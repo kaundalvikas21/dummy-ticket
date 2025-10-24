@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__sequential-thinking__sequentialthinking",
+      "mcp__linear__create_issue",
+      "mcp__linear__list_teams",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "mcp__linear__create_comment",
+      "mcp__linear__list_issues",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs",
+      "mcp__chrome-devtools__new_page",
+      "mcp__serena__find_file"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "sequential-thinking",
+    "chrome-devtools",
+    "serena",
+    "context7",
+    "linear"
+  ]
+}
