@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useMounted } from "@/lib/hooks/use-mounted"
 import { motion, useScroll } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Menu, X, Plane } from "lucide-react"
@@ -12,6 +13,7 @@ export function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
   const { scrollY } = useScroll()
   const pathname = usePathname()
+  const mounted = useMounted()
 
   useEffect(() => {
     return scrollY.on("change", (latest) => {
@@ -55,7 +57,7 @@ export function Header() {
               </motion.div>
             ))}
             <Link href="/buy-ticket">
-              <Button className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white hover:shadow-lg hover:shadow-[#0066FF]/30 transition-all">
+              <Button className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white hover:shadow-lg hover:shadow-[#0066FF]/30 transition-all cursor-pointer">
                 Buy Ticket
               </Button>
             </Link>
@@ -68,7 +70,7 @@ export function Header() {
         </div>
 
         {/* Mobile Navigation */}
-        {isOpen && (
+        {mounted && isOpen && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}

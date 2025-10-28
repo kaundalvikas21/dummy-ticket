@@ -123,7 +123,7 @@ export function Pricing() {
                     className={`w-full py-4 md:py-6 rounded-xl font-semibold transition-all text-sm md:text-base cursor-pointer ${
                       plan.popular
                         ? "bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white hover:shadow-xl hover:shadow-[#0066FF]/30"
-                        : "bg-white border-2 border-[#0066FF] text-[#0066FF] hover:bg-[#0066FF] hover:text-white"
+                        : "bg-white border-2 border-gray-200 text-gray-900 hover:border-[#0066FF] hover:text-[#0066FF] hover:bg-gray-50"
                     }`}
                   >
                     {plan.cta}

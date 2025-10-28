@@ -1,18 +1,15 @@
-import { Header } from "@/components/layout/header";
-import { Hero } from "@/components/home/hero";
-import { WhatIsDummyTicket } from "@/components/home/what-is-dummy-ticket";
-import { UseCases } from "@/components/home/use-cases";
-import { Pricing } from "@/components/home/pricing";
-import { OtherServices } from "@/components/home/other-services";
-import { WhyChooseUs } from "@/components/home/why-choose-us";
-import { AboutNewsSection } from "@/components/home/about-news-section";
-import { FAQ } from "@/components/home/faq";
-import { Footer } from "@/components/layout/footer";
+import { Hero } from "@/components/pages/home/hero";
+import { WhatIsDummyTicket } from "@/components/pages/home/what-is-dummy-ticket";
+import { UseCases } from "@/components/pages/home/use-cases";
+import { Pricing } from "@/components/pages/home/pricing";
+import { OtherServices } from "@/components/pages/home/other-services";
+import { WhyChooseUs } from "@/components/pages/home/why-choose-us";
+import { AboutNewsSection } from "@/components/pages/home/about-news-section";
+import { FAQ } from "@/components/pages/home/faq";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-white">
-      <Header />
+    <>
       <Hero />
       <WhatIsDummyTicket />
       <UseCases />
@@ -21,7 +18,6 @@ export default function Home() {
       <WhyChooseUs />
       <AboutNewsSection />
       <FAQ />
-      <Footer />
-    </main>
+    </>
   );
 }

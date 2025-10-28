@@ -73,14 +73,14 @@ Contact: [
 
       <div className="relative container mx-auto px-4 py-8 md:py-16">
         <div className="mb-8 md:mb-12">
-          <div className="flex items-center gap-3 text-2xl md:text-3xl font-bold mb-4 md:mb-6">
+          <Link href="/" className="flex items-center gap-3 text-2xl md:text-3xl font-bold mb-4 md:mb-6">
             <div className="bg-gradient-to-br from-[#0066FF] to-[#00D4AA] p-2 md:p-3 rounded-2xl shadow-lg shadow-[#0066FF]/20">
               <Plane className="w-6 h-6 md:w-8 md:h-8 text-white" />
             </div>
             <span className="bg-gradient-to-r from-[#0066FF] via-[#00D4AA] to-[#0066FF] bg-clip-text text-transparent">
               VisaFly
             </span>
-          </div>
+          </Link>
           <p className="text-gray-300 mb-6 md:mb-8 leading-relaxed max-w-3xl text-base md:text-lg">
             The most trusted platform for dummy tickets and flight reservations for visa applications. Serving customers
             worldwide since 1990.
