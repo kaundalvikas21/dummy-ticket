@@ -591,7 +591,7 @@ export function RegisterAgencyForm() {
               <div className="pt-4 md:pt-6">
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white py-3 md:py-4 rounded-xl text-sm md:text-base font-semibold hover:shadow-lg hover:shadow-[#0066FF]/20 transition-all duration-300 hover:scale-[1.02]"
+                  className="w-full bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white py-3 md:py-4 rounded-xl text-sm md:text-base font-semibold hover:shadow-lg hover:shadow-[#0066FF]/20 transition-all duration-300 hover:scale-[1.02] cursor-pointer"
                 >
                   Submit Registration
                 </Button>
