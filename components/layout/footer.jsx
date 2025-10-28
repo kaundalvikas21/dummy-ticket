@@ -1,4 +1,4 @@
-import { Plane, Mail, Phone, MapPin, Facebook, Youtube, Instagram } from "lucide-react"
+import { Plane, Mail, Phone, MapPin } from "lucide-react"
 import Link from "next/link"
 
 export function Footer() {
@@ -16,18 +16,42 @@ export function Footer() {
       { name: "Privacy Policy", href: "#" },
       { name: "Refund Policy", href: "#" },
     ],
-    Contact: [
-      { icon: Phone, text: "USA: +1 308-888-6496" },
-      { icon: Phone, text: "UK: +44 744 538 1114" },
-      { icon: Phone, text: "UAE: +971 54-776-1925" },
-      { icon: Mail, text: "info@visafly.com" },
+Contact: [
+      { icon: Phone, text: "USA: +1 308-888-6496", href: "tel:+13088886496" },
+      { icon: Phone, text: "UK: +44 744 538 1114", href: "tel:+447445381114" },
+      { icon: Phone, text: "UAE: +971 54-776-1925", href: "tel:+971547761925" },
+      { icon: Mail, text: "info@visafly.com", href: "mailto:info@visafly.com" },
     ],
   }
 
  const socialLinks = [
-  { name: "Facebook", icon: Facebook, href: "https://facebook.com" },
-  { name: "YouTube", icon: Youtube, href: "https://youtube.com" },
-  { name: "Instagram", icon: Instagram, href: "https://instagram.com" },
+  {
+    name: "Facebook",
+    icon: () => (
+      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+      </svg>
+    ),
+    href: "https://facebook.com",
+  },
+  {
+    name: "YouTube",
+    icon: () => (
+      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M21.58 7.19c-.23-.86-.9-1.52-1.76-1.75C18.25 5 12 5 12 5s-6.25 0-7.82.44c-.86.23-1.52.9-1.76 1.75C2 8.75 2 12 2 12s0 3.25.42 4.81c.23.86.9 1.52 1.76 1.75C5.75 19 12 19 12 19s6.25 0 7.82-.44c.86-.23 1.52-.9 1.76-1.75C22 15.25 22 12 22 12s0-3.25-.42-4.81zM10 15V9l5.2 3-5.2 3z" />
+      </svg>
+    ),
+    href: "https://youtube.com",
+  },
+  {
+    name: "Instagram",
+    icon: () => (
+      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.162 6.162 6.162 6.162-2.759 6.162-6.162-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4s1.791-4 4-4 4 1.79 4 4-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+      </svg>
+    ),
+    href: "https://instagram.com",
+  },
   {
     name: "TikTok",
     icon: () => (
@@ -124,9 +148,9 @@ export function Footer() {
               {footerLinks.Contact.map((item, index) => (
                 <li key={index} className="flex items-start gap-2 text-gray-300 group">
                   <item.icon className="w-3.5 h-3.5 md:w-5 md:h-5 flex-shrink-0 mt-0.5 text-[#00D4AA] group-hover:scale-110 transition-transform" />
-                  <span className="text-[10px] md:text-sm leading-tight group-hover:text-white transition-colors break-all">
+                  <a href={item.href} className="text-[10px] md:text-sm leading-tight group-hover:text-white transition-colors break-all">
                     {item.text}
-                  </span>
+                  </a>
                 </li>
               ))}
             </ul>
