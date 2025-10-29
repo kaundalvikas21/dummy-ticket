@@ -1,310 +1,50 @@
-"use client";
+import { notFound } from "next/navigation";
+import ServiceDetailClient from "./service-detail-client";
+import { servicesData } from "@/data/services";
 
-import { useParams } from "next/navigation";
-import { motion } from "framer-motion";
-import Link from "next/link";
-import {
-  ArrowLeft,
-  Check,
-  Clock,
-  Shield,
-  FileText,
-  Headphones,
-} from "lucide-react";
-import HeroSection from "./hero-single-service";
+// Generate static params for all services
+export async function generateStaticParams() {
+  return servicesData.map((service) => ({
+    slug: service.slug,
+  }));
+}
 
-const servicesData = [
-  {
-    slug: "past-dated-tickets",
-    title: "Past Dated Tickets",
-    description:
-      "Get dummy or backdated tickets for visa verification or travel documentation purposes.",
-    price: "35 USD | 2400 INR | 128 AED | 32 EUR | 28 GBP",
-    features: [
-      "Valid PNR number",
-      "24-hour delivery",
-      "Embassy accepted format",
-      "Full booking details",
-    ],
-    deliveryTime: "Within 24 hours",
-    validity: "Valid for visa applications",
-  },
-  {
-    slug: "schengen-plus-uk",
-    title: "Schengen Plus UK",
-    description:
-      "Includes dummy ticket with e-receipt — suitable for visa applications for Schengen + UK areas.",
-    price: "39 GBP",
-    features: [
-      "Schengen & UK compatible",
-      "E-receipt included",
-      "Verified booking reference",
-      "Instant confirmation",
-    ],
-    deliveryTime: "Instant to 12 hours",
-    validity: "Accepted by UK & Schengen embassies",
-  },
-  {
-    slug: "dummy-ticket-proof-of-return",
-    title: "Dummy Ticket with E-ticket (Proof of Return)",
-    description:
-      "Get an authentic-looking dummy ticket with e-ticket for visa or proof of return purpose.",
-    price: "49 USD | 3500 INR | 180 AED",
-    features: [
-      "Complete e-ticket",
-      "Return journey proof",
-      "Official airline format",
-      "PDF & email delivery",
-    ],
-    deliveryTime: "Within 12 hours",
-    validity: "Valid for 2-4 weeks",
-  },
-  {
-    slug: "dummy-ticket-visa-application",
-    title: "Dummy Ticket with E-ticket (Visa Application)",
-    description:
-      "Perfect for visa applications requiring valid-looking flight booking proof.",
-    price: "79 USD | 6500 INR | 290 AED",
-    features: [
-      "Premium e-ticket format",
-      "Embassy verified template",
-      "Complete itinerary",
-      "Priority support",
-    ],
-    deliveryTime: "Within 6 hours",
-    validity: "Extended validity period",
-  },
-  {
-    slug: "schengen-plus",
-    title: "Schengen Plus",
-    description:
-      "Get a dummy ticket with e-ticket number for Schengen visa or similar requirements.",
-    price: "59 USD | 4900 INR | 210 AED",
-    features: [
-      "Schengen zone compatible",
-      "E-ticket number included",
-      "Multi-destination support",
-      "Fast processing",
-    ],
-    deliveryTime: "Within 8 hours",
-    validity: "Schengen visa approved",
-  },
-];
-
-export default function ServiceDetailPage() {
-  const { slug } = useParams();
-  const service = servicesData.find((item) => item.slug === slug);
+// Generate metadata for each service (SEO)
+export async function generateMetadata({ params }) {
+  const { slug } = await params; // ✅ Await params first
+  const service = servicesData.find((s) => s.slug === slug);
 
   if (!service) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Service Not Found
-          </h2>
-          <p className="text-gray-600 mb-6">
-            The service you're looking for doesn't exist.
-          </p>
-          <Link href="/services" className="text-[#0066FF] hover:underline">
-            Return to Services
-          </Link>
-        </div>
-      </div>
-    );
+    return {
+      title: "Service Not Found",
+    };
   }
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
+  return {
+    title: `${service.title} | Your Company Name`,
+    description: service.description,
+    openGraph: {
+      title: service.title,
+      description: service.description,
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: service.title,
+      description: service.description,
     },
   };
+}
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 },
-  };
+// Server Component (default - no "use client")
+export default async function ServiceDetailPage({ params }) {
+  const { slug } = await params; // ✅ Await params first
+  const service = servicesData.find((s) => s.slug === slug);
 
-  return (
-    <>
-      <HeroSection title={service.title} subtitle={service.description} />
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30">
-        <motion.section
-          initial="hidden"
-          animate="visible"
-          variants={containerVariants}
-          className="py-12 md:py-20 px-4 sm:px-6 md:px-12 max-w-6xl mx-auto"
-        >
-          {/* Back Button */}
-          <motion.div variants={itemVariants}>
-            <Link
-              href="/services"
-              className="inline-flex items-center text-[#0066FF] hover:text-[#0052CC] mb-8 transition-colors group"
-            >
-              <ArrowLeft className="mr-2 w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-              Back to Services
-            </Link>
-          </motion.div>
+  if (!service) {
+    notFound();
+  }
 
-          <div className="grid lg:grid-cols-3 gap-8">
-            {/* Main Content */}
-            <div className="lg:col-span-2 space-y-8">
-              {/* Header */}
-              <motion.div variants={itemVariants}>
-                <h1 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900 leading-tight">
-                  {service.title}
-                </h1>
-                <p className="text-lg md:text-xl text-gray-600 leading-relaxed">
-                  {service.description}
-                </p>
-              </motion.div>
-
-              {/* Features Grid */}
-              <motion.div
-                variants={itemVariants}
-                className="bg-white rounded-2xl p-6 md:p-8 shadow-lg shadow-blue-100/50"
-              >
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                  What's Included
-                </h2>
-                <div className="grid sm:grid-cols-2 gap-4">
-                  {service.features.map((feature, index) => (
-                    <div key={index} className="flex items-start gap-3">
-                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-[#0066FF] to-[#00D4AA] flex items-center justify-center mt-0.5">
-                        <Check className="w-4 h-4 text-white" strokeWidth={3} />
-                      </div>
-                      <span className="text-gray-700 font-medium">
-                        {feature}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-
-              {/* Additional Info Cards */}
-              <motion.div
-                variants={itemVariants}
-                className="grid sm:grid-cols-2 gap-4"
-              >
-                <div className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow border border-gray-100">
-                  <div className="w-12 h-12 rounded-lg bg-blue-50 flex items-center justify-center mb-4">
-                    <Clock className="w-6 h-6 text-[#0066FF]" />
-                  </div>
-                  <h3 className="font-semibold text-gray-900 mb-2">
-                    Delivery Time
-                  </h3>
-                  <p className="text-gray-600">{service.deliveryTime}</p>
-                </div>
-
-                <div className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow border border-gray-100">
-                  <div className="w-12 h-12 rounded-lg bg-green-50 flex items-center justify-center mb-4">
-                    <Shield className="w-6 h-6 text-[#00D4AA]" />
-                  </div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Validity</h3>
-                  <p className="text-gray-600">{service.validity}</p>
-                </div>
-              </motion.div>
-
-              {/* Why Choose Us */}
-              <motion.div
-                variants={itemVariants}
-                className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 md:p-8 text-white"
-              >
-                <h2 className="text-2xl font-bold mb-6">
-                  Why Choose This Service?
-                </h2>
-                <div className="space-y-4">
-                  <div className="flex items-start gap-4">
-                    <FileText className="w-5 h-5 text-[#00D4AA] flex-shrink-0 mt-1" />
-                    <div>
-                      <h3 className="font-semibold mb-1">Authentic Format</h3>
-                      <p className="text-gray-300 text-sm">
-                        Our tickets use official airline formats accepted by
-                        embassies worldwide.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-4">
-                    <Shield className="w-5 h-5 text-[#00D4AA] flex-shrink-0 mt-1" />
-                    <div>
-                      <h3 className="font-semibold mb-1">Secure & Reliable</h3>
-                      <p className="text-gray-300 text-sm">
-                        Your data is protected with encryption, and we guarantee
-                        delivery.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-4">
-                    <Headphones className="w-5 h-5 text-[#00D4AA] flex-shrink-0 mt-1" />
-                    <div>
-                      <h3 className="font-semibold mb-1">24/7 Support</h3>
-                      <p className="text-gray-300 text-sm">
-                        Our customer support team is always available to help
-                        you.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-
-            {/* Sidebar - Pricing Card */}
-            <div className="lg:col-span-1">
-              <motion.div
-                variants={itemVariants}
-                className="sticky top-24 bg-white rounded-2xl p-6 md:p-8 shadow-xl border border-gray-100"
-              >
-                <div className="mb-6">
-                  <p className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">
-                    Pricing
-                  </p>
-                  <div className="bg-gradient-to-br from-blue-50 to-green-50 rounded-xl p-6 border border-blue-100">
-                    <p className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight">
-                      {service.price}
-                    </p>
-                  </div>
-                </div>
-
-                <Link href="/buy-ticket" className="block">
-                  <button className="w-full bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white font-semibold px-6 py-4 rounded-xl hover:shadow-xl hover:scale-[1.02] transition-all duration-300 mb-4">
-                    Buy Ticket Now
-                  </button>
-                </Link>
-
-                <div className="space-y-3 pt-6 border-t border-gray-100">
-                  <div className="flex items-center gap-3 text-sm text-gray-600">
-                    <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
-                    <span>Instant confirmation</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm text-gray-600">
-                    <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
-                    <span>Money-back guarantee</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm text-gray-600">
-                    <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
-                    <span>Secure payment processing</span>
-                  </div>
-                </div>
-
-                <div className="mt-6 pt-6 border-t border-gray-100">
-                  <p className="text-sm text-gray-500 text-center">
-                    Need help?{" "}
-                    <Link
-                      href="/contact"
-                      className="text-[#0066FF] hover:underline font-medium"
-                    >
-                      Contact us
-                    </Link>
-                  </p>
-                </div>
-              </motion.div>
-            </div>
-          </div>
-        </motion.section>
-      </div>
-    </>
-  );
+  // Pass data to client component
+  return <ServiceDetailClient service={service} />;
 }
