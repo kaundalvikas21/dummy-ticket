@@ -16,35 +16,41 @@ export function OtherServices() {
       title: "Past dated tickets",
       price: "35 USD | 2400 INR | 128 AED | 32 EUR | 28 GBP",
       cta: "Read more",
+      link: "/services/past-dated-tickets",
     },
     {
       title: "Schengen Plus UK",
       subtitle: "Dummy ticket with e-receipt",
       price: "39 GBP",
       cta: "Read more",
+      link: "/services/schengen-plus-uk",
     },
     {
       title: "Dummy ticket with e-ticket",
       subtitle: "For proof of return",
       price: "49 USD | 3500 INR | 180 AED",
       cta: "Read more",
+      link: "/services/dummy-ticket-proof-of-return",
     },
     {
       title: "Dummy hotel booking",
       price: "20 USD | 1400 INR | 70 AED | 18 EUR | 16 GBP",
       cta: "Buy now",
+      link: "/buy-ticket",
     },
     {
       title: "Dummy ticket with e-ticket",
       subtitle: "For visa application",
       price: "79 USD | 6500 INR | 290 AED",
       cta: "Read more",
+      link: "/services/dummy-ticket-visa-application",
     },
     {
       title: "Schengen Plus",
       subtitle: "Dummy ticket with e-ticket number",
       price: "59 USD | 4900 INR | 210 AED",
       cta: "Read more",
+      link: "/services/schengen-plus",
     },
   ]
 
@@ -57,7 +63,9 @@ export function OtherServices() {
           transition={{ duration: 0.6 }}
           className="text-center mb-8 md:mb-12"
         >
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">other services:</h2>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+            other services:
+          </h2>
         </motion.div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-w-6xl mx-auto mb-8 md:mb-12">
@@ -69,16 +77,28 @@ export function OtherServices() {
               transition={{ delay: 0.1 * index }}
               className="bg-gradient-to-br from-blue-50 to-teal-50 rounded-3xl p-4 md:p-6 border border-blue-100 hover:shadow-xl transition-all group"
             >
-              <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-2">{service.title}</h3>
-              {service.subtitle && <p className="text-xs md:text-sm text-gray-600 mb-3">{service.subtitle}</p>}
-              <p className="text-base md:text-lg font-semibold text-[#0066FF] mb-3 md:mb-4">{service.price}</p>
-              <Button
-                variant="outline"
-                className="w-full border-[#0066FF] text-[#0066FF] hover:bg-[#0066FF] hover:text-white group-hover:shadow-lg transition-all bg-transparent text-sm md:text-base py-2 md:py-2.5 cursor-pointer"
-              >
-                {service.cta}
-                <ArrowRight className="ml-2 w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
+              <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-2">
+                {service.title}
+              </h3>
+              {service.subtitle && (
+                <p className="text-xs md:text-sm text-gray-600 mb-3">
+                  {service.subtitle}
+                </p>
+              )}
+              <p className="text-base md:text-lg font-semibold text-[#0066FF] mb-3 md:mb-4">
+                {service.price}
+              </p>
+
+              {/* Navigate using Link */}
+              <Link href={service.link}>
+                <Button
+                  variant="outline"
+                  className="w-full border-[#0066FF] text-[#0066FF] hover:bg-[#0066FF] hover:text-white group-hover:shadow-lg transition-all bg-transparent text-sm md:text-base py-2 md:py-2.5 cursor-pointer"
+                >
+                  {service.cta}
+                  <ArrowRight className="ml-2 w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
             </motion.div>
           ))}
         </div>
