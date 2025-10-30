@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { HelpCircle, Mail, Phone, MessageSquare } from "lucide-react"
+import { HelpCircle, Mail, Phone } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
 export function UserSupport() {
@@ -18,7 +18,6 @@ export function UserSupport() {
     category: "",
     message: "",
   })
-  const [isChatOpen, setIsChatOpen] = useState(false)
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -29,13 +28,6 @@ export function UserSupport() {
     setFormData({ subject: "", category: "", message: "" })
   }
 
-  const handleStartChat = () => {
-    setIsChatOpen(true)
-    toast({
-      title: "Chat Started",
-      description: "A support agent will be with you shortly.",
-    })
-  }
 
   const faqs = [
     {

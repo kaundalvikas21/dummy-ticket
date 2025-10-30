@@ -24,10 +24,10 @@ export default function UserSidebar() {
          <div className="border-b border-white/10 p-6">
       <Link href="/" className="flex items-center gap-3">
         <div className="bg-gradient-to-br from-[#0066FF] to-[#00D4AA] p-2.5 rounded-xl">
-          <Plane className="w-7 h-7 text-white" />
+          <Plane className="w-6 h-6 text-white" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-white">VisaFly</h2>
+          <span className="text-xl font-bold text-white">VisaFly</span>
         </div>
       </Link>
     </div>
