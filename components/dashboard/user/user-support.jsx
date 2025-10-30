@@ -96,20 +96,6 @@ export function UserSupport() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex flex-col items-center text-center">
-              <div className="bg-purple-100 p-4 rounded-full mb-4">
-                <MessageSquare className="h-8 w-8 text-purple-600" />
-              </div>
-              <h3 className="font-semibold mb-2">Live Chat</h3>
-              <p className="text-sm text-gray-600 mb-4">Chat with us now</p>
-              <Button size="sm" onClick={handleStartChat}>
-                Start Chat
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">

@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-export function DashboardHome({ setActiveSection }) {
+export function DashboardHome() {
   const router = useRouter();
 
   const handleBookTicket = () => {
@@ -21,16 +21,13 @@ export function DashboardHome({ setActiveSection }) {
   };
 
   const handleViewAllBookings = () => {
-    setActiveSection?.("bookings");
+    router.push("/user/bookings");
   };
 
   const handleTrackBooking = () => {
-    setActiveSection?.("bookings");
+    router.push("/user/bookings");
   };
 
-  const handleDownloadDocuments = () => {
-    setActiveSection?.("documents");
-  };
 
   const stats = [
     {
@@ -233,14 +230,6 @@ export function DashboardHome({ setActiveSection }) {
             >
               <CheckCircle className="h-6 w-6" />
               <span>Track Booking</span>
-            </Button>
-            <Button
-              className="h-auto flex-col gap-2 py-6 bg-transparent"
-              variant="outline"
-              onClick={handleDownloadDocuments}
-            >
-              <ArrowRight className="h-6 w-6" />
-              <span>Download Documents</span>
             </Button>
           </div>
         </CardContent>

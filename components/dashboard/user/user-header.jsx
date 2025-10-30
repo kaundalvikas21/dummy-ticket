@@ -14,7 +14,7 @@ import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
 import { useState } from "react"
 
-export function UserHeader({ setActiveSection }) {
+export function UserHeader() {
   const router = useRouter()
   const { toast } = useToast()
 
@@ -49,7 +49,8 @@ export function UserHeader({ setActiveSection }) {
 
   const handleNotificationClick = (notification) => {
     setNotifications((prev) => prev.map((n) => (n.id === notification.id ? { ...n, read: true } : n)))
-    setActiveSection(notification.targetSection)
+    const targetRoute = `/user/${notification.targetSection}`
+    router.push(targetRoute)
     setNotificationDropdownOpen(false)
     toast({
       title: "Navigating",
@@ -138,15 +139,15 @@ export function UserHeader({ setActiveSection }) {
               <p className="text-xs text-gray-500">john@example.com</p>
             </div>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => setActiveSection("profile")} className="cursor-pointer">
+            <DropdownMenuItem onClick={() => router.push("/user/profile")} className="cursor-pointer">
               <UserCircle className="mr-2 h-4 w-4" />
               <span>Edit Profile</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setActiveSection("support")} className="cursor-pointer">
+            <DropdownMenuItem onClick={() => router.push("/user/support")} className="cursor-pointer">
               <HelpCircle className="mr-2 h-4 w-4" />
               <span>Support</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setActiveSection("settings")} className="cursor-pointer">
+            <DropdownMenuItem onClick={() => router.push("/user/settings")} className="cursor-pointer">
               <Settings className="mr-2 h-4 w-4" />
               <span>Settings</span>
             </DropdownMenuItem>
