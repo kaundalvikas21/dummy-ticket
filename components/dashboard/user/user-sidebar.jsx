@@ -6,14 +6,15 @@ import { cn } from "@/lib/utils"
 import { Home, Ticket, User, CreditCard, FileText, HelpCircle, Settings, Plane } from "lucide-react"
 
 const menuItems = [
-  { href: "/user", label: "Dashboard", icon: Home },
-  { href: "/user/bookings", label: "My Bookings", icon: Ticket },
-  { href: "/user/profile", label: "My Profile", icon: User },
-  { href: "/user/payments", label: "Payment History", icon: CreditCard },
-  { href: "/user/documents", label: "Travel Documents", icon: FileText },
-  { href: "/user/support", label: "Support", icon: HelpCircle },
-  { href: "/user/settings", label: "Settings", icon: Settings },
+  { id: "dashboard", href: "/user", label: "Dashboard", icon: Home },
+  { id: "bookings", href: "/user/bookings", label: "My Bookings", icon: Ticket },
+  { id: "profile", href: "/user/profile", label: "My Profile", icon: User },
+  { id: "payments", href: "/user/payments", label: "Payment History", icon: CreditCard },
+  { id: "documents", href: "/user/documents", label: "Travel Documents", icon: FileText },
+  { id: "support", href: "/user/support", label: "Support", icon: HelpCircle },
+  { id: "settings", href: "/user/settings", label: "Settings", icon: Settings },
 ]
+
 
 export default function UserSidebar() {
   const pathname = usePathname()

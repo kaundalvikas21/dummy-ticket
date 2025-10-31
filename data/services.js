@@ -1,3 +1,4 @@
+// single service page data goes through slug
 export const servicesData = [
   {
     slug: "past-dated-tickets",
