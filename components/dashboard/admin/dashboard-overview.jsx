@@ -163,8 +163,14 @@ export function DashboardOverview() {
                 </tr>
               </thead>
               <tbody>
-                {recentOrders.map((order) => (
-                  <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                {recentOrders.map((order, index) => (
+                  <motion.tr
+                    key={order.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                  >
                     <td className="py-3 px-4 text-sm font-medium text-gray-900">{order.id}</td>
                     <td className="py-3 px-4 text-sm text-gray-700">{order.customer}</td>
                     <td className="py-3 px-4 text-sm text-gray-700">{order.service}</td>
@@ -195,7 +201,7 @@ export function DashboardOverview() {
                         View
                       </Button>
                     </td>
-                  </tr>
+                  </motion.tr>
                 ))}
               </tbody>
             </table>
