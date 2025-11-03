@@ -1,3 +1,9 @@
+/* displays that one service dynamically
+Receives `service` object as props from the page file.
+Handles UI rendering: title, description, icons, CTA, etc.
+Keeps this component client-side to enable animations/interactions.
+*/
+
 "use client";
 
 import { motion } from "framer-motion";
@@ -12,6 +18,7 @@ import {
 } from "lucide-react";
 import HeroSection from "./hero-single-service";
 
+// Passing the Data as prop (service) comes from app/(frontend)/services/[slug]/page.jsx
 export default function ServiceDetailClient({ service }) {
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -169,7 +176,7 @@ export default function ServiceDetailClient({ service }) {
                 </div>
 
                 <Link href="/buy-ticket" className="block">
-                  <button className="w-full bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white font-semibold px-6 py-4 rounded-xl hover:shadow-xl hover:scale-[1.02] transition-all duration-300 mb-4">
+                  <button className="w-full bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white font-semibold px-6 py-4 rounded-xl hover:shadow-xl hover:scale-[1.02] transition-all duration-300 mb-4 cursor-pointer">
                     Buy Ticket Now
                   </button>
                 </Link>

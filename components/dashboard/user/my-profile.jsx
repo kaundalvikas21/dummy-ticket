@@ -58,13 +58,13 @@ export function MyProfile() {
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold">My Profile</h2>
         {!isEditing ? (
-          <Button onClick={() => setIsEditing(true)}>Edit Profile</Button>
+          <Button className="cursor-pointer" onClick={() => setIsEditing(true)}>Edit Profile</Button>
         ) : (
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => setIsEditing(false)}>
+            <Button className="cursor-pointer" variant="outline" onClick={() => setIsEditing(false)}>
               Cancel
             </Button>
-            <Button onClick={handleSave}>Save Changes</Button>
+            <Button className="cursor-pointer" onClick={handleSave}>Save Changes</Button>
           </div>
         )}
       </div>

@@ -78,28 +78,33 @@ export function ServicePlansManagement() {
     features: "",
     active: true,
   })
+  const [initialFormData, setInitialFormData] = useState(null)
 
   const handleAddNew = () => {
-    setEditingPlan(null)
-    setFormData({
+    const emptyForm = {
       name: "",
       price: "",
       currencies: "",
       features: "",
       active: true,
-    })
+    }
+    setEditingPlan(null)
+    setFormData(emptyForm)
+    setInitialFormData(emptyForm)
     setIsDialogOpen(true)
   }
 
   const handleEdit = (plan) => {
-    setEditingPlan(plan)
-    setFormData({
+    const editForm = {
       name: plan.name,
       price: plan.price.toString(),
       currencies: plan.currencies,
       features: plan.features.join("\n"),
       active: plan.active,
-    })
+    }
+    setEditingPlan(plan)
+    setFormData(editForm)
+    setInitialFormData(editForm)
     setIsDialogOpen(true)
   }
 
@@ -157,6 +162,20 @@ export function ServicePlansManagement() {
     setIsDialogOpen(false)
   }
 
+  // 🔍 Detect if form changed compared to initialFormData
+  const isFormChanged = () => {
+    if (!initialFormData) return false
+    return (
+      formData.name !== initialFormData.name ||
+      formData.price !== initialFormData.price ||
+      formData.currencies !== initialFormData.currencies ||
+      formData.features !== initialFormData.features ||
+      formData.active !== initialFormData.active
+    )
+  }
+
+  const isSaveDisabled = !isFormChanged() || !formData.name || !formData.price
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -165,7 +184,10 @@ export function ServicePlansManagement() {
           <h1 className="text-3xl font-bold text-gray-900">Service Plans Management</h1>
           <p className="text-gray-600 mt-1">Manage pricing and features for your services</p>
         </div>
-        <Button className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white" onClick={handleAddNew}>
+        <Button
+          className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white cursor-pointer"
+          onClick={handleAddNew}
+        >
           <Plus className="w-4 h-4 mr-2" />
           Add New Plan
         </Button>
@@ -252,6 +274,7 @@ export function ServicePlansManagement() {
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Add/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -306,10 +329,22 @@ export function ServicePlansManagement() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+            <Button
+              className="cursor-pointer"
+              variant="outline"
+              onClick={() => setIsDialogOpen(false)}
+            >
               Cancel
             </Button>
-            <Button className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white" onClick={handleSave}>
+            <Button
+              disabled={isSaveDisabled}
+              className={`cursor-pointer ${
+                isSaveDisabled
+                  ? "opacity-50 cursor-not-allowed"
+                  : "bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white"
+              }`}
+              onClick={handleSave}
+            >
               {editingPlan ? "Update Plan" : "Add Plan"}
             </Button>
           </DialogFooter>

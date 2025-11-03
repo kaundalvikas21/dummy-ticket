@@ -7,7 +7,7 @@ import Link from "next/link"
 
 export function Hero() {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16 md:pt-20">
+    <section className="relative flex items-center justify-center overflow-hidden pt-16 md:pt-20">
       <div className="absolute inset-0">
         <img
           src="/modern-airport-terminal-with-planes-and-travelers-.jpg"

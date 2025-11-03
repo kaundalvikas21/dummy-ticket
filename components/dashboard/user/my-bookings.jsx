@@ -278,7 +278,7 @@ startxref
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold">My Bookings</h2>
-        <Button onClick={() => router.push("/buy-ticket")}>Book New Ticket</Button>
+        <Button className="cursor-pointer" onClick={() => router.push("/buy-ticket")}>Book New Ticket</Button>
       </div>
 
       {/* Filters */}
@@ -312,43 +312,83 @@ startxref
 
       {/* Bookings List */}
       <div className="space-y-4">
-        {filteredBookings.map((booking) => (
-          <Card key={booking.id}>
-            <CardContent className="p-6">
-              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-blue-100">
-                    <Plane className="h-8 w-8 text-blue-600" />
+        {filteredBookings.length > 0 ? (
+          filteredBookings.map((booking) => (
+            <Card key={booking.id}>
+              <CardContent className="p-6">
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-blue-100">
+                      <Plane className="h-8 w-8 text-blue-600" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-lg font-semibold">{booking.route}</h3>
+                        <Badge className={getStatusColor(booking.status)}>{booking.status}</Badge>
+                      </div>
+                      <p className="text-sm text-gray-600">Booking ID: {booking.id}</p>
+                      <div className="mt-2 flex items-center gap-4 text-sm text-gray-500">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-4 w-4" />
+                          {booking.date}
+                        </span>
+                        <span>{booking.type}</span>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-lg font-semibold">{booking.route}</h3>
-                      <Badge className={getStatusColor(booking.status)}>{booking.status}</Badge>
-                    </div>
-                    <p className="text-sm text-gray-600">Booking ID: {booking.id}</p>
-                    <div className="mt-2 flex items-center gap-4 text-sm text-gray-500">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="h-4 w-4" />
-                        {booking.date}
-                      </span>
-                      <span>{booking.type}</span>
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm" onClick={() => handleViewDetails(booking)}>
+                      <Eye className="mr-2 h-4 w-4" />
+                      View Details
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => handleDownloadTicket(booking.id)}>
+                      <Download className="mr-2 h-4 w-4" />
+                      Download
+                    </Button>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" onClick={() => handleViewDetails(booking)}>
-                    <Eye className="mr-2 h-4 w-4" />
-                    View Details
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gray-100">
+                <Search className="h-10 w-10 text-gray-400" />
+              </div>
+              <h3 className="mb-2 text-lg font-semibold text-gray-900">No bookings found</h3>
+              <p className="mb-6 max-w-sm text-sm text-gray-500">
+                {searchTerm || statusFilter !== "all" ? (
+                  <>
+                    We couldn't find any bookings matching your search criteria. 
+                    Try adjusting your filters or search terms.
+                  </>
+                ) : (
+                  <>
+                    You don't have any bookings yet. 
+                    Ready to plan your next journey?
+                  </>
+                )}
+              </p>
+              <div className="flex gap-3">
+                {(searchTerm || statusFilter !== "all") && (
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setSearchTerm("")
+                      setStatusFilter("all")
+                    }}
+                  >
+                    Clear Filters
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleDownloadTicket(booking.id)}>
-                    <Download className="mr-2 h-4 w-4" />
-                    Download
-                  </Button>
-                </div>
+                )}
+                <Button onClick={() => router.push("/buy-ticket")}>
+                  Book Your First Ticket
+                </Button>
               </div>
             </CardContent>
           </Card>
-        ))}
+        )}
       </div>
 
       {/* Booking Details Dialog */}

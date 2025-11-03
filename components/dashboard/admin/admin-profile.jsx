@@ -296,7 +296,7 @@ export function AdminProfile() {
 
           <div className="flex gap-3">
             <Button
-              className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white"
+              className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white cursor-pointer"
               onClick={handleSaveProfile}
               disabled={!profileChanged || isSavingProfile}
             >
@@ -384,7 +384,7 @@ export function AdminProfile() {
             </div>
           </div>
           <Button
-            className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white"
+            className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white cursor-pointer"
             onClick={handleChangePassword}
             disabled={!isPasswordFormValid() || isChangingPassword}
           >

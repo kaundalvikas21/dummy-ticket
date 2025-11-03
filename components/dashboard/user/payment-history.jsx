@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Search, Download, CreditCard, CheckCircle } from "lucide-react"
+import { Search, Download, CreditCard, CheckCircle, FileX } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
 export function PaymentHistory() {
@@ -188,11 +188,33 @@ startxref
     window.URL.revokeObjectURL(url)
   }
 
+  // Empty state component for reusability
+  const EmptyState = ({ hasSearch }) => (
+    <div className="flex flex-col items-center justify-center py-12">
+      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+        <FileX className="h-8 w-8 text-gray-400" />
+      </div>
+      <h3 className="mb-2 text-lg font-semibold text-gray-900">
+        {hasSearch ? "No payments found" : "No payment history"}
+      </h3>
+      <p className="mb-4 text-sm text-gray-500 text-center max-w-sm">
+        {hasSearch 
+          ? `No payments match "${searchTerm}". Try searching with different keywords.`
+          : "You haven't made any payments yet. Start by booking your first ticket."}
+      </p>
+      {hasSearch && (
+        <Button variant="outline" onClick={() => setSearchTerm("")}>
+          Clear search
+        </Button>
+      )}
+    </div>
+  )
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold">Payment History</h2>
-        <Button variant="outline" onClick={handleExportAll}>
+        <Button className="cursor-pointer" variant="outline" onClick={handleExportAll} disabled={filteredPayments.length === 0}>
           <Download className="mr-2 h-4 w-4" />
           Export All
         </Button>
@@ -231,7 +253,9 @@ startxref
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Average Transaction</p>
-                <p className="text-3xl font-bold mt-2">${(totalSpent / payments.length).toFixed(2)}</p>
+                <p className="text-3xl font-bold mt-2">
+                  ${payments.length > 0 ? (totalSpent / payments.length).toFixed(2) : "0.00"}
+                </p>
               </div>
               <div className="bg-purple-100 p-3 rounded-lg">
                 <CreditCard className="h-6 w-6 text-purple-600" />
@@ -262,40 +286,44 @@ startxref
           <CardTitle>Transaction History</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Payment ID</TableHead>
-                <TableHead>Booking ID</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Method</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredPayments.map((payment) => (
-                <TableRow key={payment.id}>
-                  <TableCell className="font-medium">{payment.id}</TableCell>
-                  <TableCell>{payment.bookingId}</TableCell>
-                  <TableCell>{payment.date}</TableCell>
-                  <TableCell className="max-w-xs truncate">{payment.description}</TableCell>
-                  <TableCell>{payment.method}</TableCell>
-                  <TableCell className="font-semibold">${payment.amount}</TableCell>
-                  <TableCell>
-                    <Badge className={getStatusColor(payment.status)}>{payment.status}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Button variant="ghost" size="sm" onClick={() => handleDownloadInvoice(payment.id)}>
-                      <Download className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
+          {filteredPayments.length > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Payment ID</TableHead>
+                  <TableHead>Booking ID</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Method</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredPayments.map((payment) => (
+                  <TableRow key={payment.id}>
+                    <TableCell className="font-medium">{payment.id}</TableCell>
+                    <TableCell>{payment.bookingId}</TableCell>
+                    <TableCell>{payment.date}</TableCell>
+                    <TableCell className="max-w-xs truncate">{payment.description}</TableCell>
+                    <TableCell>{payment.method}</TableCell>
+                    <TableCell className="font-semibold">${payment.amount}</TableCell>
+                    <TableCell>
+                      <Badge className={getStatusColor(payment.status)}>{payment.status}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Button variant="ghost" size="sm" onClick={() => handleDownloadInvoice(payment.id)}>
+                        <Download className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <EmptyState hasSearch={searchTerm.length > 0} />
+          )}
         </CardContent>
       </Card>
     </div>

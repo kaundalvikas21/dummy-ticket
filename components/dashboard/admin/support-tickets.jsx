@@ -243,7 +243,7 @@ export function SupportTickets() {
                       )}
                     </div>
                   </div>
-                  <Button variant="outline" size="sm" onClick={() => handleViewDetails(ticket)}>
+                  <Button className="cursor-pointer" variant="outline" size="sm" onClick={() => handleViewDetails(ticket)}>
                     View Details
                   </Button>
                 </div>
@@ -342,7 +342,7 @@ export function SupportTickets() {
                   className="mb-2"
                 />
                 <Button
-                  className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white"
+                  className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white cursor-pointer"
                   onClick={handleSendResponse}
                 >
                   <Send className="w-4 h-4 mr-2" />

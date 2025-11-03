@@ -1,4 +1,11 @@
-// single service page data goes through slug
+// This file holds all the detailed information for every service your application offers.
+
+/* Holds all services
+This file contains the full list of service objects.
+Each service includes: slug, title, description, icon, and other fields.
+This data is imported wherever needed (e.g., in Services page or detail page).
+*/
+
 export const servicesData = [
   {
     slug: "past-dated-tickets",

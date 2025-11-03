@@ -287,7 +287,7 @@ export const TravelDocuments = ({ setActiveSection }) => {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Identity Documents</CardTitle>
-          <Button
+          <Button className="cursor-pointer"
             onClick={() => {
               setIsEditMode(false)
               setEditingDocumentId(null)

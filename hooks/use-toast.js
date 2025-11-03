@@ -1,4 +1,4 @@
-// Inspired by react-hot-toast library
+// import in dashboard components, for toast success,error,warning message etc used.
 import * as React from "react"
 
 const TOAST_LIMIT = 1

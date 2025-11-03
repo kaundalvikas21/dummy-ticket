@@ -5,7 +5,7 @@ import { Pricing } from "@/components/pages/home/pricing";
 import { OtherServices } from "@/components/pages/home/other-services";
 import { WhyChooseUs } from "@/components/pages/home/why-choose-us";
 import { AboutNewsSection } from "@/components/pages/home/about-news-section";
-import { FAQ } from "@/components/pages/home/faq";
+import { FAQSection } from "@/components/pages/home/faq-section";
 
 export default function Home() {
   return (
@@ -17,7 +17,7 @@ export default function Home() {
       <OtherServices />
       <WhyChooseUs />
       <AboutNewsSection />
-      <FAQ />
+      <FAQSection />
     </>
   );
 }

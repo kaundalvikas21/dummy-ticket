@@ -1,3 +1,10 @@
+/* finds one service by slug
+ This dynamic route finds a single service based on the slug.
+1️⃣ Imports all services from data/services.js
+2️⃣ Finds the matching service using the URL slug
+3️⃣ Passes that single service as props to the client component
+*/ 
+
 import { notFound } from "next/navigation";
 import ServiceDetailClient from "./service-detail-client";
 import { servicesData } from "@/data/services";

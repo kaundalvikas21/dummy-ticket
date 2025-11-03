@@ -170,7 +170,7 @@ export function OrdersManagement() {
           <h1 className="text-3xl font-bold text-gray-900">Orders Management</h1>
           <p className="text-gray-600 mt-1">Manage and track all customer bookings</p>
         </div>
-        <Button className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white" onClick={handleExport}>
+        <Button className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white cursor-pointer" onClick={handleExport} disabled={filteredOrders.length === 0}>
           <Download className="w-4 h-4 mr-2" />
           Export Orders
         </Button>
@@ -227,71 +227,111 @@ export function OrdersManagement() {
                 </tr>
               </thead>
               <tbody>
-                {filteredOrders.map((order) => (
-                  <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                    <td className="py-3 px-4 text-sm font-medium text-gray-900">{order.id}</td>
-                    <td className="py-3 px-4">
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium text-gray-900">{order.customer}</span>
-                        <span className="text-xs text-gray-500">{order.email}</span>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 text-sm text-gray-700">{order.service}</td>
-                    <td className="py-3 px-4">
-                      <div className="flex flex-col">
-                        <span className="text-xs text-gray-600">{order.departure}</span>
-                        <span className="text-xs text-gray-400">→</span>
-                        <span className="text-xs text-gray-600">{order.arrival}</span>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 text-sm font-semibold text-gray-900">{order.amount}</td>
-                    <td className="py-3 px-4">
-                      <Badge
-                        variant={
-                          order.status === "completed"
-                            ? "default"
-                            : order.status === "processing"
-                              ? "secondary"
-                              : "outline"
-                        }
-                        className={
-                          order.status === "completed"
-                            ? "bg-green-100 text-green-700 hover:bg-green-100"
-                            : order.status === "processing"
-                              ? "bg-blue-100 text-blue-700 hover:bg-blue-100"
-                              : "bg-yellow-100 text-yellow-700 hover:bg-yellow-100"
-                        }
-                      >
-                        {order.status}
-                      </Badge>
-                    </td>
-                    <td className="py-3 px-4 text-sm text-gray-600">{order.date}</td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm" onClick={() => handleView(order)}>
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" onClick={() => handleEdit(order)}>
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-red-600 hover:text-red-700"
-                          onClick={() => handleDeleteClick(order.id)}
+                {filteredOrders.length > 0 ? (
+                  filteredOrders.map((order) => (
+                    <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                      <td className="py-3 px-4 text-sm font-medium text-gray-900">{order.id}</td>
+                      <td className="py-3 px-4">
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium text-gray-900">{order.customer}</span>
+                          <span className="text-xs text-gray-500">{order.email}</span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 text-sm text-gray-700">{order.service}</td>
+                      <td className="py-3 px-4">
+                        <div className="flex flex-col">
+                          <span className="text-xs text-gray-600">{order.departure}</span>
+                          <span className="text-xs text-gray-400">→</span>
+                          <span className="text-xs text-gray-600">{order.arrival}</span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 text-sm font-semibold text-gray-900">{order.amount}</td>
+                      <td className="py-3 px-4">
+                        <Badge
+                          variant={
+                            order.status === "completed"
+                              ? "default"
+                              : order.status === "processing"
+                                ? "secondary"
+                                : "outline"
+                          }
+                          className={
+                            order.status === "completed"
+                              ? "bg-green-100 text-green-700 hover:bg-green-100"
+                              : order.status === "processing"
+                                ? "bg-blue-100 text-blue-700 hover:bg-blue-100"
+                                : "bg-yellow-100 text-yellow-700 hover:bg-yellow-100"
+                          }
                         >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                          {order.status}
+                        </Badge>
+                      </td>
+                      <td className="py-3 px-4 text-sm text-gray-600">{order.date}</td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-2">
+                          <Button variant="ghost" size="sm" onClick={() => handleView(order)}>
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => handleEdit(order)}>
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-red-600 hover:text-red-700"
+                            onClick={() => handleDeleteClick(order.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={8} className="py-12 text-center">
+                      <div className="flex flex-col items-center justify-center space-y-3">
+                        <div className="w-20 h-20 bg-gradient-to-br from-blue-50 to-teal-50 rounded-full flex items-center justify-center">
+                          <Search className="w-10 h-10 text-gray-400" />
+                        </div>
+                        <div className="space-y-1">
+                          <h3 className="text-lg font-semibold text-gray-900">No orders found</h3>
+                          <p className="text-sm text-gray-500 max-w-sm mx-auto">
+                            {searchQuery || statusFilter !== "all" ? (
+                              <>
+                                We couldn't find any orders matching your search criteria.
+                                <br />
+                                Try adjusting your filters or search terms.
+                              </>
+                            ) : (
+                              "No orders have been placed yet."
+                            )}
+                          </p>
+                        </div>
+                        {(searchQuery || statusFilter !== "all") && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSearchQuery("")
+                              setStatusFilter("all")
+                            }}
+                            className="mt-2"
+                          >
+                            Clear filters
+                          </Button>
+                        )}
                       </div>
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
         </CardContent>
       </Card>
 
+      {/* View Order Dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
@@ -356,6 +396,7 @@ export function OrdersManagement() {
         </DialogContent>
       </Dialog>
 
+      {/* Edit Order Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="max-h-[85vh] overflow-y-auto">
           <DialogHeader>
@@ -405,6 +446,7 @@ export function OrdersManagement() {
         </DialogContent>
       </Dialog>
 
+      {/* Delete Confirmation Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

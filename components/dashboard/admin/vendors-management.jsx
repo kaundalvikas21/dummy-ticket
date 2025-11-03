@@ -180,7 +180,7 @@ export function VendorsManagement() {
           <h1 className="text-3xl font-bold text-gray-900">Vendors Management</h1>
           <p className="text-gray-600 mt-1">Manage travel agencies and vendor partners</p>
         </div>
-        <Button className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white" onClick={handleAdd}>
+        <Button className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white cursor-pointer" onClick={handleAdd}>
           <Plus className="w-4 h-4 mr-2" />
           Add New Vendor
         </Button>
@@ -208,105 +208,136 @@ export function VendorsManagement() {
           <CardTitle>All Vendors ({filteredVendors.length})</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Vendor</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Contact</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Total Bookings</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Revenue</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Status</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Join Date</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredVendors.map((vendor) => (
-                  <tr key={vendor.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-3">
-                        <Avatar>
-                          <AvatarFallback className="bg-gradient-to-br from-[#0066FF] to-[#00D4AA] text-white">
-                            {vendor.name
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")
-                              .slice(0, 2)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex flex-col">
-                          <span className="text-sm font-medium text-gray-900">{vendor.name}</span>
-                          <span className="text-xs text-gray-500">{vendor.id}</span>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="flex flex-col gap-1">
-                        <span className="text-xs text-gray-600">{vendor.email}</span>
-                        <span className="text-xs text-gray-600">{vendor.phone}</span>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 text-sm text-gray-700">{vendor.totalBookings}</td>
-                    <td className="py-3 px-4 text-sm font-semibold text-gray-900">{vendor.revenue}</td>
-                    <td className="py-3 px-4">
-                      <Badge
-                        variant={vendor.status === "active" ? "default" : "outline"}
-                        className={
-                          vendor.status === "active"
-                            ? "bg-green-100 text-green-700 hover:bg-green-100"
-                            : vendor.status === "pending"
-                              ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-100"
-                              : "bg-red-100 text-red-700 hover:bg-red-100"
-                        }
-                      >
-                        {vendor.status}
-                      </Badge>
-                    </td>
-                    <td className="py-3 px-4 text-sm text-gray-600">{vendor.joinDate}</td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm" onClick={() => handleView(vendor)}>
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" onClick={() => handleEdit(vendor)}>
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        {vendor.status === "pending" && (
-                          <>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-green-600"
-                              onClick={() => handleApprove(vendor.id)}
-                            >
-                              <CheckCircle className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-red-600"
-                              onClick={() => handleReject(vendor.id)}
-                            >
-                              <XCircle className="w-4 h-4" />
-                            </Button>
-                          </>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-red-600 hover:text-red-700"
-                          onClick={() => handleDeleteClick(vendor.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </td>
+          {filteredVendors.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 px-4">
+              <div className="w-20 h-20 mb-6 rounded-full bg-gradient-to-br from-[#0066FF]/10 to-[#00D4AA]/10 flex items-center justify-center">
+                <Search className="w-10 h-10 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No vendors found</h3>
+              <p className="text-sm text-gray-500 text-center max-w-sm mb-6">
+                {searchQuery
+                  ? `No vendors match your search for "${searchQuery}". Try adjusting your search terms.`
+                  : "Start by adding your first vendor to get started."}
+              </p>
+              {searchQuery ? (
+                <Button
+                  variant="outline"
+                  onClick={() => setSearchQuery("")}
+                  className="border-gray-300 hover:bg-gray-50"
+                >
+                  Clear Search
+                </Button>
+              ) : (
+                <Button
+                  className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white"
+                  onClick={handleAdd}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add First Vendor
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Vendor</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Contact</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Total Bookings</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Revenue</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Status</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Join Date</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {filteredVendors.map((vendor) => (
+                    <tr key={vendor.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-3">
+                          <Avatar>
+                            <AvatarFallback className="bg-gradient-to-br from-[#0066FF] to-[#00D4AA] text-white">
+                              {vendor.name
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")
+                                .slice(0, 2)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium text-gray-900">{vendor.name}</span>
+                            <span className="text-xs text-gray-500">{vendor.id}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-xs text-gray-600">{vendor.email}</span>
+                          <span className="text-xs text-gray-600">{vendor.phone}</span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 text-sm text-gray-700">{vendor.totalBookings}</td>
+                      <td className="py-3 px-4 text-sm font-semibold text-gray-900">{vendor.revenue}</td>
+                      <td className="py-3 px-4">
+                        <Badge
+                          variant={vendor.status === "active" ? "default" : "outline"}
+                          className={
+                            vendor.status === "active"
+                              ? "bg-green-100 text-green-700 hover:bg-green-100"
+                              : vendor.status === "pending"
+                                ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-100"
+                                : "bg-red-100 text-red-700 hover:bg-red-100"
+                          }
+                        >
+                          {vendor.status}
+                        </Badge>
+                      </td>
+                      <td className="py-3 px-4 text-sm text-gray-600">{vendor.joinDate}</td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-2">
+                          <Button variant="ghost" size="sm" onClick={() => handleView(vendor)}>
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => handleEdit(vendor)}>
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          {vendor.status === "pending" && (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-green-600"
+                                onClick={() => handleApprove(vendor.id)}
+                              >
+                                <CheckCircle className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-red-600"
+                                onClick={() => handleReject(vendor.id)}
+                              >
+                                <XCircle className="w-4 h-4" />
+                              </Button>
+                            </>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-red-600 hover:text-red-700"
+                            onClick={() => handleDeleteClick(vendor.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </CardContent>
       </Card>
 
