@@ -5,7 +5,17 @@ export async function GET() {
   try {
     const { data: faqs, error } = await supabase
       .from('faqs')
-      .select('*')
+      .select(`
+        *,
+        faq_translations (
+          id,
+          locale,
+          question,
+          answer,
+          created_at,
+          updated_at
+        )
+      `)
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: false })
 

@@ -4,6 +4,7 @@ import { motion } from "framer-motion"
 import { useInView } from "framer-motion"
 import { useRef, useState, useEffect } from "react"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { useLocale } from "@/contexts/locale-context"
 
 const defaultFaqs = [
   {
@@ -51,6 +52,7 @@ const defaultFaqs = [
 export function FAQ({ faqs: propFaqs }) {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
+  const { locale } = useLocale()
   const [faqs, setFaqs] = useState(propFaqs || defaultFaqs)
   const [loading, setLoading] = useState(!propFaqs)
   const [error, setError] = useState(null)
@@ -60,11 +62,11 @@ export function FAQ({ faqs: propFaqs }) {
     if (!propFaqs) {
       fetchFaqs()
     }
-  }, [propFaqs])
+  }, [propFaqs, locale])
 
   const fetchFaqs = async () => {
     try {
-      const response = await fetch('/api/faqs')
+      const response = await fetch(`/api/faqs?locale=${locale}`)
       const result = await response.json()
 
       if (response.ok) {

@@ -1,12 +1,11 @@
 "use client"
 
-import { useState, useEffect } from 'react'
-import { FAQManagement } from '@/components/dashboard/admin/faq-management'
+import { FAQManagementMultiLang } from '@/components/dashboard/admin/faq-management-multilang'
 
 export default function FAQPage() {
   return (
     <div className="p-6">
-      <FAQManagement />
+      <FAQManagementMultiLang />
     </div>
   )
 }

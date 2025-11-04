@@ -1,12 +1,23 @@
 import { supabase } from '@/lib/supabase'
 import { NextResponse } from 'next/server'
 
-export async function GET() {
+export async function GET(request) {
   try {
+    const { searchParams } = new URL(request.url)
+    const locale = searchParams.get('locale') || 'en'
+
     const { data: faqs, error } = await supabase
       .from('faqs')
-      .select('*')
+      .select(`
+        *,
+        faq_translations!inner (
+          question,
+          answer,
+          locale
+        )
+      `)
       .eq('status', 'active')
+      .eq('faq_translations.locale', locale)
       .order('sort_order', { ascending: true })
 
     if (error) {
@@ -17,7 +28,21 @@ export async function GET() {
       )
     }
 
-    return NextResponse.json({ faqs })
+    // Transform the data to include fallbacks
+    const transformedFaqs = faqs.map(faq => ({
+      id: faq.id,
+      question: faq.faq_translations[0]?.question || faq.question,
+      answer: faq.faq_translations[0]?.answer || faq.answer,
+      locale: faq.faq_translations[0]?.locale || 'en',
+      fallback_question: faq.question,
+      fallback_answer: faq.answer,
+      status: faq.status,
+      sort_order: faq.sort_order,
+      created_at: faq.created_at,
+      updated_at: faq.updated_at
+    }))
+
+    return NextResponse.json({ faqs: transformedFaqs })
   } catch (error) {
     console.error('Error in GET /api/faqs:', error)
     return NextResponse.json(

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Menu, X, Plane } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { LocaleSelector } from "@/components/ui/locale-selector"
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false)
@@ -48,7 +49,7 @@ export function Header() {
           </motion.div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-6">
             {navItems.map((item) => (
               <motion.div key={item.name} whileHover={{ y: -2 }}>
                 <Link href={item.href} className="font-medium transition-colors text-gray-700 hover:text-[#0066FF]">
@@ -56,6 +57,7 @@ export function Header() {
                 </Link>
               </motion.div>
             ))}
+            <LocaleSelector />
             <Link href="/buy-ticket">
               <Button className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white hover:shadow-lg hover:shadow-[#0066FF]/30 transition-all cursor-pointer">
                 Buy Ticket
@@ -87,6 +89,10 @@ export function Header() {
                 {item.name}
               </Link>
             ))}
+            <div className="flex items-center justify-between py-2">
+              <span className="font-medium text-gray-700">Language</span>
+              <LocaleSelector />
+            </div>
             <Link href="/buy-ticket">
               <Button className="w-full mt-4 bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white">
                 Buy Ticket
