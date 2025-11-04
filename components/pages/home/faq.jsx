@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion"
 import { useInView } from "framer-motion"
-import { useRef } from "react"
+import { useRef, useState, useEffect } from "react"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 
 const defaultFaqs = [
@@ -48,9 +48,43 @@ const defaultFaqs = [
   },
 ]
 
-export function FAQ({ faqs = defaultFaqs }) {
+export function FAQ({ faqs: propFaqs }) {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
+  const [faqs, setFaqs] = useState(propFaqs || defaultFaqs)
+  const [loading, setLoading] = useState(!propFaqs)
+  const [error, setError] = useState(null)
+
+  // Fetch FAQs from API if no propFaqs provided
+  useEffect(() => {
+    if (!propFaqs) {
+      fetchFaqs()
+    }
+  }, [propFaqs])
+
+  const fetchFaqs = async () => {
+    try {
+      const response = await fetch('/api/faqs')
+      const result = await response.json()
+
+      if (response.ok) {
+        setFaqs(result.faqs || defaultFaqs)
+        setError(null)
+      } else {
+        console.error('Failed to fetch FAQs:', result.error)
+        setError('Failed to load FAQs')
+        // Fallback to default FAQs
+        setFaqs(defaultFaqs)
+      }
+    } catch (error) {
+      console.error('Error fetching FAQs:', error)
+      setError('Network error')
+      // Fallback to default FAQs
+      setFaqs(defaultFaqs)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <section id="faq" ref={ref}>
@@ -78,24 +112,41 @@ export function FAQ({ faqs = defaultFaqs }) {
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6 }}
           >
-            <Accordion type="single" collapsible defaultValue="item-0" className="space-y-3 md:space-y-4">
-              {faqs.map((faq, index) => (
-                <AccordionItem
-                  key={index}
-                  value={`item-${index}`}
-                  className="bg-white/60 backdrop-blur-lg rounded-2xl shadow-lg border border-white/50 overflow-hidden"
+            {loading ? (
+              <div className="text-center py-12">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#0066FF]"></div>
+                <p className="mt-4 text-gray-600">Loading FAQs...</p>
+              </div>
+            ) : error ? (
+              <div className="text-center py-12">
+                <p className="text-red-600 mb-4">{error}</p>
+                <button
+                  onClick={fetchFaqs}
+                  className="px-4 py-2 bg-[#0066FF] text-white rounded-lg hover:bg-[#0055EE] transition-colors"
                 >
-                  <AccordionTrigger className="px-4 py-4 md:px-8 md:py-6 hover:bg-white/40 transition-colors text-left [&[data-state=open]>svg]:rotate-180">
-                    <span className="font-semibold text-gray-900 text-sm md:text-lg pr-4 md:pr-8">
-                      {faq.question}
-                    </span>
-                  </AccordionTrigger>
-                  <AccordionContent className="px-4 md:px-8 text-gray-600 leading-relaxed text-sm md:text-base">
-                    {faq.answer}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
+                  Try Again
+                </button>
+              </div>
+            ) : (
+              <Accordion type="single" collapsible defaultValue="item-0" className="space-y-3 md:space-y-4">
+                {faqs.map((faq, index) => (
+                  <AccordionItem
+                    key={faq.id || index}
+                    value={`item-${index}`}
+                    className="bg-white/60 backdrop-blur-lg rounded-2xl shadow-lg border border-white/50 overflow-hidden"
+                  >
+                    <AccordionTrigger className="px-4 py-4 md:px-8 md:py-6 hover:bg-white/40 transition-colors text-left [&[data-state=open]>svg]:rotate-180">
+                      <span className="font-semibold text-gray-900 text-sm md:text-lg pr-4 md:pr-8">
+                        {faq.question}
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent className="px-4 md:px-8 text-gray-600 leading-relaxed text-sm md:text-base">
+                      {faq.answer}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            )}
           </motion.div>
         </div>
       </div>
