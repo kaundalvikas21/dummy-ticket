@@ -11,7 +11,8 @@
       "mcp__context7__resolve-library-id",
       "mcp__context7__get-library-docs",
       "mcp__chrome-devtools__new_page",
-      "mcp__serena__find_file"
+      "mcp__serena__find_file",
+      "Read(//mnt/c/Users/**)"
     ]
   },
   "enableAllProjectMcpServers": true,

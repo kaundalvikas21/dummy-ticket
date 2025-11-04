@@ -1,4 +1,4 @@
-import {VendorSidebar} from "@/components/dashboard/vendor/vendor-sidebar";
+import {VendorSidebar} from "@/components/dashboard/shared/VendorSidebar";
 import { VendorHeader } from "@/components/dashboard/vendor/vendor-header";
 
 export default function VendorDashboardLayout({ children }) {

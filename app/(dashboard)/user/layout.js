@@ -1,4 +1,4 @@
-import UserSidebar from "@/components/dashboard/user/user-sidebar";
+import UserSidebar from "@/components/dashboard/shared/UserSidebar";
 import { UserHeader } from "@/components/dashboard/user/user-header";
 
 export default function DashboardLayout({ children }) {

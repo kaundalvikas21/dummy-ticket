@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { AdminSidebar } from "@/components/dashboard/admin/admin-sidebar";
+import { AdminSidebar } from "@/components/dashboard/shared/AdminSidebar";
 import { AdminHeader } from "@/components/dashboard/admin/admin-header";
 
 export default function AdminDashboardLayout({ children }) {
