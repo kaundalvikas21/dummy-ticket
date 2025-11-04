@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search, Plus, Edit, Trash2, Eye, EyeOff, MoveUp, MoveDown, Globe, Check, X, AlertCircle } from "lucide-react"
+import { Search, Plus, Edit, Trash2, Eye, EyeOff, MoveUp, MoveDown, Globe, Check, X, AlertCircle, Square, CheckSquare2 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -32,6 +32,9 @@ export function FAQManagementMultiLang() {
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [selectedFaq, setSelectedFaq] = useState(null)
+  const [selectedFaqIds, setSelectedFaqIds] = useState([])
+  const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false)
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false)
   const [activeTab, setActiveTab] = useState(DEFAULT_LOCALE)
 
   // Form data for all locales
@@ -290,6 +293,65 @@ export function FAQManagementMultiLang() {
     }
   }
 
+  // Multi-select handlers
+  const handleSelectFaq = (faqId) => {
+    setSelectedFaqIds(prev =>
+      prev.includes(faqId)
+        ? prev.filter(id => id !== faqId)
+        : [...prev, faqId]
+    )
+  }
+
+  const handleSelectAll = () => {
+    if (selectedFaqIds.length === filteredFaqs.length) {
+      // Deselect all
+      setSelectedFaqIds([])
+    } else {
+      // Select all
+      setSelectedFaqIds(filteredFaqs.map(f => f.id))
+    }
+  }
+
+  const isAllSelected = filteredFaqs.length > 0 && selectedFaqIds.length === filteredFaqs.length
+  const isIndeterminate = selectedFaqIds.length > 0 && selectedFaqIds.length < filteredFaqs.length
+
+  const clearSelection = () => {
+    setSelectedFaqIds([])
+  }
+
+  // Bulk delete handler
+  const handleBulkDelete = async () => {
+    setIsBulkDeleting(true)
+    try {
+      const deletePromises = selectedFaqIds.map(async (faqId) => {
+        const response = await fetch(`/api/faqs/${faqId}`, {
+          method: 'DELETE',
+        })
+        return { faqId, success: response.ok }
+      })
+
+      const results = await Promise.all(deletePromises)
+
+      const successful = results.filter(r => r.success).length
+      const failed = results.filter(r => !r.success).length
+
+      await fetchFaqs()
+      clearSelection()
+      setShowBulkDeleteDialog(false)
+
+      if (failed > 0) {
+        alert(`Successfully deleted ${successful} FAQ${successful !== 1 ? 's' : ''}. ${failed} FAQ${failed !== 1 ? 's' : ''} failed to delete.`)
+      } else {
+        alert(`Successfully deleted ${successful} FAQ${successful !== 1 ? 's' : ''}.`)
+      }
+    } catch (error) {
+      console.error('Error in bulk delete:', error)
+      alert('Failed to delete FAQs. Please try again.')
+    } finally {
+      setIsBulkDeleting(false)
+    }
+  }
+
   // Open edit dialog
   const openEditDialog = (faq) => {
     setSelectedFaq(faq)
@@ -352,10 +414,69 @@ export function FAQManagementMultiLang() {
         />
       </div>
 
+      {/* Bulk Action Bar */}
+      {selectedFaqIds.length > 0 && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4 flex items-center justify-between animate-in slide-in-from-top">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-blue-900">
+              {selectedFaqIds.length} {selectedFaqIds.length === 1 ? 'FAQ' : 'FAQs'} selected
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={clearSelection}
+              className="text-gray-600 hover:text-gray-800"
+            >
+              Clear Selection
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => setShowBulkDeleteDialog(true)}
+              disabled={isBulkDeleting}
+            >
+              <Trash2 className="w-4 h-4 mr-1" />
+              {isBulkDeleting ? 'Deleting...' : 'Delete'}
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* FAQ List */}
       <Card>
         <CardHeader>
-          <CardTitle>All FAQs ({filteredFaqs.length})</CardTitle>
+          <CardTitle className="flex items-center justify-between">
+            <span>All FAQs ({filteredFaqs.length})</span>
+            {filteredFaqs.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleSelectAll}
+                className="flex items-center gap-2"
+              >
+                {isAllSelected ? (
+                  <>
+                    <CheckSquare2 className="w-4 h-4" />
+                    Deselect All
+                  </>
+                ) : isIndeterminate ? (
+                  <>
+                    <div className="w-4 h-4 border border-gray-300 rounded relative">
+                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-blue-600 rounded-sm"></div>
+                    </div>
+                    Select All
+                  </>
+                ) : (
+                  <>
+                    <Square className="w-4 h-4" />
+                    Select All
+                  </>
+                )}
+              </Button>
+            )}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -373,9 +494,21 @@ export function FAQManagementMultiLang() {
                 return (
                   <div
                     key={faq.id}
-                    className="border rounded-lg p-4 hover:shadow-md transition-shadow"
+                    className={`border rounded-lg p-4 hover:shadow-md transition-shadow ${
+                      selectedFaqIds.includes(faq.id) ? 'bg-blue-50 border-blue-300' : ''
+                    }`}
                   >
                     <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+                      {/* Checkbox */}
+                      <div className="flex items-start lg:items-center">
+                        <input
+                          type="checkbox"
+                          checked={selectedFaqIds.includes(faq.id)}
+                          onChange={() => handleSelectFaq(faq.id)}
+                          className="mt-1 lg:mt-0 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        />
+                      </div>
+
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2 flex-wrap">
                           <h3 className="font-semibold text-gray-900 truncate">
