@@ -201,3 +201,51 @@
     max-width: 1280px;
   }
 }
+
+/* RTL Content Styles for Arabic */
+.rtl-content {
+  direction: rtl;
+  text-align: right;
+}
+
+.rtl-content h1,
+.rtl-content h2,
+.rtl-content h3,
+.rtl-content h4,
+.rtl-content h5,
+.rtl-content h6 {
+  text-align: right;
+}
+
+.rtl-content p,
+.rtl-content span,
+.rtl-content div {
+  text-align: right;
+}
+
+/* RTL Accordion Styles */
+.rtl-content [data-state="open"] > svg {
+  /* Keep chevron rotation the same for RTL */
+  transform: rotate(180deg);
+}
+
+.rtl-content .text-left {
+  text-align: right !important;
+}
+
+.rtl-content .text-right {
+  text-align: left !important;
+}
+
+/* Ensure layout elements remain LTR */
+header, nav, footer, .container {
+  direction: ltr !important;
+}
+
+/* Admin dashboard protection */
+.admin-layout,
+.dashboard-layout,
+.admin-sidebar,
+.admin-header {
+  direction: ltr !important;
+}

@@ -37,17 +37,13 @@ export function LocaleProvider({ children }) {
     initializeLocale()
   }, [])
 
-  // Update localStorage and document when locale changes
+  // Update localStorage when locale changes
   useEffect(() => {
     if (!isLoading && typeof window !== 'undefined') {
       localStorage.setItem('locale', locale)
 
-      // Update document direction for RTL languages
-      const localeInfo = LOCALES[locale]
-      if (localeInfo) {
-        document.documentElement.dir = localeInfo.direction
-        document.documentElement.lang = locale
-      }
+      // Update document language (but not direction to prevent layout reversion)
+      document.documentElement.lang = locale
     }
   }, [locale, isLoading])
 

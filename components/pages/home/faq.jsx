@@ -91,20 +91,24 @@ export function FAQ({ faqs: propFaqs }) {
   return (
     <section id="faq" ref={ref}>
       <div className="container mx-auto px-4">
-        <div className="max-w-4xl mx-auto">
+        <div className={`max-w-4xl mx-auto ${locale === 'ar' ? 'rtl-content' : ''}`}>
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6 }}
             className="mb-8 md:mb-12"
           >
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 md:mb-4 text-balance">
+            <h2 className={`text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 md:mb-4 text-balance ${
+              locale === 'ar' ? 'text-right' : ''
+            }`}>
               Frequently Asked{" "}
               <span className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] bg-clip-text text-transparent">
                 Questions
               </span>
             </h2>
-            <p className="text-base md:text-xl text-gray-600 text-pretty">
+            <p className={`text-base md:text-xl text-gray-600 text-pretty ${
+              locale === 'ar' ? 'text-right' : ''
+            }`}>
               Find answers to common questions about our dummy ticket services
             </p>
           </motion.div>
@@ -137,12 +141,22 @@ export function FAQ({ faqs: propFaqs }) {
                     value={`item-${index}`}
                     className="bg-white/60 backdrop-blur-lg rounded-2xl shadow-lg border border-white/50 overflow-hidden"
                   >
-                    <AccordionTrigger className="px-4 py-4 md:px-8 md:py-6 hover:bg-white/40 transition-colors text-left [&[data-state=open]>svg]:rotate-180">
-                      <span className="font-semibold text-gray-900 text-sm md:text-lg pr-4 md:pr-8">
+                    <AccordionTrigger
+                      className={`px-4 py-4 md:px-8 md:py-6 hover:bg-white/40 transition-colors ${
+                        locale === 'ar' ? 'text-right pr-8 pl-4 md:pr-16 md:pl-8' : 'text-left pr-4 md:pr-8'
+                      } [&[data-state=open]>svg]:rotate-180`}
+                    >
+                      <span className={`font-semibold text-gray-900 text-sm md:text-lg ${
+                        locale === 'ar' ? 'text-right' : ''
+                      }`}>
                         {faq.question}
                       </span>
                     </AccordionTrigger>
-                    <AccordionContent className="px-4 md:px-8 text-gray-600 leading-relaxed text-sm md:text-base">
+                    <AccordionContent
+                      className={`px-4 md:px-8 text-gray-600 leading-relaxed text-sm md:text-base ${
+                        locale === 'ar' ? 'text-right' : ''
+                      }`}
+                    >
                       {faq.answer}
                     </AccordionContent>
                   </AccordionItem>
