@@ -22,6 +22,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { LOCALES, DEFAULT_LOCALE } from "@/lib/locales"
+import { FlagIcon } from "@/components/ui/flag-icon"
 
 export function FAQManagementMultiLang() {
   const [faqs, setFaqs] = useState([])
@@ -409,8 +410,15 @@ export function FAQManagementMultiLang() {
                         </p>
                         <div className="flex flex-wrap gap-1 mt-2">
                           {faq.faq_translations?.map(trans => (
-                            <Badge key={trans.locale} variant="outline" className="text-xs">
-                              {LOCALES[trans.locale]?.flag} {trans.locale.toUpperCase()}
+                            <Badge key={trans.locale} variant="outline" className="text-xs flex items-center gap-1">
+                              <FlagIcon
+                                src={LOCALES[trans.locale]?.flag}
+                                alt={LOCALES[trans.locale]?.name}
+                                countryCode={LOCALES[trans.locale]?.countryCode}
+                                size={12}
+                                className="shrink-0"
+                              />
+                              {trans.locale.toUpperCase()}
                             </Badge>
                           ))}
                         </div>
@@ -527,7 +535,13 @@ export function FAQManagementMultiLang() {
                     value={code}
                     className="flex items-center gap-1 px-2 py-2 text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm"
                   >
-                    <span className="text-sm">{locale.flag}</span>
+                    <FlagIcon
+                      src={locale.flag}
+                      alt={locale.name}
+                      countryCode={locale.countryCode}
+                      size={16}
+                      className="shrink-0"
+                    />
                     <span className="hidden sm:inline text-xs font-medium">{locale.name}</span>
                     {formData.translations[code]?.question && formData.translations[code]?.answer && (
                       <Check className="w-3 h-3 text-green-500 flex-shrink-0" />
@@ -539,7 +553,13 @@ export function FAQManagementMultiLang() {
               {Object.entries(LOCALES).map(([code, locale]) => (
                 <TabsContent key={code} value={code} className="space-y-4">
                   <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
-                    <span className="text-lg">{locale.flag}</span>
+                    <FlagIcon
+                      src={locale.flag}
+                      alt={locale.name}
+                      countryCode={locale.countryCode}
+                      size={20}
+                      className="shrink-0"
+                    />
                     <span className="font-medium">{locale.name}</span>
                     {code === DEFAULT_LOCALE && (
                       <Badge variant="outline" className="ml-auto">

@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useLocale } from '@/contexts/locale-context'
+import { FlagIcon } from '@/components/ui/flag-icon'
 
 export function LocaleSelector() {
   const { locale, changeLocale, allLocales } = useLocale()
@@ -25,7 +26,13 @@ export function LocaleSelector() {
         >
           <Globe className="w-4 h-4" />
           <span className="hidden sm:inline-flex items-center gap-2">
-            <span className="text-lg">{currentLocale?.flag}</span>
+            <FlagIcon
+              src={currentLocale?.flag}
+              alt={currentLocale?.name}
+              countryCode={currentLocale?.countryCode}
+              size={16}
+              className="shrink-0"
+            />
             <span className="text-xs sm:text-sm font-medium">
               {currentLocale?.code.toUpperCase()}
             </span>
@@ -42,7 +49,13 @@ export function LocaleSelector() {
               localeInfo.code === locale ? 'bg-blue-50 text-blue-700' : ''
             }`}
           >
-            <span className="text-lg">{localeInfo.flag}</span>
+            <FlagIcon
+              src={localeInfo.flag}
+              alt={localeInfo.name}
+              countryCode={localeInfo.countryCode}
+              size={20}
+              className="shrink-0"
+            />
             <div className="flex-1">
               <div className="font-medium text-sm">{localeInfo.name}</div>
               <div className="text-xs text-muted-foreground">
