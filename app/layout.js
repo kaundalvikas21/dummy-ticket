@@ -1,6 +1,7 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { LocaleProvider } from "@/contexts/locale-context"; 
+import { LocaleProvider } from "@/contexts/locale-context";
+import { AuthProvider } from "@/contexts/auth-context"; 
 
 const inter = Inter({
   subsets: ["latin"],
@@ -21,7 +22,9 @@ export default function RootLayout({ children }) {
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
         <LocaleProvider>
-          {children}
+          <AuthProvider>
+            {children}
+          </AuthProvider>
         </LocaleProvider>
       </body>
     </html>

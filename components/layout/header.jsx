@@ -4,10 +4,18 @@ import { useState, useEffect } from "react"
 import { useMounted } from "@/lib/hooks/use-mounted"
 import { motion, useScroll } from "framer-motion"
 import { Button } from "@/components/ui/button"
-import { Menu, X, Plane } from "lucide-react"
+import { Menu, X, Plane, User, LogOut } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { LocaleSelector } from "@/components/ui/locale-selector"
+import { useAuth } from "@/contexts/auth-context"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false)
@@ -15,6 +23,7 @@ export function Header() {
   const { scrollY } = useScroll()
   const pathname = usePathname()
   const mounted = useMounted()
+  const { user, logout, isAuthenticated, isAdmin, isVendor, isUser } = useAuth()
 
   useEffect(() => {
     return scrollY.on("change", (latest) => {
@@ -58,11 +67,50 @@ export function Header() {
               </motion.div>
             ))}
             <LocaleSelector />
-            <Link href="/buy-ticket">
-              <Button className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white hover:shadow-lg hover:shadow-[#0066FF]/30 transition-all cursor-pointer">
-                Buy Ticket
-              </Button>
-            </Link>
+
+            {/* Auth Section */}
+            {mounted && (
+              <>
+                {isAuthenticated ? (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" className="flex items-center gap-2">
+                        <User className="w-4 h-4" />
+                        <span className="hidden sm:inline">
+                          {user?.email?.split('@')[0]}
+                        </span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem asChild>
+                        <Link href={`/${user?.role}`} className="flex items-center gap-2">
+                          <User className="w-4 h-4" />
+                          Dashboard
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={logout} className="flex items-center gap-2 text-red-600">
+                        <LogOut className="w-4 h-4" />
+                        Logout
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                ) : (
+                  <Link href="/login">
+                    <Button variant="outline" className="flex items-center gap-2">
+                      <User className="w-4 h-4" />
+                      Login
+                    </Button>
+                  </Link>
+                )}
+
+                <Link href="/buy-ticket">
+                  <Button className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white hover:shadow-lg hover:shadow-[#0066FF]/30 transition-all cursor-pointer">
+                    Buy Ticket
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -93,6 +141,38 @@ export function Header() {
               <span className="font-medium text-gray-700">Language</span>
               <LocaleSelector />
             </div>
+
+            {/* Mobile Auth Section */}
+            {mounted && (
+              <>
+                {isAuthenticated ? (
+                  <>
+                    <div className="py-2 border-t border-gray-200 mt-2">
+                      <div className="text-sm font-medium text-gray-700">
+                        {user?.email}
+                      </div>
+                      <div className="text-xs text-gray-500 capitalize">
+                        {user?.role} Account
+                      </div>
+                    </div>
+                    <Link href={`/${user?.role}`} className="block py-2 text-gray-700 hover:text-[#0066FF] font-medium">
+                      Dashboard
+                    </Link>
+                    <button
+                      onClick={logout}
+                      className="block w-full text-left py-2 text-red-600 hover:text-red-800 font-medium"
+                    >
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <Link href="/login" className="block py-2 text-gray-700 hover:text-[#0066FF] font-medium">
+                    Login
+                  </Link>
+                )}
+              </>
+            )}
+
             <Link href="/buy-ticket">
               <Button className="w-full mt-4 bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white">
                 Buy Ticket
