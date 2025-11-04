@@ -53,7 +53,7 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
-    const { id } = params
+    const { id } = await params
 
     const { data: faq, error } = await supabase
       .from('faqs')

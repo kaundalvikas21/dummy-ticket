@@ -29,13 +29,26 @@ export async function GET() {
 
 export async function POST(request) {
   try {
-    const { question, answer, status = 'active', sort_order = 0 } = await request.json()
+    const { question, answer, status = 'active', sort_order } = await request.json()
 
     if (!question || !answer) {
       return NextResponse.json(
         { error: 'Question and answer are required' },
         { status: 400 }
       )
+    }
+
+    // If sort_order is not provided, automatically assign the next available one
+    let finalSortOrder = sort_order
+    if (finalSortOrder === undefined || finalSortOrder === null) {
+      const { data: maxSortData } = await supabase
+        .from('faqs')
+        .select('sort_order')
+        .order('sort_order', { ascending: false })
+        .limit(1)
+        .single()
+
+      finalSortOrder = maxSortData ? maxSortData.sort_order + 1 : 0
     }
 
     const { data: faq, error } = await supabase
@@ -45,7 +58,7 @@ export async function POST(request) {
           question: question.trim(),
           answer: answer.trim(),
           status,
-          sort_order,
+          sort_order: finalSortOrder,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         }

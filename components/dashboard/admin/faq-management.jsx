@@ -148,30 +148,52 @@ export function FAQManagement() {
 
     if (newIndex < 0 || newIndex >= faqs.length) return
 
-    const newSortOrder = faqs[newIndex].sort_order
+    const currentFaq = faqs[currentIndex]
+    const targetFaq = faqs[newIndex]
+
+    // Use the current index as sort_order if not properly set
+    const currentSortOrder = currentFaq.sort_order !== undefined ? currentFaq.sort_order : currentIndex
+    const targetSortOrder = targetFaq.sort_order !== undefined ? targetFaq.sort_order : newIndex
 
     try {
-      // Update current FAQ
-      await fetch(`/api/faqs/${faq.id}`, {
+      // Update current FAQ with target's sort order
+      const currentResponse = await fetch(`/api/faqs/${currentFaq.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ ...faq, sort_order: newSortOrder }),
+        body: JSON.stringify({
+          ...currentFaq,
+          sort_order: targetSortOrder
+        }),
       })
 
-      // Update other FAQ
-      await fetch(`/api/faqs/${faqs[newIndex].id}`, {
+      if (!currentResponse.ok) {
+        throw new Error('Failed to update current FAQ position')
+      }
+
+      // Update target FAQ with current's sort order
+      const targetResponse = await fetch(`/api/faqs/${targetFaq.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ ...faqs[newIndex], sort_order: faq.sort_order }),
+        body: JSON.stringify({
+          ...targetFaq,
+          sort_order: currentSortOrder
+        }),
       })
 
+      if (!targetResponse.ok) {
+        throw new Error('Failed to update target FAQ position')
+      }
+
+      // Refresh the list
       await fetchFaqs()
     } catch (error) {
       console.error('Error moving FAQ:', error)
+      // Optional: Show error message to user
+      alert('Failed to move FAQ. Please try again.')
     }
   }
 
