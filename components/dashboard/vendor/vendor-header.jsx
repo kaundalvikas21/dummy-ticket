@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Bell, ChevronDown, UserCircle, Settings, LogOut } from "lucide-react"
+import { Bell, ChevronDown, UserCircle, Settings, LogOut, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
@@ -16,11 +16,14 @@ import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { useMounted } from "@/lib/hooks/use-mounted"
+import { useAuth } from "@/contexts/auth-context"
 
 export function VendorHeader() {
   const mounted = useMounted()
   const { toast } = useToast()
   const router = useRouter()
+  const { logout, profile } = useAuth()
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [notifications, setNotifications] = useState([
     {
       id: 1,
@@ -44,14 +47,47 @@ export function VendorHeader() {
     })
   }
 
-  const handleLogout = () => {
-    toast({
-      title: "Logged out successfully",
-      description: "Redirecting to homepage...",
-    })
-    setTimeout(() => {
-      window.location.href = "/"
-    }, 1500)
+  const handleLogout = async () => {
+    setIsLoggingOut(true)
+
+    try {
+      const result = await logout()
+
+      if (result.success) {
+        toast({
+          title: "Logged Out Successfully 👋",
+          description: "You have been logged out of your account",
+          variant: "success",
+        })
+
+        // Redirect to login page after successful logout
+        setTimeout(() => {
+          window.location.href = '/login'
+        }, 1000)
+      } else {
+        toast({
+          title: "Logout Failed",
+          description: result.error || "Something went wrong during logout",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      toast({
+        title: "Logout Failed",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoggingOut(false)
+    }
+  }
+
+  // Get user display name from profile
+  const getUserDisplayName = () => {
+    if (profile?.first_name) {
+      return `${profile.first_name} ${profile.last_name || ''}`.trim()
+    }
+    return "Global Travel Agency"
   }
 
   return (
@@ -111,18 +147,18 @@ export function VendorHeader() {
               <Button variant="ghost" className="flex items-center gap-2 hover:bg-gray-100 transition-colors">
                 <Avatar className="w-8 h-8 ring-2 ring-blue-500">
                   <AvatarFallback className="bg-gradient-to-br from-[#0066FF] to-[#00D4AA] text-white text-sm">
-                    GT
+                    {getUserDisplayName().substring(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <span className="text-sm font-medium text-gray-700">Global Travel</span>
+                <span className="text-sm font-medium text-gray-700">{getUserDisplayName()}</span>
                 <ChevronDown className="w-4 h-4 text-gray-500" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>
                 <div className="flex flex-col gap-1">
-                  <p className="text-sm font-medium">Global Travel Agency</p>
-                  <p className="text-xs text-gray-500">contact@globaltravel.com</p>
+                  <p className="text-sm font-medium">{getUserDisplayName()}</p>
+                  <p className="text-xs text-gray-500">{profile?.email || 'contact@globaltravel.com'}</p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
@@ -139,9 +175,22 @@ export function VendorHeader() {
                 </DropdownMenuItem>
               </Link>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600">
-                <LogOut className="w-4 h-4 mr-2" />
-                Logout
+              <DropdownMenuItem
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+                className="cursor-pointer text-red-600 disabled:opacity-50"
+              >
+                {isLoggingOut ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Logging out...
+                  </>
+                ) : (
+                  <>
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Logout
+                  </>
+                )}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

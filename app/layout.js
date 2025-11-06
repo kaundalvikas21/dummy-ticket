@@ -1,7 +1,8 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { LocaleProvider } from "@/contexts/locale-context";
-import { AuthProvider } from "@/contexts/auth-context"; 
+import { AuthProvider } from "@/contexts/auth-context";
+import { Toaster } from "@/components/ui/toaster"; 
 
 const inter = Inter({
   subsets: ["latin"],
@@ -26,6 +27,7 @@ export default function RootLayout({ children }) {
             {children}
           </AuthProvider>
         </LocaleProvider>
+        <Toaster />
       </body>
     </html>
   );

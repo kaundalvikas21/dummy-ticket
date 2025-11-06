@@ -8,6 +8,7 @@ const AuthContext = createContext({
   profile: null,
   loading: true,
   login: async () => {},
+  register: async () => {},
   logout: async () => {},
   isAuthenticated: false,
   isAdmin: false,
@@ -23,6 +24,26 @@ export function AuthProvider({ children }) {
   // Check for existing session on mount
   useEffect(() => {
     checkAuth()
+  }, [])
+
+  // Listen for global logout events
+  useEffect(() => {
+    const handleGlobalLogout = () => {
+      setUser(null)
+      setProfile(null)
+      localStorage.removeItem('auth_user')
+      localStorage.removeItem('auth_profile')
+
+      // Clear cookies
+      document.cookie = 'auth_user=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+      document.cookie = 'auth_profile=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+    }
+
+    window.addEventListener('auth-logout', handleGlobalLogout)
+
+    return () => {
+      window.removeEventListener('auth-logout', handleGlobalLogout)
+    }
   }, [])
 
   const checkAuth = async () => {
@@ -83,6 +104,18 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
     try {
+      // Call logout API endpoint for server-side cleanup
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error('Server logout failed')
+      }
+
       // Clear user data from state and localStorage
       setUser(null)
       setProfile(null)
@@ -92,8 +125,46 @@ export function AuthProvider({ children }) {
       // Clear cookies
       document.cookie = 'auth_user=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
       document.cookie = 'auth_profile=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+
+      // Dispatch custom event for global logout sync
+      window.dispatchEvent(new CustomEvent('auth-logout', {
+        detail: { timestamp: Date.now() }
+      }))
+
+      return { success: true }
     } catch (error) {
       console.error('Logout error:', error)
+      return { success: false, error: error.message }
+    }
+  }
+
+  const register = async (userData) => {
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Registration failed')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        // Auto-login after successful registration
+        const loginResult = await login(userData.email, userData.password)
+        return loginResult
+      } else {
+        return { success: false, error: result.error }
+      }
+    } catch (error) {
+      console.error('Registration error:', error)
+      return { success: false, error: error.message }
     }
   }
 
@@ -102,6 +173,7 @@ export function AuthProvider({ children }) {
     profile,
     loading,
     login,
+    register,
     logout,
     isAuthenticated: !!user,
     isAdmin: profile?.role === 'admin',

@@ -4,11 +4,12 @@ import { useState, useEffect } from "react"
 import { useMounted } from "@/lib/hooks/use-mounted"
 import { motion, useScroll } from "framer-motion"
 import { Button } from "@/components/ui/button"
-import { Menu, X, Plane, User, LogOut } from "lucide-react"
+import { Menu, X, Plane, User, LogOut, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { LocaleSelector } from "@/components/ui/locale-selector"
 import { useAuth } from "@/contexts/auth-context"
+import { useToast } from "@/hooks/use-toast"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,16 +21,61 @@ import {
 export function Header() {
   const [isOpen, setIsOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
   const { scrollY } = useScroll()
   const pathname = usePathname()
   const mounted = useMounted()
-  const { user, logout, isAuthenticated, isAdmin, isVendor, isUser } = useAuth()
+  const { user, profile, logout, isAuthenticated, isAdmin, isVendor, isUser } = useAuth()
+  const { toast } = useToast()
 
   useEffect(() => {
     return scrollY.on("change", (latest) => {
       setIsScrolled(latest > 50)
     })
   }, [scrollY])
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true)
+
+    try {
+      const result = await logout()
+
+      if (result.success) {
+        toast({
+          title: "Logged Out Successfully 👋",
+          description: "You have been logged out of your account",
+          variant: "success",
+        })
+
+        // Force redirect to login page after successful logout
+        setTimeout(() => {
+          window.location.href = '/login'
+        }, 1000)
+      } else {
+        toast({
+          title: "Logout Failed",
+          description: result.error || "Something went wrong during logout",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      toast({
+        title: "Logout Failed",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoggingOut(false)
+    }
+  }
+
+  // Get user display name (prefer profile name over email)
+  const getUserDisplayName = () => {
+    if (profile?.first_name) {
+      return `${profile.first_name} ${profile.last_name || ''}`.trim()
+    }
+    return user?.email?.split('@')[0] || 'User'
+  }
 
   const navItems = [
     { name: "Services", href: "/services" },
@@ -77,7 +123,7 @@ export function Header() {
                       <Button variant="outline" className="flex items-center gap-2">
                         <User className="w-4 h-4" />
                         <span className="hidden sm:inline">
-                          {user?.email?.split('@')[0]}
+                          {getUserDisplayName()}
                         </span>
                       </Button>
                     </DropdownMenuTrigger>
@@ -89,19 +135,48 @@ export function Header() {
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={logout} className="flex items-center gap-2 text-red-600">
-                        <LogOut className="w-4 h-4" />
-                        Logout
+                      <DropdownMenuItem
+                        onClick={handleLogout}
+                        disabled={isLoggingOut}
+                        className="flex items-center gap-2 text-red-600"
+                      >
+                        {isLoggingOut ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Logging out...
+                          </>
+                        ) : (
+                          <>
+                            <LogOut className="w-4 h-4" />
+                            Logout
+                          </>
+                        )}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 ) : (
-                  <Link href="/login">
-                    <Button variant="outline" className="flex items-center gap-2">
-                      <User className="w-4 h-4" />
-                      Login
-                    </Button>
-                  </Link>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" className="flex items-center gap-2">
+                        <User className="w-4 h-4" />
+                        Account
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem asChild>
+                        <Link href="/login" className="flex items-center gap-2">
+                          <User className="w-4 h-4" />
+                          Login
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/register" className="flex items-center gap-2">
+                          <User className="w-4 h-4" />
+                          Register
+                        </Link>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 )}
 
                 <Link href="/buy-ticket">
@@ -149,7 +224,7 @@ export function Header() {
                   <>
                     <div className="py-2 border-t border-gray-200 mt-2">
                       <div className="text-sm font-medium text-gray-700">
-                        {user?.email}
+                        {getUserDisplayName()}
                       </div>
                       <div className="text-xs text-gray-500 capitalize">
                         {user?.role} Account
@@ -159,16 +234,32 @@ export function Header() {
                       Dashboard
                     </Link>
                     <button
-                      onClick={logout}
-                      className="block w-full text-left py-2 text-red-600 hover:text-red-800 font-medium"
+                      onClick={handleLogout}
+                      disabled={isLoggingOut}
+                      className="block w-full text-left py-2 text-red-600 hover:text-red-800 font-medium disabled:opacity-50"
                     >
-                      Logout
+                      {isLoggingOut ? (
+                        <div className="flex items-center gap-2">
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Logging out...
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <LogOut className="w-4 h-4" />
+                          Logout
+                        </div>
+                      )}
                     </button>
                   </>
                 ) : (
-                  <Link href="/login" className="block py-2 text-gray-700 hover:text-[#0066FF] font-medium">
-                    Login
-                  </Link>
+                  <>
+                    <Link href="/login" className="block py-2 text-gray-700 hover:text-[#0066FF] font-medium">
+                      Login
+                    </Link>
+                    <Link href="/register" className="block py-2 text-gray-700 hover:text-[#0066FF] font-medium">
+                      Register
+                    </Link>
+                  </>
                 )}
               </>
             )}

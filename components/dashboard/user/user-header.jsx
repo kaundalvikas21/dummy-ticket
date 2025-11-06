@@ -1,6 +1,6 @@
 "use client"
 
-import { Bell, LogOut, Settings, User, UserCircle, HelpCircle, ChevronDown } from "lucide-react"
+import { Bell, LogOut, Settings, User, UserCircle, HelpCircle, ChevronDown, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -12,11 +12,14 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
+import { useAuth } from "@/contexts/auth-context"
 import { useState, useEffect } from "react"
 
 export function UserHeader() {
   const router = useRouter()
   const { toast } = useToast()
+  const { logout, profile } = useAuth()
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
 
   const [mounted, setMounted] = useState(false);
 
@@ -66,14 +69,47 @@ export function UserHeader() {
 
   const unreadCount = notifications.filter((n) => !n.read).length
 
-  const handleLogout = () => {
-    toast({
-      title: "Logged Out",
-      description: "You have been successfully logged out.",
-    })
-    setTimeout(() => {
-      router.push("/")
-    }, 1000)
+  const handleLogout = async () => {
+    setIsLoggingOut(true)
+
+    try {
+      const result = await logout()
+
+      if (result.success) {
+        toast({
+          title: "Logged Out Successfully 👋",
+          description: "You have been logged out of your account",
+          variant: "success",
+        })
+
+        // Redirect to login page after successful logout
+        setTimeout(() => {
+          window.location.href = '/login'
+        }, 1000)
+      } else {
+        toast({
+          title: "Logout Failed",
+          description: result.error || "Something went wrong during logout",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      toast({
+        title: "Logout Failed",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoggingOut(false)
+    }
+  }
+
+  // Get user display name from profile
+  const getUserDisplayName = () => {
+    if (profile?.first_name) {
+      return `${profile.first_name} ${profile.last_name || ''}`.trim()
+    }
+    return "User"
   }
 
   return (
@@ -134,15 +170,15 @@ export function UserHeader() {
                 <User className="h-5 w-5 text-white" />
               </div>
               <div className="flex flex-col items-start">
-                <span className="text-sm font-medium text-gray-900">John Doe</span>
+                <span className="text-sm font-medium text-gray-900">{getUserDisplayName()}</span>
               </div>
               <ChevronDown className="h-4 w-4 text-gray-500" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <div className="px-2 py-1.5">
-              <p className="text-sm font-semibold">John Doe</p>
-              <p className="text-xs text-gray-500">john@example.com</p>
+              <p className="text-sm font-semibold">{getUserDisplayName()}</p>
+              <p className="text-xs text-gray-500">{profile?.email || 'user@example.com'}</p>
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => router.push("/user/profile")} className="cursor-pointer">
@@ -158,9 +194,22 @@ export function UserHeader() {
               <span>Settings</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600">
-              <LogOut className="mr-2 h-4 w-4" />
-              <span>Logout</span>
+            <DropdownMenuItem
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+              className="cursor-pointer text-red-600 disabled:opacity-50"
+            >
+              {isLoggingOut ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <span>Logging out...</span>
+                </>
+              ) : (
+                <>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Logout</span>
+                </>
+              )}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
