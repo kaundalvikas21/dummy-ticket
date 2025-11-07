@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS user_profiles (
   country_code TEXT,
   date_of_birth DATE,
   nationality TEXT,
+   passport_number VARCHAR(50);
     address TEXT,
   city TEXT,
   postal_code TEXT,

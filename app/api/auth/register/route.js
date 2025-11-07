@@ -9,7 +9,7 @@ const supabase = createClient(
 
 export async function POST(request) {
   try {
-    const { email, password, role, firstName, lastName } = await request.json()
+    const { email, password, role, firstName, lastName, phoneNumber, nationality } = await request.json()
 
     // Validate required fields with specific error messages
     const missingFields = []
@@ -90,6 +90,8 @@ export async function POST(request) {
         user_id: user.id,
         first_name: firstName,
         last_name: lastName,
+        phone_number: phoneNumber || null,
+        nationality: nationality || null,
         // Other fields will be filled from dashboard profile
       })
       .select()
@@ -108,17 +110,31 @@ export async function POST(request) {
     return NextResponse.json({
       success: true,
       message: 'Registration successful',
-      data: {
-        user: {
-          id: user.id,
-          email: user.email,
-          role: user.role,
-        },
-        profile: {
-          id: profile.id,
-          first_name: profile.first_name,
-          last_name: profile.last_name,
-        }
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        status: user.status,
+      },
+      profile: {
+        id: profile.id,
+        first_name: profile.first_name,
+        last_name: profile.last_name,
+        phone_number: profile.phone_number,
+        country_code: profile.country_code,
+        date_of_birth: profile.date_of_birth,
+        nationality: profile.nationality,
+        address: profile.address,
+        city: profile.city,
+        postal_code: profile.postal_code,
+        preferred_language: profile.preferred_language || 'en',
+        avatar_url: profile.avatar_url,
+        notification_preferences: profile.notification_preferences || {},
+        privacy_settings: profile.privacy_settings || {},
+        // Backward compatibility fields
+        email: user.email,
+        role: user.role,
+        status: user.status
       }
     })
 

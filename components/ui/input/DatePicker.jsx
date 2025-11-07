@@ -22,8 +22,17 @@ export function DatePicker({
   label,
   required = false,
   disabledDate,
+  captionLayout,
+  fromYear,
+  toYear,
+  defaultMonth,
 }) {
   const [date, setDate] = React.useState(value ? new Date(value) : undefined)
+
+  // Update internal state when value prop changes
+  React.useEffect(() => {
+    setDate(value ? new Date(value) : undefined)
+  }, [value])
 
   const handleSelect = (selectedDate) => {
     setDate(selectedDate)
@@ -49,6 +58,7 @@ export function DatePicker({
             className={cn(
               "w-full justify-start text-left font-normal border-input",
               !date && "text-muted-foreground",
+              disabled && "opacity-50 cursor-not-allowed bg-gray-50 border-gray-200",
               className
             )}
             disabled={disabled}
@@ -57,15 +67,21 @@ export function DatePicker({
             {date ? format(date, "PPP") : <span>{placeholder}</span>}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            mode="single"
-            selected={date}
-            onSelect={handleSelect}
-            disabled={disabledDate}
-            initialFocus
-          />
-        </PopoverContent>
+        {!disabled && (
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={date}
+              onSelect={handleSelect}
+              disabled={disabledDate}
+              initialFocus
+              captionLayout={captionLayout}
+              fromYear={fromYear}
+              toYear={toYear}
+              defaultMonth={defaultMonth}
+            />
+          </PopoverContent>
+        )}
       </Popover>
     </div>
   )
