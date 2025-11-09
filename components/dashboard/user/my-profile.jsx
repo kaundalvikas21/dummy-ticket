@@ -165,6 +165,7 @@ export function MyProfile() {
       }
 
       // Prepare data for API (convert to database field names)
+      // Note: Email is excluded as it cannot be changed for security reasons
       const profileData = {
         first_name: profile.firstName?.trim(),
         last_name: profile.lastName?.trim(),
@@ -177,7 +178,8 @@ export function MyProfile() {
         postal_code: profile.postalCode?.trim(),
         country_code: profile.countryCode?.trim(),
         preferred_language: profile.preferredLanguage,
-        avatar_url: avatarUrl // Include uploaded image URL
+        // Include uploaded image URL, or keep existing one if no new image uploaded
+        avatar_url: avatarUrl || authProfile?.avatar_url
       }
 
       console.log('Prepared profile data for API:', profileData)
@@ -432,13 +434,22 @@ export function MyProfile() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={profile.email}
-                  onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-                  disabled={!isEditing}
-                />
+                <div className="group relative">
+                  <Input
+                    id="email"
+                    type="email"
+                    value={profile.email}
+                    disabled
+                    className="bg-gray-50 cursor-not-allowed"
+                    readOnly
+                  />
+                  <div className="absolute bottom-full left-0 mb-2 w-48 p-2 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+                    <p>Email cannot be changed for security reasons.</p>
+                    <div className="absolute bottom-0 left-4 transform translate-y-full">
+                      <div className="border-4 border-transparent border-t-gray-800"></div>
+                    </div>
+                  </div>
+                </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="phone">Phone</Label>

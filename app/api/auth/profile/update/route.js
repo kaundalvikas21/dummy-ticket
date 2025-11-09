@@ -32,8 +32,20 @@ export async function PUT(request) {
       )
     }
 
-    // Prepare data for database update
-    const updatePayload = {
+    // Validate that email is not being updated (security measure)
+    if (profileData.email) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Email changes are not allowed for security reasons. Please contact support if you need to update your email address.',
+          details: 'Email addresses are immutable after account creation to prevent account takeover.'
+        },
+        { status: 400 }
+      )
+    }
+
+    // Prepare data for user_profiles table update
+    const profileUpdatePayload = {
       first_name: profileData.first_name?.trim() || null,
       last_name: profileData.last_name?.trim() || null,
       phone_number: profileData.phone_number?.trim() || null,
@@ -45,7 +57,8 @@ export async function PUT(request) {
       country_code: profileData.country_code?.trim() || null,
       preferred_language: profileData.preferred_language || 'en',
       passport_number: profileData.passport_number?.trim() || null,
-      avatar_url: profileData.avatar_url?.trim() || null,
+      // Only update avatar_url if explicitly provided (not null/undefined)
+      ...(profileData.avatar_url !== undefined && { avatar_url: profileData.avatar_url?.trim() || null }),
       notification_preferences: profileData.notification_preferences || {},
       privacy_settings: profileData.privacy_settings || {},
       updated_at: new Date().toISOString()
@@ -54,7 +67,7 @@ export async function PUT(request) {
     // Update user profile in database
     const { data: updatedProfile, error } = await supabase
       .from('user_profiles')
-      .update(updatePayload)
+      .update(profileUpdatePayload)
       .eq('user_id', userId)
       .select()
       .single()
@@ -67,7 +80,7 @@ export async function PUT(request) {
         hint: error.hint,
         code: error.code,
         userId: userId,
-        updatePayload: updatePayload
+        profileUpdatePayload: profileUpdatePayload
       })
       return NextResponse.json(
         {
@@ -87,12 +100,20 @@ export async function PUT(request) {
       )
     }
 
+    // Get current user data to return unchanged email
+    const { data: currentUser } = await supabase
+      .from('users')
+      .select('email')
+      .eq('id', userId)
+      .single()
+
     // Return updated profile data with consistent format
     return NextResponse.json({
       success: true,
       message: 'Profile updated successfully',
       profile: {
         id: updatedProfile.id,
+        email: currentUser?.email, // Email from users table (unchanged)
         first_name: updatedProfile.first_name,
         last_name: updatedProfile.last_name,
         phone_number: updatedProfile.phone_number,
@@ -107,7 +128,6 @@ export async function PUT(request) {
         avatar_url: updatedProfile.avatar_url,
         notification_preferences: updatedProfile.notification_preferences || {},
         privacy_settings: updatedProfile.privacy_settings || {},
-        // Backward compatibility fields will be added by frontend
       }
     })
 
