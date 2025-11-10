@@ -30,6 +30,11 @@
     "linear": {
       "command": "npx",
       "args": ["-y", "mcp-remote", "https://mcp.linear.app/sse"]
+    },
+    "consult7": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["consult7", "openrouter", "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"]
     }
   }
 }
