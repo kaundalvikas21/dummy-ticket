@@ -1,0 +1,132 @@
+import { supabase } from '@/lib/supabase'
+import { NextResponse } from 'next/server'
+
+export async function GET(request) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const locale = searchParams.get('locale') || 'en'
+    const includeInactive = searchParams.get('include_inactive') === 'true'
+
+    // Get sections with their items and translations
+    let query = supabase
+      .from('faq_page_sections')
+      .select(`
+        *,
+        faq_page_section_translations (
+          locale,
+          title
+        ),
+        faq_page_items (
+          id,
+          question,
+          answer,
+          status,
+          sort_order,
+          faq_page_item_translations (
+            locale,
+            question,
+            answer
+          )
+        )
+      `)
+      .order('sort_order', { ascending: true })
+
+    if (!includeInactive) {
+      query = query.eq('status', 'active')
+    }
+
+    const { data: sections, error } = await query
+
+    if (error) {
+      console.error('Error fetching FAQ page sections:', error)
+      return NextResponse.json(
+        { error: 'Failed to fetch FAQ page sections' },
+        { status: 500 }
+      )
+    }
+
+    // Transform the data to include fallbacks and proper structure
+    const transformedSections = sections.map(section => ({
+      id: section.id,
+      title: section.faq_section_translations?.[0]?.title || section.title,
+      icon: section.icon,
+      status: section.status,
+      sort_order: section.sort_order,
+      items: (section.faq_page_items || [])
+        .filter(item => includeInactive || item.status === 'active')
+        .sort((a, b) => a.sort_order - b.sort_order)
+        .map(item => ({
+          id: item.id,
+          question: item.faq_item_translations?.[0]?.question || item.question,
+          answer: item.faq_item_translations?.[0]?.answer || item.answer,
+          status: item.status,
+          sort_order: item.sort_order
+        }))
+    }))
+
+    return NextResponse.json({ sections: transformedSections })
+  } catch (error) {
+    console.error('Error in GET /api/faq-page/sections:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function POST(request) {
+  try {
+    const { title, icon, status = 'active', sort_order } = await request.json()
+
+    if (!title || title.trim() === '') {
+      return NextResponse.json(
+        { error: 'Section title is required' },
+        { status: 400 }
+      )
+    }
+
+    // If sort_order is not provided, automatically assign the next available one
+    let finalSortOrder = sort_order
+    if (finalSortOrder === undefined || finalSortOrder === null) {
+      const { data: maxSortData } = await supabase
+        .from('faq_page_sections')
+        .select('sort_order')
+        .order('sort_order', { ascending: false })
+        .limit(1)
+        .single()
+
+      finalSortOrder = maxSortData ? maxSortData.sort_order + 1 : 0
+    }
+
+    const { data: section, error } = await supabase
+      .from('faq_page_sections')
+      .insert([
+        {
+          title: title.trim(),
+          icon: icon?.trim() || null,
+          status,
+          sort_order: finalSortOrder,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+      ])
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Error creating FAQ page section:', error)
+      return NextResponse.json(
+        { error: 'Failed to create FAQ page section', details: error.message },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({ section }, { status: 201 })
+  } catch (error) {
+    console.error('Error in POST /api/faq-page/sections:', error)
+    return NextResponse.json(
+      { error: 'Internal server error', details: error.message },
+      { status: 500 }
+    )
+  }
+}

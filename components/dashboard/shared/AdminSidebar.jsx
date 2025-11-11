@@ -17,6 +17,7 @@ import {
   Plane,
   UserCircle,
   FileCheck,
+  FileText,
   Code,
   HelpCircle,
 } from "lucide-react"
@@ -37,6 +38,11 @@ const menuItems = [
   { id: "components", label: "Components", icon: Code, href: "/admin/components", hasSubmenu: true,
     submenu: [
       { id: "faq", label: "FAQ", icon: HelpCircle, href: "/admin/components/faq" }
+    ]
+  },
+  { id: "pages", label: "Pages", icon: FileText, href: "/admin/pages", hasSubmenu: true,
+    submenu: [
+      { id: "faq", label: "FAQ", icon: HelpCircle, href: "/admin/pages/faq" }
     ]
   },
   { id: "settings", label: "Settings", icon: Settings, href: "/admin/settings" },
