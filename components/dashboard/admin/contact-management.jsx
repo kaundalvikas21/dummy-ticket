@@ -90,21 +90,6 @@ export function ContactManagement() {
         { key: "email", label: "Email Address", type: "text", icon: Mail },
         { key: "address", label: "Address", type: "text", icon: MapPin }
       ]
-    },
-    {
-      title: "Page Content",
-      settings: [
-        { key: "page_title", label: "Page Title", type: "text", icon: Globe },
-        { key: "page_description", label: "Page Description", type: "textarea", icon: Globe }
-      ]
-    },
-    {
-      title: "Support Information",
-      settings: [
-        { key: "working_hours_text", label: "Working Hours Description", type: "textarea", icon: Clock },
-        { key: "contact_support_title", label: "Support Section Title", type: "text", icon: Phone },
-        { key: "contact_support_description", label: "Support Section Description", type: "textarea", icon: Mail }
-      ]
     }
   ]
 

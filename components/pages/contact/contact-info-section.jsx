@@ -9,13 +9,12 @@ export function ContactInfoSection({ settings }) {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
 
-  // Use dynamic settings or fall back to defaults
-  const workingHoursText = settings.working_hours_text?.value ||
-    "Due to the nature of the travel industry we at dummyticket.com understand the need to be available to the customer at any time of day or night. The company is open 24/7 and customer service is available at least 18 hours a day."
+  // Static content for support information
+  const contactSupportTitle = "Contact Support"
+  const contactSupportDescription = "Get in touch with our support team from around the world."
 
-  const contactSupportTitle = settings.contact_support_title?.value || "Contact Support"
-  const contactSupportDescription = settings.contact_support_description?.value ||
-    "Reach out to our support team in your region. We're here to help you with your travel documentation needs."
+  // Static content for working hours description
+  const workingHoursText = "Due to the nature of the travel industry we at dummyticket.com understand the need to be available to the customer at any time of day or night. The company is open 24/7 and customer service is available at least 18 hours a day."
 
   // Parse working hours from settings
   const parseWorkingHours = () => {

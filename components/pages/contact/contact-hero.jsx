@@ -4,9 +4,11 @@ import { motion } from "framer-motion";
 import { Phone, Mail, MapPin } from "lucide-react";
 
 export function ContactHero({ settings }) {
-  // Use dynamic settings or fall back to defaults
-  const pageTitle = settings.page_title?.value || "Get in Touch";
-  const pageDescription = settings.page_description?.value || "We're here to help you 24/7. Reach out to us anytime, anywhere.";
+  // Static content for title and description
+  const pageTitle = "Get in Touch";
+  const pageDescription = "We're here to help you 24/7. Reach out to us anytime, anywhere. Our dedicated support team is available to assist you with any questions or concerns you may have.";
+
+  // Dynamic contact information
   const phone = settings.phone?.value || "+1-800-123-4567";
   const email = settings.email?.value || "support@example.com";
   const address = settings.address?.value || "123 Business St, Suite 100, New York, NY 10001";
