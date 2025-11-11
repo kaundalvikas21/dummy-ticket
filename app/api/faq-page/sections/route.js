@@ -1,6 +1,22 @@
 import { supabase } from '@/lib/supabase'
 import { NextResponse } from 'next/server'
 
+// Helper functions to get localized content
+function getLocalizedTitle(section, locale) {
+  const translation = section.faq_page_section_translations?.find(t => t.locale === locale)
+  return translation?.title || section.title
+}
+
+function getLocalizedQuestion(item, locale) {
+  const translation = item.faq_page_item_translations?.find(t => t.locale === locale)
+  return translation?.question || item.question
+}
+
+function getLocalizedAnswer(item, locale) {
+  const translation = item.faq_page_item_translations?.find(t => t.locale === locale)
+  return translation?.answer || item.answer
+}
+
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url)
@@ -48,7 +64,7 @@ export async function GET(request) {
     // Transform the data to include fallbacks and proper structure
     const transformedSections = sections.map(section => ({
       id: section.id,
-      title: section.faq_section_translations?.[0]?.title || section.title,
+      title: getLocalizedTitle(section, locale),
       icon: section.icon,
       status: section.status,
       sort_order: section.sort_order,
@@ -57,8 +73,8 @@ export async function GET(request) {
         .sort((a, b) => a.sort_order - b.sort_order)
         .map(item => ({
           id: item.id,
-          question: item.faq_item_translations?.[0]?.question || item.question,
-          answer: item.faq_item_translations?.[0]?.answer || item.answer,
+          question: getLocalizedQuestion(item, locale),
+          answer: getLocalizedAnswer(item, locale),
           status: item.status,
           sort_order: item.sort_order
         }))

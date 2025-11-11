@@ -5,18 +5,22 @@ import HeroSection from "@/components/pages/faq/HeroSection"
 import FaqCategory from "@/components/pages/faq/FaqCategory"
 import StillHaveQuestions from "@/components/pages/faq/StillHaveQuestions"
 import { HelpCircle, Clock, CreditCard, FileText, Globe, Loader2 } from "lucide-react"
+import { useLocale } from "@/contexts/locale-context"
 
 export default function FAQPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [sections, setSections] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const { locale, isLoading: localeLoading } = useLocale()
 
   // Fetch FAQ sections with items from API
   useEffect(() => {
     const fetchFAQSections = async () => {
       try {
-        const response = await fetch('/api/faq-page/sections')
+        // Include locale parameter to get translated content
+        const url = `/api/faq-page/sections${locale !== 'en' ? `?locale=${locale}` : ''}`
+        const response = await fetch(url)
         const result = await response.json()
 
         if (response.ok) {
@@ -34,7 +38,7 @@ export default function FAQPage() {
     }
 
     fetchFAQSections()
-  }, [])
+  }, [locale])
 
   // Transform API data to match existing component structure
   const faqCategories = sections.map(section => ({
@@ -43,7 +47,7 @@ export default function FAQPage() {
     faqs: section.items || []
   }))
 
-  // Filter logic preserved
+  // Filter logic for translated content
   const filteredCategories = faqCategories.map((category) => ({
     ...category,
     faqs: category.faqs.filter(
@@ -53,7 +57,7 @@ export default function FAQPage() {
     ),
   })).filter(category => category.faqs.length > 0)
 
-  if (loading) {
+  if (loading || localeLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 flex items-center justify-center">
         <div className="text-center">
@@ -78,6 +82,7 @@ export default function FAQPage() {
   }
 
   if (filteredCategories.length === 0) {
+    const isEnglish = locale === 'en'
     return (
       <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50">
         <HeroSection searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
@@ -85,13 +90,26 @@ export default function FAQPage() {
         <section className="py-10 md:py-16">
           <div className="container mx-auto px-4">
             <div className="max-w-5xl mx-auto text-center">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">No FAQs Found</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                {isEnglish ? "No FAQs Found" : "No FAQs Found"}
+              </h2>
               <p className="text-gray-600">
                 {searchQuery
-                  ? `No FAQs found matching "${searchQuery}". Try different search terms.`
-                  : "No FAQ content is available at the moment. Please check back later."
+                  ? (isEnglish
+                    ? `No FAQs found matching "${searchQuery}". Try different search terms.`
+                    : `No FAQs found matching "${searchQuery}". Try different search terms.`)
+                  : (isEnglish
+                    ? "No FAQ content is available at the moment. Please check back later."
+                    : "No FAQ content is available at the moment. Please check back later.")
                 }
               </p>
+              {!searchQuery && locale !== DEFAULT_LOCALE && (
+                <p className="text-sm text-gray-500 mt-2">
+                  {isEnglish
+                    ? "Content may not be available in this language yet."
+                    : "Content may not be available in this language yet."}
+                </p>
+              )}
             </div>
           </div>
         </section>

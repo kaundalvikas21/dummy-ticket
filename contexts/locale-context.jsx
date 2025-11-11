@@ -93,3 +93,5 @@ export function useLocale() {
   }
   return context
 }
+
+export { LocaleContext }
