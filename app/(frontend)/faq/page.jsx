@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import HeroSection from "@/components/pages/faq/HeroSection"
 import FaqCategory from "@/components/pages/faq/FaqCategory"
 import StillHaveQuestions from "@/components/pages/faq/StillHaveQuestions"
-import { HelpCircle, Clock, CreditCard, FileText, Globe, Loader2 } from "lucide-react"
+import { HelpCircle, Clock, CreditCard, FileText, Globe, Loader2, Phone } from "lucide-react"
 import { useLocale } from "@/contexts/locale-context"
 
 export default function FAQPage() {
@@ -148,6 +148,7 @@ function getIconByName(iconName) {
     CreditCard: CreditCard,
     FileText: FileText,
     Globe: Globe,
+    Phone: Phone,
     Info: HelpCircle, // Fallback
     Settings: HelpCircle, // Fallback
     Users: HelpCircle, // Fallback
@@ -159,7 +160,6 @@ function getIconByName(iconName) {
     Zap: HelpCircle, // Fallback
     Package: HelpCircle, // Fallback
     Truck: HelpCircle, // Fallback
-    Phone: HelpCircle, // Fallback
   }
 
   return icons[iconName] || icons.HelpCircle

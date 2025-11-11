@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect } from "react"
 import {
   Toast,
   ToastClose,
@@ -11,7 +12,19 @@ import {
 import { useToast } from "@/hooks/use-toast"
 
 export function Toaster() {
-  const { toasts } = useToast()
+  const { toasts, dismiss } = useToast()
+
+  useEffect(() => {
+    toasts.forEach((toast) => {
+      if (toast.open) {
+        const timer = setTimeout(() => {
+          dismiss(toast.id)
+        }, 5000)
+
+        return () => clearTimeout(timer)
+      }
+    })
+  }, [toasts, dismiss])
 
   return (
     <ToastProvider>
