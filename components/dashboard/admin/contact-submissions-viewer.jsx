@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search, Filter, Eye, Trash2, CheckCircle, Clock, AlertTriangle, User, Mail, Phone, Calendar, ChevronLeft, ChevronRight, Save, X, MessageSquare } from "lucide-react"
+import { Search, Filter, Eye, Trash2, CheckCircle, Clock, AlertTriangle, User, Mail, Phone, Calendar, ChevronLeft, ChevronRight, Save, X, MessageSquare, RefreshCw } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -53,6 +53,7 @@ export function ContactSubmissionsViewer() {
   // Form data for editing
   const [editFormData, setEditFormData] = useState({
     status: "",
+    priority: "",
     admin_notes: ""
   })
 
@@ -123,6 +124,7 @@ export function ContactSubmissionsViewer() {
     setSelectedSubmission(submission)
     setEditFormData({
       status: submission.status,
+      priority: submission.priority,
       admin_notes: submission.admin_notes || ""
     })
     setShowViewDialog(true)
@@ -142,6 +144,7 @@ export function ContactSubmissionsViewer() {
         body: JSON.stringify({
           id: selectedSubmission.id,
           status: editFormData.status,
+          priority: editFormData.priority,
           admin_notes: editFormData.admin_notes
         })
       })
@@ -161,6 +164,9 @@ export function ContactSubmissionsViewer() {
           ...selectedSubmission,
           ...result.submission
         })
+
+        // Close the modal automatically
+        setShowViewDialog(false)
       } else {
         toast({
           title: "Error",
@@ -218,6 +224,11 @@ export function ContactSubmissionsViewer() {
     }
   }
 
+  // Handle manual refresh
+  const handleRefresh = async () => {
+    await fetchSubmissions(currentPage)
+  }
+
   // Get status badge component
   const getStatusBadge = (status) => {
     const statusConfig = statusOptions.find(s => s.value === status) || statusOptions[0]
@@ -250,6 +261,15 @@ export function ContactSubmissionsViewer() {
           <h1 className="text-2xl font-bold text-gray-900">Contact Submissions</h1>
           <p className="text-gray-600 mt-1">View and manage contact form submissions</p>
         </div>
+        <Button
+          variant="outline"
+          onClick={handleRefresh}
+          disabled={loading}
+          className="flex items-center gap-2"
+        >
+          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          Refresh
+        </Button>
       </div>
 
       {/* Filters */}
@@ -608,10 +628,22 @@ export function ContactSubmissionsViewer() {
                 <h3 className="text-lg font-semibold text-gray-900">Status & Priority</h3>
                 <div className="grid gap-3 md:grid-cols-2">
                   <div>
-                    <Label>Priority</Label>
-                    <div className="mt-1">
-                      {getPriorityBadge(selectedSubmission.priority)}
-                    </div>
+                    <Label htmlFor="edit-priority">Priority</Label>
+                    <Select
+                      value={editFormData.priority}
+                      onValueChange={(value) => setEditFormData(prev => ({ ...prev, priority: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {priorityOptions.map(priority => (
+                          <SelectItem key={priority.value} value={priority.value}>
+                            {priority.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div>
                     <Label htmlFor="edit-status">Status</Label>

@@ -125,7 +125,7 @@ export function ContactInfoSection({ settings }) {
                     >
                       <div className="text-center">
                         <div className="font-bold mb-0.5 md:mb-1">{item.day}</div>
-                        <div className="text-[10px] md:text-xs text-white/90">{item.hours}</div>
+                        <div className="text-[10px] md:text-xs text-white/90">{item.hours} hours</div>
                       </div>
                     </div>
                   </motion.div>

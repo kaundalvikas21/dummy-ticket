@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
+import { FlagIcon } from "@/components/ui/flag-icon"
 
 export function ContactManagement() {
   const { toast } = useToast()
@@ -68,6 +69,18 @@ export function ContactManagement() {
     "USA", "India", "UAE", "UK", "Canada", "Australia", "Singapore", "Philippines"
   ]
 
+  // Country codes for flag icons
+  const countryCodes = {
+    "USA": "us",
+    "India": "in",
+    "UAE": "ae",
+    "UK": "gb",
+    "Canada": "ca",
+    "Australia": "au",
+    "Singapore": "sg",
+    "Philippines": "ph"
+  }
+
   // Predefined contact settings for better organization
   const contactSettingCategories = [
     {
@@ -94,6 +107,9 @@ export function ContactManagement() {
       ]
     }
   ]
+
+  // Settings that have their own dedicated management sections and should not appear in Additional Settings
+  const specialManagedSettings = ['working_hours', 'country_support']
 
   // Parse working hours from settings
   const parseWorkingHours = (settings) => {
@@ -281,7 +297,9 @@ export function ContactManagement() {
   }
 
   const handleEditWorkingHours = (item) => {
-    setWorkingHoursFormData({ day: item.day, hours: item.hours })
+    // Clean existing hours value (remove " hours" suffix if present)
+    const cleanHours = item.hours.toString().replace(' hours', '').trim()
+    setWorkingHoursFormData({ day: item.day, hours: cleanHours })
     setEditingWorkingHours(item)
     setShowWorkingHoursDialog(true)
   }
@@ -296,11 +314,27 @@ export function ContactManagement() {
       return
     }
 
+    const hours = parseInt(workingHoursFormData.hours)
+    if (isNaN(hours) || hours < 0 || hours > 24) {
+      toast({
+        title: "Validation Error",
+        description: "Hours must be a number between 0 and 24",
+        variant: "destructive"
+      })
+      return
+    }
+
+    // Ensure we store the numeric value
+    const cleanedFormData = {
+      ...workingHoursFormData,
+      hours: hours.toString() // Store as string for consistency but ensure it's a clean number
+    }
+
     let updatedWorkingHours
     if (editingWorkingHours) {
       // Update existing item
       updatedWorkingHours = workingHours.map(item =>
-        item.day === editingWorkingHours.day ? workingHoursFormData : item
+        item.day === editingWorkingHours.day ? cleanedFormData : item
       )
       toast({
         title: "Success",
@@ -317,7 +351,7 @@ export function ContactManagement() {
         })
         return
       }
-      updatedWorkingHours = [...workingHours, workingHoursFormData]
+      updatedWorkingHours = [...workingHours, cleanedFormData]
       toast({
         title: "Success",
         description: "Working hours added successfully"
@@ -451,6 +485,67 @@ export function ContactManagement() {
            (setting.description && setting.description.toLowerCase().includes(searchLower))
   })
 
+  // Comprehensive search function for all contact settings
+  const searchContactSettings = () => {
+    if (!searchTerm.trim()) {
+      // Return all sections when search is empty
+      return {
+        filteredCategories: contactSettingCategories,
+        filteredWorkingHours: workingHours,
+        filteredCountrySupport: countrySupport,
+        filteredAdditionalSettings: filteredSettings,
+        hasResults: true
+      }
+    }
+
+    const searchLower = searchTerm.toLowerCase()
+
+    // Filter contact setting categories
+    const filteredCategories = contactSettingCategories.map(category => ({
+      ...category,
+      settings: category.settings.filter(setting => {
+        const settingData = settings[setting.key]
+        return (
+          setting.key.toLowerCase().includes(searchLower) ||
+          setting.label.toLowerCase().includes(searchLower) ||
+          (settingData?.value && settingData.value.toLowerCase().includes(searchLower)) ||
+          (settingData?.description && settingData.description.toLowerCase().includes(searchLower))
+        )
+      })
+    })).filter(category => category.settings.length > 0)
+
+    // Filter working hours
+    const filteredWorkingHours = workingHours.filter(item =>
+      item.day.toLowerCase().includes(searchLower) ||
+      item.hours.toString().toLowerCase().includes(searchLower)
+    )
+
+    // Filter country support
+    const filteredCountrySupport = countrySupport.filter(item =>
+      item.country.toLowerCase().includes(searchLower) ||
+      item.phone.toLowerCase().includes(searchLower)
+    )
+
+    // Filter additional settings (already has filteredSettings)
+    const filteredAdditionalSettings = filteredSettings
+
+    // Check if any section has results
+    const hasResults = filteredCategories.length > 0 ||
+                      filteredWorkingHours.length > 0 ||
+                      filteredCountrySupport.length > 0 ||
+                      filteredAdditionalSettings.length > 0
+
+    return {
+      filteredCategories,
+      filteredWorkingHours,
+      filteredCountrySupport,
+      filteredAdditionalSettings,
+      hasResults
+    }
+  }
+
+  const searchResults = searchContactSettings()
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -489,12 +584,40 @@ export function ContactManagement() {
           placeholder="Search settings..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
+          className="pl-10 pr-10"
         />
+        {searchTerm && (
+          <button
+            onClick={() => setSearchTerm('')}
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
-      {/* Organized Settings by Category */}
-      {contactSettingCategories.map((category, categoryIndex) => (
+      {/* No Results Message */}
+      {searchTerm && !searchResults.hasResults && (
+        <Card className="shadow-sm">
+          <CardContent className="text-center py-12">
+            <Search className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No results found</h3>
+            <p className="text-gray-500 mb-4">
+              Try searching for different keywords like "phone", "email", "working hours", or country names
+            </p>
+            <Button onClick={() => setSearchTerm('')} variant="outline">
+              <X className="w-4 h-4 mr-2" />
+              Clear Search
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Only show sections when there's no search or when there are results */}
+      {!searchTerm || searchResults.hasResults ? (
+        <>
+          {/* Organized Settings by Category */}
+          {searchResults.filteredCategories.map((category, categoryIndex) => (
         <Card key={categoryIndex} className="shadow-sm">
           <CardHeader>
             <CardTitle className="text-lg font-semibold text-gray-900">
@@ -612,19 +735,25 @@ export function ContactManagement() {
           </div>
         </CardHeader>
         <CardContent>
-          {workingHours.length === 0 ? (
+          {searchResults.filteredWorkingHours.length === 0 ? (
             <div className="text-center py-8">
               <Clock className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No working hours set</h3>
-              <p className="text-gray-500 mb-4">Add working hours for each day of the week</p>
-              <Button onClick={handleAddWorkingHours} variant="outline">
-                <Plus className="w-4 h-4 mr-2" />
-                Add First Day
-              </Button>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                {searchTerm ? 'No working hours match your search' : 'No working hours set'}
+              </h3>
+              <p className="text-gray-500 mb-4">
+                {searchTerm ? 'Try searching for different days or hours' : 'Add working hours for each day of the week'}
+              </p>
+              {!searchTerm && (
+                <Button onClick={handleAddWorkingHours} variant="outline">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add First Day
+                </Button>
+              )}
             </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              {workingHours.map((item, index) => (
+              {searchResults.filteredWorkingHours.map((item, index) => (
                 <Card key={index} className="border border-gray-200">
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-2">
@@ -676,24 +805,36 @@ export function ContactManagement() {
           </div>
         </CardHeader>
         <CardContent>
-          {countrySupport.length === 0 ? (
+          {searchResults.filteredCountrySupport.length === 0 ? (
             <div className="text-center py-8">
               <Globe className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No country support added</h3>
-              <p className="text-gray-500 mb-4">Add support phone numbers for different countries</p>
-              <Button onClick={handleAddCountrySupport} variant="outline">
-                <Plus className="w-4 h-4 mr-2" />
-                Add First Country
-              </Button>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                {searchTerm ? 'No countries match your search' : 'No country support added'}
+              </h3>
+              <p className="text-gray-500 mb-4">
+                {searchTerm ? 'Try searching for different countries or phone numbers' : 'Add support phone numbers for different countries'}
+              </p>
+              {!searchTerm && (
+                <Button onClick={handleAddCountrySupport} variant="outline">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add First Country
+                </Button>
+              )}
             </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {countrySupport.map((item, index) => (
+              {searchResults.filteredCountrySupport.map((item, index) => (
                 <Card key={index} className="border border-gray-200">
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-2">
                       <h4 className="font-medium text-gray-900 flex items-center gap-2">
-                        <Flag className="w-4 h-4" />
+                        <FlagIcon
+                          src={`https://flagcdn.com/w80/${countryCodes[item.country] || item.country.toLowerCase()}.png`}
+                          alt={`${item.country} flag`}
+                          countryCode={countryCodes[item.country] || item.country.toLowerCase()}
+                          size={16}
+                          className="flex-shrink-0"
+                        />
                         {item.country}
                       </h4>
                       <div className="flex gap-1">
@@ -733,7 +874,8 @@ export function ContactManagement() {
       {Object.keys(settings).some(key =>
         !contactSettingCategories.some(cat =>
           cat.settings.some(template => template.key === key)
-        )
+        ) &&
+        !specialManagedSettings.includes(key)
       ) && (
         <Card className="shadow-sm">
           <CardHeader>
@@ -747,7 +889,8 @@ export function ContactManagement() {
                 .filter(([key]) =>
                   !contactSettingCategories.some(cat =>
                     cat.settings.some(template => template.key === key)
-                  )
+                  ) &&
+                  !specialManagedSettings.includes(key)
                 )
                 .map(([key, setting]) => (
                   <Card key={key} className="border border-gray-200">
@@ -1018,10 +1161,14 @@ export function ContactManagement() {
               <Label htmlFor="working-hours-hours">Working Hours</Label>
               <Input
                 id="working-hours-hours"
+                type="number"
+                min="0"
+                max="24"
                 value={workingHoursFormData.hours}
                 onChange={(e) => setWorkingHoursFormData(prev => ({ ...prev, hours: e.target.value }))}
-                placeholder="e.g., 24 hours, 9 AM - 6 PM, Closed"
+                placeholder="e.g., 24, 18, 15, 0"
               />
+              <p className="text-xs text-gray-500 mt-1">Enter number of hours (0-24). 0 means closed.</p>
             </div>
 
             <div className="flex justify-end gap-2 pt-4">
@@ -1064,7 +1211,16 @@ export function ContactManagement() {
                   <SelectContent>
                     {countries.map(country => (
                       <SelectItem key={country} value={country}>
-                        {country}
+                        <div className="flex items-center gap-2">
+                          <FlagIcon
+                            src={`https://flagcdn.com/w80/${countryCodes[country] || country.toLowerCase()}.png`}
+                            alt={`${country} flag`}
+                            countryCode={countryCodes[country] || country.toLowerCase()}
+                            size={16}
+                            className="flex-shrink-0"
+                          />
+                          {country}
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -1095,6 +1251,8 @@ export function ContactManagement() {
           </div>
         </DialogContent>
       </Dialog>
+        </>
+      ) : null}
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>

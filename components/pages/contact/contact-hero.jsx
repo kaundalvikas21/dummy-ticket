@@ -84,8 +84,8 @@ export function ContactHero({ settings }) {
               <h3 className="font-semibold mb-1 md:mb-2 text-sm md:text-base">
                 Visit Us
               </h3>
-              <p className="text-white/80 text-xs md:text-sm">
-                {address.length > 30 ? `${address.substring(0, 30)}...` : address}
+              <p className="text-white/80 text-xs md:text-sm leading-relaxed">
+                {address}
               </p>
             </motion.div>
           </div>

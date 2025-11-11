@@ -25,32 +25,18 @@ CREATE INDEX idx_contact_submissions_admin_id ON contact_submissions(admin_id);
 -- Create RLS (Row Level Security) policies
 ALTER TABLE contact_submissions ENABLE ROW LEVEL SECURITY;
 
--- Policy for public insert (contact form submissions)
+-- Policy for public insert (contact form submissions - no authentication required)
 CREATE POLICY "Public can insert contact submissions" ON contact_submissions
     FOR INSERT WITH CHECK (true);
 
--- Policy for authenticated users to read submissions
+-- Policy for authenticated users to read all submissions
 CREATE POLICY "Authenticated users can read contact submissions" ON contact_submissions
     FOR SELECT USING (auth.role() = 'authenticated');
 
--- Policy for admin users to manage submissions
-CREATE POLICY "Admin users can manage contact submissions" ON contact_submissions
-    FOR ALL USING (
-        EXISTS (
-            SELECT 1 FROM users
-            WHERE users.id = auth.uid()
-            AND users.role = 'admin'
-        )
-    );
+-- Policy for authenticated users to update submissions (status updates, notes)
+CREATE POLICY "Authenticated users can update contact submissions" ON contact_submissions
+    FOR UPDATE USING (auth.role() = 'authenticated');
 
--- Policy for submission owners to read their own submissions (if user accounts are implemented)
-CREATE POLICY "Users can read their own submissions" ON contact_submissions
-    FOR SELECT USING (
-        false -- Disabled for now, can be enabled when user accounts are linked to submissions
-    );
-
--- Policy for submission owners to update their own submissions (if user accounts are implemented)
-CREATE POLICY "Users can update their own submissions" ON contact_submissions
-    FOR UPDATE USING (
-        false -- Disabled for now, can be enabled when user accounts are linked to submissions
-    );
+-- Policy for authenticated users to delete submissions
+CREATE POLICY "Authenticated users can delete contact submissions" ON contact_submissions
+    FOR DELETE USING (auth.role() = 'authenticated');

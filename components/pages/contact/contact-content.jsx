@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useRef, useState } from "react"
+import React, { useRef, useState, useEffect } from "react"
 import { motion, useInView } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { PhoneIcon, Loader2 } from "lucide-react"
@@ -66,6 +66,33 @@ export default function ContactContent({ settings }) {
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Pre-fill form with user profile data if logged in
+  useEffect(() => {
+    const loadUserProfile = async () => {
+      try {
+        // Check if user is logged in by fetching profile
+        const response = await fetch('/api/auth/profile')
+
+        if (response.ok) {
+          const userData = await response.json()
+
+          // Only pre-fill if the fields are empty
+          setFormData(prev => ({
+            ...prev,
+            name: prev.name || userData.name || "",
+            email: prev.email || userData.email || "",
+            phone: prev.phone || userData.phone || ""
+          }))
+        }
+      } catch (error) {
+        // User not logged in or error fetching profile - continue with empty form
+        console.log('No user profile found or error loading profile:', error.message)
+      }
+    }
+
+    loadUserProfile()
+  }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -150,6 +177,8 @@ export default function ContactContent({ settings }) {
                   </div>
                   <input
                     type="text"
+                    name="name"
+                    autoComplete="name"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="Enter your full name"
@@ -170,6 +199,8 @@ export default function ContactContent({ settings }) {
                   </div>
                   <input
                     type="email"
+                    name="email"
+                    autoComplete="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     placeholder="your.email@example.com"
@@ -190,6 +221,8 @@ export default function ContactContent({ settings }) {
                   </div>
                   <input
                     type="tel"
+                    name="phone"
+                    autoComplete="tel"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     placeholder="+1 (555) 000-0000"

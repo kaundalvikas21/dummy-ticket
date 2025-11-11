@@ -14,17 +14,10 @@ export async function GET(request) {
 
     const offset = (page - 1) * limit
 
-    // Build query
+    // Build query - simplified without complex admin join
     let query = supabase
       .from('contact_submissions')
-      .select(`
-        *,
-        admin:admin_id (
-          id,
-          email,
-          name
-        )
-      `, { count: 'exact' })
+      .select('*', { count: 'exact' })
 
     // Apply filters
     if (status && status !== 'all') {
@@ -81,7 +74,7 @@ export async function GET(request) {
 
 export async function PUT(request) {
   try {
-    const { id, status, admin_notes, admin_id } = await request.json()
+    const { id, status, priority, admin_notes, admin_id } = await request.json()
 
     if (!id) {
       return NextResponse.json(
@@ -99,12 +92,22 @@ export async function PUT(request) {
       )
     }
 
+    // Validate priority
+    const validPriorities = ['low', 'normal', 'high', 'urgent']
+    if (priority && !validPriorities.includes(priority)) {
+      return NextResponse.json(
+        { error: 'Invalid priority value' },
+        { status: 400 }
+      )
+    }
+
     // Build update object
     const updateData = {
       updated_at: new Date().toISOString()
     }
 
     if (status !== undefined) updateData.status = status
+    if (priority !== undefined) updateData.priority = priority
     if (admin_notes !== undefined) updateData.admin_notes = admin_notes
     if (admin_id !== undefined) updateData.admin_id = admin_id
 
