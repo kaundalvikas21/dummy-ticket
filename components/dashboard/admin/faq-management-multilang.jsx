@@ -23,8 +23,10 @@ import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { LOCALES, DEFAULT_LOCALE } from "@/lib/locales"
 import { FlagIcon } from "@/components/ui/flag-icon"
+import { useToast } from "@/hooks/use-toast"
 
 export function FAQManagementMultiLang() {
+  const { toast } = useToast()
   const [faqs, setFaqs] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
@@ -35,6 +37,7 @@ export function FAQManagementMultiLang() {
   const [selectedFaqIds, setSelectedFaqIds] = useState([])
   const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false)
   const [isBulkDeleting, setIsBulkDeleting] = useState(false)
+  const [deletingFaqIds, setDeletingFaqIds] = useState(new Set())
   const [activeTab, setActiveTab] = useState(DEFAULT_LOCALE)
 
   // Form data for all locales
@@ -105,7 +108,11 @@ export function FAQManagementMultiLang() {
     // Validate that at least English translation is filled
     const englishTranslation = formData.translations[DEFAULT_LOCALE]
     if (!englishTranslation?.question || !englishTranslation?.answer) {
-      alert('English translation is required')
+      toast({
+        title: "Validation Error",
+        description: "English translation is required",
+        variant: "destructive"
+      })
       return
     }
 
@@ -202,21 +209,39 @@ export function FAQManagementMultiLang() {
     if (!selectedFaq) return
 
     try {
+      console.log(`Deleting FAQ: ${selectedFaq.id} - ${selectedFaq.question}`)
+
       const response = await fetch(`/api/faqs/${selectedFaq.id}`, {
         method: 'DELETE',
       })
 
       const result = await response.json()
+      console.log('Delete response:', result)
 
       if (response.ok) {
         await fetchFaqs()
         setShowDeleteDialog(false)
         setSelectedFaq(null)
+        toast({
+          title: "Success",
+          description: "FAQ deleted successfully"
+        })
       } else {
-        console.error('Failed to delete FAQ:', result.error)
+        const errorMessage = result.error || result.details || 'Unknown error'
+        console.error('Failed to delete FAQ:', errorMessage)
+        toast({
+          title: "Delete Failed",
+          description: `Failed to delete FAQ: ${errorMessage}`,
+          variant: "destructive"
+        })
       }
     } catch (error) {
       console.error('Error deleting FAQ:', error)
+      toast({
+        title: "Network Error",
+        description: "Network error occurred while deleting FAQ. Please try again.",
+        variant: "destructive"
+      })
     }
   }
 
@@ -289,7 +314,11 @@ export function FAQManagementMultiLang() {
       await fetchFaqs()
     } catch (error) {
       console.error('Error moving FAQ:', error)
-      alert('Failed to move FAQ. Please try again.')
+      toast({
+        title: "Move Failed",
+        description: "Failed to move FAQ. Please try again.",
+        variant: "destructive"
+      })
     }
   }
 
@@ -322,33 +351,99 @@ export function FAQManagementMultiLang() {
   // Bulk delete handler
   const handleBulkDelete = async () => {
     setIsBulkDeleting(true)
+    const totalToDelete = selectedFaqIds.length
+    let deletedCount = 0
+    let failedDeletions = []
+
     try {
-      const deletePromises = selectedFaqIds.map(async (faqId) => {
-        const response = await fetch(`/api/faqs/${faqId}`, {
-          method: 'DELETE',
-        })
-        return { faqId, success: response.ok }
-      })
+      console.log(`Starting bulk delete of ${totalToDelete} FAQs`)
 
-      const results = await Promise.all(deletePromises)
+      // Process deletions one by one for better error tracking
+      for (let i = 0; i < selectedFaqIds.length; i++) {
+        const faqId = selectedFaqIds[i]
+        const faq = faqs.find(f => f.id === faqId)
+        const translation = faq?.faq_translations?.find(t => t.locale === DEFAULT_LOCALE)
 
-      const successful = results.filter(r => r.success).length
-      const failed = results.filter(r => !r.success).length
+        console.log(`Deleting FAQ ${i + 1}/${totalToDelete}: ${translation?.question || faq?.question}`)
 
+        // Track which FAQ is currently being deleted
+        setDeletingFaqIds(prev => new Set(prev).add(faqId))
+
+        try {
+          const response = await fetch(`/api/faqs/${faqId}`, {
+            method: 'DELETE',
+          })
+
+          if (response.ok) {
+            deletedCount++
+            console.log(`Successfully deleted FAQ: ${faqId}`)
+          } else {
+            const errorData = await response.json().catch(() => ({}))
+            failedDeletions.push({
+              faqId,
+              question: translation?.question || faq?.question || 'Unknown FAQ',
+              error: errorData.error || errorData.details || 'Unknown error'
+            })
+            console.error(`Failed to delete FAQ ${faqId}:`, errorData)
+          }
+        } catch (error) {
+          failedDeletions.push({
+            faqId,
+            question: translation?.question || faq?.question || 'Unknown FAQ',
+            error: error.message || 'Network error'
+          })
+          console.error(`Network error deleting FAQ ${faqId}:`, error)
+        } finally {
+          // Remove from currently deleting set
+          setDeletingFaqIds(prev => {
+            const newSet = new Set(prev)
+            newSet.delete(faqId)
+            return newSet
+          })
+        }
+      }
+
+      // Refresh the FAQ list
       await fetchFaqs()
       clearSelection()
       setShowBulkDeleteDialog(false)
 
-      if (failed > 0) {
-        alert(`Successfully deleted ${successful} FAQ${successful !== 1 ? 's' : ''}. ${failed} FAQ${failed !== 1 ? 's' : ''} failed to delete.`)
+      // Show detailed results
+      if (failedDeletions.length === 0) {
+        // Complete success
+        toast({
+          title: "Bulk Delete Successful",
+          description: `Successfully deleted ${deletedCount} FAQ${deletedCount !== 1 ? 's' : ''}.`
+        })
+      } else if (deletedCount === 0) {
+        // Complete failure
+        const failureDetails = failedDeletions.map(f => `• ${f.question}: ${f.error}`).join('\n')
+        toast({
+          title: "Bulk Delete Failed",
+          description: `Failed to delete any FAQs. Check console for details.`,
+          variant: "destructive"
+        })
+        console.error('Bulk delete failures:', failureDetails)
       } else {
-        alert(`Successfully deleted ${successful} FAQ${successful !== 1 ? 's' : ''}.`)
+        // Partial success
+        toast({
+          title: "Partial Success",
+          description: `Successfully deleted ${deletedCount} FAQ${deletedCount !== 1 ? 's' : ''}, but ${failedDeletions.length} failed.`,
+          variant: "default"
+        })
+        console.error('Partial bulk delete failures:', failedDeletions.map(f => `• ${f.question}: ${f.error}`).join('\n'))
       }
+
     } catch (error) {
-      console.error('Error in bulk delete:', error)
-      alert('Failed to delete FAQs. Please try again.')
+      console.error('Critical error in bulk delete:', error)
+      toast({
+        title: "Critical Error",
+        description: "Critical error occurred during bulk delete. Please refresh the page and try again.",
+        variant: "destructive"
+      })
     } finally {
       setIsBulkDeleting(false)
+      setDeletingFaqIds(new Set())
     }
   }
 
@@ -505,13 +600,24 @@ export function FAQManagementMultiLang() {
                           type="checkbox"
                           checked={selectedFaqIds.includes(faq.id)}
                           onChange={() => handleSelectFaq(faq.id)}
-                          className="mt-1 lg:mt-0 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          disabled={isBulkDeleting || deletingFaqIds.has(faq.id)}
+                          className={`mt-1 lg:mt-0 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 ${
+                            (isBulkDeleting || deletingFaqIds.has(faq.id)) ? 'opacity-50 cursor-not-allowed' : ''
+                          }`}
                         />
                       </div>
 
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2 flex-wrap">
-                          <h3 className="font-semibold text-gray-900 truncate">
+                          {deletingFaqIds.has(faq.id) && (
+                            <div className="flex items-center gap-1 text-red-600">
+                              <div className="w-3 h-3 border border-red-600 border-t-transparent rounded-full animate-spin"></div>
+                              <span className="text-xs font-medium">Deleting...</span>
+                            </div>
+                          )}
+                          <h3 className={`font-semibold truncate ${
+                            deletingFaqIds.has(faq.id) ? 'text-gray-400 line-through' : 'text-gray-900'
+                          }`}>
                             {translation?.question || faq.question}
                           </h3>
                           <Badge
@@ -564,7 +670,7 @@ export function FAQManagementMultiLang() {
                             variant="outline"
                             size="sm"
                             onClick={() => moveFaq(faq, 'up')}
-                            disabled={index === 0}
+                            disabled={index === 0 || isBulkDeleting || deletingFaqIds.has(faq.id)}
                           >
                             <MoveUp className="w-3 h-3" />
                           </Button>
@@ -572,7 +678,7 @@ export function FAQManagementMultiLang() {
                             variant="outline"
                             size="sm"
                             onClick={() => moveFaq(faq, 'down')}
-                            disabled={index === filteredFaqs.length - 1}
+                            disabled={index === filteredFaqs.length - 1 || isBulkDeleting || deletingFaqIds.has(faq.id)}
                           >
                             <MoveDown className="w-3 h-3" />
                           </Button>
@@ -583,6 +689,7 @@ export function FAQManagementMultiLang() {
                           variant="outline"
                           size="sm"
                           onClick={() => toggleStatus(faq)}
+                          disabled={isBulkDeleting || deletingFaqIds.has(faq.id)}
                           className={faq.status === 'active' ? 'text-green-600' : 'text-gray-600'}
                         >
                           {faq.status === 'active' ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
@@ -593,6 +700,7 @@ export function FAQManagementMultiLang() {
                           variant="outline"
                           size="sm"
                           onClick={() => openEditDialog(faq)}
+                          disabled={isBulkDeleting || deletingFaqIds.has(faq.id)}
                         >
                           <Edit className="w-4 h-4" />
                         </Button>
@@ -605,7 +713,8 @@ export function FAQManagementMultiLang() {
                             setSelectedFaq(faq)
                             setShowDeleteDialog(true)
                           }}
-                          className="text-red-600 hover:text-red-700"
+                          disabled={isBulkDeleting || deletingFaqIds.has(faq.id)}
+                          className="text-red-600 hover:text-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -788,6 +897,70 @@ export function FAQManagementMultiLang() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
               Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Bulk Delete Confirmation Dialog */}
+      <AlertDialog open={showBulkDeleteDialog} onOpenChange={setShowBulkDeleteDialog}>
+        <AlertDialogContent className="max-w-lg">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Trash2 className="w-5 h-5 text-red-600" />
+              Delete Multiple FAQs
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete {selectedFaqIds.length} selected FAQ{selectedFaqIds.length !== 1 ? 's' : ''}?
+              This action cannot be undone and will remove all translations.
+            </AlertDialogDescription>
+
+            {/* List of FAQs to be deleted */}
+            <div className="max-h-40 overflow-y-auto bg-gray-50 rounded-md p-3 space-y-2 my-4">
+              {selectedFaqIds.map(faqId => {
+                const faq = faqs.find(f => f.id === faqId)
+                const translation = faq?.faq_translations?.find(t => t.locale === DEFAULT_LOCALE)
+                return (
+                  <div key={faqId} className="text-sm">
+                    <strong className="text-gray-900">
+                      {translation?.question || faq?.question || 'Unknown FAQ'}
+                    </strong>
+                    <div className="text-gray-600 text-xs">
+                      Status: {faq?.status || 'unknown'} •
+                      {faq?.faq_translations?.length || 0} translation{faq?.faq_translations?.length !== 1 ? 's' : ''}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-md">
+              <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
+              <span className="text-sm text-red-800">
+                This will permanently delete all selected FAQs and their translations.
+              </span>
+            </div>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isBulkDeleting}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleBulkDelete}
+              className="bg-red-600 hover:bg-red-700"
+              disabled={isBulkDeleting}
+            >
+              {isBulkDeleting ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete {selectedFaqIds.length} FAQ{selectedFaqIds.length !== 1 ? 's' : ''}
+                </>
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

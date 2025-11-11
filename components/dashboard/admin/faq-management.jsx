@@ -20,8 +20,10 @@ import {
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
+import { useToast } from "@/hooks/use-toast"
 
 export function FAQManagement() {
+  const { toast } = useToast()
   const [faqs, setFaqs] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
@@ -192,8 +194,12 @@ export function FAQManagement() {
       await fetchFaqs()
     } catch (error) {
       console.error('Error moving FAQ:', error)
-      // Optional: Show error message to user
-      alert('Failed to move FAQ. Please try again.')
+      // Show error message to user
+      toast({
+        title: "Move Failed",
+        description: "Failed to move FAQ. Please try again.",
+        variant: "destructive"
+      })
     }
   }
 
