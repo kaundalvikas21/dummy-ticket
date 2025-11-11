@@ -43,6 +43,9 @@ export function FAQPageManagement() {
   const [activeLocale, setActiveLocale] = useState('en')
   const [sectionTranslations, setSectionTranslations] = useState({})
   const [itemTranslations, setItemTranslations] = useState({})
+  const [sectionTranslationData, setSectionTranslationData] = useState({})
+  const [itemTranslationData, setItemTranslationData] = useState({})
+  const [isBulkSaving, setIsBulkSaving] = useState(false)
   const [sectionFormData, setSectionFormData] = useState({
     title: "",
     icon: "",
@@ -308,12 +311,14 @@ export function FAQPageManagement() {
   const openSectionTranslationDialog = async (section) => {
     setSelectedSection(section)
     setShowSectionTranslationDialog(true)
+    setSectionTranslationData({}) // Clear previous data
     await fetchSectionTranslations(section.id)
   }
 
   const openItemTranslationDialog = async (item) => {
     setSelectedItem(item)
     setShowItemTranslationDialog(true)
+    setItemTranslationData({}) // Clear previous data
     await fetchItemTranslations(item.id)
   }
 
@@ -374,74 +379,158 @@ export function FAQPageManagement() {
     }))
   }
 
-  // Copy from default (English) functionality
-  const handleCopySectionFromDefault = (locale) => {
-    if (selectedSection && locale !== 'en') {
-      // Use the English content as default and save it directly
-      const englishTitle = selectedSection.title
+  // Handle translation data changes for bulk saving
+  const handleSectionDataChange = (data) => {
+    setSectionTranslationData(prev => ({
+      ...prev,
+      [data.locale]: {
+        locale: data.locale,
+        title: data.title,
+        hasContent: data.hasContent
+      }
+    }))
+  }
 
-      fetch(`/api/faq-page/sections/${selectedSection.id}/translations`, {
+  const handleItemDataChange = (data) => {
+    setItemTranslationData(prev => ({
+      ...prev,
+      [data.locale]: {
+        locale: data.locale,
+        question: data.question,
+        answer: data.answer,
+        hasContent: data.hasContent
+      }
+    }))
+  }
+
+  // Bulk save functions
+  const bulkSaveSectionTranslations = async () => {
+    if (!selectedSection || Object.keys(sectionTranslationData).length === 0) return
+
+    setIsBulkSaving(true)
+    try {
+      const translationsToSave = Object.values(sectionTranslationData).filter(data => data.hasContent)
+
+      if (translationsToSave.length === 0) {
+        toast({
+          title: "No translations to save",
+          description: "Please enter some content before saving.",
+          variant: "destructive"
+        })
+        return
+      }
+
+      const response = await fetch(`/api/faq-page/sections/${selectedSection.id}/translations/batch`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          locale,
-          title: englishTitle
+          translations: translationsToSave
         }),
-      }).then(response => response.json())
-        .then(result => {
-          if (result.action === 'created' || result.action === 'updated') {
-            // Update local state
-            handleSectionTranslationChange({
-              locale,
-              title: englishTitle
-            })
-            // Refresh translations to update the form
-            fetchSectionTranslations(selectedSection.id)
-          }
+      })
+
+      const result = await response.json()
+
+      if (response.ok) {
+        // Show success toast
+        toast({
+          title: "Translations saved successfully!",
+          description: result.message || `Saved ${result.summary?.success || 0} translations for this section.`,
         })
-        .catch(error => {
-          console.error('Error copying translation:', error)
+
+        // Close the modal
+        setShowSectionTranslationDialog(false)
+        setSelectedSection(null)
+        setSectionTranslations({})
+        setSectionTranslationData({})
+        setActiveLocale('en')
+
+        // Refresh sections data to show updated translations
+        await fetchSections()
+      } else {
+        toast({
+          title: "Failed to save translations",
+          description: result.error || "An error occurred while saving translations.",
+          variant: "destructive"
         })
+      }
+    } catch (error) {
+      console.error('Error in bulk save:', error)
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred while saving translations.",
+        variant: "destructive"
+      })
+    } finally {
+      setIsBulkSaving(false)
     }
   }
 
-  const handleCopyItemFromDefault = (locale) => {
-    if (selectedItem && locale !== 'en') {
-      // Use the English content as default and save it directly
-      const englishQuestion = selectedItem.question
-      const englishAnswer = selectedItem.answer
+  const bulkSaveItemTranslations = async () => {
+    if (!selectedItem || Object.keys(itemTranslationData).length === 0) return
 
-      fetch(`/api/faq-page/items/${selectedItem.id}/translations`, {
+    setIsBulkSaving(true)
+    try {
+      const translationsToSave = Object.values(itemTranslationData).filter(data => data.hasContent)
+
+      if (translationsToSave.length === 0) {
+        toast({
+          title: "No translations to save",
+          description: "Please enter some content before saving.",
+          variant: "destructive"
+        })
+        return
+      }
+
+      const response = await fetch(`/api/faq-page/items/${selectedItem.id}/translations/batch`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          locale,
-          question: englishQuestion,
-          answer: englishAnswer
+          translations: translationsToSave
         }),
-      }).then(response => response.json())
-        .then(result => {
-          if (result.action === 'created' || result.action === 'updated') {
-            // Update local state
-            handleItemTranslationChange({
-              locale,
-              question: englishQuestion,
-              answer: englishAnswer
-            })
-            // Refresh translations to update the form
-            fetchItemTranslations(selectedItem.id)
-          }
+      })
+
+      const result = await response.json()
+
+      if (response.ok) {
+        // Show success toast
+        toast({
+          title: "Translations saved successfully!",
+          description: result.message || `Saved ${result.summary?.success || 0} translations for this FAQ item.`,
         })
-        .catch(error => {
-          console.error('Error copying translation:', error)
+
+        // Close the modal
+        setShowItemTranslationDialog(false)
+        setSelectedItem(null)
+        setItemTranslations({})
+        setItemTranslationData({})
+        setActiveLocale('en')
+
+        // Refresh sections data to show updated translations
+        await fetchSections()
+      } else {
+        toast({
+          title: "Failed to save translations",
+          description: result.error || "An error occurred while saving translations.",
+          variant: "destructive"
         })
+      }
+    } catch (error) {
+      console.error('Error in bulk save:', error)
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred while saving translations.",
+        variant: "destructive"
+      })
+    } finally {
+      setIsBulkSaving(false)
     }
   }
 
+  
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -812,14 +901,24 @@ export function FAQPageManagement() {
         if (!open) {
           setSelectedSection(null)
           setSectionTranslations({})
+          setSectionTranslationData({})
           setActiveLocale('en')
         }
       }}>
         <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>
-              Translate Section: {selectedSection?.title}
-            </DialogTitle>
+            <div className="flex items-center justify-between">
+              <DialogTitle>
+                Translate Section: {selectedSection?.title}
+              </DialogTitle>
+              <Button
+                onClick={bulkSaveSectionTranslations}
+                disabled={isBulkSaving || Object.keys(sectionTranslationData).length === 0}
+                className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white"
+              >
+                {isBulkSaving ? 'Saving...' : 'Save All Translations'}
+              </Button>
+            </div>
           </DialogHeader>
 
           <TranslationTabs
@@ -834,8 +933,8 @@ export function FAQPageManagement() {
                   localeName={localeName}
                   isDefault={isDefault}
                   initialTitle={sectionTranslations[locale]?.title || (isDefault ? selectedSection?.title : '')}
-                  onTranslationChange={handleSectionTranslationChange}
-                  onCopyFromDefault={handleCopySectionFromDefault}
+                  currentTranslationData={sectionTranslationData}
+                  onDataChange={handleSectionDataChange}
                 />
               </div>
             )}
@@ -849,14 +948,24 @@ export function FAQPageManagement() {
         if (!open) {
           setSelectedItem(null)
           setItemTranslations({})
+          setItemTranslationData({})
           setActiveLocale('en')
         }
       }}>
         <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>
-              Translate FAQ Item: {selectedItem?.question}
-            </DialogTitle>
+            <div className="flex items-center justify-between">
+              <DialogTitle>
+                Translate FAQ Item: {selectedItem?.question}
+              </DialogTitle>
+              <Button
+                onClick={bulkSaveItemTranslations}
+                disabled={isBulkSaving || Object.keys(itemTranslationData).length === 0}
+                className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white"
+              >
+                {isBulkSaving ? 'Saving...' : 'Save All Translations'}
+              </Button>
+            </div>
           </DialogHeader>
 
           <TranslationTabs
@@ -872,8 +981,8 @@ export function FAQPageManagement() {
                   isDefault={isDefault}
                   initialQuestion={itemTranslations[locale]?.question || (isDefault ? selectedItem?.question : '')}
                   initialAnswer={itemTranslations[locale]?.answer || (isDefault ? selectedItem?.answer : '')}
-                  onTranslationChange={handleItemTranslationChange}
-                  onCopyFromDefault={handleCopyItemFromDefault}
+                  currentTranslationData={itemTranslationData}
+                  onDataChange={handleItemDataChange}
                 />
               </div>
             )}
