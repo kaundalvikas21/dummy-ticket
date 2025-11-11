@@ -3,7 +3,14 @@
 import { motion } from "framer-motion";
 import { Phone, Mail, MapPin } from "lucide-react";
 
-export function ContactHero() {
+export function ContactHero({ settings }) {
+  // Use dynamic settings or fall back to defaults
+  const pageTitle = settings.page_title?.value || "Get in Touch";
+  const pageDescription = settings.page_description?.value || "We're here to help you 24/7. Reach out to us anytime, anywhere.";
+  const phone = settings.phone?.value || "+1-800-123-4567";
+  const email = settings.email?.value || "support@example.com";
+  const address = settings.address?.value || "123 Business St, Suite 100, New York, NY 10001";
+
   return (
     <section className="relative pt-24 pb-12 md:pt-32 md:pb-20 overflow-hidden">
       {/* Background Image with Overlay */}
@@ -23,10 +30,10 @@ export function ContactHero() {
           className="max-w-4xl mx-auto text-center text-white"
         >
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6">
-            Get in Touch
+            {pageTitle}
           </h1>
           <p className="text-base md:text-xl lg:text-2xl mb-8 md:mb-12 text-white/90">
-            We're here to help you 24/7. Reach out to us anytime, anywhere.
+            {pageDescription}
           </p>
 
           {/* Quick Contact Info */}
@@ -41,9 +48,12 @@ export function ContactHero() {
               <h3 className="font-semibold mb-1 md:mb-2 text-sm md:text-base">
                 Call Us
               </h3>
-              <p className="text-white/80 text-xs md:text-sm">
-                24/7 Support Available
-              </p>
+              <a
+                href={`tel:${phone.replace(/[^+\d]/g, "")}`}
+                className="text-white/80 text-xs md:text-sm hover:text-white hover:underline transition-colors"
+              >
+                {phone}
+              </a>
             </motion.div>
 
             <motion.div
@@ -56,9 +66,12 @@ export function ContactHero() {
               <h3 className="font-semibold mb-1 md:mb-2 text-sm md:text-base">
                 Email Us
               </h3>
-              <p className="text-white/80 text-xs md:text-sm">
-                Quick Response Time
-              </p>
+              <a
+                href={`mailto:${email}`}
+                className="text-white/80 text-xs md:text-sm hover:text-white hover:underline transition-colors"
+              >
+                {email}
+              </a>
             </motion.div>
 
             <motion.div
@@ -72,7 +85,7 @@ export function ContactHero() {
                 Visit Us
               </h3>
               <p className="text-white/80 text-xs md:text-sm">
-                Global Presence
+                {address.length > 30 ? `${address.substring(0, 30)}...` : address}
               </p>
             </motion.div>
           </div>

@@ -3,7 +3,8 @@
 import React, { useRef, useState } from "react"
 import { motion, useInView } from "framer-motion"
 import { Button } from "@/components/ui/button"
-import { PhoneIcon } from "lucide-react"
+import { PhoneIcon, Loader2 } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
 
 // --- Custom SVG Icons ---
 const UserIcon = () => (
@@ -51,7 +52,8 @@ const MessageIcon = () => (
 )
 
 // --- Main Component ---
-export default function ContactContent() {
+export default function ContactContent({ settings }) {
+  const { toast } = useToast()
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
 
@@ -59,12 +61,58 @@ export default function ContactContent() {
     name: "",
     email: "",
     phone: "",
+    subject: "General Inquiry", // Default subject
     message: "",
   })
 
-  const handleSubmit = (e) => {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log("Form submitted:", formData)
+    setIsSubmitting(true)
+
+    try {
+      const response = await fetch('/api/contact/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
+
+      const result = await response.json()
+
+      if (response.ok) {
+        toast({
+          title: "Success!",
+          description: "Your message has been sent successfully. We'll get back to you soon!",
+        })
+
+        // Reset form
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          subject: "General Inquiry",
+          message: "",
+        })
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to send your message. Please try again.",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      console.error('Error submitting contact form:', error)
+      toast({
+        title: "Error",
+        description: "Failed to send your message. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -174,9 +222,17 @@ export default function ContactContent() {
               {/* Submit Button */}
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white py-3 md:py-4 rounded-xl text-sm md:text-base font-semibold hover:shadow-lg hover:shadow-[#0066FF]/20 transition-all duration-300 hover:scale-[1.02] cursor-pointer"
+                disabled={isSubmitting}
+                className="w-full bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white py-3 md:py-4 rounded-xl text-sm md:text-base font-semibold hover:shadow-lg hover:shadow-[#0066FF]/20 transition-all duration-300 hover:scale-[1.02] cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100"
               >
-                Send Message
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  "Send Message"
+                )}
               </Button>
             </form>
           </div>

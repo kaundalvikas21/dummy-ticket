@@ -20,6 +20,8 @@ import {
   FileText,
   Code,
   HelpCircle,
+  Phone,
+  Inbox,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -42,7 +44,13 @@ const menuItems = [
   },
   { id: "pages", label: "Pages", icon: FileText, href: "/admin/pages", hasSubmenu: true,
     submenu: [
+      { id: "contact", label: "Contact Us", icon: Phone, href: "/admin/pages/contact" },
       { id: "faq", label: "FAQ", icon: HelpCircle, href: "/admin/pages/faq" }
+    ]
+  },
+  { id: "logs", label: "Logs", icon: Inbox, href: "/admin/logs", hasSubmenu: true,
+    submenu: [
+      { id: "contact-submissions", label: "Contact Submissions", icon: MessageSquare, href: "/admin/logs/contact-submissions" }
     ]
   },
   { id: "settings", label: "Settings", icon: Settings, href: "/admin/settings" },
