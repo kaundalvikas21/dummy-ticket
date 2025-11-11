@@ -37,11 +37,6 @@ const menuItems = [
   { id: "vendors", label: "Vendors", icon: Building2, href: "/admin/vendors" },
   { id: "support", label: "Support", icon: MessageSquare, href: "/admin/support" },
   { id: "analytics", label: "Analytics", icon: BarChart3, href: "/admin/analytics" },
-  { id: "components", label: "Components", icon: Code, href: "/admin/components", hasSubmenu: true,
-    submenu: [
-      { id: "faq", label: "FAQ", icon: HelpCircle, href: "/admin/components/faq" }
-    ]
-  },
   { id: "pages", label: "Pages", icon: FileText, href: "/admin/pages", hasSubmenu: true,
     submenu: [
       { id: "contact", label: "Contact Us", icon: Phone, href: "/admin/pages/contact" },
@@ -51,6 +46,11 @@ const menuItems = [
   { id: "logs", label: "Logs", icon: Inbox, href: "/admin/logs", hasSubmenu: true,
     submenu: [
       { id: "contact-submissions", label: "Contact Submissions", icon: MessageSquare, href: "/admin/logs/contact-submissions" }
+    ]
+  },
+  { id: "components", label: "Components", icon: Code, href: "/admin/components", hasSubmenu: true,
+    submenu: [
+      { id: "faq", label: "FAQ", icon: HelpCircle, href: "/admin/components/faq" }
     ]
   },
   { id: "settings", label: "Settings", icon: Settings, href: "/admin/settings" },

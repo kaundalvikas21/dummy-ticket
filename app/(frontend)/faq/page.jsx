@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import HeroSection from "@/components/pages/faq/HeroSection"
 import FaqCategory from "@/components/pages/faq/FaqCategory"
 import StillHaveQuestions from "@/components/pages/faq/StillHaveQuestions"
-import { HelpCircle, Clock, CreditCard, FileText, Globe, Loader2, Phone } from "lucide-react"
+import { HelpCircle, Clock, MessageSquare, CreditCard, FileText, Globe, Loader2, Phone, Settings, Info, Users, ShoppingCart, Shield, BookOpen, CheckCircle, AlertCircle, Zap, Package, Truck } from "lucide-react"
 import { useLocale } from "@/contexts/locale-context"
 
 export default function FAQPage() {
@@ -145,21 +145,22 @@ function getIconByName(iconName) {
   const icons = {
     HelpCircle: HelpCircle,
     Clock: Clock,
+    MessageSquare,
     CreditCard: CreditCard,
     FileText: FileText,
     Globe: Globe,
     Phone: Phone,
-    Info: HelpCircle, // Fallback
-    Settings: HelpCircle, // Fallback
-    Users: HelpCircle, // Fallback
-    ShoppingCart: HelpCircle, // Fallback
-    Shield: HelpCircle, // Fallback
-    BookOpen: HelpCircle, // Fallback
-    CheckCircle: HelpCircle, // Fallback
-    AlertCircle: HelpCircle, // Fallback
-    Zap: HelpCircle, // Fallback
-    Package: HelpCircle, // Fallback
-    Truck: HelpCircle, // Fallback
+    Info: Info, 
+    Settings: Settings, 
+    Users: Users, 
+    ShoppingCart: ShoppingCart,
+    Shield: Shield,
+    BookOpen: BookOpen,
+    CheckCircle: CheckCircle,
+    AlertCircle: AlertCircle,
+    Zap: Zap,
+    Package: Package, 
+    Truck: Truck, 
   }
 
   return icons[iconName] || icons.HelpCircle
