@@ -5,6 +5,7 @@ import { motion, useInView } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { PhoneIcon, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { useAuth } from "@/contexts/auth-context"
 
 // --- Custom SVG Icons ---
 const UserIcon = () => (
@@ -54,6 +55,7 @@ const MessageIcon = () => (
 // --- Main Component ---
 export default function ContactContent({ settings }) {
   const { toast } = useToast()
+  const { user } = useAuth()
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
 
@@ -70,9 +72,14 @@ export default function ContactContent({ settings }) {
   // Pre-fill form with user profile data if logged in
   useEffect(() => {
     const loadUserProfile = async () => {
+      if (!user?.id) {
+        // User not logged in, do not attempt to fetch profile
+        return
+      }
+
       try {
-        // Check if user is logged in by fetching profile
-        const response = await fetch('/api/auth/profile')
+        // Fetch user profile using the user ID
+        const response = await fetch(`/api/auth/profile?userId=${user.id}`)
 
         if (response.ok) {
           const userData = await response.json()
@@ -80,19 +87,19 @@ export default function ContactContent({ settings }) {
           // Only pre-fill if the fields are empty
           setFormData(prev => ({
             ...prev,
-            name: prev.name || userData.name || "",
-            email: prev.email || userData.email || "",
-            phone: prev.phone || userData.phone || ""
+            name: prev.name || userData.profile.first_name || "",
+            email: prev.email || userData.profile.email || "",
+            phone: prev.phone || userData.profile.phone_number || ""
           }))
         }
       } catch (error) {
-        // User not logged in or error fetching profile - continue with empty form
-        console.log('No user profile found or error loading profile:', error.message)
+        // Error fetching profile - continue with empty form
+        console.log('Error loading user profile:', error.message)
       }
     }
 
     loadUserProfile()
-  }, [])
+  }, [user])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
