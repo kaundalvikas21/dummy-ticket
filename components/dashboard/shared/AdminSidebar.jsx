@@ -21,6 +21,7 @@ import {
   Code,
   HelpCircle,
   Phone,
+  Info,
   Inbox,
 } from "lucide-react"
 import Link from "next/link"
@@ -40,7 +41,8 @@ const menuItems = [
   { id: "pages", label: "Pages", icon: FileText, href: "/admin/pages", hasSubmenu: true,
     submenu: [
       { id: "contact", label: "Contact Us", icon: Phone, href: "/admin/pages/contact" },
-      { id: "faq", label: "FAQ", icon: HelpCircle, href: "/admin/pages/faq" }
+      { id: "faq", label: "FAQ", icon: HelpCircle, href: "/admin/pages/faq" },
+      { id: "about", label: "About Us", icon: Info, href: "/admin/pages/about" }
     ]
   },
   { id: "logs", label: "Logs", icon: Inbox, href: "/admin/logs", hasSubmenu: true,
