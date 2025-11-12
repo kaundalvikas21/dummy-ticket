@@ -1,7 +1,33 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search, Plus, Edit, Trash2, Eye, EyeOff, Info, GripVertical } from "lucide-react"
+import {
+  Search, Plus, Edit, Trash2, Eye, EyeOff, Info, GripVertical, Award, Globe, Users,
+  CheckCircle2, TrendingUp, Star, Target, Zap, Heart, Shield, Rocket, Clock, MapPin, Plane, Briefcase, Loader2
+} from "lucide-react"
+
+// Icon mapping object for dynamic rendering
+const iconMap = {
+  Users,
+  Globe,
+  Award,
+  CheckCircle2,
+  TrendingUp,
+  Star,
+  Target,
+  Zap,
+  Heart,
+  Shield,
+  Rocket,
+  Clock,
+  MapPin,
+  Plane,
+  Briefcase,
+  Info // fallback icon
+}
+
+// Get available icon names for the select dropdown
+const availableIconNames = Object.keys(iconMap).filter(icon => icon !== 'Info')
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -22,25 +48,6 @@ import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
 
-// Common Lucide icons for selection
-const availableIcons = [
-  { name: "Users", icon: "Users" },
-  { name: "Globe", icon: "Globe" },
-  { name: "Award", icon: "Award" },
-  { name: "CheckCircle2", icon: "CheckCircle2" },
-  { name: "TrendingUp", icon: "TrendingUp" },
-  { name: "Star", icon: "Star" },
-  { name: "Target", icon: "Target" },
-  { name: "Zap", icon: "Zap" },
-  { name: "Heart", icon: "Heart" },
-  { name: "Shield", icon: "Shield" },
-  { name: "Rocket", icon: "Rocket" },
-  { name: "Clock", icon: "Clock" },
-  { name: "MapPin", icon: "MapPin" },
-  { name: "Plane", icon: "Plane" },
-  { name: "Briefcase", icon: "Briefcase" }
-]
-
 export function AboutStatsManagement() {
   const { toast } = useToast()
   const [stats, setStats] = useState([])
@@ -50,6 +57,7 @@ export function AboutStatsManagement() {
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [selectedStat, setSelectedStat] = useState(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
     icon: "",
     value: "",
@@ -90,10 +98,17 @@ export function AboutStatsManagement() {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setIsSubmitting(true)
 
     try {
       const url = selectedStat ? `/api/about/stats/${selectedStat.id}` : '/api/about/stats'
       const method = selectedStat ? 'PUT' : 'POST'
+
+      // Show saving toast
+      const savingToast = toast({
+        title: "Saving...",
+        description: `Please wait while we ${selectedStat ? 'update' : 'create'} the stat.`,
+      })
 
       const response = await fetch(url, {
         method,
@@ -105,6 +120,9 @@ export function AboutStatsManagement() {
 
       const result = await response.json()
 
+      // Dismiss saving toast
+      savingToast.dismiss()
+
       if (response.ok) {
         await fetchStats()
         setShowAddDialog(false)
@@ -112,24 +130,26 @@ export function AboutStatsManagement() {
         setFormData({ icon: "", value: "", label: "", status: "active", sort_order: 1 })
         setSelectedStat(null)
         toast({
-          title: "Success",
+          title: "✅ Success!",
           description: `Stat ${selectedStat ? 'updated' : 'created'} successfully`,
         })
       } else {
         console.error('Failed to save stat:', result.error)
         toast({
-          title: "Error",
-          description: "Failed to save stat. Please try again.",
+          title: "❌ Error",
+          description: result.error || "Failed to save stat. Please try again.",
           variant: "destructive"
         })
       }
     } catch (error) {
       console.error('Error saving stat:', error)
       toast({
-        title: "Error",
-        description: "An error occurred. Please try again.",
+        title: "❌ Error",
+        description: "Network error occurred. Please check your connection and try again.",
         variant: "destructive"
       })
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -302,7 +322,10 @@ export function AboutStatsManagement() {
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <div className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-[#0066FF] to-[#00D4AA]">
-                          <Info className="w-4 h-4 text-white" />
+                          {(() => {
+                            const IconComponent = iconMap[stat.icon] || iconMap.Info
+                            return <IconComponent className="w-4 h-4 text-white" />
+                          })()}
                         </div>
                         <h3 className="font-semibold text-gray-900">{stat.value}</h3>
                         <Badge
@@ -391,9 +414,9 @@ export function AboutStatsManagement() {
                   <SelectValue placeholder="Select an icon" />
                 </SelectTrigger>
                 <SelectContent>
-                  {availableIcons.map((iconOption) => (
-                    <SelectItem key={iconOption.name} value={iconOption.icon}>
-                      {iconOption.name}
+                  {availableIconNames.map((iconName) => (
+                    <SelectItem key={iconName} value={iconName}>
+                      {iconName}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -447,11 +470,25 @@ export function AboutStatsManagement() {
             </div>
 
             <div className="flex justify-end space-x-2">
-              <Button type="button" variant="outline" onClick={() => setShowAddDialog(false)}>
+              <Button type="button" variant="outline" onClick={() => setShowAddDialog(false)} disabled={isSubmitting}>
                 Cancel
               </Button>
-              <Button type="submit" className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white">
-                Add Stat
+              <Button
+                type="submit"
+                className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Adding...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Stat
+                  </>
+                )}
               </Button>
             </div>
           </form>
@@ -472,9 +509,9 @@ export function AboutStatsManagement() {
                   <SelectValue placeholder="Select an icon" />
                 </SelectTrigger>
                 <SelectContent>
-                  {availableIcons.map((iconOption) => (
-                    <SelectItem key={iconOption.name} value={iconOption.icon}>
-                      {iconOption.name}
+                  {availableIconNames.map((iconName) => (
+                    <SelectItem key={iconName} value={iconName}>
+                      {iconName}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -528,11 +565,25 @@ export function AboutStatsManagement() {
             </div>
 
             <div className="flex justify-end space-x-2">
-              <Button type="button" variant="outline" onClick={() => setShowEditDialog(false)}>
+              <Button type="button" variant="outline" onClick={() => setShowEditDialog(false)} disabled={isSubmitting}>
                 Cancel
               </Button>
-              <Button type="submit" className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white">
-                Update Stat
+              <Button
+                type="submit"
+                className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  <>
+                    <Edit className="w-4 h-4 mr-2" />
+                    Update Stat
+                  </>
+                )}
               </Button>
             </div>
           </form>

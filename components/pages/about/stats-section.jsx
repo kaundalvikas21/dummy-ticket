@@ -56,7 +56,15 @@ export function StatsSection() {
   return (
     <section ref={ref} className="py-12 md:py-20 bg-white">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 max-w-6xl mx-auto">
+        <div
+          className={`grid gap-4 sm:gap-6 md:gap-8 max-w-6xl mx-auto ${
+            stats.length === 1 ? 'grid-cols-1' :
+            stats.length === 2 ? 'grid-cols-2 md:grid-cols-2' :
+            stats.length === 3 ? 'grid-cols-2 md:grid-cols-3' :
+            stats.length === 4 ? 'grid-cols-2 lg:grid-cols-4' :
+            'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
+          }`}
+        >
           {stats.map((stat, index) => {
             const IconComponent = getIcon(stat.icon)
             return (
