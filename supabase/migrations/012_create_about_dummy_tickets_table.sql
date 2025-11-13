@@ -12,3 +12,10 @@ CREATE TABLE about_dummy_tickets (
   -- Create index for better performance
   CREATE INDEX idx_about_dummy_tickets_status ON about_dummy_tickets(status);
   CREATE INDEX idx_about_dummy_tickets_sort_order ON about_dummy_tickets(sort_order);
+
+  -- Enable RLS for about_dummy_tickets
+  ALTER TABLE about_dummy_tickets ENABLE ROW LEVEL SECURITY;
+
+  -- Policy to allow all operations on about_dummy_tickets
+  CREATE POLICY "Enable all operations for about_dummy_tickets" ON about_dummy_tickets
+  FOR ALL USING (true) WITH CHECK (true);

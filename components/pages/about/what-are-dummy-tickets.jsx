@@ -69,29 +69,57 @@ export function WhatAreDummyTickets() {
     return (
       <section className="py-12 md:py-20 bg-gradient-to-br from-blue-50 to-white">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-center min-h-[400px]">
-            <div className="text-center mb-8">
-              <div className="h-16 w-64 bg-gray-200 rounded-2xl mx-auto mb-4 animate-pulse"></div>
-              <div className="h-4 w-80 bg-gray-200 rounded mx-auto animate-pulse"></div>
-            </div>
+          {/* Section Header Skeleton matching the actual structure */}
+          <div className="max-w-4xl mx-auto text-center mb-10 md:mb-16">
+            <div className="h-12 md:h-16 w-64 md:w-80 bg-gray-200 rounded mx-auto mb-4 animate-pulse"></div>
+            <div className="h-4 md:h-5 w-72 md:w-96 bg-gray-200 rounded-lg mx-auto animate-pulse"></div>
+          </div>
 
-            {/* Card Skeletons matching the 2-column layout */}
-            <div className="max-w-6xl mx-auto grid gap-8 md:grid-cols-2">
-              {Array.from({ length: 2 }).map((_, i) => (
-                <SkeletonCard key={i}>
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br flex items-center justify-center bg-gray-200 animate-pulse">
+          {/* Card Skeletons matching the 2-column layout with exact structure */}
+          <div className="max-w-6xl mx-auto grid gap-8 md:grid-cols-2">
+            {Array.from({ length: 2 }).map((_, i) => (
+              <div key={i} className="bg-white rounded-3xl p-8 shadow-lg border border-gray-100">
+                {/* Gradient Icon Skeleton */}
+                <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br flex items-center justify-center mb-6 ${
+                  i === 0
+                    ? 'bg-gradient-to-r from-blue-400 to-green-400 animate-pulse'
+                    : 'bg-gradient-to-r from-green-400 to-blue-400 animate-pulse'
+                }`}>
+                  <div className="w-6 h-6 bg-white/30 rounded"></div>
+                </div>
+
+                {/* Title Skeleton */}
+                <div className="h-8 w-48 bg-gray-200 rounded mb-4 animate-pulse"></div>
+
+                {/* Content Area Skeleton - Mix of list and text types */}
+                <div className="text-base text-gray-700 space-y-4">
+                  {i === 0 ? (
+                    // List type skeleton
+                    <ul className="space-y-3">
+                      {Array.from({ length: 4 }).map((_, j) => (
+                        <li key={j} className="flex items-start gap-3">
+                          <div className="w-5 h-5 bg-gray-200 rounded-full mt-0.5 flex-shrink-0 animate-pulse"></div>
+                          <div className="flex-1 space-y-2">
+                            <div className="h-4 w-full bg-gray-200 rounded animate-pulse"></div>
+                            {j % 2 === 0 && <div className="h-4 w-3/4 bg-gray-200 rounded animate-pulse"></div>}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    // Text type skeleton
+                    <div className="space-y-4">
+                      {Array.from({ length: 3 }).map((_, j) => (
+                        <div key={j} className="space-y-2">
+                          <div className="h-4 w-full bg-gray-200 rounded animate-pulse"></div>
+                          {j < 2 && <div className="h-4 w-5/6 bg-gray-200 rounded animate-pulse"></div>}
+                        </div>
+                      ))}
                     </div>
-                    <div className="h-8 w-48 bg-gray-200 rounded animate-pulse"></div>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="h-4 w-full bg-gray-200 rounded animate-pulse"></div>
-                    <div className="h-4 w-3/4 bg-gray-200 rounded animate-pulse"></div>
-                    <div className="h-4 w-5/6 bg-gray-200 rounded animate-pulse"></div>
-                  </div>
-                </SkeletonCard>
-              ))}
-            </div>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
