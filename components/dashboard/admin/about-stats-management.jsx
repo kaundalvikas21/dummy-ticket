@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import {
   Search, Plus, Edit, Trash2, Eye, EyeOff, Info, GripVertical, Award, Globe, Users,
   CheckCircle2, TrendingUp, Star, Target, Zap, Heart, Shield, Rocket, Clock, MapPin, Plane, Briefcase, Loader2,
-  Languages
+  Languages, AlertCircle, Check
 } from "lucide-react"
 import { LOCALES, DEFAULT_LOCALE } from "@/lib/locales"
 import { FlagIcon } from "@/components/ui/flag-icon"
@@ -65,6 +65,7 @@ export function AboutStatsManagement() {
   const [translationLocale, setTranslationLocale] = useState(DEFAULT_LOCALE)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSavingTranslations, setIsSavingTranslations] = useState(false)
+  const [activeTab, setActiveTab] = useState(DEFAULT_LOCALE)
   const [formData, setFormData] = useState({
     icon: "",
     value: "",
@@ -73,6 +74,45 @@ export function AboutStatsManagement() {
     sort_order: 1,
     translations: {}
   })
+
+  // Initialize translations object for all locales
+  useEffect(() => {
+    const initialTranslations = {}
+    Object.keys(LOCALES).forEach(locale => {
+      initialTranslations[locale] = {
+        label: "",
+        value: ""
+      }
+    })
+    setFormData(prev => ({
+      ...prev,
+      translations: initialTranslations
+    }))
+  }, [])
+
+  // Handle opening add dialog
+  const handleOpenAddDialog = () => {
+    // Complete state reset to prevent contamination
+    const initialTranslations = {}
+    Object.keys(LOCALES).forEach(locale => {
+      initialTranslations[locale] = {
+        label: "",
+        value: ""
+      }
+    })
+
+    setFormData({
+      icon: "",
+      value: "",
+      label: "",
+      status: "active",
+      sort_order: 1,
+      translations: initialTranslations
+    })
+    setSelectedStat(null)
+    setShowAddDialog(true)
+    setActiveTab(DEFAULT_LOCALE)
+  }
 
   // Fetch stats from API
   const fetchStats = async () => {
@@ -103,12 +143,23 @@ export function AboutStatsManagement() {
     stat.icon.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  // Handle form submission
+  // Handle form submission - Multi-language support
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsSubmitting(true)
 
     try {
+      // Validate that English translation is filled
+      const englishTranslation = formData.translations[DEFAULT_LOCALE]
+      if (!englishTranslation?.value || !englishTranslation?.label) {
+        toast({
+          title: "Validation Error",
+          description: "English value and label are required",
+          variant: "destructive"
+        })
+        return
+      }
+
       const url = selectedStat ? `/api/about/stats/${selectedStat.id}` : '/api/about/stats'
       const method = selectedStat ? 'PUT' : 'POST'
 
@@ -118,12 +169,22 @@ export function AboutStatsManagement() {
         description: `Please wait while we ${selectedStat ? 'update' : 'create'} the stat.`,
       })
 
+      // Prepare main stat data using English translation
+      const mainStatData = {
+        icon: formData.icon,
+        value: englishTranslation.value,
+        label: englishTranslation.label,
+        status: formData.status,
+        sort_order: formData.sort_order
+      }
+
+      // Create/update main stat
       const response = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(mainStatData),
       })
 
       const result = await response.json()
@@ -132,11 +193,42 @@ export function AboutStatsManagement() {
       savingToast.dismiss()
 
       if (response.ok) {
+        const statId = selectedStat?.id || result.stat.id
+
+        // Handle translations for all languages (excluding English value since it's stored in main table)
+        const translationsToSave = Object.entries(formData.translations)
+          .filter(([locale, translation]) =>
+            // Include translation if label exists (value is only stored in main table for English)
+            translation.label && translation.label.trim()
+          )
+          .map(([locale, translation]) => ({
+            stat_id: statId,
+            locale,
+            label: translation.label,
+            // Only store value for English in translations as backup, other locales don't need value
+            value: locale === DEFAULT_LOCALE ? translation.value : ''
+          }))
+
+        if (translationsToSave.length > 0) {
+          const savePromises = translationsToSave.map(async (translation) => {
+            const translationResponse = await fetch('/api/about-stats-translations', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(translation),
+            })
+            const translationResult = await translationResponse.json()
+            return { response: translationResponse, result: translationResult }
+          })
+
+          await Promise.all(savePromises)
+        }
+
         await fetchStats()
         setShowAddDialog(false)
         setShowEditDialog(false)
-        setFormData({ icon: "", value: "", label: "", status: "active", sort_order: 1 })
         setSelectedStat(null)
+        setActiveTab(DEFAULT_LOCALE)
+
         toast({
           title: "✅ Success!",
           description: `Stat ${selectedStat ? 'updated' : 'created'} successfully`,
@@ -289,14 +381,16 @@ export function AboutStatsManagement() {
       translations
     })
     setShowEditDialog(true)
+    setActiveTab(DEFAULT_LOCALE)
   }
 
   // Open translations dialog
   const openTranslationsDialog = async (stat) => {
     setSelectedStat(stat)
+    setActiveTab(DEFAULT_LOCALE)
     setTranslationLocale(DEFAULT_LOCALE)
 
-    // Initialize formData with empty translations
+    // Initialize formData with existing data
     const initialTranslations = {}
     Object.keys(LOCALES).forEach(locale => {
       initialTranslations[locale] = {
@@ -321,12 +415,10 @@ export function AboutStatsManagement() {
         })
       }
 
-      // Set default (English) content if no translation exists
-      if (!initialTranslations[DEFAULT_LOCALE].label && !initialTranslations[DEFAULT_LOCALE].value) {
-        initialTranslations[DEFAULT_LOCALE] = {
-          label: stat.label || '',
-          value: stat.value || ''
-        }
+      // Always set default (English) content from main table
+      initialTranslations[DEFAULT_LOCALE] = {
+        label: stat.label || '',
+        value: stat.value || ''
       }
     } catch (error) {
       console.error('Error loading translations:', error)
@@ -337,10 +429,15 @@ export function AboutStatsManagement() {
       }
     }
 
-    setFormData(prev => ({
-      ...prev,
+    // Set form data with stat info and translations
+    setFormData({
+      icon: stat.icon,
+      value: stat.value,
+      label: stat.label,
+      status: stat.status,
+      sort_order: stat.sort_order,
       translations: initialTranslations
-    }))
+    })
 
     setShowTranslationsDialog(true)
   }
@@ -372,8 +469,8 @@ export function AboutStatsManagement() {
     }))
   }
 
-  // Handle save all translations
-  const handleSaveAllTranslations = async () => {
+  // Handle save translations only (from translation dialog)
+  const handleSaveTranslationsOnly = async () => {
     if (!selectedStat) return
 
     const stat = selectedStat
@@ -384,21 +481,52 @@ export function AboutStatsManagement() {
     if (!englishTranslation || (!englishTranslation.label?.trim() && !englishTranslation.value?.trim())) {
       toast({
         title: "Required",
-        description: "English translation label or value is required",
+        description: "English value and label are required",
         variant: "destructive"
       })
       return
     }
 
-    // Prepare translations for all languages
+    // Update main stat if English content changed
+    const englishChanged =
+      englishTranslation.value?.trim() !== stat.value ||
+      englishTranslation.label?.trim() !== stat.label
+
+    if (englishChanged) {
+      try {
+        const response = await fetch(`/api/about/stats/${stat.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...stat,
+            value: englishTranslation.value?.trim() || stat.value,
+            label: englishTranslation.label?.trim() || stat.label
+          })
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to update main stat')
+        }
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to update main content",
+          variant: "destructive"
+        })
+        return
+      }
+    }
+
+    // Prepare translations for all languages (only store labels, values are in main table)
     Object.entries(LOCALES).forEach(([code, locale]) => {
       const translation = formData.translations[code]
-      if (translation && (translation.label?.trim() || translation.value?.trim())) {
+      if (translation && translation.label?.trim()) {
         translationsToSave.push({
           stat_id: stat.id,
           locale: code,
-          label: translation.label?.trim() || '',
-          value: translation.value?.trim() || ''
+          label: translation.label?.trim(),
+          // Only store value for English as backup, other locales don't need value
+          value: code === DEFAULT_LOCALE ? (translation.value?.trim() || '') : ''
         })
       }
     })
@@ -469,7 +597,7 @@ export function AboutStatsManagement() {
           <p className="text-gray-600">Manage statistics displayed on the About Us page</p>
         </div>
         <Button
-          onClick={() => setShowAddDialog(true)}
+          onClick={handleOpenAddDialog}
           className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white"
         >
           <Plus className="w-4 h-4 mr-2" />
@@ -645,15 +773,51 @@ export function AboutStatsManagement() {
         </CardContent>
       </Card>
 
-      {/* Add Stat Dialog */}
-      <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent className="sm:max-w-[600px]">
+      {/* Add/Edit Stat Dialog */}
+      <Dialog open={showAddDialog || showEditDialog} onOpenChange={() => {
+        setShowAddDialog(false)
+        setShowEditDialog(false)
+        setSelectedStat(null)
+      }}>
+        <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Add New Stat</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <Globe className="w-5 h-5" />
+              {selectedStat ? 'Edit Multi-Language Stat' : 'Add Multi-Language Stat'}
+            </DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Status and Sort Order */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="status"
+                  checked={formData.status === 'active'}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, status: checked ? 'active' : 'inactive' })
+                  }
+                />
+                <Label htmlFor="status">Active (visible on website)</Label>
+              </div>
+
+              <div>
+                <Label htmlFor="sort_order">Sort Order</Label>
+                <Input
+                  id="sort_order"
+                  type="number"
+                  min="1"
+                  max="99"
+                  value={formData.sort_order}
+                  onChange={(e) => setFormData({ ...formData, sort_order: parseInt(e.target.value) || 0 })}
+                  placeholder="0"
+                />
+              </div>
+            </div>
+
+            {/* Icon Selection */}
             <div>
-              <Label htmlFor="icon">Icon</Label>
+              <Label>Icon</Label>
               <Select value={formData.icon} onValueChange={(value) => setFormData({ ...formData, icon: value })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select an icon" />
@@ -661,174 +825,129 @@ export function AboutStatsManagement() {
                 <SelectContent>
                   {availableIconNames.map((iconName) => (
                     <SelectItem key={iconName} value={iconName}>
-                      {iconName}
+                      <div className="flex items-center gap-2">
+                        {(() => {
+                          const IconComponent = iconMap[iconName] || iconMap.Info
+                          return <IconComponent className="w-4 h-4" />
+                        })()}
+                        {iconName}
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
 
-            <div>
-              <Label htmlFor="value">Value</Label>
-              <Input
-                id="value"
-                value={formData.value}
-                onChange={(e) => setFormData({ ...formData, value: e.target.value })}
-                placeholder="Enter the value (e.g., 500K+, 150+, 99.9%)"
-                required
-              />
-            </div>
+            {/* Language Tabs */}
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-5 h-auto p-1">
+                {Object.entries(LOCALES).map(([code, locale]) => (
+                  <TabsTrigger
+                    key={code}
+                    value={code}
+                    className="flex items-center gap-1 px-2 py-2 text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                  >
+                    <FlagIcon
+                      src={locale.flag}
+                      alt={locale.name}
+                      countryCode={locale.countryCode}
+                      size={16}
+                      className="shrink-0"
+                    />
+                    <span className="hidden sm:inline text-xs font-medium">{locale.name}</span>
+                    {formData.translations[code]?.label && (
+                      <Check className="w-3 h-3 text-green-500 flex-shrink-0" />
+                    )}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
 
-            <div>
-              <Label htmlFor="label">Label</Label>
-              <Input
-                id="label"
-                value={formData.label}
-                onChange={(e) => setFormData({ ...formData, label: e.target.value })}
-                placeholder="Enter the label (e.g., Happy Customers)"
-                required
-              />
-            </div>
+              {Object.entries(LOCALES).map(([code, locale]) => (
+                <TabsContent key={code} value={code} className="space-y-4">
+                  <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
+                    <FlagIcon
+                      src={locale.flag}
+                      alt={locale.name}
+                      countryCode={locale.countryCode}
+                      size={20}
+                      className="shrink-0"
+                    />
+                    <span className="font-medium">{locale.name}</span>
+                    {code === DEFAULT_LOCALE && (
+                      <Badge variant="outline" className="ml-auto">
+                        Required
+                      </Badge>
+                    )}
+                  </div>
 
-            <div>
-              <Label htmlFor="sort-order">Display Order</Label>
-              <Input
-                id="sort-order"
-                type="number"
-                min="1"
-                max="99"
-                value={formData.sort_order}
-                onChange={(e) => setFormData({ ...formData, sort_order: parseInt(e.target.value) || 1 })}
-                placeholder="1 = first, 2 = second, etc."
-              />
-            </div>
+                  {/* Only show value field for English - values like numbers don't need translation */}
+                  {code === DEFAULT_LOCALE && (
+                    <div>
+                      <Label htmlFor={`value-${code}`}>
+                        Value <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        id={`value-${code}`}
+                        value={formData.translations[code]?.value || ""}
+                        onChange={(e) => setFormData({
+                          ...formData,
+                          translations: {
+                            ...formData.translations,
+                            [code]: {
+                              ...formData.translations[code],
+                              value: e.target.value
+                            }
+                          }
+                        })}
+                        placeholder={`Enter value (e.g., 500K+, 150+, 99.9%)`}
+                        required
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Numbers and metrics (like 500K+, 99.9%) typically don't need translation
+                      </p>
+                    </div>
+                  )}
 
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="status"
-                checked={formData.status === 'active'}
-                onCheckedChange={(checked) =>
-                  setFormData({ ...formData, status: checked ? 'active' : 'inactive' })
-                }
-              />
-              <Label htmlFor="status">Active (visible on website)</Label>
-            </div>
-
-            <div className="flex justify-end space-x-2">
-              <Button type="button" variant="outline" onClick={() => setShowAddDialog(false)} disabled={isSubmitting}>
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Adding...
-                  </>
-                ) : (
-                  <>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Stat
-                  </>
-                )}
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Stat Dialog */}
-      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>Edit Stat</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label htmlFor="edit-icon">Icon</Label>
-              <Select value={formData.icon} onValueChange={(value) => setFormData({ ...formData, icon: value })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select an icon" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableIconNames.map((iconName) => (
-                    <SelectItem key={iconName} value={iconName}>
-                      {iconName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label htmlFor="edit-value">Value</Label>
-              <Input
-                id="edit-value"
-                value={formData.value}
-                onChange={(e) => setFormData({ ...formData, value: e.target.value })}
-                placeholder="Enter the value (e.g., 500K+, 150+, 99.9%)"
-                required
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="edit-label">Label</Label>
-              <Input
-                id="edit-label"
-                value={formData.label}
-                onChange={(e) => setFormData({ ...formData, label: e.target.value })}
-                placeholder="Enter the label (e.g., Happy Customers)"
-                required
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="edit-sort-order">Display Order</Label>
-              <Input
-                id="edit-sort-order"
-                type="number"
-                min="1"
-                max="99"
-                value={formData.sort_order}
-                onChange={(e) => setFormData({ ...formData, sort_order: parseInt(e.target.value) || 1 })}
-                placeholder="1 = first, 2 = second, etc."
-              />
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="edit-status"
-                checked={formData.status === 'active'}
-                onCheckedChange={(checked) =>
-                  setFormData({ ...formData, status: checked ? 'active' : 'inactive' })
-                }
-              />
-              <Label htmlFor="edit-status">Active (visible on website)</Label>
-            </div>
+                  <div>
+                    <Label htmlFor={`label-${code}`}>
+                      Label {code === DEFAULT_LOCALE && <span className="text-red-500">*</span>}
+                    </Label>
+                    <Input
+                      id={`label-${code}`}
+                      value={formData.translations[code]?.label || ""}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        translations: {
+                          ...formData.translations,
+                          [code]: {
+                            ...formData.translations[code],
+                            label: e.target.value
+                          }
+                        }
+                      })}
+                      placeholder={`Enter label in ${locale.name} (e.g., Happy Customers)`}
+                      required={code === DEFAULT_LOCALE}
+                    />
+                    {code !== DEFAULT_LOCALE && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        Translate the label text to {locale.name}
+                      </p>
+                    )}
+                  </div>
+                </TabsContent>
+              ))}
+            </Tabs>
 
             <div className="flex justify-end space-x-2">
-              <Button type="button" variant="outline" onClick={() => setShowEditDialog(false)} disabled={isSubmitting}>
+              <Button type="button" variant="outline" onClick={() => {
+                setShowAddDialog(false)
+                setShowEditDialog(false)
+                setSelectedStat(null)
+              }}>
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Updating...
-                  </>
-                ) : (
-                  <>
-                    <Edit className="w-4 h-4 mr-2" />
-                    Update Stat
-                  </>
-                )}
+              <Button type="submit" className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white" disabled={isSubmitting}>
+                {isSubmitting ? 'Saving...' : (selectedStat ? 'Update Stat' : 'Create Stat')}
               </Button>
             </div>
           </form>
@@ -861,59 +980,116 @@ export function AboutStatsManagement() {
       <Dialog open={showTranslationsDialog} onOpenChange={setShowTranslationsDialog}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>
-              Translations for "{selectedStat?.label}"
+            <DialogTitle className="flex items-center gap-2">
+              <Languages className="w-5 h-5" />
+              Manage Translations for "{selectedStat?.label}"
             </DialogTitle>
           </DialogHeader>
 
-          <Tabs value={translationLocale} onValueChange={setTranslationLocale} className="w-full">
-            <TabsList className="grid w-full grid-cols-5 mb-4">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-5 h-auto p-1">
               {Object.entries(LOCALES).map(([code, locale]) => (
                 <TabsTrigger
                   key={code}
                   value={code}
-                  className="flex items-center gap-2 data-[state=active]:bg-[#0066FF] data-[state=active]:text-white"
+                  className="flex items-center gap-1 px-2 py-2 text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm"
                 >
                   <FlagIcon
                     src={locale.flag}
                     alt={locale.name}
                     countryCode={locale.countryCode}
+                    size={16}
+                    className="shrink-0"
                   />
-                  <span>{code.toUpperCase()}</span>
+                  <span className="hidden sm:inline text-xs font-medium">{locale.name}</span>
+                  {formData.translations[code]?.label && (
+                    <Check className="w-3 h-3 text-green-500 flex-shrink-0" />
+                  )}
                 </TabsTrigger>
               ))}
             </TabsList>
 
             {Object.entries(LOCALES).map(([code, locale]) => (
               <TabsContent key={code} value={code} className="space-y-4">
-                <div className="p-4 border rounded-lg bg-gray-50">
-                  <div className="flex items-center gap-2 mb-3">
-                    <FlagIcon
-                      src={locale.flag}
-                      alt={locale.name}
-                      countryCode={locale.countryCode}
-                    />
-                    <span className="font-medium">{locale.name}</span>
-                    {code === DEFAULT_LOCALE && (
-                      <span className="text-xs bg-gray-200 px-2 py-1 rounded">Required</span>
-                    )}
-                  </div>
+                <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
+                  <FlagIcon
+                    src={locale.flag}
+                    alt={locale.name}
+                    countryCode={locale.countryCode}
+                    size={20}
+                    className="shrink-0"
+                  />
+                  <span className="font-medium">{locale.name}</span>
+                  {code === DEFAULT_LOCALE && (
+                    <Badge variant="outline" className="ml-auto">
+                      Main Content - Editable
+                    </Badge>
+                  )}
+                </div>
 
-                  {/* Translation Label */}
-                  <div className="mb-3">
-                    <Label className="text-sm font-medium flex items-center gap-2">
-                      Label
+                <div className="space-y-4">
+                  {/* Only show value field for English - values like numbers don't need translation */}
+                  {code === DEFAULT_LOCALE && (
+                    <div>
+                      <Label htmlFor={`trans-value-${code}`}>
+                        Value <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        id={`trans-value-${code}`}
+                        value={formData.translations[code]?.value || ""}
+                        onChange={(e) => setFormData({
+                          ...formData,
+                          translations: {
+                            ...formData.translations,
+                            [code]: {
+                              ...formData.translations[code],
+                              value: e.target.value
+                            }
+                          }
+                        })}
+                        placeholder={`Enter value (e.g., 500K+, 150+, 99.9%)`}
+                        required
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Numbers and metrics (like 500K+, 99.9%) typically don't need translation
+                      </p>
+                    </div>
+                  )}
+
+                  <div>
+                    <Label htmlFor={`trans-label-${code}`}>
+                      Label {code === DEFAULT_LOCALE && <span className="text-red-500">*</span>}
                     </Label>
                     <Input
-                      value={formData.translations?.[code]?.label || ''}
-                      onChange={(e) => updateTranslationLabel(code, e.target.value)}
-                      placeholder="Enter label (e.g., Happy Customers)"
-                      className="mt-1"
+                      id={`trans-label-${code}`}
+                      value={formData.translations[code]?.label || ""}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        translations: {
+                          ...formData.translations,
+                          [code]: {
+                            ...formData.translations[code],
+                            label: e.target.value
+                          }
+                        }
+                      })}
+                      placeholder={`Enter label in ${locale.name} (e.g., Happy Customers)`}
                       required={code === DEFAULT_LOCALE}
-                      disabled={code === DEFAULT_LOCALE}
                     />
+                    {code !== DEFAULT_LOCALE && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        Translate the label text to {locale.name}
+                      </p>
+                    )}
                   </div>
                 </div>
+
+                {locale.direction === 'rtl' && (
+                  <div className="flex items-center gap-2 p-2 bg-blue-50 text-blue-700 rounded text-sm">
+                    <AlertCircle className="w-4 h-4" />
+                    RTL layout will be applied for Arabic content
+                  </div>
+                )}
               </TabsContent>
             ))}
           </Tabs>
@@ -923,14 +1099,14 @@ export function AboutStatsManagement() {
               Cancel
             </Button>
             <Button
-              onClick={handleSaveAllTranslations}
-              className="bg-[#0066FF] hover:bg-[#0055CC]"
+              onClick={handleSaveTranslationsOnly}
+              className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white"
               disabled={isSavingTranslations}
             >
               {isSavingTranslations ? (
                 <>
-                  <Languages className="w-4 h-4 mr-2 animate-spin" />
-                  Saving...
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Saving Translations...
                 </>
               ) : (
                 <>
