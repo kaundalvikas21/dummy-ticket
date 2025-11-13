@@ -33,6 +33,32 @@ const SkeletonCard = ({ children, className }) => (
   </div>
 )
 
+// List Display Component for rendering JSON array content as formatted list
+const renderListContent = (contentString) => {
+  if (!contentString) return null
+
+  try {
+    const parsedContent = JSON.parse(contentString)
+    if (!Array.isArray(parsedContent) || parsedContent.length === 0) {
+      return null
+    }
+
+    return (
+      <ul className="space-y-2">
+        {parsedContent.map((item, index) => (
+          <li key={index} className="flex items-start gap-2">
+            <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+            <span className="text-gray-700 text-sm">{item}</span>
+          </li>
+        ))}
+      </ul>
+    )
+  } catch (error) {
+    // If JSON parsing fails, show as plain text
+    return <span className="text-gray-600 text-sm">{contentString}</span>
+  }
+}
+
 export function DummyTicketsManagement() {
   const { toast } = useToast()
   const [tickets, setTickets] = useState([])
@@ -642,9 +668,17 @@ export function DummyTicketsManagement() {
                             <span className="text-xs text-gray-600">{completion}%</span>
                           </div>
                         </div>
-                        <p className="text-gray-600 text-sm line-clamp-2">
-                          {displayContent}
-                        </p>
+                        <div className="text-gray-600 text-sm">
+                          {ticket.content_type === 'list' ? (
+                            renderListContent(displayContent) || (
+                              <p className="line-clamp-2 text-gray-400 italic">
+                                No list items configured
+                              </p>
+                            )
+                          ) : (
+                            <p className="line-clamp-2">{displayContent}</p>
+                          )}
+                        </div>
                         <div className="flex flex-wrap gap-1 mt-2">
                           {ticket.about_dummy_tickets_translations?.map(trans => (
                             <Badge key={trans.locale} variant="outline" className="text-xs flex items-center gap-1">
