@@ -3,9 +3,17 @@ import { NextResponse } from 'next/server'
 
 export async function GET() {
   try {
+    // Fetch stats with translations
     const { data: stats, error } = await supabase
       .from('about_stats')
-      .select('*')
+      .select(`
+        *,
+        about_stats_translations (
+          label,
+          value,
+          locale
+        )
+      `)
       .order('sort_order', { ascending: true })
       .order('created_at', { ascending: false })
 

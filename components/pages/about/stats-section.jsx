@@ -3,45 +3,49 @@
 import { motion, useInView } from "framer-motion"
 import { useRef, useState, useEffect } from "react"
 import * as LucideIcons from "lucide-react"
+import { useLocale } from "@/contexts/locale-context"
 
 export function StatsSection() {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true, margin: "-100px" })
+  const { locale } = useLocale()
   const [stats, setStats] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
-  // Default stats as fallback
-  const defaultStats = [
-    { icon: "Users", value: "500K+", label: "Happy Customers", sort_order: 1 },
-    { icon: "Globe", value: "150+", label: "Countries Served", sort_order: 2 },
-    { icon: "Award", value: "35+", label: "Years Experience", sort_order: 3 },
-    { icon: "CheckCircle2", value: "99.9%", label: "Success Rate", sort_order: 4 },
-  ]
-
-  // Fetch stats from API
+  // Fetch stats from API with locale support
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch('/api/about/stats')
+        setLoading(true)
+        setError(null)
+
+        const response = await fetch(`/api/about/stats?locale=${locale}`)
         const result = await response.json()
 
-        if (response.ok && result.stats && result.stats.length > 0) {
-          setStats(result.stats)
+        if (response.ok) {
+          if (result.stats && result.stats.length > 0) {
+            setStats(result.stats)
+          } else {
+            // No stats found - don't use fallbacks
+            setStats([])
+          }
         } else {
-          // Use default stats if API fails or returns empty
-          setStats(defaultStats)
+          console.error('API Error:', result.error)
+          setError(result.error || 'Failed to load statistics')
+          setStats([])
         }
       } catch (error) {
         console.error('Error fetching stats:', error)
-        // Use default stats on error
-        setStats(defaultStats)
+        setError('Network error occurred while loading statistics')
+        setStats([])
       } finally {
         setLoading(false)
       }
     }
 
     fetchStats()
-  }, [])
+  }, [locale]) // Refetch when locale changes
 
   // Function to get Lucide icon component by name
   const getIcon = (iconName) => {
@@ -51,6 +55,79 @@ export function StatsSection() {
     } catch (error) {
       return LucideIcons.Star // Fallback to Star icon
     }
+  }
+
+  // Loading skeleton component
+  const LoadingSkeleton = () => (
+    <div
+      className={`grid gap-4 sm:gap-6 md:gap-8 max-w-6xl mx-auto ${
+        stats.length === 1 ? 'grid-cols-1' :
+        stats.length === 2 ? 'grid-cols-2 md:grid-cols-2' :
+        stats.length === 3 ? 'grid-cols-2 md:grid-cols-3' :
+        stats.length === 4 ? 'grid-cols-2 lg:grid-cols-4' :
+        'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
+      }`}
+    >
+      {[1, 2, 3, 4].map((i) => (
+        <div key={i} className="text-center">
+          <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-gray-200 mb-3 md:mb-4 animate-pulse"></div>
+          <div className="h-8 w-16 md:h-10 md:w-20 bg-gray-200 rounded mb-1 md:mb-2 animate-pulse mx-auto"></div>
+          <div className="h-4 w-24 md:h-5 md:w-32 bg-gray-200 rounded animate-pulse mx-auto"></div>
+        </div>
+      ))}
+    </div>
+  )
+
+  if (loading) {
+    return (
+      <section ref={ref} className="py-12 md:py-20 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-8">
+            <div className="text-xl font-semibold text-gray-900">Loading Statistics</div>
+            <div className="text-sm text-gray-600 mt-1">Please wait while we load the latest statistics...</div>
+          </div>
+          <LoadingSkeleton />
+        </div>
+      </section>
+    )
+  }
+
+  if (error) {
+    return (
+      <section ref={ref} className="py-12 md:py-20 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mb-4">
+              <LucideIcons.AlertCircle className="w-8 h-8 text-red-600" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">Unable to Load Statistics</h3>
+            <p className="text-gray-600 mb-4">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  if (stats.length === 0) {
+    return (
+      <section ref={ref} className="py-12 md:py-20 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
+              <LucideIcons.BarChart3 className="w-8 h-8 text-gray-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">No Statistics Available</h3>
+            <p className="text-gray-600">Statistics will appear here once they are added by the administrator.</p>
+          </div>
+        </div>
+      </section>
+    )
   }
 
   return (
