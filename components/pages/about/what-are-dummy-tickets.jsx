@@ -82,8 +82,8 @@ export function WhatAreDummyTickets() {
                 {/* Gradient Icon Skeleton */}
                 <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br flex items-center justify-center mb-6 ${
                   i === 0
-                    ? 'bg-gradient-to-r from-blue-400 to-green-400 animate-pulse'
-                    : 'bg-gradient-to-r from-green-400 to-blue-400 animate-pulse'
+                    ? 'bg-gray-200 animate-pulse'
+                    : 'bg-gray-200 animate-pulse'
                 }`}>
                   <div className="w-6 h-6 bg-white/30 rounded"></div>
                 </div>
