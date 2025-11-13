@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import {
   Search, Plus, Edit, Trash2, Eye, EyeOff, Info, GripVertical, Award, Globe, Users,
   CheckCircle2, TrendingUp, Star, Target, Zap, Heart, Shield, Rocket, Clock, MapPin, Plane, Briefcase, Loader2,
-  Languages, AlertCircle, Check
+  AlertCircle, Check
 } from "lucide-react"
 import { LOCALES, DEFAULT_LOCALE } from "@/lib/locales"
 import { FlagIcon } from "@/components/ui/flag-icon"
@@ -61,10 +61,7 @@ export function AboutStatsManagement() {
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [selectedStat, setSelectedStat] = useState(null)
-  const [showTranslationsDialog, setShowTranslationsDialog] = useState(false)
-  const [translationLocale, setTranslationLocale] = useState(DEFAULT_LOCALE)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isSavingTranslations, setIsSavingTranslations] = useState(false)
   const [activeTab, setActiveTab] = useState(DEFAULT_LOCALE)
   const [formData, setFormData] = useState({
     icon: "",
@@ -384,201 +381,9 @@ export function AboutStatsManagement() {
     setActiveTab(DEFAULT_LOCALE)
   }
 
-  // Open translations dialog
-  const openTranslationsDialog = async (stat) => {
-    setSelectedStat(stat)
-    setActiveTab(DEFAULT_LOCALE)
-    setTranslationLocale(DEFAULT_LOCALE)
-
-    // Initialize formData with existing data
-    const initialTranslations = {}
-    Object.keys(LOCALES).forEach(locale => {
-      initialTranslations[locale] = {
-        label: '',
-        value: ''
-      }
-    })
-
-    try {
-      // Load existing translations
-      const response = await fetch(`/api/about-stats-translations?stat_id=${stat.id}`)
-      const result = await response.json()
-
-      if (response.ok && result.translations) {
-        result.translations.forEach(translation => {
-          if (initialTranslations[translation.locale]) {
-            initialTranslations[translation.locale] = {
-              label: translation.label || '',
-              value: translation.value || ''
-            }
-          }
-        })
-      }
-
-      // Always set default (English) content from main table
-      initialTranslations[DEFAULT_LOCALE] = {
-        label: stat.label || '',
-        value: stat.value || ''
-      }
-    } catch (error) {
-      console.error('Error loading translations:', error)
-      // Set default content on error
-      initialTranslations[DEFAULT_LOCALE] = {
-        label: stat.label || '',
-        value: stat.value || ''
-      }
-    }
-
-    // Set form data with stat info and translations
-    setFormData({
-      icon: stat.icon,
-      value: stat.value,
-      label: stat.label,
-      status: stat.status,
-      sort_order: stat.sort_order,
-      translations: initialTranslations
-    })
-
-    setShowTranslationsDialog(true)
-  }
-
-  // Translation update functions
-  const updateTranslationLabel = (locale, label) => {
-    setFormData(prev => ({
-      ...prev,
-      translations: {
-        ...(prev.translations || {}),
-        [locale]: {
-          ...(prev.translations?.[locale] || {}),
-          label: label
-        }
-      }
-    }))
-  }
-
-  const updateTranslationValue = (locale, value) => {
-    setFormData(prev => ({
-      ...prev,
-      translations: {
-        ...(prev.translations || {}),
-        [locale]: {
-          ...(prev.translations?.[locale] || {}),
-          value: value
-        }
-      }
-    }))
-  }
-
-  // Handle save translations only (from translation dialog)
-  const handleSaveTranslationsOnly = async () => {
-    if (!selectedStat) return
-
-    const stat = selectedStat
-    const translationsToSave = []
-
-    // Check if English (DEFAULT_LOCALE) translation is filled
-    const englishTranslation = formData.translations[DEFAULT_LOCALE]
-    if (!englishTranslation || (!englishTranslation.label?.trim() && !englishTranslation.value?.trim())) {
-      toast({
-        title: "Required",
-        description: "English value and label are required",
-        variant: "destructive"
-      })
-      return
-    }
-
-    // Update main stat if English content changed
-    const englishChanged =
-      englishTranslation.value?.trim() !== stat.value ||
-      englishTranslation.label?.trim() !== stat.label
-
-    if (englishChanged) {
-      try {
-        const response = await fetch(`/api/about/stats/${stat.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            ...stat,
-            value: englishTranslation.value?.trim() || stat.value,
-            label: englishTranslation.label?.trim() || stat.label
-          })
-        })
-
-        if (!response.ok) {
-          throw new Error('Failed to update main stat')
-        }
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to update main content",
-          variant: "destructive"
-        })
-        return
-      }
-    }
-
-    // Prepare translations for all languages (only store labels, values are in main table)
-    Object.entries(LOCALES).forEach(([code, locale]) => {
-      const translation = formData.translations[code]
-      if (translation && translation.label?.trim()) {
-        translationsToSave.push({
-          stat_id: stat.id,
-          locale: code,
-          label: translation.label?.trim(),
-          // Only store value for English as backup, other locales don't need value
-          value: code === DEFAULT_LOCALE ? (translation.value?.trim() || '') : ''
-        })
-      }
-    })
-
-    setIsSavingTranslations(true)
-
-    try {
-      const savePromises = translationsToSave.map(async (translation) => {
-        const response = await fetch('/api/about-stats-translations', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(translation),
-        })
-        const result = await response.json()
-        return { response, result }
-      })
-
-      const saveResults = await Promise.all(savePromises)
-      const hasErrors = saveResults.some(({ response }) => !response.ok)
-
-      if (!hasErrors) {
-        toast({
-          title: "✅ Success!",
-          description: "All translations saved successfully",
-        })
-        await fetchStats() // Refresh the data
-        setShowTranslationsDialog(false)
-      } else {
-        const errors = saveResults
-          .filter(({ response }) => !response.ok)
-          .map(({ result }) => result.error)
-        console.error('Some translations failed to save:', errors)
-        toast({
-          title: "⚠️ Partial Success",
-          description: "Some translations failed to save. Please check and try again.",
-          variant: "destructive"
-        })
-      }
-    } catch (error) {
-      console.error('Error saving translations:', error)
-      toast({
-        title: "❌ Error",
-        description: "Network error occurred while saving translations. Please try again.",
-        variant: "destructive"
-      })
-    } finally {
-      setIsSavingTranslations(false)
-    }
-  }
-
+  
+  
+  
   // Get translation completion status
   const getTranslationStatus = (stat) => {
     const totalLocales = Object.keys(LOCALES).length
@@ -638,7 +443,6 @@ export function AboutStatsManagement() {
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="h-8 w-12 bg-gray-200 rounded animate-pulse"></div>
-                      <div className="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
                       <div className="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
                       <div className="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
                       <div className="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
@@ -740,16 +544,6 @@ export function AboutStatsManagement() {
                         onClick={() => openEditDialog(stat)}
                       >
                         <Edit className="w-4 h-4" />
-                      </Button>
-
-                      {/* Translations */}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => openTranslationsDialog(stat)}
-                        className="text-blue-600 hover:text-blue-700"
-                      >
-                        <Languages className="w-4 h-4" />
                       </Button>
 
                       {/* Delete */}
@@ -975,149 +769,6 @@ export function AboutStatsManagement() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* Translations Dialog */}
-      <Dialog open={showTranslationsDialog} onOpenChange={setShowTranslationsDialog}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Languages className="w-5 h-5" />
-              Manage Translations for "{selectedStat?.label}"
-            </DialogTitle>
-          </DialogHeader>
-
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-5 h-auto p-1">
-              {Object.entries(LOCALES).map(([code, locale]) => (
-                <TabsTrigger
-                  key={code}
-                  value={code}
-                  className="flex items-center gap-1 px-2 py-2 text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm"
-                >
-                  <FlagIcon
-                    src={locale.flag}
-                    alt={locale.name}
-                    countryCode={locale.countryCode}
-                    size={16}
-                    className="shrink-0"
-                  />
-                  <span className="hidden sm:inline text-xs font-medium">{locale.name}</span>
-                  {formData.translations[code]?.label && (
-                    <Check className="w-3 h-3 text-green-500 flex-shrink-0" />
-                  )}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-
-            {Object.entries(LOCALES).map(([code, locale]) => (
-              <TabsContent key={code} value={code} className="space-y-4">
-                <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
-                  <FlagIcon
-                    src={locale.flag}
-                    alt={locale.name}
-                    countryCode={locale.countryCode}
-                    size={20}
-                    className="shrink-0"
-                  />
-                  <span className="font-medium">{locale.name}</span>
-                  {code === DEFAULT_LOCALE && (
-                    <Badge variant="outline" className="ml-auto">
-                      Main Content - Editable
-                    </Badge>
-                  )}
-                </div>
-
-                <div className="space-y-4">
-                  {/* Only show value field for English - values like numbers don't need translation */}
-                  {code === DEFAULT_LOCALE && (
-                    <div>
-                      <Label htmlFor={`trans-value-${code}`}>
-                        Value <span className="text-red-500">*</span>
-                      </Label>
-                      <Input
-                        id={`trans-value-${code}`}
-                        value={formData.translations[code]?.value || ""}
-                        onChange={(e) => setFormData({
-                          ...formData,
-                          translations: {
-                            ...formData.translations,
-                            [code]: {
-                              ...formData.translations[code],
-                              value: e.target.value
-                            }
-                          }
-                        })}
-                        placeholder={`Enter value (e.g., 500K+, 150+, 99.9%)`}
-                        required
-                      />
-                      <p className="text-xs text-gray-500 mt-1">
-                        Numbers and metrics (like 500K+, 99.9%) typically don't need translation
-                      </p>
-                    </div>
-                  )}
-
-                  <div>
-                    <Label htmlFor={`trans-label-${code}`}>
-                      Label {code === DEFAULT_LOCALE && <span className="text-red-500">*</span>}
-                    </Label>
-                    <Input
-                      id={`trans-label-${code}`}
-                      value={formData.translations[code]?.label || ""}
-                      onChange={(e) => setFormData({
-                        ...formData,
-                        translations: {
-                          ...formData.translations,
-                          [code]: {
-                            ...formData.translations[code],
-                            label: e.target.value
-                          }
-                        }
-                      })}
-                      placeholder={`Enter label in ${locale.name} (e.g., Happy Customers)`}
-                      required={code === DEFAULT_LOCALE}
-                    />
-                    {code !== DEFAULT_LOCALE && (
-                      <p className="text-xs text-gray-500 mt-1">
-                        Translate the label text to {locale.name}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {locale.direction === 'rtl' && (
-                  <div className="flex items-center gap-2 p-2 bg-blue-50 text-blue-700 rounded text-sm">
-                    <AlertCircle className="w-4 h-4" />
-                    RTL layout will be applied for Arabic content
-                  </div>
-                )}
-              </TabsContent>
-            ))}
-          </Tabs>
-
-          <div className="flex justify-end gap-2 pt-4 border-t">
-            <Button variant="outline" onClick={() => setShowTranslationsDialog(false)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSaveTranslationsOnly}
-              className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white"
-              disabled={isSavingTranslations}
-            >
-              {isSavingTranslations ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Saving Translations...
-                </>
-              ) : (
-                <>
-                  <Languages className="w-4 h-4 mr-2" />
-                  Save All Translations
-                </>
-              )}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }
