@@ -49,6 +49,7 @@ export function DummyTicketsManagement() {
   })
   const [listContent, setListContent] = useState([])
   const [translationLocale, setTranslationLocale] = useState('en')
+  const [isSavingTranslations, setIsSavingTranslations] = useState(false)
 
   
   // Fetch tickets from API
@@ -488,6 +489,8 @@ export function DummyTicketsManagement() {
       }
     })
 
+    setIsSavingTranslations(true)
+
     try {
       const savePromises = translationsToSave.map(async (translation) => {
         const response = await fetch('/api/about/dummy-tickets/translations', {
@@ -529,6 +532,8 @@ export function DummyTicketsManagement() {
         description: "Network error occurred while saving translations. Please try again.",
         variant: "destructive"
       })
+    } finally {
+      setIsSavingTranslations(false)
     }
   }
 
@@ -748,7 +753,7 @@ export function DummyTicketsManagement() {
 
       {/* Add Content Dialog */}
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Add New Content</DialogTitle>
           </DialogHeader>
@@ -831,7 +836,7 @@ export function DummyTicketsManagement() {
             {formData.content_type === 'list' && (
               <div>
                 <Label>Steps Content</Label>
-                <div className="space-y-2 border rounded-lg p-4 bg-gray-50">
+                <div className="space-y-2 border rounded-lg p-4 bg-gray-50 max-h-[40vh] overflow-y-auto">
                   {listContent.length === 0 ? (
                     <p className="text-sm text-gray-500 text-center py-4">
                       No steps added. Click "Add Step" to add your first step.
@@ -948,7 +953,7 @@ export function DummyTicketsManagement() {
 
       {/* Edit Content Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Content</DialogTitle>
           </DialogHeader>
@@ -1032,7 +1037,7 @@ export function DummyTicketsManagement() {
             {formData.content_type === 'list' && (
               <div>
                 <Label>Steps Content</Label>
-                <div className="space-y-2 border rounded-lg p-4 bg-gray-50">
+                <div className="space-y-2 border rounded-lg p-4 bg-gray-50 max-h-[40vh] overflow-y-auto">
                   {listContent.length === 0 ? (
                     <p className="text-sm text-gray-500 text-center py-4">
                       No steps added. Click "Add Step" to add your first step.
@@ -1149,7 +1154,7 @@ export function DummyTicketsManagement() {
 
       {/* Translations Dialog */}
       <Dialog open={showTranslationsDialog} onOpenChange={setShowTranslationsDialog}>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               Translations for "{selectedCard?.title || editingCard?.title}"
@@ -1271,8 +1276,19 @@ export function DummyTicketsManagement() {
             <Button
               onClick={handleSaveAllTranslations}
               className="bg-[#0066FF] hover:bg-[#0055CC]"
+              disabled={isSavingTranslations}
             >
-              Save All Translations
+              {isSavingTranslations ? (
+                <>
+                  <Globe className="w-4 h-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Globe className="w-4 h-4 mr-2" />
+                  Save All Translations
+                </>
+              )}
             </Button>
           </div>
         </DialogContent>
