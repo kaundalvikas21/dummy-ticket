@@ -1,16 +1,80 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { FileCheck, CheckCircle2 } from "lucide-react"
+import { FileCheck, CheckCircle2, Loader2 } from "lucide-react"
+import { useState, useEffect } from "react"
+import { useLocale } from "@/contexts/locale-context"
 
 export function WhatAreDummyTickets() {
-  const steps = [
+  const { locale } = useLocale()
+  const [tickets, setTickets] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  // Default fallback steps
+  const defaultSteps = [
     "Select your desired route and travel dates",
     "Complete the booking with your passenger details",
     "Receive your flight reservation instantly via email",
     "Submit it with your visa application",
     "Valid PNR code verifiable with airlines",
   ]
+
+  // Fetch dynamic content from API
+  useEffect(() => {
+    const fetchTickets = async () => {
+      try {
+        const response = await fetch(`/api/about/dummy-tickets?locale=${locale}`)
+        const result = await response.json()
+
+        if (response.ok && result.tickets) {
+          setTickets(result.tickets)
+        }
+      } catch (error) {
+        console.error('Error fetching dummy tickets:', error)
+        // Keep default content if API fails
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchTickets()
+  }, [locale])
+
+  // Parse content based on content type
+  const parseContent = (ticket) => {
+    if (!ticket || !ticket.content) return []
+
+    try {
+      // Try to parse as JSON array first
+      const parsed = JSON.parse(ticket.content)
+      if (Array.isArray(parsed)) {
+        return parsed.filter(item => item.trim()) // Filter out empty items
+      }
+    } catch (e) {
+      // If JSON parse fails, treat as simple text and split by lines
+      if (ticket.content_type === 'list') {
+        const lines = ticket.content.split('\n')
+          .map(line => line.replace(/^[\d.\-\s]+/, '').trim()) // Remove numbering/bullets
+          .filter(line => line.trim())
+        return lines
+      }
+      // For simple content, return as single paragraph array
+      return [ticket.content]
+    }
+    return []
+  }
+
+  if (loading) {
+    return (
+      <section className="py-12 md:py-20 bg-gradient-to-br from-blue-50 to-white">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <Loader2 className="w-8 h-8 animate-spin text-[#0066FF]" />
+          </div>
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section className="py-12 md:py-20 bg-gradient-to-br from-blue-50 to-white">
@@ -30,47 +94,71 @@ export function WhatAreDummyTickets() {
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="bg-white rounded-3xl p-8 shadow-lg border border-gray-100"
-          >
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#0066FF] to-[#00D4AA] flex items-center justify-center mb-6">
-              <FileCheck className="w-6 h-6 text-white" />
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">Why You Need It</h3>
-            <p className="text-base text-gray-700 mb-4">
-              Embassies require proof of onward travel for visa applications. Buying real tickets early is risky and expensive.
+        {tickets.length === 0 ? (
+          <div className="text-center py-12">
+            <FileCheck className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-xl font-medium text-gray-900 mb-2">
+              No content available yet
+            </h3>
+            <p className="text-gray-500">
+              Content will appear here once added from the admin panel.
             </p>
-            <p className="text-base text-gray-700">
-              Dummy tickets solve this by providing authentic, verifiable reservations without financial risk.
-            </p>
-          </motion.div>
+          </div>
+        ) : (
+          <div className={`grid gap-8 max-w-6xl mx-auto ${
+            tickets.length === 1 ? 'md:grid-cols-1' : 'md:grid-cols-2'
+          }`}>
+            {tickets.map((ticket, index) => {
+              const contentItems = parseContent(ticket)
+              const isFirstCard = index === 0
+              const isEvenIndex = index % 2 === 0
 
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="bg-white rounded-3xl p-8 shadow-lg border border-gray-100"
-          >
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#00D4AA] to-[#0066FF] flex items-center justify-center mb-6">
-              <CheckCircle2 className="w-5 h-5 text-white" />
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">How It Works</h3>
-            <ul className="space-y-3">
-              {steps.map((item, i) => (
-                <li key={i} className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-[#00D4AA] mt-0.5" />
-                  <span className="text-base text-gray-700">{item}</span>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-        </div>
+              return (
+                <motion.div
+                  key={ticket.id}
+                  initial={{ opacity: 0, [isEvenIndex ? 'x' : 'x']: isEvenIndex ? -30 : 30 }}
+                  whileInView={{ opacity: 1, [isEvenIndex ? 'x' : 'x']: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  className="bg-white rounded-3xl p-8 shadow-lg border border-gray-100"
+                >
+                  <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br flex items-center justify-center mb-6 ${
+                    isFirstCard
+                      ? 'from-[#0066FF] to-[#00D4AA]'
+                      : 'from-[#00D4AA] to-[#0066FF]'
+                  }`}>
+                    {isFirstCard ? (
+                      <FileCheck className="w-6 h-6 text-white" />
+                    ) : (
+                      <CheckCircle2 className="w-5 h-5 text-white" />
+                    )}
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                    {ticket.title}
+                  </h3>
+                  <div className="text-base text-gray-700">
+                    {ticket.content_type === 'list' ? (
+                      <ul className="space-y-3">
+                        {contentItems.map((item, i) => (
+                          <li key={i} className="flex items-start gap-3">
+                            <CheckCircle2 className="w-5 h-5 text-[#00D4AA] mt-0.5 flex-shrink-0" />
+                            <span className="text-base text-gray-700">{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <div className="space-y-4">
+                        {contentItems.map((paragraph, i) => (
+                          <p key={i} className="mb-4 last:mb-0">{paragraph}</p>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )
+            })}
+          </div>
+        )}
       </div>
     </section>
   )

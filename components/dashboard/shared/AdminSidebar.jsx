@@ -22,6 +22,7 @@ import {
   HelpCircle,
   Phone,
   Info,
+  Globe,
   Inbox,
 } from "lucide-react"
 import Link from "next/link"
