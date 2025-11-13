@@ -548,11 +548,11 @@ export function DummyTicketsManagement() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Skeleton cards matching the actual content structure */}
               {Array.from({ length: 2 }).map((_, i) => (
                 <SkeletonCard key={i}>
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div className="flex flex-col lg:flex-row justify-between items-start gap-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-3">
                         {/* Title and Badges Skeleton */}
@@ -605,7 +605,7 @@ export function DummyTicketsManagement() {
               No dummy tickets found. {searchTerm ? 'Try a different search term.' : 'Create your first multi-language dummy ticket!'}
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {filteredTickets.map((ticket, index) => {
                 const completion = getTranslationStatus(ticket)
                 // Prioritize English from translations table, fallback to main table
@@ -618,10 +618,10 @@ export function DummyTicketsManagement() {
                     key={ticket.id}
                     className="border rounded-lg p-4 hover:shadow-md transition-shadow"
                   >
-                    <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+                    <div className="flex flex-col lg:flex-row justify-between items-start gap-4">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2 flex-wrap">
-                          <h3 className="font-semibold truncate text-gray-900">
+                          <h3 className="font-semibold text-gray-900">
                             {displayTitle}
                           </h3>
                           <Badge
@@ -676,7 +676,7 @@ export function DummyTicketsManagement() {
                               </p>
                             )
                           ) : (
-                            <p className="line-clamp-2">{displayContent}</p>
+                            <p>{displayContent}</p>
                           )}
                         </div>
                         <div className="flex flex-wrap gap-1 mt-2">
