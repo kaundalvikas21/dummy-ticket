@@ -903,7 +903,6 @@ export function AboutStatsManagement() {
                   <div className="mb-3">
                     <Label className="text-sm font-medium flex items-center gap-2">
                       Label
-                      {code === DEFAULT_LOCALE && <span className="text-xs bg-blue-500 text-white px-2 py-1 rounded">Edit from main stat</span>}
                     </Label>
                     <Input
                       value={formData.translations?.[code]?.label || ''}
@@ -911,21 +910,6 @@ export function AboutStatsManagement() {
                       placeholder="Enter label (e.g., Happy Customers)"
                       className="mt-1"
                       required={code === DEFAULT_LOCALE}
-                      disabled={code === DEFAULT_LOCALE}
-                    />
-                  </div>
-
-                  {/* Translation Value */}
-                  <div className="mb-3">
-                    <Label className="text-sm font-medium flex items-center gap-2">
-                      Value
-                      {code === DEFAULT_LOCALE && <span className="text-xs bg-blue-500 text-white px-2 py-1 rounded">Edit from main stat</span>}
-                    </Label>
-                    <Input
-                      value={formData.translations?.[code]?.value || ''}
-                      onChange={(e) => updateTranslationValue(code, e.target.value)}
-                      placeholder="Enter value (e.g., 500K+, 150+, 99.9%)"
-                      className="mt-1"
                       disabled={code === DEFAULT_LOCALE}
                     />
                   </div>

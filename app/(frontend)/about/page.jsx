@@ -10,7 +10,7 @@ export default function AboutPage() {
     <>
       <HeroSection />
       <StatsSection />
-      <WhatAreDummyTickets />
+      <WhatAreDummyTickets/>
       <WhyChooseVisaFly />
       <OurCommitment />
       <ReadyToBook />

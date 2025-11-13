@@ -4,7 +4,8 @@ import { useState, useEffect } from "react"
 import HeroSection from "@/components/pages/faq/HeroSection"
 import FaqCategory from "@/components/pages/faq/FaqCategory"
 import StillHaveQuestions from "@/components/pages/faq/StillHaveQuestions"
-import { HelpCircle, Clock, MessageSquare, CreditCard, FileText, Globe, Loader2, Phone, Settings, Info, Users, ShoppingCart, Shield, BookOpen, CheckCircle, AlertCircle, Zap, Package, Truck } from "lucide-react"
+import { HelpCircle, Clock, MessageSquare, CreditCard, FileText, Globe, Phone, Settings, Info, Users, ShoppingCart, Shield, BookOpen, CheckCircle, AlertCircle, Zap, Package, Truck } from "lucide-react"
+import { SkeletonCard, SkeletonCardContent, SkeletonCardHeader } from "@/components/ui/skeleton-card"
 import { useLocale } from "@/contexts/locale-context"
 
 export default function FAQPage() {
@@ -59,11 +60,47 @@ export default function FAQPage() {
 
   if (loading || localeLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600" />
-          <p className="text-gray-600">Loading FAQ content...</p>
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50">
+        {/* Hero Section Skeleton */}
+        <div className="min-h-[70vh] flex items-center justify-center">
+          <div className="text-center">
+            <div className="h-16 w-80 bg-gray-200 rounded-2xl mx-auto mb-6 animate-pulse"></div>
+            <div className="h-8 w-64 bg-gray-200 rounded mx-auto mb-4 animate-pulse"></div>
+            <div className="h-4 w-96 bg-gray-200 rounded mx-auto animate-pulse"></div>
+          </div>
         </div>
+
+        {/* FAQ Categories Skeleton */}
+        <section className="py-16">
+          <div className="container mx-auto px-4">
+            <div className="max-w-5xl mx-auto space-y-12">
+              {/* Generate 4 FAQ category skeletons */}
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="bg-white rounded-xl shadow-lg p-6 md:p-8">
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="w-12 h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+                    <div>
+                      <div className="h-6 w-32 bg-gray-200 rounded mb-2 animate-pulse"></div>
+                      <div className="h-4 w-48 bg-gray-200 rounded animate-pulse"></div>
+                    </div>
+                  </div>
+                  {/* FAQ Items Skeleton */}
+                  <div className="space-y-4">
+                    {Array.from({ length: 3 }).map((_, j) => (
+                      <div key={j} className="border-b border-gray-100 pb-4 last:border-0">
+                        <div className="space-y-2">
+                          <div className="h-5 w-full bg-gray-200 rounded animate-pulse"></div>
+                          <div className="h-4 w-3/4 bg-gray-200 rounded animate-pulse"></div>
+                          <div className="h-4 w-4/5 bg-gray-200 rounded animate-pulse"></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
       </div>
     )
   }

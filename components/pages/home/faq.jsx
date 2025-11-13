@@ -119,9 +119,25 @@ export function FAQ({ faqs: propFaqs }) {
             transition={{ duration: 0.6 }}
           >
             {loading ? (
-              <div className="text-center py-12">
-                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#0066FF]"></div>
-                <p className="mt-4 text-gray-600">Loading FAQs...</p>
+              <div className="space-y-3 md:space-y-4">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="bg-white/60 backdrop-blur-lg rounded-2xl shadow-lg border border-white/50 overflow-hidden p-4 md:p-6"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1 space-y-3">
+                        <div className="h-4 md:h-5 bg-gray-200 rounded animate-pulse w-3/4 md:w-2/3"></div>
+                        <div className="space-y-2">
+                          <div className="h-3 bg-gray-200 rounded animate-pulse w-full"></div>
+                          <div className="h-3 bg-gray-200 rounded animate-pulse w-5/6"></div>
+                          <div className="h-3 bg-gray-200 rounded animate-pulse w-4/5"></div>
+                        </div>
+                      </div>
+                      <div className="ml-4 h-5 w-5 bg-gray-200 rounded animate-pulse"></div>
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : error ? (
               <div className="text-center py-12">

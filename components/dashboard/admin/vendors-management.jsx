@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Search, Plus, Eye, Edit, Trash2, CheckCircle, XCircle } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -19,9 +19,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Label } from "@/components/ui/label"
+import { SkeletonTable } from "@/components/ui/skeleton-table"
 
 export function VendorsManagement() {
-  const [vendors, setVendors] = useState([
+  const [vendors, setVendors] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [mockVendors, setMockVendors] = useState([
     {
       id: "VEN-001",
       name: "Global Travel Agency",
@@ -74,6 +77,24 @@ export function VendorsManagement() {
     address: "",
     commission: "",
   })
+
+  // Simulate API call
+  useEffect(() => {
+    const fetchVendors = async () => {
+      try {
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 1300))
+        // Set the mock data
+        setVendors(mockVendors)
+      } catch (error) {
+        console.error('Error fetching vendors:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchVendors()
+  }, [mockVendors])
 
   const filteredVendors = vendors.filter(
     (vendor) =>
@@ -205,10 +226,12 @@ export function VendorsManagement() {
       {/* Vendors Table */}
       <Card>
         <CardHeader>
-          <CardTitle>All Vendors ({filteredVendors.length})</CardTitle>
+          <CardTitle>{loading ? 'Loading Vendors...' : `All Vendors (${filteredVendors.length})`}</CardTitle>
         </CardHeader>
         <CardContent>
-          {filteredVendors.length === 0 ? (
+          {loading ? (
+            <SkeletonTable rows={5} columns={7} />
+          ) : filteredVendors.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 px-4">
               <div className="w-20 h-20 mb-6 rounded-full bg-gradient-to-br from-[#0066FF]/10 to-[#00D4AA]/10 flex items-center justify-center">
                 <Search className="w-10 h-10 text-gray-400" />

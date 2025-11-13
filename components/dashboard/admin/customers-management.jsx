@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Search, Download, Eye, Mail, Phone, Filter, ChevronDown } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -18,9 +18,12 @@ import {
   DropdownMenuTrigger,
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu"
+import { SkeletonTable } from "@/components/ui/skeleton-table"
 
 export function CustomersManagement() {
-  const [customers] = useState([
+  const [customers, setCustomers] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [mockCustomers, setMockCustomers] = useState([
     {
       id: "CUST-001",
       name: "John Doe",
@@ -91,6 +94,24 @@ export function CustomersManagement() {
   const [filterStatus, setFilterStatus] = useState("all")
   const [filterOrderRange, setFilterOrderRange] = useState("all")
   const [sortBy, setSortBy] = useState("name")
+
+  // Simulate API call
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      try {
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 1200))
+        // Set the mock data
+        setCustomers(mockCustomers)
+      } catch (error) {
+        console.error('Error fetching customers:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchCustomers()
+  }, [mockCustomers])
 
   // Apply filters and search
   const filteredCustomers = customers
@@ -332,8 +353,8 @@ export function CustomersManagement() {
       <Card>
         <CardHeader>
           <CardTitle>
-            All Customers ({filteredCustomers.length})
-            {searchQuery && filteredCustomers.length > 0 && (
+            All Customers {loading ? '' : `(${filteredCustomers.length})`}
+            {!loading && searchQuery && filteredCustomers.length > 0 && (
               <span className="text-sm font-normal text-gray-500 ml-2">
                 matching "{searchQuery}"
               </span>
@@ -341,19 +362,22 @@ export function CustomersManagement() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Customer</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Contact</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Total Orders</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Total Spent</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Status</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Join Date</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Actions</th>
-                </tr>
-              </thead>
+          {loading ? (
+            <SkeletonTable rows={5} columns={7} />
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Customer</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Contact</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Total Orders</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Total Spent</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Status</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Join Date</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Actions</th>
+                  </tr>
+                </thead>
               <tbody>
                 {filteredCustomers.length > 0 ? (
                   filteredCustomers.map((customer) => (
@@ -414,6 +438,7 @@ export function CustomersManagement() {
               </tbody>
             </table>
           </div>
+          )}
         </CardContent>
       </Card>
 

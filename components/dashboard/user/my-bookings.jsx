@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Search, Eye, Download, Plane, Calendar } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
+import { SkeletonCard, SkeletonCardContent } from "@/components/ui/skeleton-card"
 
 const Booking = {
   id: "",
@@ -35,11 +36,13 @@ export function MyBookings({ setActiveSection }) {
   const [statusFilter, setStatusFilter] = useState("all")
   const [selectedBooking, setSelectedBooking] = useState(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   const router = useRouter()
   const { toast } = useToast()
 
-  const [bookings] = useState([
+  const [bookings, setBookings] = useState([])
+  const [mockBookings] = useState([
     {
       id: "TKT-12345",
       route: "New York → London",
@@ -83,6 +86,24 @@ export function MyBookings({ setActiveSection }) {
       bookingDate: "Nov 5, 2024",
     },
   ])
+
+  // Simulate API call
+  useEffect(() => {
+    const fetchBookings = async () => {
+      try {
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        // Set the mock data
+        setBookings(mockBookings)
+      } catch (error) {
+        console.error('Error fetching bookings:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchBookings()
+  }, [mockBookings])
 
   const filteredBookings = bookings.filter((booking) => {
     const matchesSearch =
@@ -312,7 +333,35 @@ startxref
 
       {/* Bookings List */}
       <div className="space-y-4">
-        {filteredBookings.length > 0 ? (
+        {loading ? (
+          // Loading skeleton cards
+          Array.from({ length: 3 }).map((_, i) => (
+            <SkeletonCard key={i}>
+              <div className="p-6">
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-gray-200 animate-pulse"></div>
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <div className="h-6 w-48 bg-gray-200 rounded animate-pulse"></div>
+                        <div className="h-6 w-20 bg-gray-200 rounded-full animate-pulse"></div>
+                      </div>
+                      <div className="h-4 w-40 bg-gray-200 rounded animate-pulse"></div>
+                      <div className="flex items-center gap-4">
+                        <div className="h-4 w-32 bg-gray-200 rounded animate-pulse"></div>
+                        <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="h-9 w-24 bg-gray-200 rounded animate-pulse"></div>
+                    <div className="h-9 w-20 bg-gray-200 rounded animate-pulse"></div>
+                  </div>
+                </div>
+              </div>
+            </SkeletonCard>
+          ))
+        ) : filteredBookings.length > 0 ? (
           filteredBookings.map((booking) => (
             <Card key={booking.id}>
               <CardContent className="p-6">

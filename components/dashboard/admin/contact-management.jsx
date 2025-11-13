@@ -21,6 +21,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
 import { FlagIcon } from "@/components/ui/flag-icon"
+import { SkeletonCard, SkeletonCardContent } from "@/components/ui/skeleton-card"
 
 export function ContactManagement() {
   const { toast } = useToast()
@@ -533,10 +534,98 @@ export function ContactManagement() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-          <p className="text-gray-600">Loading contact settings...</p>
+      <div className="space-y-6">
+        {/* Loading skeleton for header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <div className="h-8 w-48 bg-gray-200 rounded animate-pulse mb-2"></div>
+            <div className="h-4 w-64 bg-gray-200 rounded animate-pulse"></div>
+          </div>
+          <div className="h-10 w-32 bg-gray-200 rounded-lg animate-pulse"></div>
+        </div>
+
+        {/* Loading skeleton for search */}
+        <div className="h-10 w-full bg-gray-200 rounded-lg animate-pulse"></div>
+
+        {/* Loading skeleton for contact categories */}
+        <div className="space-y-6">
+          {/* Basic Contact Information skeleton */}
+          <div className="shadow-sm rounded-lg border border-gray-200 p-6">
+            <div className="h-6 w-48 bg-gray-200 rounded animate-pulse mb-4"></div>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-gray-200 rounded animate-pulse"></div>
+                      <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
+                    </div>
+                    <div className="flex gap-1">
+                      <div className="h-6 w-6 bg-gray-200 rounded animate-pulse"></div>
+                      <div className="h-6 w-6 bg-gray-200 rounded animate-pulse"></div>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="h-4 w-full bg-gray-200 rounded animate-pulse"></div>
+                    <div className="h-3 w-3/4 bg-gray-200 rounded animate-pulse"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Working Hours skeleton */}
+          <div className="shadow-sm rounded-lg border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-6 w-32 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+              <div className="h-8 w-24 bg-gray-200 rounded animate-pulse"></div>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="h-4 w-20 bg-gray-200 rounded animate-pulse"></div>
+                    <div className="flex gap-1">
+                      <div className="h-6 w-6 bg-gray-200 rounded animate-pulse"></div>
+                      <div className="h-6 w-6 bg-gray-200 rounded animate-pulse"></div>
+                    </div>
+                  </div>
+                  <div className="h-3 w-16 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Country Support skeleton */}
+          <div className="shadow-sm rounded-lg border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-6 w-32 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+              <div className="h-8 w-28 bg-gray-200 rounded animate-pulse"></div>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-gray-200 rounded animate-pulse"></div>
+                      <div className="h-4 w-20 bg-gray-200 rounded animate-pulse"></div>
+                    </div>
+                    <div className="flex gap-1">
+                      <div className="h-6 w-6 bg-gray-200 rounded animate-pulse"></div>
+                      <div className="h-6 w-6 bg-gray-200 rounded animate-pulse"></div>
+                    </div>
+                  </div>
+                  <div className="h-3 w-24 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     )

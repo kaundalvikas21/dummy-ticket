@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Search, Download, Eye, Edit, Trash2 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -19,9 +19,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Label } from "@/components/ui/label"
+import { SkeletonTable } from "@/components/ui/skeleton-table"
 
 export function OrdersManagement() {
-  const [orders, setOrders] = useState([
+  const [orders, setOrders] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [mockOrders, setMockOrders] = useState([
     {
       id: "ORD-12345",
       customer: "John Doe",
@@ -96,6 +99,24 @@ export function OrdersManagement() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [orderToDelete, setOrderToDelete] = useState(null)
+
+  // Simulate API call
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 1500))
+        // Set the mock data
+        setOrders(mockOrders)
+      } catch (error) {
+        console.error('Error fetching orders:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchOrders()
+  }, [mockOrders])
 
   const filteredOrders = orders.filter((order) => {
     const matchesSearch =
@@ -209,23 +230,26 @@ export function OrdersManagement() {
       {/* Orders Table */}
       <Card>
         <CardHeader>
-          <CardTitle>All Orders ({filteredOrders.length})</CardTitle>
+          <CardTitle>All Orders</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Order ID</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Customer</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Service</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Route</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Amount</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Status</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Date</th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Actions</th>
-                </tr>
-              </thead>
+          {loading ? (
+            <SkeletonTable rows={5} columns={8} />
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Order ID</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Customer</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Service</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Route</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Amount</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Status</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Date</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Actions</th>
+                  </tr>
+                </thead>
               <tbody>
                 {filteredOrders.length > 0 ? (
                   filteredOrders.map((order) => (
@@ -328,6 +352,7 @@ export function OrdersManagement() {
               </tbody>
             </table>
           </div>
+          )}
         </CardContent>
       </Card>
 

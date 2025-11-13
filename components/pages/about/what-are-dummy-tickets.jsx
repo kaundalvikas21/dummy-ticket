@@ -1,9 +1,10 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { FileCheck, CheckCircle2, Loader2 } from "lucide-react"
+import { FileCheck, CheckCircle2 } from "lucide-react"
 import { useState, useEffect } from "react"
 import { useLocale } from "@/contexts/locale-context"
+import { SkeletonCard, SkeletonCardContent, SkeletonCardHeader } from "@/components/ui/skeleton-card"
 
 export function WhatAreDummyTickets() {
   const { locale } = useLocale()
@@ -69,7 +70,28 @@ export function WhatAreDummyTickets() {
       <section className="py-12 md:py-20 bg-gradient-to-br from-blue-50 to-white">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-center min-h-[400px]">
-            <Loader2 className="w-8 h-8 animate-spin text-[#0066FF]" />
+            <div className="text-center mb-8">
+              <div className="h-16 w-64 bg-gray-200 rounded-2xl mx-auto mb-4 animate-pulse"></div>
+              <div className="h-4 w-80 bg-gray-200 rounded mx-auto animate-pulse"></div>
+            </div>
+
+            {/* Card Skeletons matching the 2-column layout */}
+            <div className="max-w-6xl mx-auto grid gap-8 md:grid-cols-2">
+              {Array.from({ length: 2 }).map((_, i) => (
+                <SkeletonCard key={i}>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br flex items-center justify-center bg-gray-200 animate-pulse">
+                    </div>
+                    <div className="h-8 w-48 bg-gray-200 rounded animate-pulse"></div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="h-4 w-full bg-gray-200 rounded animate-pulse"></div>
+                    <div className="h-4 w-3/4 bg-gray-200 rounded animate-pulse"></div>
+                    <div className="h-4 w-5/6 bg-gray-200 rounded animate-pulse"></div>
+                  </div>
+                </SkeletonCard>
+              ))}
+            </div>
           </div>
         </div>
       </section>

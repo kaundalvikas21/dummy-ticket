@@ -27,6 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
+import { SkeletonTable } from "@/components/ui/skeleton-table"
 
 export function ContactSubmissionsViewer() {
   const { toast } = useToast()
@@ -402,11 +403,8 @@ export function ContactSubmissionsViewer() {
       <Card className="shadow-sm">
         <CardContent className="p-0">
           {loading ? (
-            <div className="flex items-center justify-center h-64">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-                <p className="text-gray-600">Loading submissions...</p>
-              </div>
+            <div className="p-6">
+              <SkeletonTable rows={5} columns={6} />
             </div>
           ) : submissions.length === 0 ? (
             <div className="text-center py-12">
