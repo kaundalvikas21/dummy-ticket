@@ -1,7 +1,5 @@
 {
   "hero": {
-    "title": "About VisaFly",
-    "subtitle": "Your trusted partner for dummy tickets and visa documentation since 1990",
     "trustedSince": "Trusted Since 1990",
     "heroTitle": "Your Trusted Partner for",
     "heroTitleHighlight": "Visa Flight Reservations",
@@ -13,23 +11,7 @@
     "errorLoading": "Unable to Load Statistics",
     "tryAgain": "Try Again",
     "noStats": "No Statistics Available",
-    "noStatsMessage": "Statistics will appear here once they are added by the administrator.",
-    "yearsInBusiness": {
-      "number": "34+",
-      "label": "Years in Business"
-    },
-    "countriesServed": {
-      "number": "150+",
-      "label": "Countries Served"
-    },
-    "happyCustomers": {
-      "number": "500K+",
-      "label": "Happy Customers"
-    },
-    "ticketsIssued": {
-      "number": "1M+",
-      "label": "Tickets Issued"
-    }
+    "noStatsMessage": "Statistics will appear here once they are added by the administrator."
   },
   "whatAreDummyTickets": {
     "whatAreTitle": "What Are",
@@ -37,25 +19,7 @@
     "whatAreDescription": "A dummy ticket, also known as a flight reservation or flight itinerary, is a temporary booking used as proof of travel plans for visa applications.",
     "noContent": "No content available yet",
     "noContentMessage": "Content will appear here once added from the admin panel.",
-    "description": "A dummy ticket is a verifiable flight reservation that looks exactly like a regular airline ticket with a valid PNR (Passenger Name Record) or booking reference number. These are commonly used for visa applications where proof of travel plans is required.",
-    "features": [
-      {
-        "title": "Valid PNR Code",
-        "description": "6-digit alphanumeric code provided by airlines"
-      },
-      {
-        "title": "Verifiable Online",
-        "description": "Check via airline's \"Manage Booking\" tool"
-      },
-      {
-        "title": "Professional Format",
-        "description": "Looks exactly like a real airline ticket"
-      },
-      {
-        "title": "Accepted Worldwide",
-        "description": "Recognized by embassies and immigration authorities"
-      }
-    ]
+    "description": "A dummy ticket is a verifiable flight reservation that looks exactly like a regular airline ticket with a valid PNR (Passenger Name Record) or booking reference number. These are commonly used for visa applications where proof of travel plans is required."
   },
   "whyChooseUs": {
     "whyChooseTitle": "Why Choose",
@@ -86,32 +50,6 @@
         "title": "Trusted Since 1990",
         "description": "Over three decades of excellence in providing reliable flight reservations for visa applications."
       }
-    ],
-    "reasons": [
-      {
-        "title": "Experience Since 1990",
-        "description": "Over three decades of expertise in visa documentation and travel requirements"
-      },
-      {
-        "title": "Multi-lingual Support",
-        "description": "Our team speaks multiple languages to serve customers from around the world"
-      },
-      {
-        "title": "Secure Payments",
-        "description": "Multiple payment options with industry-standard security measures"
-      },
-      {
-        "title": "24/7 Customer Service",
-        "description": "Round-the-clock support to assist with your urgent needs"
-      },
-      {
-        "title": "Global Reach",
-        "description": "Serving customers from all over the world with local expertise"
-      },
-      {
-        "title": "Quality Assurance",
-        "description": "Every booking meets the highest standards of authenticity and reliability"
-      }
     ]
   },
   "ourCommitment": {
@@ -122,35 +60,12 @@
     "valuesTitle": "Our Values",
     "mission": "To simplify the visa application process by providing authentic, reliable flight reservations that help travelers achieve their dreams of exploring the world.",
     "vision": "To be the world's most trusted platform for dummy tickets, setting the standard for quality, reliability, and customer satisfaction in the travel documentation industry.",
-    "values": "Integrity, transparency, and customer-first approach guide everything we do. We believe in building lasting relationships through exceptional service and unwavering commitment to quality.",
-    "valuesList": [
-      {
-        "title": "Excellence",
-        "description": "We deliver the highest quality service with attention to every detail"
-      },
-      {
-        "title": "Integrity",
-        "description": "Honest and transparent business practices with clear pricing"
-      },
-      {
-        "title": "Customer First",
-        "description": "Your success is our priority - we go above and beyond to help"
-      },
-      {
-        "title": "Innovation",
-        "description": "Continuously improving our services to meet your evolving needs"
-      }
-    ]
+    "values": "Integrity, transparency, and customer-first approach guide everything we do. We believe in building lasting relationships through exceptional service and unwavering commitment to quality."
   },
   "readyToBook": {
     "readyTitle": "Ready to Get Your Dummy Ticket?",
     "readyDescription": "Join hundreds of thousands of satisfied customers who trust us for their visa applications",
     "bookNow": "Book Your Ticket Now",
-    "cta": "Get Your Dummy Ticket Now",
-    "support": {
-      "title": "Need Help?",
-      "description": "Our customer support team is available 24/7 to assist you with any questions or concerns.",
-      "button": "Contact Support"
-    }
+    "cta": "Get Your Dummy Ticket Now"
   }
 }

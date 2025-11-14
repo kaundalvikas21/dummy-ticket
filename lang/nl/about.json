@@ -1,7 +1,5 @@
 {
   "hero": {
-    "title": "Over VisaFly",
-    "subtitle": "Uw betrouwbare partner voor dummy tickets en visumdocumentatie sinds 1990",
     "trustedSince": "Vertrouwd Sinds 1990",
     "heroTitle": "Uw Betrouwbare Partner voor",
     "heroTitleHighlight": "Visa Vliegtuigticketreserveringen",
@@ -13,23 +11,7 @@
     "errorLoading": "Kan Statistieken Niet Laden",
     "tryAgain": "Probeer Opnieuw",
     "noStats": "Geen Statistieken Beschikbaar",
-    "noStatsMessage": "Statistieken verschijnen hier zodra ze zijn toegevoegd door de beheerder.",
-    "yearsInBusiness": {
-      "number": "34+",
-      "label": "Jaar in Bedrijf"
-    },
-    "countriesServed": {
-      "number": "150+",
-      "label": "Bediende Landen"
-    },
-    "happyCustomers": {
-      "number": "500K+",
-      "label": "Tevreden Klanten"
-    },
-    "ticketsIssued": {
-      "number": "1M+",
-      "label": "Uitgegeven Tickets"
-    }
+    "noStatsMessage": "Statistieken verschijnen hier zodra ze zijn toegevoegd door de beheerder."
   },
   "whatAreDummyTickets": {
     "whatAreTitle": "Wat Zijn",
@@ -37,25 +19,7 @@
     "whatAreDescription": "Een dummy ticket, ook bekend als een vluchtreservering of vluchtroute, is een tijdelijke boeking die wordt gebruikt als bewijs van reisplannen voor visumaanvragen.",
     "noContent": "Nog geen inhoud beschikbaar",
     "noContentMessage": "Inhoud verschijnt hier zodra deze is toegevoegd vanuit het beheerpanel.",
-    "description": "Een dummy ticket is een verifieerbare vluchtreservering die er precies uitziet als een regulier vliegtuigticket met een geldige PNR (Passagiers Naam Record) of boekingsreferentienummer. Deze worden veel gebruikt voor visumaanvragen waar bewijs van reisplannen vereist is.",
-    "features": [
-      {
-        "title": "Geldige PNR Code",
-        "description": "6-cijferig alfanumerieke code geleverd door vliegtuigmaatschappijen"
-      },
-      {
-        "title": "Online Verifieerbaar",
-        "description": "Controleer via de Beheer Boeking tool van de vliegtuigmaatschappij"
-      },
-      {
-        "title": "Professionele Opmaak",
-        "description": "Ziet er exact uit als een echt vliegtuigticket"
-      },
-      {
-        "title": "Wereldwijd Geaccepteerd",
-        "description": "Erkend door ambassades en immigratieautoriteiten"
-      }
-    ]
+    "description": "Een dummy ticket is een verifieerbare vluchtreservering die er precies uitziet als een regulier vliegtuigticket met een geldige PNR (Passagiers Naam Record) of boekingsreferentienummer. Deze worden veel gebruikt voor visumaanvragen waar bewijs van reisplannen vereist is."
   },
   "whyChooseUs": {
     "whyChooseTitle": "Waarom Kiezen",
@@ -86,32 +50,6 @@
         "title": "Vertrouwd Sinds 1990",
         "description": "Meer dan drie decennia van excellentie in het leveren van betrouwbare vluchtreserveringen voor visumaanvragen."
       }
-    ],
-    "reasons": [
-      {
-        "title": "Ervaring Sinds 1990",
-        "description": "Meer dan drie decennia expertise in visumdocumentatie en reiseisen"
-      },
-      {
-        "title": "Meertalige Support",
-        "description": "Ons team spreekt meerdere talen om klanten van over de hele wereld te bedienen"
-      },
-      {
-        "title": "Veilige Betalingen",
-        "description": "Meerdere betaalopties met industriestandaard veiligheidsmaatregelen"
-      },
-      {
-        "title": "24/7 Klantenservice",
-        "description": "De klok rond support om te helpen met uw dringende behoeften"
-      },
-      {
-        "title": "Wereldwijd Bereik",
-        "description": "Klanten bedienen van over de hele wereld met lokale expertise"
-      },
-      {
-        "title": "Kwaliteitsborging",
-        "description": "Elke boeking voldoet aan de hoogste standaarden van authenticiteit en betrouwbaarheid"
-      }
     ]
   },
   "ourCommitment": {
@@ -122,35 +60,12 @@
     "valuesTitle": "Onze Waarden",
     "mission": "Het visumaanvraagproces vereenvoudigen door authentieke, betrouwbare vluchtreserveringen te bieden die reizigers helpen hun dromen van wereldverkenning te verwezenlijken.",
     "vision": "Werelds meest betrouwbare platform voor dummy tickets worden, de standaard zettend voor kwaliteit, betrouwbaarheid en klanttevredenheid in de reisdocumentatie industrie.",
-    "values": "Integriteit, transparantie en klant-eerst aanpak leiden alles wat we doen. We geloven in het opbouwen van langdurige relaties door uitzonderlijke service en onwrikbare toewijding aan kwaliteit.",
-    "valuesList": [
-      {
-        "title": "Excellentie",
-        "description": "We leveren de hoogste kwaliteit service met aandacht voor elk detail"
-      },
-      {
-        "title": "Integriteit",
-        "description": "Eerlijke en transparante zakelijke praktijken met duidelijke prijzen"
-      },
-      {
-        "title": "Klant Eerst",
-        "description": "Uw succes is onze prioriteit - we gaan verder om u te helpen"
-      },
-      {
-        "title": "Innovatie",
-        "description": "Continu verbeteren van onze services om aan uw veranderende behoeften te voldoen"
-      }
-    ]
+    "values": "Integriteit, transparantie en klant-eerst aanpak leiden alles wat we doen. We geloven in het opbouwen van langdurige relaties door uitzonderlijke service en onwrikbare toewijding aan kwaliteit."
   },
   "readyToBook": {
     "readyTitle": "Klaar om Uw Dummy Ticket te Krijgen?",
     "readyDescription": "Sluit u aan bij honderdduizenden tevreden klanten die ons vertrouwen voor hun visumaanvragen",
     "bookNow": "Boek Uw Ticket Nu",
-    "cta": "Krijg Uw Dummy Ticket Nu",
-    "support": {
-      "title": "Hulp Nodig?",
-      "description": "Onze klantenservice team is 24/7 beschikbaar om u te helpen met alle vragen of zorgen.",
-      "button": "Neem Contact op met Support"
-    }
+    "cta": "Krijg Uw Dummy Ticket Nu"
   }
 }

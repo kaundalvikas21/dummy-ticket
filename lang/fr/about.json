@@ -1,7 +1,5 @@
 {
   "hero": {
-    "title": "À Propos de VisaFly",
-    "subtitle": "Votre partenaire de confiance pour les billets factices et documentation de visa depuis 1990",
     "trustedSince": "Confiance Depuis 1990",
     "heroTitle": "Votre Partenaire de Confiance pour",
     "heroTitleHighlight": "Réservations de Vols Visa",
@@ -13,23 +11,7 @@
     "errorLoading": "Impossible de Charger les Statistiques",
     "tryAgain": "Réessayer",
     "noStats": "Aucune Statistique Disponible",
-    "noStatsMessage": "Les statistiques apparaîtront ici une fois ajoutées par l'administrateur.",
-    "yearsInBusiness": {
-      "number": "34+",
-      "label": "Années d'Activité"
-    },
-    "countriesServed": {
-      "number": "150+",
-      "label": "Pays Desservis"
-    },
-    "happyCustomers": {
-      "number": "500K+",
-      "label": "Clients Satisfaits"
-    },
-    "ticketsIssued": {
-      "number": "1M+",
-      "label": "Billets Émis"
-    }
+    "noStatsMessage": "Les statistiques apparaîtront ici une fois ajoutées par l'administrateur."
   },
   "whatAreDummyTickets": {
     "whatAreTitle": "Que Sont",
@@ -37,25 +19,7 @@
     "whatAreDescription": "Un billet fictif, également connu sous le nom de réservation de vol ou d'itinéraire de vol, est une réservation temporaire utilisée comme preuve de projets de voyage pour les demandes de visa.",
     "noContent": "Aucun contenu disponible pour le moment",
     "noContentMessage": "Le contenu apparaîtra ici une fois ajouté depuis le panneau d'administration.",
-    "description": "Un billet fictif est une réservation de vol vérifiable qui ressemble exactement à un billet d'avion régulier avec un PNR valide (Passenger Name Record) ou numéro de référence de réservation. Ceux-ci sont couramment utilisés pour les demandes de visa où une preuve de projets de voyage est requise.",
-    "features": [
-      {
-        "title": "Code PNR Valide",
-        "description": "Code alphanumérique à 6 chiffres fourni par les compagnies aériennes"
-      },
-      {
-        "title": "Vérifiable en Ligne",
-        "description": "Vérifiez via l'outil \"Gérer la Réservation\" de la compagnie aérienne"
-      },
-      {
-        "title": "Format Professionnel",
-        "description": "Ressemble exactement à un vrai billet d'avion"
-      },
-      {
-        "title": "Accepté Mondialement",
-        "description": "Reconnu par les ambassades et les autorités d'immigration"
-      }
-    ]
+    "description": "Un billet fictif est une réservation de vol vérifiable qui ressemble exactement à un billet d'avion régulier avec un PNR valide (Passenger Name Record) ou numéro de référence de réservation. Ceux-ci sont couramment utilisés pour les demandes de visa où une preuve de projets de voyage est requise."
   },
   "whyChooseUs": {
     "whyChooseTitle": "Pourquoi Choisir",
@@ -86,32 +50,6 @@
         "title": "Confiance Depuis 1990",
         "description": "Plus de trois décennies d'excellence dans la fourniture de réservations de vols fiables pour les demandes de visa."
       }
-    ],
-    "reasons": [
-      {
-        "title": "Expérience Depuis 1990",
-        "description": "Plus de trois décennies d'expertise en documentation de visa et exigences de voyage"
-      },
-      {
-        "title": "Support Multilingue",
-        "description": "Notre équipe parle plusieurs langues pour servir les clients du monde entier"
-      },
-      {
-        "title": "Paiements Sécurisés",
-        "description": "Options de paiement multiples avec des mesures de sécurité standard de l'industrie"
-      },
-      {
-        "title": "Service Client 24/7",
-        "description": "Support disponible 24h/24 et 7j/7 pour aider avec vos besoins urgents"
-      },
-      {
-        "title": "Portée Mondiale",
-        "description": "Servir les clients du monde entier avec une expertise locale"
-      },
-      {
-        "title": "Assurance Qualité",
-        "description": "Chaque réservation répond aux plus hauts standards d'authenticité et de fiabilité"
-      }
     ]
   },
   "ourCommitment": {
@@ -122,35 +60,12 @@
     "valuesTitle": "Nos Valeurs",
     "mission": "Simplifier le processus de demande de visa en fournissant des réservations de vol authentiques et fiables qui aident les voyageurs à réaliser leur rêve d'explorer le monde.",
     "vision": "Devenir la plateforme la plus digne de confiance au monde pour les billets fictifs, établissant le standard de qualité, de fiabilité et de satisfaction client dans l'industrie de la documentation de voyage.",
-    "values": "L'intégrité, la transparence et l'approche client d'abord guident tout ce que nous faisons. Nous croyons en construire des relations durables grâce à un service exceptionnel et un engagement inébranlable envers la qualité.",
-    "valuesList": [
-      {
-        "title": "Excellence",
-        "description": "Nous fournissons le service de plus haute qualité avec attention à chaque détail"
-      },
-      {
-        "title": "Intégrité",
-        "description": "Pratiques commerciales honnêtes et transparentes avec des tarifs clairs"
-      },
-      {
-        "title": "Client d'Abord",
-        "description": "Votre succès est notre priorité - nous allons au-delà pour vous aider"
-      },
-      {
-        "title": "Innovation",
-        "description": "Amélioration continue de nos services pour répondre à vos besoins évolutifs"
-      }
-    ]
+    "values": "L'intégrité, la transparence et l'approche client d'abord guident tout ce que nous faisons. Nous croyons en construire des relations durables grâce à un service exceptionnel et un engagement inébranlable envers la qualité."
   },
   "readyToBook": {
     "readyTitle": "Prêt à Obtenir Votre Billet Fictif ?",
     "readyDescription": "Rejoignez des centaines de milliers de clients satisfaits qui nous font confiance pour leurs demandes de visa",
     "bookNow": "Réservez Votre Billet Maintenant",
-    "cta": "Obtenez Votre Billet Fictif Maintenant",
-    "support": {
-      "title": "Besoin d'Aide ?",
-      "description": "Notre équipe de support client est disponible 24h/24 et 7j/7 pour vous aider avec toutes questions ou préoccupations.",
-      "button": "Contacter le Support"
-    }
+    "cta": "Obtenez Votre Billet Fictif Maintenant"
   }
 }
