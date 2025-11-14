@@ -1,0 +1,188 @@
+{
+  "hero": {
+    "subtitle": "Veilig en Geverifieerd Boekingsproces",
+    "title": "Boek Uw Dummy Vliegtuigticket",
+    "description": "Voltooi onderstaande veilige boekingsprocedure om uw verifieerbare vliegtuigreservering voor visumaanvragen te ontvangen. Vertrouwd door duizenden wereldwijd.",
+    "features": {
+      "instantDelivery": "Directe Levering",
+      "validPnr": "Geldige PNR Code",
+      "secure": "100% Veilig",
+      "support": "24/7 Support"
+    }
+  },
+  "progress": {
+    "completed": "Voltooid",
+    "inProgress": "In Behandeling",
+    "pending": "Wachtend"
+  },
+  "formSteps": {
+    "selectPlan": "Selecteer Plan",
+    "passengerDetails": "Passagiersgegevens",
+    "travelDetails": "Reisgegevens",
+    "deliveryOptions": "Leveringsopties",
+    "billingPayment": "Facturatie en Betaling"
+  },
+  "servicePlan": {
+    "title": "Selecteer Uw Serviceplan",
+    "description": "Kies het plan dat het beste past bij uw reisbehoeften",
+    "mostPopular": "MEEST POPULAIR",
+    "perPerson": "/ persoon",
+    "allPlansInclude": "Alle plannen omvatten: Geldige PNR code, verifieerbare reserveringen, directe levering, en 24/7 klantenservice. Selecteer uw plan om door te gaan met het boekingsproces.",
+    "dummyTicket": {
+      "name": "DUMMY TICKET VOOR VISA",
+      "price": "19",
+      "description": "Perfect voor visumaanvragen en bewijs van doorreis",
+      "features": [
+        "Geldige PNR code inbegrepen",
+        "Verifieerbaar op vliegtuigmaatschappij websites",
+        "Directe levering via e-mail",
+        "24/7 klantenservice"
+      ]
+    },
+    "dummyTicketHotel": {
+      "name": "DUMMY TICKET & HOTEL",
+      "price": "35",
+      "description": "Vliegtuigreservering + hotelboeking voor compleet reisbewijs",
+      "features": [
+        "Vliegtuig + hotel reservering",
+        "Verifieerbaar op vliegtuigmaatschappij/hotel websites",
+        "Accommodatie tot 1 maand",
+        "Complete reisdocumentatie"
+      ]
+    },
+    "returnTicket": {
+      "name": "DUMMY RETOURTICKET",
+      "price": "15",
+      "description": "Retourticket voor immigratie en bewijs van reis",
+      "features": [
+        "Retourvlucht reservering",
+        "Geldige PNR voor verificatie",
+        "Perfect voor immigratievereisten",
+        "Directe levering"
+      ]
+    }
+  },
+  "passengerDetails": {
+    "title": "Passagiersgegevens",
+    "description": "Voer de passagiersinformatie in zoals deze op het paspoort staat",
+    "fields": {
+      "firstName": "Voornaam",
+      "lastName": "Achternaam",
+      "email": "E-mail",
+      "phone": "Telefoon",
+      "passportNumber": "Paspoortnummer",
+      "dateOfBirth": "Geboortedatum",
+      "gender": "Geslacht",
+      "nationality": "Nationaliteit"
+    },
+    "placeholders": {
+      "firstName": "Jan",
+      "lastName": "Janssen",
+      "email": "jan.janssen@voorbeeld.nl",
+      "phone": "+31 20 123 4567",
+      "passportNumber": "A12345678",
+      "selectDateOfBirth": "Selecteer geboortedatum",
+      "selectGender": "Selecteer geslacht",
+      "selectNationality": "Selecteer nationaliteit"
+    },
+    "genders": {
+      "male": "Man",
+      "female": "Vrouw",
+      "other": "Anders"
+    }
+  },
+  "travelDetails": {
+    "title": "Reisgegevens",
+    "description": "Vul uw reisroute informatie in",
+    "fields": {
+      "tripType": "Reistype",
+      "roundTrip": "Retour",
+      "oneWay": "Enkele Reis",
+      "departureAndReturn": "Vertrek en Terugkeer",
+      "departureOnly": "Alleen Vertrek",
+      "departureCity": "Vertrekstad",
+      "arrivalCity": "Aankomstad",
+      "departureDate": "Vertrekdatum",
+      "returnDate": "Retourdatum",
+      "travelClass": "Reisklasse"
+    },
+    "placeholders": {
+      "departureCity": "Amsterdam (AMS)",
+      "arrivalCity": "Londen (LHR)"
+    },
+    "travelClasses": {
+      "economy": "Economy Class",
+      "premiumEconomy": "Premium Economy",
+      "business": "Business Class",
+      "first": "First Class"
+    }
+  },
+  "deliveryOptions": {
+    "title": "Leveringsopties",
+    "description": "Kies hoe u uw dummy ticket wilt ontvangen",
+    "fields": {
+      "deliveryMethod": "Leveringsmethode",
+      "emailDelivery": "E-mail Levering (Direct)",
+      "whatsappDelivery": "WhatsApp Levering",
+      "emailDeliveryDesc": "Ontvang uw ticket binnen enkele minuten",
+      "whatsappDeliveryDesc": "Ontvang uw ticket via WhatsApp",
+      "deliveryEmail": "E-mailadres voor Levering",
+      "whatsappNumber": "WhatsApp Nummer"
+    },
+    "placeholders": {
+      "deliveryEmail": "uw.email@voorbeeld.nl",
+      "whatsappNumber": "+31 20 123 4567"
+    },
+    "securityNote": "Veilige Levering: Uw dummy ticket wordt geleverd met een geldige PNR code die geverifieerd kan worden op vliegtuigmaatschappij websites. Alle documenten zijn versleuteld en veilig verzonden."
+  },
+  "billingPayment": {
+    "title": "Facturatie en Betaling",
+    "description": "Voer uw factuurgegevens en betaalgegevens in",
+    "billingAddress": "Factuuradres",
+    "fields": {
+      "fullName": "Volledige Naam",
+      "address": "Adres",
+      "city": "Stad",
+      "zipCode": "Postcode",
+      "country": "Land",
+      "paymentMethod": "Betaalmethode",
+      "creditDebitCard": "Credit / Debit Card",
+      "cardTypes": "Visa, Mastercard, Amex",
+      "paypal": "PayPal",
+      "paypalDesc": "Snelle en veilige betaling"
+    },
+    "placeholders": {
+      "fullName": "Jan Janssen",
+      "address": "Hoofdstraat 123",
+      "city": "Amsterdam",
+      "zipCode": "1012 JS",
+      "selectCountry": "Selecteer land"
+    },
+    "securityNote": "Veilige Betaling: Uw betaalgegevens zijn versleuteld en worden veilig verwerkt. We slaan nooit uw kaartgegevens op."
+  },
+  "orderSummary": {
+    "title": "Besteloverzicht",
+    "noPlanSelected": "Nog geen plan geselecteerd",
+    "servicePlan": "Serviceplan",
+    "whatsappDelivery": "WhatsApp Levering",
+    "total": "Totaal",
+    "features": [
+      "Geldige PNR code inbegrepen",
+      "Verifieerbaar op vliegtuigmaatschappij websites",
+      "Directe levering",
+      "24/7 klantenservice"
+    ],
+    "guarantee": {
+      "title": "Geld-Terug Garantie",
+      "description": "Als uw ticket niet wordt geaccepteerd, restitueren wij 100% van uw betaling."
+    }
+  },
+  "navigation": {
+    "previous": "Vorige",
+    "prev": "Vorig",
+    "next": "Volgende",
+    "nextStep": "Volgende Stap",
+    "complete": "Bestelling Voltooien",
+    "processing": "Bezig met verwerken..."
+  }
+}

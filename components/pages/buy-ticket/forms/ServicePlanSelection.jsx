@@ -3,8 +3,10 @@
 import { motion } from "framer-motion"
 import { Check, Shield } from "lucide-react"
 import { InfoCard } from "@/components/ui/input/InfoCard"
+import { useTranslation } from "@/lib/translations"
 
 export function ServicePlanSelection({ formData, updateFormData, servicePlans }) {
+  const { t } = useTranslation()
   return (
     <motion.div 
       initial={{ opacity: 0 }} 
@@ -13,10 +15,10 @@ export function ServicePlanSelection({ formData, updateFormData, servicePlans })
     >
       <div>
         <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-1 md:mb-2">
-          Select Your Service Plan
+          {t('buyTicket.servicePlan.title')}
         </h2>
         <p className="text-sm md:text-base text-gray-600">
-          Choose the plan that best fits your travel needs
+          {t('buyTicket.servicePlan.description')}
         </p>
       </div>
 
@@ -33,8 +35,8 @@ export function ServicePlanSelection({ formData, updateFormData, servicePlans })
 
       <InfoCard
         icon={Shield}
-        title="All plans include:"
-        description="Valid PNR code, verifiable reservations, instant delivery, and 24/7 customer support. Select your plan to continue with the booking process."
+        title={t('buyTicket.servicePlan.allPlansInclude')}
+        description={t('buyTicket.servicePlan.allPlansInclude')}
         variant="blue"
       />
     </motion.div>
@@ -42,6 +44,7 @@ export function ServicePlanSelection({ formData, updateFormData, servicePlans })
 }
 
 function PlanCard({ plan, isSelected, onSelect }) {
+  const { t } = useTranslation()
   return (
     <motion.button
       type="button"
@@ -57,7 +60,7 @@ function PlanCard({ plan, isSelected, onSelect }) {
       {plan.popular && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2">
           <span className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white px-4 py-1 rounded-full text-xs font-semibold">
-            MOST POPULAR
+            {t('buyTicket.servicePlan.mostPopular')}
           </span>
         </div>
       )}
@@ -72,7 +75,7 @@ function PlanCard({ plan, isSelected, onSelect }) {
             <span className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#0066FF] to-[#00D4AA] bg-clip-text text-transparent">
               {plan.price}
             </span>
-            <span className="text-xs md:text-sm text-gray-500 ml-1">/ person</span>
+            <span className="text-xs md:text-sm text-gray-500 ml-1">{t('buyTicket.servicePlan.perPerson')}</span>
           </div>
           <p className="text-[10px] md:text-xs text-gray-500">{plan.currencies}</p>
         </div>

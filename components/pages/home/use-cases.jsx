@@ -52,7 +52,7 @@ export function UseCases() {
   ]
 
   const useCases = isLoading ? fallbackCases :
-    (Array.isArray(t('useCases.cases')) ? t('useCases.cases').map((caseData, index) => ({
+    (Array.isArray(t('homepage.useCases.cases')) ? t('homepage.useCases.cases').map((caseData, index) => ({
       ...caseData,
       icon: [FileCheck, Plane, BookOpen, Briefcase, Globe, Car][index],
       color: [
@@ -74,9 +74,9 @@ export function UseCases() {
           transition={{ duration: 0.6 }}
           className="text-center mb-8 md:mb-16"
         >
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 md:mb-4">{t('useCases.title')}</h2>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 md:mb-4">{t('homepage.useCases.title')}</h2>
           <p className="text-base md:text-xl text-gray-600 max-w-2xl mx-auto">
-            {t('useCases.subtitle')}
+            {t('homepage.useCases.subtitle')}
           </p>
         </motion.div>
 

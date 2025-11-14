@@ -1,0 +1,188 @@
+{
+  "hero": {
+    "subtitle": "عملية حجز آمنة وموثوقة",
+    "title": "احجز تذكرتك الوهمية",
+    "description": "أكمل عملية الحجز الآمنة أدناه للحصول على حجز رحلتك الموثق لطلبات التأشيرة. موثوق من قبل آلاف الأشخاص حول العالم.",
+    "features": {
+      "instantDelivery": "تسليم فوري",
+      "validPnr": "رمز PNR صالح",
+      "secure": "آمن 100%",
+      "support": "دعم 24/7"
+    }
+  },
+  "progress": {
+    "completed": "مكتمل",
+    "inProgress": "قيد التنفيذ",
+    "pending": "في الانتظار"
+  },
+  "formSteps": {
+    "selectPlan": "اختر الباقة",
+    "passengerDetails": "بيانات المسافر",
+    "travelDetails": "تفاصيل الرحلة",
+    "deliveryOptions": "خيارات التسليم",
+    "billingPayment": "الفواتير والدفع"
+  },
+  "servicePlan": {
+    "title": "اختر باية الخدمة",
+    "description": "اختر الباقة التي تناسب احتياجات سفرك بشكل أفضل",
+    "mostPopular": "الأكثر شعبية",
+    "perPerson": "/ شخص",
+    "allPlansInclude": "جميع الباقات تشمل: رمز PNR صالح، حجوزات موثوقة، تسليم فوري، ودعم العملاء 24/7. اختر باقتك لمتابعة عملية الحجز.",
+    "dummyTicket": {
+      "name": "تذكرة وهمية للتأشيرة",
+      "price": "19",
+      "description": "مثالية لطلبات التأشيرة وإثبات عودة السفر",
+      "features": [
+        "رمز PNR صالح مشمول",
+        "قابل للتحقق من مواقع شركات الطيران",
+        "تسليم فوري عبر البريد الإلكتروني",
+        "دعم العملاء 24/7"
+      ]
+    },
+    "dummyTicketHotel": {
+      "name": "تذكرة وهمية وفندق",
+      "price": "35",
+      "description": "حجز طيران + فندق لإثبات سفر كامل",
+      "features": [
+        "حجز طيران وفندق",
+        "قابل للتحقق من مواقع شركات الطيران/الفنادق",
+        "إقامة حتى شهر واحد",
+        "وثائق سفر كاملة"
+      ]
+    },
+    "returnTicket": {
+      "name": "تذكرة عودة وهمية",
+      "price": "15",
+      "description": "تذكرة عودة للهجرة وإثبات السفر",
+      "features": [
+        "حجز رحلة العودة",
+        "رمز PNR صالح للتحقق",
+        "مثالي لمتطلبات الهجرة",
+        "تسليم فوري"
+      ]
+    }
+  },
+  "passengerDetails": {
+    "title": "بيانات المسافر",
+    "description": "أدخل معلومات المسافر كما تظهر في جواز السفر",
+    "fields": {
+      "firstName": "الاسم الأول",
+      "lastName": "اسم العائلة",
+      "email": "البريد الإلكتروني",
+      "phone": "الهاتف",
+      "passportNumber": "رقم جواز السفر",
+      "dateOfBirth": "تاريخ الميلاد",
+      "gender": "الجنس",
+      "nationality": "الجنسية"
+    },
+    "placeholders": {
+      "firstName": "أحمد",
+      "lastName": "محمد",
+      "email": "ahmed.mohammed@example.com",
+      "phone": "+966 50 123 4567",
+      "passportNumber": "A12345678",
+      "selectDateOfBirth": "اختر تاريخ الميلاد",
+      "selectGender": "اختر الجنس",
+      "selectNationality": "اختر الجنسية"
+    },
+    "genders": {
+      "male": "ذكر",
+      "female": "أنثى",
+      "other": "آخر"
+    }
+  },
+  "travelDetails": {
+    "title": "تفاصيل الرحلة",
+    "description": "قدم معلومات مسار سفرك",
+    "fields": {
+      "tripType": "نوع الرحلة",
+      "roundTrip": "ذهاب وعودة",
+      "oneWay": "ذهاب فقط",
+      "departureAndReturn": "المغادرة والعودة",
+      "departureOnly": "مغادرة فقط",
+      "departureCity": "مدينة المغادرة",
+      "arrivalCity": "مدينة الوصول",
+      "departureDate": "تاريخ المغادرة",
+      "returnDate": "تاريخ العودة",
+      "travelClass": "درجة السفر"
+    },
+    "placeholders": {
+      "departureCity": "الرياض (RUH)",
+      "arrivalCity": "دبي (DXB)"
+    },
+    "travelClasses": {
+      "economy": "درجة السياحة",
+      "premiumEconomy": "درجة السياحة الممتازة",
+      "business": "درجة رجال الأعمال",
+      "first": "الدرجة الأولى"
+    }
+  },
+  "deliveryOptions": {
+    "title": "خيارات التسليم",
+    "description": "اختر كيفية استلام تذكرتك الوهمية",
+    "fields": {
+      "deliveryMethod": "طريقة التسليم",
+      "emailDelivery": "التسليم عبر البريد الإلكتروني (فوري)",
+      "whatsappDelivery": "التسليم عبر واتساب",
+      "emailDeliveryDesc": "استلم تذكرتك خلال دقائق",
+      "whatsappDeliveryDesc": "احصل على تذكرتك عبر واتساب",
+      "deliveryEmail": "البريد الإلكتروني للتسليم",
+      "whatsappNumber": "رقم واتساب"
+    },
+    "placeholders": {
+      "deliveryEmail": "your.email@example.com",
+      "whatsappNumber": "+966 50 123 4567"
+    },
+    "securityNote": "تسليم آمن: سيتم تسليم تذكرتك الوهمية مع رمز PNR صالح يمكن التحقق منه على مواقع شركات الطيران. جميع المستندات مشفرة ومرسلة بشكل آمن."
+  },
+  "billingPayment": {
+    "title": "الفواتير والدفع",
+    "description": "أدخل معلومات الفواتير وتفاصيل الدفع",
+    "billingAddress": "عنوان الفوترة",
+    "fields": {
+      "fullName": "الاسم الكامل",
+      "address": "العنوان",
+      "city": "المدينة",
+      "zipCode": "الرمز البريدي",
+      "country": "البلد",
+      "paymentMethod": "طريقة الدفع",
+      "creditDebitCard": "بطاقة ائتمان / خصم مباشر",
+      "cardTypes": "فيزا، ماستركارد، أمريكان إكسبريس",
+      "paypal": "باي بال",
+      "paypalDesc": "دفع سريع وآمن"
+    },
+    "placeholders": {
+      "fullName": "أحمد محمد",
+      "address": "شارع الملك فهد 123",
+      "city": "الرياض",
+      "zipCode": "12345",
+      "selectCountry": "اختر البلد"
+    },
+    "securityNote": "دفع آمن: معلومات الدفع الخاصة بك مشفرة ومعالجة بشكل آمن. لا نقوم أبداً بتخزين تفاصيل بطاقتك."
+  },
+  "orderSummary": {
+    "title": "ملخص الطلب",
+    "noPlanSelected": "لم يتم اختيار باقة بعد",
+    "servicePlan": "باقة الخدمة",
+    "whatsappDelivery": "تسليم واتساب",
+    "total": "الإجمالي",
+    "features": [
+      "رمز PNR صالح مشمول",
+      "قابل للتحقق من مواقع شركات الطيران",
+      "تسليم فوري",
+      "دعم العملاء 24/7"
+    ],
+    "guarantee": {
+      "title": "ضمان استرداد المال",
+      "description": "إذا لم يتم قبول تذكرتك، سنقوم برد 100% من دفعتك."
+    }
+  },
+  "navigation": {
+    "previous": "السابق",
+    "prev": "السابق",
+    "next": "التالي",
+    "nextStep": "الخطوة التالية",
+    "complete": "إتمام الطلب",
+    "processing": "جاري المعالجة..."
+  }
+}

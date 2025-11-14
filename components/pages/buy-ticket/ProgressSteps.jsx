@@ -2,8 +2,10 @@
 
 import { motion, AnimatePresence } from "framer-motion"
 import { Check } from "lucide-react"
+import { useTranslation } from "@/lib/translations"
 
 export function ProgressSteps({ steps, currentStep }) {
+  const { t } = useTranslation()
   return (
     <div className="max-w-5xl mx-auto mb-8 md:mb-16">
       <div className="relative">
@@ -45,6 +47,7 @@ export function ProgressSteps({ steps, currentStep }) {
 }
 
 function StepItem({ step, index, isCompleted, isActive, isUpcoming }) {
+  const { t } = useTranslation()
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -138,25 +141,25 @@ function StepItem({ step, index, isCompleted, isActive, isUpcoming }) {
             isCompleted || isActive ? "text-gray-900" : "text-gray-400"
           }`}
         >
-          {step.name}
+          {t(`buyTicket.${step.translationKey}`)}
         </div>
 
         <div className="mt-0.5 md:mt-1">
           {isCompleted && (
             <span className="inline-flex items-center gap-0.5 md:gap-1 text-[8px] md:text-xs text-green-600 font-medium">
               <Check className="w-2 h-2 md:w-3 md:h-3" />
-              <span className="hidden md:inline">Completed</span>
+              <span className="hidden md:inline">{t('buyTicket.progress.completed')}</span>
             </span>
           )}
           {isActive && (
             <span className="inline-flex items-center gap-0.5 md:gap-1 text-[8px] md:text-xs text-[#0066FF] font-medium">
               <div className="w-1 h-1 md:w-2 md:h-2 rounded-full bg-[#0066FF] animate-pulse" />
-              <span className="hidden md:inline">In Progress</span>
+              <span className="hidden md:inline">{t('buyTicket.progress.inProgress')}</span>
             </span>
           )}
           {isUpcoming && (
             <span className="text-[8px] md:text-xs text-gray-400 font-medium hidden md:inline">
-              Pending
+              {t('buyTicket.progress.pending')}
             </span>
           )}
         </div>

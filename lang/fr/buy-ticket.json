@@ -1,0 +1,188 @@
+{
+  "hero": {
+    "subtitle": "Processus de Réservation Sécurisé et Vérifié",
+    "title": "Réservez Votre Billet Factice",
+    "description": "Complétez le processus de réservation sécurisé ci-dessous pour obtenir votre réservation de vol vérifiable pour les demandes de visa. Approuvé par des milliers de personnes dans le monde.",
+    "features": {
+      "instantDelivery": "Livraison Instantanée",
+      "validPnr": "Code PNR Valide",
+      "secure": "100% Sécurisé",
+      "support": "Support 24/7"
+    }
+  },
+  "progress": {
+    "completed": "Terminé",
+    "inProgress": "En Cours",
+    "pending": "En Attente"
+  },
+  "formSteps": {
+    "selectPlan": "Sélectionner le Plan",
+    "passengerDetails": "Informations du Passager",
+    "travelDetails": "Détails du Voyage",
+    "deliveryOptions": "Options de Livraison",
+    "billingPayment": "Facturation et Paiement"
+  },
+  "servicePlan": {
+    "title": "Sélectionnez Votre Plan de Service",
+    "description": "Choisissez le plan qui correspond le mieux à vos besoins de voyage",
+    "mostPopular": "LE PLUS POPULAIRE",
+    "perPerson": "/ personne",
+    "allPlansInclude": "Tous les plans incluent : Code PNR valide, réservations vérifiables, livraison instantanée, et support client 24/7. Sélectionnez votre plan pour continuer le processus de réservation.",
+    "dummyTicket": {
+      "name": "BILLET FACTICE POUR VISA",
+      "price": "19",
+      "description": "Parfait pour les demandes de visa et preuve de voyage de retour",
+      "features": [
+        "Code PNR valide inclus",
+        "Vérifiable sur les sites web des compagnies aériennes",
+        "Livraison instantanée par email",
+        "Support client 24/7"
+      ]
+    },
+    "dummyTicketHotel": {
+      "name": "BILLET FACTICE & HÔTEL",
+      "price": "35",
+      "description": "Réservation de vol + hôtel pour preuve de voyage complète",
+      "features": [
+        "Réservation vol + hôtel",
+        "Vérifiable sur les sites web des compagnies aériennes/hôtels",
+        "Hébergement jusqu'à 1 mois",
+        "Documentation de voyage complète"
+      ]
+    },
+    "returnTicket": {
+      "name": "BILLET RETOUR FACTICE",
+      "price": "15",
+      "description": "Billet de retour pour l'immigration et preuve de voyage",
+      "features": [
+        "Réservation de vol retour",
+        "PNR valide pour vérification",
+        "Parfait pour les exigences d'immigration",
+        "Livraison instantanée"
+      ]
+    }
+  },
+  "passengerDetails": {
+    "title": "Informations du Passager",
+    "description": "Entrez les informations du passager comme elles apparaissent sur le passeport",
+    "fields": {
+      "firstName": "Prénom",
+      "lastName": "Nom de Famille",
+      "email": "Email",
+      "phone": "Téléphone",
+      "passportNumber": "Numéro de Passeport",
+      "dateOfBirth": "Date de Naissance",
+      "gender": "Genre",
+      "nationality": "Nationalité"
+    },
+    "placeholders": {
+      "firstName": "Jean",
+      "lastName": "Dupont",
+      "email": "jean.dupont@exemple.com",
+      "phone": "+33 1 23 45 67 89",
+      "passportNumber": "A12345678",
+      "selectDateOfBirth": "Sélectionner la date de naissance",
+      "selectGender": "Sélectionner le genre",
+      "selectNationality": "Sélectionner la nationalité"
+    },
+    "genders": {
+      "male": "Homme",
+      "female": "Femme",
+      "other": "Autre"
+    }
+  },
+  "travelDetails": {
+    "title": "Détails du Voyage",
+    "description": "Fournissez les informations de votre itinéraire de voyage",
+    "fields": {
+      "tripType": "Type de Voyage",
+      "roundTrip": "Aller-Retour",
+      "oneWay": "Aller Simple",
+      "departureAndReturn": "Départ et Retour",
+      "departureOnly": "Départ Uniquement",
+      "departureCity": "Ville de Départ",
+      "arrivalCity": "Ville d'Arrivée",
+      "departureDate": "Date de Départ",
+      "returnDate": "Date de Retour",
+      "travelClass": "Classe de Voyage"
+    },
+    "placeholders": {
+      "departureCity": "Paris (CDG)",
+      "arrivalCity": "New York (JFK)"
+    },
+    "travelClasses": {
+      "economy": "Classe Économique",
+      "premiumEconomy": "Premium Économie",
+      "business": "Classe Affaires",
+      "first": "Première Classe"
+    }
+  },
+  "deliveryOptions": {
+    "title": "Options de Livraison",
+    "description": "Choisissez comment vous souhaitez recevoir votre billet factice",
+    "fields": {
+      "deliveryMethod": "Méthode de Livraison",
+      "emailDelivery": "Livraison Email (Instantanée)",
+      "whatsappDelivery": "Livraison WhatsApp",
+      "emailDeliveryDesc": "Recevez votre billet en quelques minutes",
+      "whatsappDeliveryDesc": "Recevez votre billet via WhatsApp",
+      "deliveryEmail": "Email de Livraison",
+      "whatsappNumber": "Numéro WhatsApp"
+    },
+    "placeholders": {
+      "deliveryEmail": "votre.email@exemple.com",
+      "whatsappNumber": "+33 1 23 45 67 89"
+    },
+    "securityNote": "Livraison Sécurisée : Votre billet factice sera livré avec un code PNR valide qui peut être vérifié sur les sites web des compagnies aériennes. Tous les documents sont cryptés et envoyés de manière sécurisée."
+  },
+  "billingPayment": {
+    "title": "Facturation et Paiement",
+    "description": "Entrez vos informations de facturation et détails de paiement",
+    "billingAddress": "Adresse de Facturation",
+    "fields": {
+      "fullName": "Nom Complet",
+      "address": "Adresse",
+      "city": "Ville",
+      "zipCode": "Code Postal",
+      "country": "Pays",
+      "paymentMethod": "Méthode de Paiement",
+      "creditDebitCard": "Carte de Crédit / Débit",
+      "cardTypes": "Visa, Mastercard, Amex",
+      "paypal": "PayPal",
+      "paypalDesc": "Paiement rapide et sécurisé"
+    },
+    "placeholders": {
+      "fullName": "Jean Dupont",
+      "address": "123 Rue Principale",
+      "city": "Paris",
+      "zipCode": "75001",
+      "selectCountry": "Sélectionner le pays"
+    },
+    "securityNote": "Paiement Sécurisé : Vos informations de paiement sont cryptées et traitées de manière sécurisée. Nous ne stockons jamais les détails de votre carte."
+  },
+  "orderSummary": {
+    "title": "Récapitulatif de la Commande",
+    "noPlanSelected": "Aucun plan sélectionné",
+    "servicePlan": "Plan de Service",
+    "whatsappDelivery": "Livraison WhatsApp",
+    "total": "Total",
+    "features": [
+      "Code PNR valide inclus",
+      "Vérifiable sur les sites web des compagnies aériennes",
+      "Livraison instantanée",
+      "Support client 24/7"
+    ],
+    "guarantee": {
+      "title": "Garantie de Remboursement",
+      "description": "Si votre billet n'est pas accepté, nous vous rembourserons 100% de votre paiement."
+    }
+  },
+  "navigation": {
+    "previous": "Précédent",
+    "prev": "Préc",
+    "next": "Suivant",
+    "nextStep": "Étape Suivante",
+    "complete": "Finaliser la Commande",
+    "processing": "Traitement en cours..."
+  }
+}

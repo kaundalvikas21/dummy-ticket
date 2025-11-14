@@ -103,15 +103,15 @@ export function FAQ({ faqs: propFaqs }) {
             <h2 className={`text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 md:mb-4 text-balance ${
               locale === 'ar' ? 'text-right' : ''
             }`}>
-              {t('faq.title')}{" "}
+              {t('homepage.faq.title')}{" "}
               <span className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] bg-clip-text text-transparent">
-                {t('faq.highlighted')}
+                {t('homepage.faq.highlighted')}
               </span>
             </h2>
             <p className={`text-base md:text-xl text-gray-600 text-pretty ${
               locale === 'ar' ? 'text-right' : ''
             }`}>
-              {t('faq.subtitle')}
+              {t('homepage.faq.subtitle')}
             </p>
           </motion.div>
 

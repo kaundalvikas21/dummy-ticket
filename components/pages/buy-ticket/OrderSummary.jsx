@@ -2,19 +2,17 @@
 
 import { motion } from "framer-motion"
 import { Check, Shield } from "lucide-react"
+import { useTranslation } from "@/lib/translations"
 
 export function OrderSummary({ formData, servicePlans }) {
+  const { t } = useTranslation()
+
   const selectedPlan = servicePlans.find((plan) => plan.id === formData.selectedPlan)
   const basePrice = selectedPlan?.price || 0
   const deliveryFee = formData.deliveryMethod === "whatsapp" ? 5 : 0
   const total = basePrice + deliveryFee
 
-  const benefits = [
-    "Valid PNR code included",
-    "Verifiable on airline websites",
-    "Instant delivery",
-    "24/7 customer support"
-  ]
+  const benefits = t('buyTicket.orderSummary.features')
 
   return (
     <div className="sticky top-24 self-start">
@@ -34,7 +32,7 @@ export function OrderSummary({ formData, servicePlans }) {
 
         <div className="relative z-10">
           <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-4 md:mb-6">
-            Order Summary
+            {t('buyTicket.orderSummary.title')}
           </h3>
 
           {/* Selected Plan Details */}
@@ -57,13 +55,13 @@ export function OrderSummary({ formData, servicePlans }) {
               </>
             ) : (
               <div className="text-xs md:text-sm text-gray-500 italic">
-                No plan selected yet
+                {t('buyTicket.orderSummary.noPlanSelected')}
               </div>
             )}
 
             {deliveryFee > 0 && (
               <div className="flex justify-between text-xs md:text-sm">
-                <span className="text-gray-600">WhatsApp Delivery</span>
+                <span className="text-gray-600">{t('buyTicket.orderSummary.whatsappDelivery')}</span>
                 <span className="font-semibold">${deliveryFee}</span>
               </div>
             )}
@@ -71,7 +69,7 @@ export function OrderSummary({ formData, servicePlans }) {
             {/* Total */}
             <div className="border-t border-gray-200 pt-3 md:pt-4">
               <div className="flex justify-between items-center">
-                <span className="font-bold text-gray-900 text-sm md:text-base">Total</span>
+                <span className="font-bold text-gray-900 text-sm md:text-base">{t('buyTicket.orderSummary.total')}</span>
                 <span className="font-bold text-xl md:text-2xl text-[#0066FF]">${total}</span>
               </div>
             </div>
@@ -92,11 +90,11 @@ export function OrderSummary({ formData, servicePlans }) {
             <div className="flex items-center gap-2 mb-1.5 md:mb-2">
               <Shield className="w-4 h-4 md:w-5 md:h-5 text-[#0066FF]" />
               <span className="font-semibold text-gray-900 text-sm md:text-base">
-                Money-Back Guarantee
+                {t('buyTicket.orderSummary.guarantee.title')}
               </span>
             </div>
             <p className="text-xs md:text-sm text-gray-600">
-              If your ticket is not accepted, we'll refund 100% of your payment.
+              {t('buyTicket.orderSummary.guarantee.description')}
             </p>
           </div>
         </div>

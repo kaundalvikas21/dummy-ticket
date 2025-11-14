@@ -1,0 +1,188 @@
+{
+  "hero": {
+    "subtitle": "Proceso de Reserva Seguro y Verificado",
+    "title": "Reserva tu Billete Ficticio",
+    "description": "Completa el proceso de reserva seguro a continuación para obtener tu reserva de vuelo verificable para solicitudes de visa. Confiable para miles de personas en todo el mundo.",
+    "features": {
+      "instantDelivery": "Entrega Inmediata",
+      "validPnr": "Código PNR Válido",
+      "secure": "100% Seguro",
+      "support": "Soporte 24/7"
+    }
+  },
+  "progress": {
+    "completed": "Completado",
+    "inProgress": "En Progreso",
+    "pending": "Pendiente"
+  },
+  "formSteps": {
+    "selectPlan": "Seleccionar Plan",
+    "passengerDetails": "Datos del Pasajero",
+    "travelDetails": "Detalles del Viaje",
+    "deliveryOptions": "Opciones de Entrega",
+    "billingPayment": "Facturación y Pago"
+  },
+  "servicePlan": {
+    "title": "Selecciona tu Plan de Servicio",
+    "description": "Elige el plan que mejor se ajuste a tus necesidades de viaje",
+    "mostPopular": "EL MÁS POPULAR",
+    "perPerson": "/ persona",
+    "allPlansInclude": "Todos los planes incluyen: Código PNR válido, reservas verificables, entrega inmediata y soporte al cliente 24/7. Selecciona tu plan para continuar con el proceso de reserva.",
+    "dummyTicket": {
+      "name": "BILLETE FICTICIO PARA VISA",
+      "price": "19",
+      "description": "Perfecto para solicitudes de visa y comprobante de viaje de regreso",
+      "features": [
+        "Código PNR válido incluido",
+        "Verificable en sitios web de aerolíneas",
+        "Entrega inmediata por correo electrónico",
+        "Soporte al cliente 24/7"
+      ]
+    },
+    "dummyTicketHotel": {
+      "name": "BILLETE FICTICIO & HOTEL",
+      "price": "35",
+      "description": "Reserva de vuelo + hotel para comprobante de viaje completo",
+      "features": [
+        "Reserva de vuelo + hotel",
+        "Verificable en sitios web de aerolíneas/hoteles",
+        "Alojamiento hasta 1 mes",
+        "Documentación de viaje completa"
+      ]
+    },
+    "returnTicket": {
+      "name": "BILLETE DE REGRESO FICTICIO",
+      "price": "15",
+      "description": "Billete de regreso para inmigración y comprobante de viaje",
+      "features": [
+        "Reserva de vuelo de regreso",
+        "PNR válido para verificación",
+        "Perfecto para requisitos de inmigración",
+        "Entrega inmediata"
+      ]
+    }
+  },
+  "passengerDetails": {
+    "title": "Datos del Pasajero",
+    "description": "Ingresa la información del pasajero como aparece en el pasaporte",
+    "fields": {
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "email": "Correo Electrónico",
+      "phone": "Teléfono",
+      "passportNumber": "Número de Pasaporte",
+      "dateOfBirth": "Fecha de Nacimiento",
+      "gender": "Género",
+      "nationality": "Nacionalidad"
+    },
+    "placeholders": {
+      "firstName": "Juan",
+      "lastName": "García",
+      "email": "juan.garcia@ejemplo.com",
+      "phone": "+34 91 123 45 67",
+      "passportNumber": "A12345678",
+      "selectDateOfBirth": "Seleccionar fecha de nacimiento",
+      "selectGender": "Seleccionar género",
+      "selectNationality": "Seleccionar nacionalidad"
+    },
+    "genders": {
+      "male": "Masculino",
+      "female": "Femenino",
+      "other": "Otro"
+    }
+  },
+  "travelDetails": {
+    "title": "Detalles del Viaje",
+    "description": "Proporciona la información de tu itinerario de viaje",
+    "fields": {
+      "tripType": "Tipo de Viaje",
+      "roundTrip": "Ida y Vuelta",
+      "oneWay": "Solo Ida",
+      "departureAndReturn": "Salida y Regreso",
+      "departureOnly": "Solo Salida",
+      "departureCity": "Ciudad de Salida",
+      "arrivalCity": "Ciudad de Llegada",
+      "departureDate": "Fecha de Salida",
+      "returnDate": "Fecha de Regreso",
+      "travelClass": "Clase de Viaje"
+    },
+    "placeholders": {
+      "departureCity": "Madrid (MAD)",
+      "arrivalCity": "Nueva York (JFK)"
+    },
+    "travelClasses": {
+      "economy": "Clase Económica",
+      "premiumEconomy": "Premium Economy",
+      "business": "Clase Ejecutiva",
+      "first": "Primera Clase"
+    }
+  },
+  "deliveryOptions": {
+    "title": "Opciones de Entrega",
+    "description": "Elige cómo quieres recibir tu billete ficticio",
+    "fields": {
+      "deliveryMethod": "Método de Entrega",
+      "emailDelivery": "Entrega por Correo (Inmediata)",
+      "whatsappDelivery": "Entrega por WhatsApp",
+      "emailDeliveryDesc": "Recibe tu billete en minutos",
+      "whatsappDeliveryDesc": "Recibe tu billete a través de WhatsApp",
+      "deliveryEmail": "Correo de Entrega",
+      "whatsappNumber": "Número de WhatsApp"
+    },
+    "placeholders": {
+      "deliveryEmail": "tu.correo@ejemplo.com",
+      "whatsappNumber": "+34 91 123 45 67"
+    },
+    "securityNote": "Entrega Segura: Tu billete ficticio será entregado con un código PNR válido que puede ser verificado en sitios web de aerolíneas. Todos los documentos están encriptados y enviados de forma segura."
+  },
+  "billingPayment": {
+    "title": "Facturación y Pago",
+    "description": "Ingresa tu información de facturación y detalles de pago",
+    "billingAddress": "Dirección de Facturación",
+    "fields": {
+      "fullName": "Nombre Completo",
+      "address": "Dirección",
+      "city": "Ciudad",
+      "zipCode": "Código Postal",
+      "country": "País",
+      "paymentMethod": "Método de Pago",
+      "creditDebitCard": "Tarjeta de Crédito / Débito",
+      "cardTypes": "Visa, Mastercard, Amex",
+      "paypal": "PayPal",
+      "paypalDesc": "Pago rápido y seguro"
+    },
+    "placeholders": {
+      "fullName": "Juan García",
+      "address": "Calle Principal 123",
+      "city": "Madrid",
+      "zipCode": "28001",
+      "selectCountry": "Seleccionar país"
+    },
+    "securityNote": "Pago Seguro: Tu información de pago está encriptada y procesada de forma segura. Nunca almacenamos los detalles de tu tarjeta."
+  },
+  "orderSummary": {
+    "title": "Resumen del Pedido",
+    "noPlanSelected": "Ningún plan seleccionado todavía",
+    "servicePlan": "Plan de Servicio",
+    "whatsappDelivery": "Entrega WhatsApp",
+    "total": "Total",
+    "features": [
+      "Código PNR válido incluido",
+      "Verificable en sitios web de aerolíneas",
+      "Entrega inmediata",
+      "Soporte al cliente 24/7"
+    ],
+    "guarantee": {
+      "title": "Garantía de Devolución de Dinero",
+      "description": "Si tu billete no es aceptado, te reembolsaremos el 100% de tu pago."
+    }
+  },
+  "navigation": {
+    "previous": "Anterior",
+    "prev": "Ant",
+    "next": "Siguiente",
+    "nextStep": "Siguiente Paso",
+    "complete": "Completar Pedido",
+    "processing": "Procesando..."
+  }
+}

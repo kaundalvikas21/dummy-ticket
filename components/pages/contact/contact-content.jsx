@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { PhoneIcon, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/contexts/auth-context"
+import { useTranslation } from "@/lib/translations"
 
 // --- Custom SVG Icons ---
 const UserIcon = () => (
@@ -54,6 +55,7 @@ const MessageIcon = () => (
 
 // --- Main Component ---
 export default function ContactContent({ settings }) {
+  const { t } = useTranslation()
   const { toast } = useToast()
   const { user } = useAuth()
   const ref = useRef(null)
@@ -63,7 +65,7 @@ export default function ContactContent({ settings }) {
     name: "",
     email: "",
     phone: "",
-    subject: "General Inquiry", // Default subject
+    subject: t('contact.form.fields.subject.options.general'), // Default subject
     message: "",
   })
 

@@ -19,14 +19,18 @@ export function AffiliateCard({
   const { t, isLoading } = useTranslation()
 
   // Use translated content or fallbacks
-  const title = t('affiliate.title')
-  const subtitle = t('affiliate.subtitle')
-  const description = t('affiliate.description')
-  const commission = t('affiliate.commission')
-  const cookieDurationText = t('affiliate.cookieDuration')
-  const minPayoutText = t('affiliate.minPayout')
-  const buttonText = t('affiliate.buttonText')
-  const features = isLoading ? ["Real-time tracking", "Monthly payouts", "Dedicated support"] : t('affiliate.features')
+  const title = t('homepage.affiliate.title')
+  const subtitle = t('homepage.affiliate.subtitle')
+  const description = t('homepage.affiliate.description')
+  const commission = t('homepage.affiliate.commission')
+  const cookieDurationText = t('homepage.affiliate.cookieDuration')
+  const minPayoutText = t('homepage.affiliate.minPayout')
+  const buttonText = t('homepage.affiliate.buttonText')
+  const features = isLoading
+    ? ["Real-time tracking", "Monthly payouts", "Dedicated support"]
+    : Array.isArray(t('homepage.affiliate.features'))
+      ? t('homepage.affiliate.features')
+      : [];
 
   return (
     <motion.div

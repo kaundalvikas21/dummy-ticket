@@ -48,18 +48,18 @@ export function Hero() {
         <div className="max-w-5xl mx-auto text-center">
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
             <h1 className="text-3xl md:text-5xl lg:text-7xl font-bold text-white mb-6 md:mb-8 leading-tight text-balance tracking-tight">
-              {t('hero.title')}
+              {t('homepage.hero.title')}
             </h1>
 
             <p className="text-base md:text-xl lg:text-2xl text-white/95 mb-8 md:mb-14 font-normal text-balance leading-relaxed max-w-3xl mx-auto">
-              {t('hero.subtitle')}
+              {t('homepage.hero.subtitle')}
             </p>
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-4 mb-8 md:mb-12 max-w-2xl mx-auto">
               {[
-                { icon: Shield, text: t('hero.features.embassyApproved') },
-                { icon: Clock, text: t('hero.features.quickDelivery') },
-                { icon: CheckCircle, text: t('hero.features.verifiable') },
+                { icon: Shield, text: t('homepage.hero.features.embassyApproved') },
+                { icon: Clock, text: t('homepage.hero.features.quickDelivery') },
+                { icon: CheckCircle, text: t('homepage.hero.features.verifiable') },
               ].map((item, index) => (
                 <div
                   key={item.text}
@@ -79,7 +79,7 @@ export function Hero() {
                   size="lg"
                   className="bg-white text-[#0066FF] text-base md:text-lg px-6 py-5 md:px-10 md:py-7 rounded-2xl hover:bg-white/90 shadow-xl hover:shadow-2xl transition-all group font-semibold cursor-pointer"
                 >
-                  {t('hero.cta')}
+                  {t('homepage.hero.cta')}
                   <ArrowRight className="ml-2 w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>

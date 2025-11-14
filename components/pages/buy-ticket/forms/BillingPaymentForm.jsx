@@ -5,32 +5,35 @@ import { CreditCard, Lock } from "lucide-react"
 import { TextInput } from "@/components/ui/input/TextInput"
 import { SelectInput } from "@/components/ui/input/SelectInput"
 import { InfoCard } from "@/components/ui/input/InfoCard"
+import { useTranslation } from "@/lib/translations"
 
-
-const countryOptions = [
-{ value: "US", label: "United States" },
-  { value: "UK", label: "United Kingdom" },
-  { value: "CA", label: "Canada" },
-  { value: "AU", label: "Australia" },
-  { value: "IN", label: "India" },
-  { value: "DE", label: "Germany" },
-  { value: "FR", label: "France" },
-  { value: "IT", label: "Italy" },
-  { value: "ES", label: "Spain" },
-  { value: "JP", label: "Japan" },
-  { value: "CN", label: "China" },
-  { value: "SG", label: "Singapore" },
-  { value: "AE", label: "United Arab Emirates" },
-  { value: "SA", label: "Saudi Arabia" },
-  { value: "NZ", label: "New Zealand" },
-  { value: "KR", label: "South Korea" },
-  { value: "BR", label: "Brazil" },
-  { value: "ZA", label: "South Africa" },
-  { value: "MX", label: "Mexico" },
-  { value: "TH", label: "Thailand" },
-]
 
 export function BillingPaymentForm({ formData, updateFormData }) {
+  const { t } = useTranslation()
+
+  const countryOptions = [
+    { value: "US", label: t('buyTicket.passengerDetails.nationalities.us') },
+    { value: "UK", label: t('buyTicket.passengerDetails.nationalities.uk') },
+    { value: "CA", label: t('buyTicket.passengerDetails.nationalities.ca') },
+    { value: "AU", label: t('buyTicket.passengerDetails.nationalities.au') },
+    { value: "IN", label: t('buyTicket.passengerDetails.nationalities.in') },
+    { value: "DE", label: t('buyTicket.passengerDetails.nationalities.de') },
+    { value: "FR", label: t('buyTicket.passengerDetails.nationalities.fr') },
+    { value: "IT", label: t('buyTicket.passengerDetails.nationalities.it') },
+    { value: "ES", label: t('buyTicket.passengerDetails.nationalities.es') },
+    { value: "JP", label: t('buyTicket.passengerDetails.nationalities.jp') },
+    { value: "CN", label: t('buyTicket.passengerDetails.nationalities.cn') },
+    { value: "SG", label: t('buyTicket.passengerDetails.nationalities.sg') },
+    { value: "AE", label: t('buyTicket.passengerDetails.nationalities.ae') },
+    { value: "SA", label: t('buyTicket.passengerDetails.nationalities.sa') },
+    { value: "NZ", label: t('buyTicket.passengerDetails.nationalities.nz') },
+    { value: "KR", label: t('buyTicket.passengerDetails.nationalities.kr') },
+    { value: "BR", label: t('buyTicket.passengerDetails.nationalities.br') },
+    { value: "ZA", label: t('buyTicket.passengerDetails.nationalities.za') },
+    { value: "MX", label: t('buyTicket.passengerDetails.nationalities.mx') },
+    { value: "TH", label: t('buyTicket.passengerDetails.nationalities.th') },
+  ]
+
   return (
     <motion.div 
       initial={{ opacity: 0 }} 
@@ -39,61 +42,61 @@ export function BillingPaymentForm({ formData, updateFormData }) {
     >
       <div>
         <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-1 md:mb-2">
-          Billing & Payment
+          {t('buyTicket.billingPayment.title')}
         </h2>
         <p className="text-sm md:text-base text-gray-600">
-          Enter your billing information and payment details
+          {t('buyTicket.billingPayment.description')}
         </p>
       </div>
 
       <div className="space-y-4 md:space-y-6">
         {/* Billing Address */}
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Billing Address</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('buyTicket.billingPayment.billingAddress')}</h3>
           <div className="grid md:grid-cols-2 gap-4 md:gap-6">
             <div className="md:col-span-2">
               <TextInput
-                label="Full Name"
+                label={t('buyTicket.billingPayment.fields.fullName')}
                 value={formData.billingName}
                 onChange={(value) => updateFormData("billingName", value)}
-                placeholder="John Doe"
+                placeholder={t('buyTicket.billingPayment.placeholders.fullName')}
                 required
               />
             </div>
 
             <div className="md:col-span-2">
               <TextInput
-                label="Address"
+                label={t('buyTicket.billingPayment.fields.address')}
                 value={formData.billingAddress}
                 onChange={(value) => updateFormData("billingAddress", value)}
-                placeholder="123 Main Street"
+                placeholder={t('buyTicket.billingPayment.placeholders.address')}
                 required
               />
             </div>
 
             <TextInput
-              label="City"
+              label={t('buyTicket.billingPayment.fields.city')}
               value={formData.billingCity}
               onChange={(value) => updateFormData("billingCity", value)}
-              placeholder="New York"
+              placeholder={t('buyTicket.billingPayment.placeholders.city')}
               required
             />
 
             <TextInput
-              label="ZIP Code"
+              label={t('buyTicket.billingPayment.fields.zipCode')}
               value={formData.billingZip}
               onChange={(value) => updateFormData("billingZip", value)}
-              placeholder="10001"
+              placeholder={t('buyTicket.billingPayment.placeholders.zipCode')}
               required
             />
 
             <div className="md:col-span-2">
               <SelectInput
-                label="Country"
+                label={t('buyTicket.billingPayment.fields.country')}
                 value={formData.billingCountry}
                 onChange={(value) => updateFormData("billingCountry", value)}
                 options={countryOptions}
-                placeholder="Select country"
+                placeholder={t('buyTicket.billingPayment.placeholders.selectCountry')}
                 required
               />
             </div>
@@ -102,13 +105,13 @@ export function BillingPaymentForm({ formData, updateFormData }) {
 
         {/* Payment Method */}
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Payment Method</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('buyTicket.billingPayment.fields.paymentMethod')}</h3>
           <div className="space-y-3">
             <PaymentMethodButton
               method="card"
               icon={CreditCard}
-              title="Credit / Debit Card"
-              subtitle="Visa, Mastercard, Amex"
+              title={t('buyTicket.billingPayment.fields.creditDebitCard')}
+              subtitle={t('buyTicket.billingPayment.fields.cardTypes')}
               iconColor="text-[#0066FF]"
               isSelected={formData.paymentMethod === "card"}
               onSelect={() => updateFormData("paymentMethod", "card")}
@@ -120,8 +123,8 @@ export function BillingPaymentForm({ formData, updateFormData }) {
                   P
                 </div>
               }
-              title="PayPal"
-              subtitle="Fast & secure payment"
+              title={t('buyTicket.billingPayment.fields.paypal')}
+              subtitle={t('buyTicket.billingPayment.fields.paypalDesc')}
               isSelected={formData.paymentMethod === "paypal"}
               onSelect={() => updateFormData("paymentMethod", "paypal")}
             />
@@ -130,8 +133,8 @@ export function BillingPaymentForm({ formData, updateFormData }) {
 
         <InfoCard
           icon={Lock}
-          title="Secure Payment:"
-          description="Your payment information is encrypted and processed securely. We never store your card details."
+          title={t('buyTicket.billingPayment.securityNote')}
+          description={t('buyTicket.billingPayment.securityNote')}
           variant="green"
         />
       </div>

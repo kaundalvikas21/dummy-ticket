@@ -58,7 +58,7 @@ export function OtherServices() {
   ]
 
   const services = isLoading ? fallbackServices :
-    (Array.isArray(t('otherServices.services')) ? t('otherServices.services').map((service, index) => ({
+    (Array.isArray(t('homepage.otherServices.services')) ? t('homepage.otherServices.services').map((service, index) => ({
       ...service,
       link: [
         "/services/past-dated-tickets",
@@ -80,7 +80,7 @@ export function OtherServices() {
           className="text-center mb-8 md:mb-12"
         >
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-            {t('otherServices.title')}
+            {t('homepage.otherServices.title')}
           </h2>
         </motion.div>
 
@@ -130,7 +130,7 @@ export function OtherServices() {
               size="lg"
               className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white px-6 py-4 md:px-8 md:py-6 rounded-2xl hover:shadow-xl transition-all text-sm md:text-base cursor-pointer"
             >
-              {t('otherServices.viewAll')}
+              {t('homepage.otherServices.viewAll')}
               <ArrowRight className="ml-2 w-4 h-4 md:w-5 md:h-5" />
             </Button>
           </Link>

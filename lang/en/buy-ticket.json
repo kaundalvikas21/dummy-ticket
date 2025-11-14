@@ -1,0 +1,188 @@
+{
+  "hero": {
+    "subtitle": "Secure & Verified Booking Process",
+    "title": "Book Your Dummy Ticket",
+    "description": "Complete the secure booking process below to get your verifiable flight reservation for visa applications. Trusted by thousands worldwide.",
+    "features": {
+      "instantDelivery": "Instant Delivery",
+      "validPnr": "Valid PNR Code",
+      "secure": "100% Secure",
+      "support": "24/7 Support"
+    }
+  },
+  "progress": {
+    "completed": "Completed",
+    "inProgress": "In Progress",
+    "pending": "Pending"
+  },
+  "formSteps": {
+    "selectPlan": "Select Plan",
+    "passengerDetails": "Passenger Details",
+    "travelDetails": "Travel Details",
+    "deliveryOptions": "Delivery Options",
+    "billingPayment": "Billing & Payment"
+  },
+  "servicePlan": {
+    "title": "Select Your Service Plan",
+    "description": "Choose the plan that best fits your travel needs",
+    "mostPopular": "MOST POPULAR",
+    "perPerson": "/ person",
+    "allPlansInclude": "All plans include: Valid PNR code, verifiable reservations, instant delivery, and 24/7 customer support. Select your plan to continue with the booking process.",
+    "dummyTicket": {
+      "name": "DUMMY TICKET FOR VISA",
+      "price": "19",
+      "description": "Perfect for visa applications and proof of onward travel",
+      "features": [
+        "Valid PNR code included",
+        "Verifiable on airline websites",
+        "Instant delivery via email",
+        "24/7 customer support"
+      ]
+    },
+    "dummyTicketHotel": {
+      "name": "DUMMY TICKET & HOTEL",
+      "price": "35",
+      "description": "Flight reservation + hotel booking for complete travel proof",
+      "features": [
+        "Flight + hotel reservation",
+        "Verifiable on airline/hotel websites",
+        "Accommodation for up to 1 month",
+        "Complete travel documentation"
+      ]
+    },
+    "returnTicket": {
+      "name": "DUMMY RETURN TICKET",
+      "price": "15",
+      "description": "Return ticket for immigration and proof of travel",
+      "features": [
+        "Return flight reservation",
+        "Valid PNR for verification",
+        "Perfect for immigration requirements",
+        "Instant delivery"
+      ]
+    }
+  },
+  "passengerDetails": {
+    "title": "Passenger Details",
+    "description": "Enter the passenger information as it appears on the passport",
+    "fields": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "phone": "Phone",
+      "passportNumber": "Passport Number",
+      "dateOfBirth": "Date of Birth",
+      "gender": "Gender",
+      "nationality": "Nationality"
+    },
+    "placeholders": {
+      "firstName": "John",
+      "lastName": "Doe",
+      "email": "john.doe@example.com",
+      "phone": "+1 234 567 8900",
+      "passportNumber": "A12345678",
+      "selectDateOfBirth": "Select date of birth",
+      "selectGender": "Select gender",
+      "selectNationality": "Select nationality"
+    },
+    "genders": {
+      "male": "Male",
+      "female": "Female",
+      "other": "Other"
+    }
+  },
+  "travelDetails": {
+    "title": "Travel Details",
+    "description": "Provide your travel itinerary information",
+    "fields": {
+      "tripType": "Trip Type",
+      "roundTrip": "Round Trip",
+      "oneWay": "One Way",
+      "departureAndReturn": "Departure & Return",
+      "departureOnly": "Departure Only",
+      "departureCity": "Departure City",
+      "arrivalCity": "Arrival City",
+      "departureDate": "Departure Date",
+      "returnDate": "Return Date",
+      "travelClass": "Travel Class"
+    },
+    "placeholders": {
+      "departureCity": "New York (JFK)",
+      "arrivalCity": "London (LHR)"
+    },
+    "travelClasses": {
+      "economy": "Economy Class",
+      "premiumEconomy": "Premium Economy",
+      "business": "Business Class",
+      "first": "First Class"
+    }
+  },
+  "deliveryOptions": {
+    "title": "Delivery Options",
+    "description": "Choose how you want to receive your dummy ticket",
+    "fields": {
+      "deliveryMethod": "Delivery Method",
+      "emailDelivery": "Email Delivery (Instant)",
+      "whatsappDelivery": "WhatsApp Delivery",
+      "emailDeliveryDesc": "Receive your ticket within minutes",
+      "whatsappDeliveryDesc": "Get your ticket via WhatsApp",
+      "deliveryEmail": "Delivery Email",
+      "whatsappNumber": "WhatsApp Number"
+    },
+    "placeholders": {
+      "deliveryEmail": "your.email@example.com",
+      "whatsappNumber": "+1 234 567 8900"
+    },
+    "securityNote": "Secure Delivery: Your dummy ticket will be delivered with a valid PNR code that can be verified on airline websites. All documents are encrypted and sent securely."
+  },
+  "billingPayment": {
+    "title": "Billing & Payment",
+    "description": "Enter your billing information and payment details",
+    "billingAddress": "Billing Address",
+    "fields": {
+      "fullName": "Full Name",
+      "address": "Address",
+      "city": "City",
+      "zipCode": "ZIP Code",
+      "country": "Country",
+      "paymentMethod": "Payment Method",
+      "creditDebitCard": "Credit / Debit Card",
+      "cardTypes": "Visa, Mastercard, Amex",
+      "paypal": "PayPal",
+      "paypalDesc": "Fast & secure payment"
+    },
+    "placeholders": {
+      "fullName": "John Doe",
+      "address": "123 Main Street",
+      "city": "New York",
+      "zipCode": "10001",
+      "selectCountry": "Select country"
+    },
+    "securityNote": "Secure Payment: Your payment information is encrypted and processed securely. We never store your card details."
+  },
+  "orderSummary": {
+    "title": "Order Summary",
+    "noPlanSelected": "No plan selected yet",
+    "servicePlan": "Service Plan",
+    "whatsappDelivery": "WhatsApp Delivery",
+    "total": "Total",
+    "features": [
+      "Valid PNR code included",
+      "Verifiable on airline websites",
+      "Instant delivery",
+      "24/7 customer support"
+    ],
+    "guarantee": {
+      "title": "Money-Back Guarantee",
+      "description": "If your ticket is not accepted, we'll refund 100% of your payment."
+    }
+  },
+  "navigation": {
+    "previous": "Previous",
+    "prev": "Prev",
+    "next": "Next",
+    "nextStep": "Next Step",
+    "complete": "Complete Order",
+    "processing": "Processing..."
+  }
+}

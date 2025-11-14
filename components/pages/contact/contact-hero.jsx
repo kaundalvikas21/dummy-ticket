@@ -2,11 +2,14 @@
 
 import { motion } from "framer-motion";
 import { Phone, Mail, MapPin } from "lucide-react";
+import { useTranslation } from "@/lib/translations";
 
 export function ContactHero({ settings }) {
-  // Static content for title and description
-  const pageTitle = "Get in Touch";
-  const pageDescription = "We're here to help you 24/7. Reach out to us anytime, anywhere. Our dedicated support team is available to assist you with any questions or concerns you may have.";
+  const { t } = useTranslation();
+
+  // Translated content for title and description
+  const pageTitle = t('contact.hero.title');
+  const pageDescription = t('contact.hero.subtitle');
 
   // Dynamic contact information
   const phone = settings.phone?.value || "+1-800-123-4567";
@@ -48,7 +51,7 @@ export function ContactHero({ settings }) {
             >
               <Phone className="w-6 h-6 md:w-8 md:h-8 mx-auto mb-2 md:mb-3" />
               <h3 className="font-semibold mb-1 md:mb-2 text-sm md:text-base">
-                Call Us
+                {t('contact.contactInfo.methods.1.title')}
               </h3>
               <a
                 href={`tel:${phone.replace(/[^+\d]/g, "")}`}
@@ -66,7 +69,7 @@ export function ContactHero({ settings }) {
             >
               <Mail className="w-6 h-6 md:w-8 md:h-8 mx-auto mb-2 md:mb-3" />
               <h3 className="font-semibold mb-1 md:mb-2 text-sm md:text-base">
-                Email Us
+                {t('contact.contactInfo.methods.0.title')}
               </h3>
               <a
                 href={`mailto:${email}`}
@@ -84,7 +87,7 @@ export function ContactHero({ settings }) {
             >
               <MapPin className="w-6 h-6 md:w-8 md:h-8 mx-auto mb-2 md:mb-3" />
               <h3 className="font-semibold mb-1 md:mb-2 text-sm md:text-base">
-                Visit Us
+                {t('contact.office.title')}
               </h3>
               <p className="text-white/80 text-xs md:text-sm leading-relaxed">
                 {address}

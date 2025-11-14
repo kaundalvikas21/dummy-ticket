@@ -2,8 +2,10 @@
 
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useTranslation } from "@/lib/translations"
 
 export function NavigationButtons({ currentStep, totalSteps, isStepValid, onNext, onPrevious }) {
+  const { t } = useTranslation()
   return (
     <div className="flex justify-between mt-6 md:mt-8 pt-4 md:pt-6 border-t border-gray-200 gap-3">
       <Button
@@ -13,8 +15,8 @@ export function NavigationButtons({ currentStep, totalSteps, isStepValid, onNext
         className="flex items-center gap-1.5 md:gap-2 bg-transparent text-sm md:text-base px-3 md:px-4 py-2 md:py-2.5 cursor-pointer"
       >
         <ChevronLeft className="w-4 h-4" />
-        <span className="hidden sm:inline">Previous</span>
-        <span className="sm:hidden">Prev</span>
+        <span className="hidden sm:inline">{t('buyTicket.navigation.previous')}</span>
+        <span className="sm:hidden">{t('buyTicket.navigation.prev')}</span>
       </Button>
       
       <Button
@@ -23,10 +25,10 @@ export function NavigationButtons({ currentStep, totalSteps, isStepValid, onNext
         className="flex items-center gap-1.5 md:gap-2 bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base px-3 md:px-4 py-2 md:py-2.5 cursor-pointer"
       >
         <span className="hidden sm:inline">
-          {currentStep === totalSteps ? "Complete Order" : "Next Step"}
+          {currentStep === totalSteps ? t('buyTicket.navigation.complete') : t('buyTicket.navigation.nextStep')}
         </span>
         <span className="sm:hidden">
-          {currentStep === totalSteps ? "Complete" : "Next"}
+          {currentStep === totalSteps ? t('buyTicket.navigation.complete') : t('buyTicket.navigation.next')}
         </span>
         <ChevronRight className="w-4 h-4" />
       </Button>

@@ -4,8 +4,10 @@ import { motion } from "framer-motion"
 import { Mail, Phone, Shield } from "lucide-react"
 import { TextInput } from "@/components/ui/input/TextInput"
 import { InfoCard } from "@/components/ui/input/InfoCard"
+import { useTranslation } from "@/lib/translations"
 
 export function DeliveryOptionsForm({ formData, updateFormData }) {
+  const { t } = useTranslation()
   return (
     <motion.div 
       initial={{ opacity: 0 }} 
@@ -14,10 +16,10 @@ export function DeliveryOptionsForm({ formData, updateFormData }) {
     >
       <div>
         <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-1 md:mb-2">
-          Delivery Options
+          {t('buyTicket.deliveryOptions.title')}
         </h2>
         <p className="text-sm md:text-base text-gray-600">
-          Choose how you want to receive your dummy ticket
+          {t('buyTicket.deliveryOptions.description')}
         </p>
       </div>
 
@@ -25,14 +27,14 @@ export function DeliveryOptionsForm({ formData, updateFormData }) {
         {/* Delivery Method Selection */}
         <div>
           <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-2 md:mb-3">
-            Delivery Method *
+            {t('buyTicket.deliveryOptions.fields.deliveryMethod')} *
           </label>
           <div className="space-y-3">
             <DeliveryMethodButton
               method="email"
               icon={Mail}
-              title="Email Delivery (Instant)"
-              subtitle="Receive your ticket within minutes"
+              title={t('buyTicket.deliveryOptions.fields.emailDelivery')}
+              subtitle={t('buyTicket.deliveryOptions.fields.emailDeliveryDesc')}
               iconColor="text-[#0066FF]"
               isSelected={formData.deliveryMethod === "email"}
               onSelect={() => updateFormData("deliveryMethod", "email")}
@@ -40,8 +42,8 @@ export function DeliveryOptionsForm({ formData, updateFormData }) {
             <DeliveryMethodButton
               method="whatsapp"
               icon={Phone}
-              title="WhatsApp Delivery"
-              subtitle="Get your ticket via WhatsApp"
+              title={t('buyTicket.deliveryOptions.fields.whatsappDelivery')}
+              subtitle={t('buyTicket.deliveryOptions.fields.whatsappDeliveryDesc')}
               iconColor="text-[#00D4AA]"
               isSelected={formData.deliveryMethod === "whatsapp"}
               onSelect={() => updateFormData("deliveryMethod", "whatsapp")}
@@ -51,23 +53,23 @@ export function DeliveryOptionsForm({ formData, updateFormData }) {
 
         {/* Delivery Contact Input */}
         <TextInput
-          label={formData.deliveryMethod === "email" ? "Delivery Email" : "WhatsApp Number"}
+          label={formData.deliveryMethod === "email" ? t('buyTicket.deliveryOptions.fields.deliveryEmail') : t('buyTicket.deliveryOptions.fields.whatsappNumber')}
           icon={formData.deliveryMethod === "email" ? Mail : Phone}
           type={formData.deliveryMethod === "email" ? "email" : "tel"}
           value={formData.deliveryEmail}
           onChange={(value) => updateFormData("deliveryEmail", value)}
           placeholder={
-            formData.deliveryMethod === "email" 
-              ? "your.email@example.com" 
-              : "+1 234 567 8900"
+            formData.deliveryMethod === "email"
+              ? t('buyTicket.deliveryOptions.placeholders.deliveryEmail')
+              : t('buyTicket.deliveryOptions.placeholders.whatsappNumber')
           }
           required
         />
 
         <InfoCard
           icon={Shield}
-          title="Secure Delivery:"
-          description="Your dummy ticket will be delivered with a valid PNR code that can be verified on airline websites. All documents are encrypted and sent securely."
+          title={t('buyTicket.deliveryOptions.securityNote')}
+          description={t('buyTicket.deliveryOptions.securityNote')}
           variant="blue"
         />
       </div>
