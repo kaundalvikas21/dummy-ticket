@@ -1,0 +1,232 @@
+{
+  "hero": {
+    "title": "Billets Fictifs pour Demandes de Visa",
+    "subtitle": "Obtenez des réservations de vol vérifiables instantanément pour les demandes de visa, preuve de retour et planification de voyage",
+    "features": {
+      "embassyApproved": "Approuvé par l'Ambassade",
+      "quickDelivery": "Livraison 5 Minutes",
+      "verifiable": "100% Vérifiable"
+    },
+    "cta": "Obtenir Votre Billet Maintenant"
+  },
+  "whatIsDummyTicket": {
+    "learnMore": "En Savoir Plus",
+    "title": "Comprendre les Billets Fictifs",
+    "subtitle": "Tout ce que vous devez savoir sur les réservations de vol pour les demandes de visa",
+    "whatIsIt": {
+      "title": "Qu'est-ce qu'un Billet Fictif?",
+      "description": "Un billet fictif est une réservation de vol vérifiable qui ressemble exactement à un billet d'avion ordinaire avec un code PNR (Passenger Name Record) ou numéro de référence de réservation valide.",
+      "features": [
+        {
+          "title": "Code PNR Valide",
+          "desc": "Code alphanumérique à 6 chiffres fourni par les compagnies aériennes"
+        },
+        {
+          "title": "Vérifiable en Ligne",
+          "desc": "Vérifiez via l'outil 'Gérer la Réservation' de la compagnie aérienne"
+        },
+        {
+          "title": "Également Connu Comme",
+          "desc": "Réservation de vol ou itinéraire de voyage"
+        }
+      ]
+    },
+    "whatUsedFor": {
+      "title": "À Quoi Sert-il?",
+      "description": "Principalement utilisé pour les demandes de visa où les ambassades exigent une preuve de plans de voyage. Sert également à plusieurs autres fins liées aux voyages.",
+      "useCases": [
+        "Demandes de visa et soumissions ambassade",
+        "Preuve de retour ou voyage de continuation",
+        "Accélérer le processus de renouvellement de passeport",
+        "Documentation RH/Manager d'entreprise",
+        "Procédures visa de sortie (pays GCC)",
+        "Location de voiture dans les aéroports"
+      ]
+    }
+  },
+  "useCases": {
+    "title": "Cas d'Usage Courants",
+    "subtitle": "Les billets fictifs servent à multiples fins pour les voyageurs du monde entier",
+    "cases": [
+      {
+        "title": "Demandes de Visa",
+        "description": "Exigé par les ambassades et consulats mondiaux pour le traitement des visas"
+      },
+      {
+        "title": "Preuve de Retour",
+        "description": "Montrez aux agents d'immigration vos plans de voyage de continuation ou de retour"
+      },
+      {
+        "title": "Services Passeport",
+        "description": "Accélérez le renouvellement de passeport avec preuve de voyage imminent"
+      },
+      {
+        "title": "Congé Travail",
+        "description": "Soumettez aux RH ou managers pour documentation d'approbation de congé"
+      },
+      {
+        "title": "Visa de Sortie",
+        "description": "Exigé pour les procédures de visa de sortie dans les pays GCC"
+      },
+      {
+        "title": "Location de Voiture",
+        "description": "Louez des véhicules dans les aéroports avec preuve de vol"
+      }
+    ]
+  },
+  "pricing": {
+    "label": "ABORDABLE",
+    "title": "Tarifs",
+    "mostPopular": "LE PLUS POPULAIRE",
+    "perPerson": "/ personne",
+    "plans": [
+      {
+        "name": "BILLET FICTIF POUR VISA",
+        "description": "Personne",
+        "features": [
+          "Réservation de vol/ itinéraire",
+          "vérifiable sur site de compagnie aérienne",
+          "Jusqu'à 4 modifications autorisées",
+          "Utilisez pour demande de visa/ preuve de retour"
+        ],
+        "cta": "ACHETER BILLET",
+        "currencies": "19 USD | 1200 INR | 70 AED | 16 EUR | 14.50 GBP"
+      },
+      {
+        "name": "BILLET FICTIF & HÔTEL",
+        "description": "Personne",
+        "features": [
+          "Réservation réelle de compagnie/hôtel",
+          "Vérifiable sur site de compagnie/hôtel",
+          "Hébergement jusqu'à un mois",
+          "Jusqu'à 4 modifications autorisées",
+          "Utilisez pour demande de visa/ preuve de retour"
+        ],
+        "cta": "ACHETER BILLET",
+        "currencies": "35 USD | 2750 INR | 128 AED | 30 EUR | 26.70 GBP"
+      },
+      {
+        "name": "BILLET RETOUR FICTIF",
+        "description": "Personne",
+        "features": [
+          "Billet retour pour présentation en immigration",
+          "Réservation de vol vérifiable avec PNR",
+          "Peut être utilisé comme preuve de retour ou voyage de continuation dans la plupart des pays"
+        ],
+        "cta": "ACHETER BILLET",
+        "currencies": "15 USD | 990 INR | 55 AED | 14 EUR | 12.50 GBP"
+      }
+    ]
+  },
+  "otherServices": {
+    "title": "autres services:",
+    "services": [
+      {
+        "title": "Billets antidatés",
+        "price": "35 USD | 2400 INR | 128 AED | 32 EUR | 28 GBP",
+        "cta": "Lire plus"
+      },
+      {
+        "title": "Schengen Plus UK",
+        "subtitle": "Billet fictif avec reçu électronique",
+        "price": "39 GBP",
+        "cta": "Lire plus"
+      },
+      {
+        "title": "Billet fictif avec e-billet",
+        "subtitle": "Pour preuve de retour",
+        "price": "49 USD | 3500 INR | 180 AED",
+        "cta": "Lire plus"
+      },
+      {
+        "title": "Réservation hôtel fictive",
+        "price": "20 USD | 1400 INR | 70 AED | 18 EUR | 16 GBP",
+        "cta": "Acheter maintenant"
+      },
+      {
+        "title": "Billet fictif avec e-billet",
+        "subtitle": "Pour demande de visa",
+        "price": "79 USD | 6500 INR | 290 AED",
+        "cta": "Lire plus"
+      },
+      {
+        "title": "Schengen Plus",
+        "subtitle": "Billet fictif avec numéro e-billet",
+        "price": "59 USD | 4900 INR | 210 AED",
+        "cta": "Lire plus"
+      }
+    ],
+    "viewAll": "Voir tous les services"
+  },
+  "whyChooseUs": {
+    "whyUs": "POURQUOI DUMMYTICKET.COM",
+    "title": "Raisons de nous choisir",
+    "reasons": [
+      {
+        "title": "Livraison rapide",
+        "description": "Recevez votre billet fictif dans les minutes suivant la passation de commande"
+      },
+      {
+        "title": "Réservations de vol vérifiables",
+        "description": "Tous nos billets ont des codes PNR valides vérifiables sur les sites des compagnies aériennes"
+      },
+      {
+        "title": "Personnel expérimenté",
+        "description": "Équipe support multilingue avec des années d'expérience en documentation visa"
+      }
+    ]
+  },
+  "aboutNews": {
+    "about": {
+      "title": "Un peu sur Nous",
+      "description1": "Dummyticket.com fournit des réservations de vol et d'hôtel pour demandes de visa. Nous sommes le moteur de réservation de billets fictifs original fondé en 1990. Servant des clients du monde entier avec personnel multilingue et multiples options de paiement et de devises.",
+      "description2": "Notre mission est de simplifier le processus de demande de visa en fournissant des réservations de vol authentiques et vérifiables acceptées par les ambassades mondiales. Avec plus de trois décennies d'expérience, nous comprenons les exigences uniques des demandes de visa et procédures d'immigration.",
+      "description3": "Nous nous orgulons de notre engagement envers la satisfaction client, offrant un support 24h/24 et 7j/7 et assurant que chaque réservation répond aux plus hauts standards d'authenticité et de fiabilité."
+    },
+    "news": {
+      "title": "Dernières nouvelles voyage",
+      "items": [
+        {
+          "title": "Fly Dubai ajoute 2 destinations supplémentaires en Arabie Saoudite",
+          "link": "https://www.dubaistandard.com/fly-dubai-adds-destination-saudi-arabia/"
+        },
+        {
+          "title": "Mise à jour vols Israël 2024",
+          "link": "https://www.dubaistandard.com/israel-flights-update-2024/"
+        },
+        {
+          "title": "Union Européenne et GCC discutent exemption visa Schengen pour citoyens GCC",
+          "link": "https://www.dubaistandard.com/gcc-eu-schengen-visa-waiver/"
+        }
+      ]
+    },
+    "blog": {
+      "title": "Du blog",
+      "posts": [
+        {
+          "title": "Différence entre billet faux et itinéraire de vol",
+          "link": "#"
+        },
+        {
+          "title": "Pourquoi Dubaï est spéciale, sûre et destination touristique populaire et premier choix pour expatriés",
+          "link": "https://www.dubaistandard.com/heres-why-dubai-is-special-safe-popular-tourist-spot-and-expats-as-a-first-choice/"
+        }
+      ]
+    }
+  },
+  "affiliate": {
+    "title": "Programme d'Affiliation",
+    "subtitle": "Gagnez avec nous",
+    "description": "Rejoignez notre programme d'affiliation et gagnez 15% de commission en référant des clients. Parfait pour les blogueurs de voyage, consultants en visa et agences.",
+    "commission": "Commission",
+    "cookieDuration": "Durée du Cookie",
+    "minPayout": "Paiement Minimum",
+    "buttonText": "Rejoindre Maintenant",
+    "features": ["Suivi en temps réel", "Paiements mensuels", "Support dédié"]
+  },
+  "faq": {
+    "title": "Questions",
+    "highlighted": "Fréquemment Posées",
+    "subtitle": "Trouvez des réponses aux questions courantes sur nos services de billets fictifs"
+  }
+}

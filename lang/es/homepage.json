@@ -1,0 +1,217 @@
+{
+  "hero": {
+    "title": "Boletos Falsos para Solicitudes de Visa",
+    "subtitle": "Obtenga reservas de vuelo verificables instantáneamente para solicitudes de visa, prueba de regreso y planificación de viajes",
+    "features": {
+      "embassyApproved": "Aprobado por Embajada",
+      "quickDelivery": "Entrega 5 Minutos",
+      "verifiable": "100% Verificable"
+    },
+    "cta": "Obtenga Su Boleto Ahora"
+  },
+  "whatIsDummyTicket": {
+    "learnMore": "Aprende Más",
+    "title": "Entendiendo los Boletos Falsos",
+    "subtitle": "Todo lo que necesita saber sobre reservas de vuelo para solicitudes de visa",
+    "whatIsIt": {
+      "title": "¿Qué es un Boleto Falso?",
+      "description": "Un boleto falso es una reserva de vuelo verificable que se ve exactamente como un boleto de aerolínea regular con un PNR (Passenger Name Record) o número de referencia de reserva válido.",
+      "features": [
+        {
+          "title": "Código PNR Válido",
+          "desc": "Código alfanumérico de 6 dígitos proporcionado por aerolíneas"
+        },
+        {
+          "title": "Verificable en Línea",
+          "desc": "Verifique a través de la herramienta 'Gestionar Reserva' de la aerolínea"
+        },
+        {
+          "title": "También Conocido Como",
+          "desc": "Reserva de vuelo o itinerario de viaje"
+        }
+      ]
+    },
+    "whatUsedFor": {
+      "title": "¿Para Qué se Usa?",
+      "description": "Principalmente usado para solicitudes de visa donde las embajadas requieren prueba de planes de viaje. También sirve múltiples otros propósitos relacionados con viajes.",
+      "useCases": [
+        "Solicitudes de visa y envíos a embajadas",
+        "Prueba de regreso o viaje continuo",
+        "Agilizar proceso de renovación de pasaporte",
+        "Documentación de RRHH/Manager de empresa",
+        "Procedimientos de visa de salida (países GCC)",
+        "Alquiler de autos en ubicaciones de aeropuerto"
+      ]
+    }
+  },
+  "useCases": {
+    "title": "Casos de Uso Comunes",
+    "subtitle": "Los boletos falsos sirven múltiples propósitos para viajeros de todo el mundo",
+    "cases": [
+      {
+        "title": "Solicitudes de Visa",
+        "description": "Requerido por embajadas y consulados mundiales para procesamiento de visas"
+      },
+      {
+        "title": "Prueba de Regreso",
+        "description": "Muestre a oficiales de inmigración sus planes de viaje continuo o de regreso"
+      },
+      {
+        "title": "Servicios de Pasaporte",
+        "description": "Agilice renovación de pasaporte con prueba de viaje próximo"
+      },
+      {
+        "title": "Permiso de Trabajo",
+        "description": "Envíe a RRHH o managers para documentación de aprobación de permiso"
+      },
+      {
+        "title": "Visa de Salida",
+        "description": "Requerido para procedimientos de visa de salida en países GCC"
+      },
+      {
+        "title": "Alquiler de Auto",
+        "description": "Alquile vehículos en ubicaciones de aeropuerto con prueba de vuelo"
+      }
+    ]
+  },
+  "pricing": {
+    "label": "ASEQUIBLE",
+    "title": "Precios",
+    "mostPopular": "MÁS POPULAR",
+    "perPerson": "/ persona",
+    "plans": [
+      {
+        "name": "BOLETO FALSO PARA VISA",
+        "description": "Persona",
+        "features": [
+          "Reserva de vuelo/ itinerario",
+          "verificable en sitio web de aerolínea",
+          "Hasta 4 cambios permitidos",
+          "Use para solicitud de visa/ prueba de regreso"
+        ],
+        "cta": "COMPRAR BOLETO",
+        "currencies": "19 USD | 1200 INR | 70 AED | 16 EUR | 14.50 GBP"
+      },
+      {
+        "name": "BOLETO FALSO & HOTEL",
+        "description": "Persona",
+        "features": [
+          "Reserva real de aerolínea/hotel",
+          "Verificable en sitio web de aerolínea/hotel",
+          "Alojamiento hasta un mes",
+          "Hasta 4 cambios permitidos",
+          "Use para solicitud de visa/ prueba de regreso"
+        ],
+        "cta": "COMPRAR BOLETO",
+        "currencies": "35 USD | 2750 INR | 128 AED | 30 EUR | 26.70 GBP"
+      },
+      {
+        "name": "BOLETO REGRESO FALSO",
+        "description": "Persona",
+        "features": [
+          "Boleto de regreso para mostrar en inmigración",
+          "Reserva de vuelo verificable con PNR",
+          "Puede ser usado como prueba de regreso o viaje continuo en la mayoría de países"
+        ],
+        "cta": "COMPRAR BOLETO",
+        "currencies": "15 USD | 990 INR | 55 AED | 14 EUR | 12.50 GBP"
+      }
+    ]
+  },
+  "otherServices": {
+    "title": "otros servicios:",
+    "services": [
+      {
+        "title": "Boletos con fecha pasada",
+        "price": "35 USD | 2400 INR | 128 AED | 32 EUR | 28 GBP",
+        "cta": "Leer más"
+      },
+      {
+        "title": "Schengen Plus UK",
+        "subtitle": "Boleto falso con recibo electrónico",
+        "price": "39 GBP",
+        "cta": "Leer más"
+      },
+      {
+        "title": "Boleto falso con e-ticket",
+        "subtitle": "Para prueba de regreso",
+        "price": "49 USD | 3500 INR | 180 AED",
+        "cta": "Leer más"
+      },
+      {
+        "title": "Reserva de hotel falsa",
+        "price": "20 USD | 1400 INR | 70 AED | 18 EUR | 16 GBP",
+        "cta": "Comprar ahora"
+      },
+      {
+        "title": "Boleto falso con e-ticket",
+        "subtitle": "Para solicitud de visa",
+        "price": "79 USD | 6500 INR | 290 AED",
+        "cta": "Leer más"
+      },
+      {
+        "title": "Schengen Plus",
+        "subtitle": "Boleto falso con número e-ticket",
+        "price": "59 USD | 4900 INR | 210 AED",
+        "cta": "Leer más"
+      }
+    ],
+    "viewAll": "Ver todos los servicios"
+  },
+  "whyChooseUs": {
+    "whyUs": "POR QUÉ DUMMYTICKET.COM",
+    "title": "Razones para elegirnos",
+    "reasons": [
+      {
+        "title": "Entrega rápida",
+        "description": "Obtenga su boleto falso dentro de minutos de realizar su pedido"
+      },
+      {
+        "title": "Reservas de vuelo verificables",
+        "description": "Todos nuestros boletos tienen códigos PNR válidos que pueden ser verificados en sitios web de aerolíneas"
+      },
+      {
+        "title": "Personal experimentado",
+        "description": "Equipo de soporte multilingüe con años de experiencia en documentación de visas"
+      }
+    ]
+  },
+  "aboutNews": {
+    "about": {
+      "title": "Un poco sobre Nosotros",
+      "description1": "Dummyticket.com proporciona reservas de vuelo y hotel para solicitudes de visa. Somos el motor de reservas de boletos falsos original fundado en el año 1990. Sirviendo clientes de todo el mundo con personal multilingüe y múltiples opciones de pago y moneda.",
+      "description2": "Nuestra misión es simplificar el proceso de solicitud de visa proporcionando reservas de vuelo auténticas y verificables que son aceptadas por embajadas mundiales. Con más de tres décadas de experiencia, entendemos los requisitos únicos de solicitudes de visa y procedimientos de inmigración.",
+      "description3": "Nos enorgullecemos de nuestro compromiso con la satisfacción del cliente, ofreciendo soporte 24/7 y asegurando que cada reserva cumpla con los más altos estándares de autenticidad y confiabilidad."
+    },
+    "news": {
+      "title": "Últimas noticias de viajes",
+      "items": [
+        {"title": "Fly Dubai agrega 2 destinos más en Arabia Saudita", "link": "https://www.dubaistandard.com/fly-dubai-adds-destination-saudi-arabia/"},
+        {"title": "Actualización vuelos Israel 2024", "link": "https://www.dubaistandard.com/israel-flights-update-2024/"},
+        {"title": "Unión Europea y GCC discuten exención de visa Schengen para ciudadanos GCC", "link": "https://www.dubaistandard.com/gcc-eu-schengen-visa-waiver/"}
+      ]
+    },
+    "blog": {
+      "title": "Del blog",
+      "posts": [
+        {"title": "Diferencia entre boleto falso e itinerario de vuelo", "link": "#"},
+        {"title": "Por qué Dubái es especial, segura y destino turístico popular y primera opción para expatriados", "link": "https://www.dubaistandard.com/heres-why-dubai-is-special-safe-popular-tourist-spot-and-expats-as-a-first-choice/"}
+      ]
+    }
+  },
+  "affiliate": {
+    "title": "Programa de Afiliados",
+    "subtitle": "Gana con nosotros",
+    "description": "Únete a nuestro programa de afiliados y gana 15% de comisión refiriendo clientes. Perfecto para blogueros de viajes, consultores de visa y agencias.",
+    "commission": "Comisión",
+    "cookieDuration": "Duración de la Cookie",
+    "minPayout": "Pago Mínimo",
+    "buttonText": "Únete Ahora",
+    "features": ["Seguimiento en tiempo real", "Pagos mensuales", "Soporte dedicado"]
+  },
+  "faq": {
+    "title": "Preguntas",
+    "highlighted": "Frecuentes",
+    "subtitle": "Encuentre respuestas a preguntas comunes sobre nuestros servicios de boletos falsos"
+  }
+}

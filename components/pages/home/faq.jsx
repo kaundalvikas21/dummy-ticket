@@ -5,6 +5,7 @@ import { useInView } from "framer-motion"
 import { useRef, useState, useEffect } from "react"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { useLocale } from "@/contexts/locale-context"
+import { useTranslation } from "@/lib/translations"
 
 const defaultFaqs = [
   {
@@ -53,6 +54,7 @@ export function FAQ({ faqs: propFaqs }) {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
   const { locale } = useLocale()
+  const { t } = useTranslation()
   const [faqs, setFaqs] = useState(propFaqs || defaultFaqs)
   const [loading, setLoading] = useState(!propFaqs)
   const [error, setError] = useState(null)
@@ -101,15 +103,15 @@ export function FAQ({ faqs: propFaqs }) {
             <h2 className={`text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 md:mb-4 text-balance ${
               locale === 'ar' ? 'text-right' : ''
             }`}>
-              Frequently Asked{" "}
+              {t('faq.title')}{" "}
               <span className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] bg-clip-text text-transparent">
-                Questions
+                {t('faq.highlighted')}
               </span>
             </h2>
             <p className={`text-base md:text-xl text-gray-600 text-pretty ${
               locale === 'ar' ? 'text-right' : ''
             }`}>
-              Find answers to common questions about our dummy ticket services
+              {t('faq.subtitle')}
             </p>
           </motion.div>
 

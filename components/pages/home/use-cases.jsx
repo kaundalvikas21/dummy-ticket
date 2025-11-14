@@ -4,12 +4,15 @@ import { motion } from "framer-motion"
 import { useInView } from "framer-motion"
 import { useRef } from "react"
 import { Plane, FileCheck, BookOpen, Briefcase, Globe, Car } from "lucide-react"
+import { useTranslation } from "@/lib/translations"
 
 export function UseCases() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
+  const { t, isLoading } = useTranslation()
 
-  const useCases = [
+  // Fallback data in case translations are not loaded yet
+  const fallbackCases = [
     {
       title: "Visa Applications",
       description: "Required by embassies and consulates worldwide for visa processing",
@@ -48,6 +51,20 @@ export function UseCases() {
     },
   ]
 
+  const useCases = isLoading ? fallbackCases :
+    (Array.isArray(t('useCases.cases')) ? t('useCases.cases').map((caseData, index) => ({
+      ...caseData,
+      icon: [FileCheck, Plane, BookOpen, Briefcase, Globe, Car][index],
+      color: [
+        "from-blue-500 to-blue-600",
+        "from-teal-500 to-teal-600",
+        "from-indigo-500 to-indigo-600",
+        "from-purple-500 to-purple-600",
+        "from-cyan-500 to-cyan-600",
+        "from-orange-500 to-orange-600"
+      ][index]
+    })) : fallbackCases)
+
   return (
     <section ref={ref} className="py-12 md:py-20 bg-white">
       <div className="container mx-auto px-4">
@@ -57,9 +74,9 @@ export function UseCases() {
           transition={{ duration: 0.6 }}
           className="text-center mb-8 md:mb-16"
         >
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 md:mb-4">Common Use Cases</h2>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 md:mb-4">{t('useCases.title')}</h2>
           <p className="text-base md:text-xl text-gray-600 max-w-2xl mx-auto">
-            Dummy tickets serve multiple purposes for travelers worldwide
+            {t('useCases.subtitle')}
           </p>
         </motion.div>
 

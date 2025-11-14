@@ -4,12 +4,15 @@ import { motion } from "framer-motion"
 import { useInView } from "framer-motion"
 import { useRef } from "react"
 import { Zap, Shield, Users } from "lucide-react"
+import { useTranslation } from "@/lib/translations"
 
 export function WhyChooseUs() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
+  const { t, isLoading } = useTranslation()
 
-  const reasons = [
+  // Fallback data in case translations are not loaded yet
+  const fallbackReasons = [
     {
       icon: Zap,
       title: "Quick delivery",
@@ -27,6 +30,12 @@ export function WhyChooseUs() {
     },
   ]
 
+  const reasons = isLoading ? fallbackReasons :
+    (Array.isArray(t('whyChooseUs.reasons')) ? t('whyChooseUs.reasons').map((reasonData, index) => ({
+      ...reasonData,
+      icon: [Zap, Shield, Users][index]
+    })) : fallbackReasons)
+
   return (
     <section ref={ref} className="py-12 md:py-20 bg-gray-50">
       <div className="container mx-auto px-4">
@@ -37,9 +46,9 @@ export function WhyChooseUs() {
           className="text-center mb-8 md:mb-12"
         >
           <p className="text-xs md:text-sm font-semibold text-[#0066FF] mb-2 uppercase tracking-wide">
-            WHY DUMMYTICKET.COM
+            {t('whyChooseUs.whyUs')}
           </p>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">Reasons to choose us</h2>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">{t('whyChooseUs.title')}</h2>
         </motion.div>
 
         <div className="grid md:grid-cols-3 gap-4 md:gap-6 max-w-6xl mx-auto">

@@ -4,12 +4,15 @@ import { motion } from "framer-motion"
 import { useInView } from "framer-motion"
 import { useRef } from "react"
 import { Building2, Newspaper, BookOpen, ExternalLink } from "lucide-react"
+import { useTranslation } from "@/lib/translations"
 
 export function AboutNewsSection() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
+  const { t, isLoading } = useTranslation()
 
-  const newsItems = [
+  // Fallback data in case translations are not loaded yet
+  const fallbackNewsItems = [
     {
       title: "Fly Dubai adds 2 more destinations in Saudi Arabia",
       link: "https://www.dubaistandard.com/fly-dubai-adds-destination-saudi-arabia/",
@@ -24,16 +27,22 @@ export function AboutNewsSection() {
     },
   ]
 
-  const blogPosts = [
+  const fallbackBlogPosts = [
     {
       title: "Difference between a fake ticket and a flight itinerary",
-      link: "#", // will update later
+      link: "#",
     },
     {
       title: "Why Dubai is special, safe, and popular tourist spot",
       link: "https://www.dubaistandard.com/heres-why-dubai-is-special-safe-popular-tourist-spot-and-expats-as-a-first-choice/",
     },
   ]
+
+  const newsItems = isLoading ? fallbackNewsItems :
+    (Array.isArray(t('aboutNews.news.items')) ? t('aboutNews.news.items') : fallbackNewsItems)
+
+  const blogPosts = isLoading ? fallbackBlogPosts :
+    (Array.isArray(t('aboutNews.blog.posts')) ? t('aboutNews.blog.posts') : fallbackBlogPosts)
 
   return (
     <section ref={ref} className="py-12 md:py-20 bg-white">
@@ -49,25 +58,20 @@ export function AboutNewsSection() {
               <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-gradient-to-br from-[#0066FF] to-[#00D4AA] flex items-center justify-center">
                 <Building2 className="w-5 h-5 md:w-6 md:h-6 text-white" />
               </div>
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-900">A little bit about Us</h2>
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900">{t('aboutNews.about.title')}</h2>
             </div>
 
             <div className="bg-white rounded-3xl p-5 md:p-8 border border-gray-200 shadow-sm hover:shadow-lg transition-all">
               <p className="text-sm md:text-base text-gray-700 leading-relaxed mb-4 md:mb-6">
-                Dummyticket.com provides flight reservations and hotel bookings for visa applications. We are the
-                original dummy ticket booking engine founded in the year 1990. Serving customers from all over the world
-                with multi-lingual staff and multiple payment and currency options.
+                {t('aboutNews.about.description1')}
               </p>
 
               <p className="text-sm md:text-base text-gray-700 leading-relaxed mb-4 md:mb-6">
-                Our mission is to simplify the visa application process by providing authentic, verifiable flight
-                reservations that are accepted by embassies worldwide. With over three decades of experience, we
-                understand the unique requirements of visa applications and immigration procedures.
+                {t('aboutNews.about.description2')}
               </p>
 
               <p className="text-sm md:text-base text-gray-700 leading-relaxed">
-                We pride ourselves on our commitment to customer satisfaction, offering round-the-clock support and
-                ensuring every booking meets the highest standards of authenticity and reliability.
+                {t('aboutNews.about.description3')}
               </p>
             </div>
           </motion.div>
@@ -85,7 +89,7 @@ export function AboutNewsSection() {
                 <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-gradient-to-br from-[#0066FF] to-[#00D4AA] flex items-center justify-center">
                   <Newspaper className="w-4 h-4 md:w-5 md:h-5 text-white" />
                 </div>
-                <h3 className="text-lg md:text-xl font-bold text-gray-900">Latest travel news</h3>
+                <h3 className="text-lg md:text-xl font-bold text-gray-900">{t('aboutNews.news.title')}</h3>
               </div>
               <div className="space-y-2">
                 {newsItems.map((item, index) => (
@@ -114,7 +118,7 @@ export function AboutNewsSection() {
                 <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-gradient-to-br from-[#00D4AA] to-[#0066FF] flex items-center justify-center">
                   <BookOpen className="w-4 h-4 md:w-5 md:h-5 text-white" />
                 </div>
-                <h3 className="text-lg md:text-xl font-bold text-gray-900">From the blog</h3>
+                <h3 className="text-lg md:text-xl font-bold text-gray-900">{t('aboutNews.blog.title')}</h3>
               </div>
               <div className="space-y-2">
                 {blogPosts.map((post, index) => (

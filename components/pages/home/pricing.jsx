@@ -6,55 +6,89 @@ import { useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Check } from "lucide-react"
 import Link from "next/link"
+import { useTranslation } from "@/lib/translations"
 
-const pricingPlans = [
-  {
-    name: "DUMMY TICKET FOR VISA",
-    price: "19",
-    currencies: "19 USD | 1200 INR | 70 AED | 16 EUR | 14.50 GBP",
-    description: "Person",
-    features: [
-      "Flight reservation/ itinerary",
-      "verifiable on airline website",
-      "Up to 4 changes allowed",
-      "Use for visa application/ proof of return",
-    ],
-    cta: "BUY TICKET",
-    popular: false,
-  },
-  {
-    name: "DUMMY TICKET & HOTEL",
-    price: "35",
-    currencies: "35 USD | 2750 INR | 128 AED | 30 EUR | 26.70 GBP",
-    description: "Person",
-    features: [
-      "Actual reservation from airline/hotel",
-      "Verifiable on airline/hotel website",
-      "Accomodation up to one month",
-      "Up to 4 changes allowed",
-      "Use for visa application/ proof of return",
-    ],
-    cta: "BUY TICKET",
-    popular: true,
-  },
-  {
-    name: "DUMMY RETURN TICKET",
-    price: "15",
-    currencies: "15 USD | 990 INR | 55 AED | 14 EUR | 12.50 GBP",
-    description: "Person",
-    features: [
-      "Return ticket for showing in immigration",
-      "Verifiable flight reservation with PNR",
-      "Can be used to show as proof of return or onward travel in most countries",
-    ],
-    cta: "BUY TICKET",
-    popular: false,
-  },
-]
+function getPricingPlans(t, isLoading) {
+  // Fallback data in case translations are not loaded yet
+  const fallbackPlans = [
+    {
+      name: "DUMMY TICKET FOR VISA",
+      price: "19",
+      currencies: "19 USD | 1200 INR | 70 AED | 16 EUR | 14.50 GBP",
+      description: "Person",
+      features: [
+        "Flight reservation/ itinerary",
+        "verifiable on airline website",
+        "Up to 4 changes allowed",
+        "Use for visa application/ proof of return",
+      ],
+      cta: "BUY TICKET",
+      popular: false,
+    },
+    {
+      name: "DUMMY TICKET & HOTEL",
+      price: "35",
+      currencies: "35 USD | 2750 INR | 128 AED | 30 EUR | 26.70 GBP",
+      description: "Person",
+      features: [
+        "Actual reservation from airline/hotel",
+        "Verifiable on airline/hotel website",
+        "Accomodation up to one month",
+        "Up to 4 changes allowed",
+        "Use for visa application/ proof of return",
+      ],
+      cta: "BUY TICKET",
+      popular: true,
+    },
+    {
+      name: "DUMMY RETURN TICKET",
+      price: "15",
+      currencies: "15 USD | 990 INR | 55 AED | 14 EUR | 12.50 GBP",
+      description: "Person",
+      features: [
+        "Return ticket for showing in immigration",
+        "Verifiable flight reservation with PNR",
+        "Can be used to show as proof of return or onward travel in most countries",
+      ],
+      cta: "BUY TICKET",
+      popular: false,
+    },
+  ]
+
+  if (isLoading) {
+    return fallbackPlans
+  }
+
+  const plans = t('pricing.plans')
+
+  if (!Array.isArray(plans) || plans.length === 0) {
+    return fallbackPlans
+  }
+
+  return [
+    {
+      ...plans[0],
+      price: "19",
+      popular: false,
+    },
+    {
+      ...plans[1],
+      price: "35",
+      popular: true,
+    },
+    {
+      ...plans[2],
+      price: "15",
+      popular: false,
+    },
+  ]
+}
 
 export function Pricing() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
+  const { t, isLoading } = useTranslation()
+  const pricingPlans = getPricingPlans(t, isLoading)
 
   return (
     <section id="pricing" ref={ref} className="py-12 md:py-24 bg-gradient-to-b from-blue-50 to-white">
@@ -65,8 +99,8 @@ export function Pricing() {
           transition={{ duration: 0.6 }}
           className="text-center mb-8 md:mb-16"
         >
-          <p className="text-sm md:text-lg font-semibold text-[#0066FF] mb-2 uppercase tracking-wide">AFFORDABLE</p>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 text-balance">Pricing</h2>
+          <p className="text-sm md:text-lg font-semibold text-[#0066FF] mb-2 uppercase tracking-wide">{t('pricing.label')}</p>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 text-balance">{t('pricing.title')}</h2>
         </motion.div>
 
         <div className="grid md:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto">
@@ -82,7 +116,7 @@ export function Pricing() {
               {plan.popular && (
                 <div className="absolute -top-3 md:-top-6 left-1/2 -translate-x-1/2 z-10">
                   <span className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white px-3 md:px-4 py-1 rounded-full text-xs font-semibold shadow-lg">
-                    MOST POPULAR
+                    {t('pricing.mostPopular')}
                   </span>
                 </div>
               )}
@@ -99,7 +133,7 @@ export function Pricing() {
                     <span className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-[#0066FF] to-[#00D4AA] bg-clip-text text-transparent">
                       {plan.price}
                     </span>
-                    <span className="text-sm md:text-base text-gray-500 ml-1">/ person</span>
+                    <span className="text-sm md:text-base text-gray-500 ml-1">{t('pricing.perPerson')}</span>
                   </div>
                 </div>
 

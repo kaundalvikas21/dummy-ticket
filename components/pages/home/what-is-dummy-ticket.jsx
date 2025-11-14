@@ -4,10 +4,12 @@ import { motion } from "framer-motion"
 import { useInView } from "framer-motion"
 import { useRef } from "react"
 import { Plane, CheckCircle, FileText, Shield, Sparkles } from "lucide-react"
+import { useTranslation } from "@/lib/translations"
 
 export function WhatIsDummyTicket() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
+  const { t, isLoading } = useTranslation()
 
   return (
     <section ref={ref} className="py-12 md:py-24 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
@@ -25,13 +27,13 @@ export function WhatIsDummyTicket() {
         >
           <div className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-blue-50 rounded-full mb-4 md:mb-6">
             <Sparkles className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#0066FF]" />
-            <span className="text-xs md:text-sm font-semibold text-[#0066FF]">Learn More</span>
+            <span className="text-xs md:text-sm font-semibold text-[#0066FF]">{t('whatIsDummyTicket.learnMore')}</span>
           </div>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 md:mb-4 tracking-tight">
-            Understanding Dummy Tickets
+            {t('whatIsDummyTicket.title')}
           </h2>
           <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto font-normal">
-            Everything you need to know about flight reservations for visa applications
+            {t('whatIsDummyTicket.subtitle')}
           </p>
         </motion.div>
 
@@ -48,20 +50,19 @@ export function WhatIsDummyTicket() {
                 <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-[#0066FF] to-[#0052CC] flex items-center justify-center shadow-lg">
                   <FileText className="w-6 h-6 md:w-8 md:h-8 text-white" />
                 </div>
-                <h3 className="text-xl md:text-2xl font-bold text-gray-900 tracking-tight">What is a Dummy Ticket?</h3>
+                <h3 className="text-xl md:text-2xl font-bold text-gray-900 tracking-tight">{t('whatIsDummyTicket.whatIsIt.title')}</h3>
               </div>
 
               <p className="text-gray-600 leading-relaxed mb-6 md:mb-8 font-normal text-sm md:text-base">
-                A dummy ticket is a verifiable flight reservation that looks exactly like a regular airline ticket with
-                a valid PNR (Passenger Name Record) or booking reference number.
+                {t('whatIsDummyTicket.whatIsIt.description')}
               </p>
 
               <div className="space-y-3 md:space-y-4">
-                {[
-                  { title: "Valid PNR Code", desc: "6-digit alphanumeric code provided by airlines", color: "blue" },
-                  { title: "Verifiable Online", desc: 'Check via airline\'s "Manage Booking" tool', color: "blue" },
-                  { title: "Also Known As", desc: "Flight reservation or travel itinerary", color: "blue" },
-                ].map((item, i) => (
+                {(Array.isArray(t('whatIsDummyTicket.whatIsIt.features')) ? t('whatIsDummyTicket.whatIsIt.features') : [
+                  { title: "Valid PNR Code", desc: "6-digit alphanumeric code provided by airlines" },
+                  { title: "Verifiable Online", desc: 'Check via airline\'s "Manage Booking" tool' },
+                  { title: "Also Known As", desc: "Flight reservation or travel itinerary" },
+                ]).map((item, i) => (
                   <motion.div
                     key={i}
                     initial={{ opacity: 0, x: -20 }}
@@ -96,23 +97,29 @@ export function WhatIsDummyTicket() {
                 <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-[#0066FF] to-[#0052CC] flex items-center justify-center shadow-lg">
                   <Shield className="w-6 h-6 md:w-8 md:h-8 text-white" />
                 </div>
-                <h3 className="text-xl md:text-2xl font-bold text-gray-900 tracking-tight">What is it Used For?</h3>
+                <h3 className="text-xl md:text-2xl font-bold text-gray-900 tracking-tight">{t('whatIsDummyTicket.whatUsedFor.title')}</h3>
               </div>
 
               <p className="text-gray-600 leading-relaxed mb-6 md:mb-8 font-normal text-sm md:text-base">
-                Primarily used for visa applications where embassies require proof of travel plans. Also serves multiple
-                other travel-related purposes.
+                {t('whatIsDummyTicket.whatUsedFor.description')}
               </p>
 
               <div className="space-y-2 md:space-y-3">
-                {[
+                {(Array.isArray(t('whatIsDummyTicket.whatUsedFor.useCases')) ? [
+                  { icon: Plane, text: t('whatIsDummyTicket.whatUsedFor.useCases.0') },
+                  { icon: CheckCircle, text: t('whatIsDummyTicket.whatUsedFor.useCases.1') },
+                  { icon: FileText, text: t('whatIsDummyTicket.whatUsedFor.useCases.2') },
+                  { icon: Shield, text: t('whatIsDummyTicket.whatUsedFor.useCases.3') },
+                  { icon: Plane, text: t('whatIsDummyTicket.whatUsedFor.useCases.4') },
+                  { icon: CheckCircle, text: t('whatIsDummyTicket.whatUsedFor.useCases.5') },
+                ] : [
                   { icon: Plane, text: "Visa applications & embassy submissions" },
                   { icon: CheckCircle, text: "Proof of return or onward travel" },
                   { icon: FileText, text: "Expedite passport renewal process" },
                   { icon: Shield, text: "Company HR/Manager documentation" },
                   { icon: Plane, text: "Exit visa procedures (GCC countries)" },
                   { icon: CheckCircle, text: "Car rental at airport locations" },
-                ].map((item, index) => {
+                ]).map((item, index) => {
                   const Icon = item.icon
                   return (
                     <motion.div

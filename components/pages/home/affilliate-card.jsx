@@ -5,21 +5,28 @@ import { useInView } from "framer-motion"
 import { useRef } from "react"
 import { TrendingUp, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useTranslation } from "@/lib/translations"
 
 export function AffiliateCard({
   commissionRate = "15%",
   cookieDuration = "30 days",
   minPayout = "$50",
-  title = "Affiliate Program",
-  subtitle = "Earn with us",
-  description = "Join our affiliate program and earn 15% commission by referring customers. Perfect for travel bloggers, visa consultants, and agencies.",
-  buttonText = "Join Now",
   onButtonClick,
-  showFeatures = true,
-  features = ["Real-time tracking", "Monthly payouts", "Dedicated support"]
+  showFeatures = true
 }) {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
+  const { t, isLoading } = useTranslation()
+
+  // Use translated content or fallbacks
+  const title = t('affiliate.title')
+  const subtitle = t('affiliate.subtitle')
+  const description = t('affiliate.description')
+  const commission = t('affiliate.commission')
+  const cookieDurationText = t('affiliate.cookieDuration')
+  const minPayoutText = t('affiliate.minPayout')
+  const buttonText = t('affiliate.buttonText')
+  const features = isLoading ? ["Real-time tracking", "Monthly payouts", "Dedicated support"] : t('affiliate.features')
 
   return (
     <motion.div
@@ -46,15 +53,15 @@ export function AffiliateCard({
 
         <div className="space-y-2 md:space-y-3 mb-4 md:mb-6">
           <div className="flex items-center justify-between p-2.5 md:p-3 bg-gradient-to-r from-blue-50 to-teal-50 rounded-xl">
-            <span className="text-xs md:text-sm font-medium text-gray-700">Commission</span>
+            <span className="text-xs md:text-sm font-medium text-gray-700">{commission}</span>
             <span className="text-base md:text-lg font-bold text-[#0066FF]">{commissionRate}</span>
           </div>
           <div className="flex items-center justify-between p-2.5 md:p-3 bg-gradient-to-r from-blue-50 to-teal-50 rounded-xl">
-            <span className="text-xs md:text-sm font-medium text-gray-700">Cookie Duration</span>
+            <span className="text-xs md:text-sm font-medium text-gray-700">{cookieDurationText}</span>
             <span className="text-base md:text-lg font-bold text-[#00D4AA]">{cookieDuration}</span>
           </div>
           <div className="flex items-center justify-between p-2.5 md:p-3 bg-gradient-to-r from-blue-50 to-teal-50 rounded-xl">
-            <span className="text-xs md:text-sm font-medium text-gray-700">Min Payout</span>
+            <span className="text-xs md:text-sm font-medium text-gray-700">{minPayoutText}</span>
             <span className="text-base md:text-lg font-bold text-[#0066FF]">{minPayout}</span>
           </div>
         </div>

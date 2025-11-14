@@ -1,0 +1,217 @@
+{
+  "hero": {
+    "title": "Dummy Tickets voor Visa Aanvragen",
+    "subtitle": "Krijg direct verifieerbare vluchtreserveringen voor visa aanvragen, bewijs van terugkeer en reisplanning",
+    "features": {
+      "embassyApproved": "Ambassade Goedgekeurd",
+      "quickDelivery": "5-Min Levering",
+      "verifiable": "100% Verifieerbaar"
+    },
+    "cta": "Krijg Uw Ticket Nu"
+  },
+  "whatIsDummyTicket": {
+    "learnMore": "Meer Leren",
+    "title": "Dummy Tickets Begrijpen",
+    "subtitle": "Alles wat u moet weten over vluchtreserveringen voor visa aanvragen",
+    "whatIsIt": {
+      "title": "Wat is een Dummy Ticket?",
+      "description": "Een dummy ticket is een verifieerbare vluchtreservering die er precies uitziet als een normaal vliegtuigticket met een geldige PNR (Passenger Name Record) of boekingsreferentienummer.",
+      "features": [
+        {
+          "title": "Geldige PNR Code",
+          "desc": "6-cijferig alfanumerieke code geleverd door luchtvaartmaatschappijen"
+        },
+        {
+          "title": "Online Verifieerbaar",
+          "desc": "Controleer via 'Boeking Beheren' tool van luchtvaartmaatschappij"
+        },
+        {
+          "title": "Ook Bekend Als",
+          "desc": "Vluchtreservering of reisroute"
+        }
+      ]
+    },
+    "whatUsedFor": {
+      "title": "Waarvoor Wordt het Gebruikt?",
+      "description": "Primair gebruikt voor visa aanvragen waar ambassades bewijs van reisplannen vereisen. Dient ook meerdere andere reisgerelateerde doeleinden.",
+      "useCases": [
+        "Visa aanvragen & ambassade indieningen",
+        "Bewijs van terugkeer of doorgaande reis",
+        "Paspoortvernieuwing proces versnellen",
+        "Bedrijfs HR/Manager documentatie",
+        "Uitgang visa procedures (GCC landen)",
+        "Autoverhuur op luchthavenlocaties"
+      ]
+    }
+  },
+  "useCases": {
+    "title": "Veelgebruikte Toepassingen",
+    "subtitle": "Dummy tickets dienen meerdere doeleinden voor reizigers wereldwijd",
+    "cases": [
+      {
+        "title": "Visa Aanvragen",
+        "description": "Verplicht door ambassades en consulaten wereldwijd voor visa verwerking"
+      },
+      {
+        "title": "Bewijs van Terugkeer",
+        "description": "Toon immigratieambtenaren uw doorgaande of terugkeer reisplannen"
+      },
+      {
+        "title": "Paspoort Diensten",
+        "description": "Versnel paspoortvernieuwing met bewijs van aankomende reis"
+      },
+      {
+        "title": "Werkverlof",
+        "description": "Dien in bij HR of managers voor verlofgoedkeuring documentatie"
+      },
+      {
+        "title": "Uitgang Visa",
+        "description": "Vereist voor uitgang visa procedures in GCC landen"
+      },
+      {
+        "title": "Autoverhuur",
+        "description": "Huur voertuigen op luchthavenlocaties met vluchtbewijs"
+      }
+    ]
+  },
+  "pricing": {
+    "label": "BETAALBAAR",
+    "title": "Prijzen",
+    "mostPopular": "MEEST POPULAIR",
+    "perPerson": "/ persoon",
+    "plans": [
+      {
+        "name": "DUMMY TICKET VOOR VISA",
+        "description": "Persoon",
+        "features": [
+          "Vluchtreservering/ route",
+          "verifieerbaar op luchtvaartmaatschappij website",
+          "Tot 4 wijzigingen toegestaan",
+          "Gebruik voor visa aanvraag/ bewijs van terugkeer"
+        ],
+        "cta": "KOOP TICKET",
+        "currencies": "19 USD | 1200 INR | 70 AED | 16 EUR | 14.50 GBP"
+      },
+      {
+        "name": "DUMMY TICKET & HOTEL",
+        "description": "Persoon",
+        "features": [
+          "Werkelijke reservering van luchtvaartmaatschappij/hotel",
+          "Verifieerbaar op luchtvaartmaatschappij/hotel website",
+          "Verblijf tot een maand",
+          "Tot 4 wijzigingen toegestaan",
+          "Gebruik voor visa aanvraag/ bewijs van terugkeer"
+        ],
+        "cta": "KOOP TICKET",
+        "currencies": "35 USD | 2750 INR | 128 AED | 30 EUR | 26.70 GBP"
+      },
+      {
+        "name": "DUMMY RETOUR TICKET",
+        "description": "Persoon",
+        "features": [
+          "Retourticket voor presentatie aan immigratie",
+          "Verifieerbare vluchtreservering met PNR",
+          "Kan worden gebruikt als bewijs van terugkeer of doorgaande reis in de meeste landen"
+        ],
+        "cta": "KOOP TICKET",
+        "currencies": "15 USD | 990 INR | 55 AED | 14 EUR | 12.50 GBP"
+      }
+    ]
+  },
+  "otherServices": {
+    "title": "andere diensten:",
+    "services": [
+      {
+        "title": "Gedateerde tickets",
+        "price": "35 USD | 2400 INR | 128 AED | 32 EUR | 28 GBP",
+        "cta": "Lees meer"
+      },
+      {
+        "title": "Schengen Plus UK",
+        "subtitle": "Dummy ticket met e-bon",
+        "price": "39 GBP",
+        "cta": "Lees meer"
+      },
+      {
+        "title": "Dummy ticket met e-ticket",
+        "subtitle": "Voor bewijs van terugkeer",
+        "price": "49 USD | 3500 INR | 180 AED",
+        "cta": "Lees meer"
+      },
+      {
+        "title": "Dummy hotelboeking",
+        "price": "20 USD | 1400 INR | 70 AED | 18 EUR | 16 GBP",
+        "cta": "Koop nu"
+      },
+      {
+        "title": "Dummy ticket met e-ticket",
+        "subtitle": "Voor visa aanvraag",
+        "price": "79 USD | 6500 INR | 290 AED",
+        "cta": "Lees meer"
+      },
+      {
+        "title": "Schengen Plus",
+        "subtitle": "Dummy ticket met e-ticket nummer",
+        "price": "59 USD | 4900 INR | 210 AED",
+        "cta": "Lees meer"
+      }
+    ],
+    "viewAll": "Bekijk alle diensten"
+  },
+  "whyChooseUs": {
+    "whyUs": "Waarom DUMMYTICKET.COM",
+    "title": "Redenen om ons te kiezen",
+    "reasons": [
+      {
+        "title": "Snelle levering",
+        "description": "Krijg uw dummy ticket binnen enkele minuten na plaatsen van bestelling"
+      },
+      {
+        "title": "Verifieerbare vluchtreserveringen",
+        "description": "Al onze tickets hebben geldige PNR codes die verifieerbaar zijn op luchtvaartmaatschappij websites"
+      },
+      {
+        "title": "Ervaren personeel",
+        "description": "Meertalig ondersteuningsteam met jaren ervaring in visa documentatie"
+      }
+    ]
+  },
+  "aboutNews": {
+    "about": {
+      "title": "Een beetje over Ons",
+      "description1": "Dummyticket.com levert vluchtreserveringen en hotelboekingen voor visa aanvragen. Wij zijn het originele dummy ticket boekingsmotor opgericht in het jaar 1990. Bedienen klanten van over de hele wereld met meertalig personeel en meerdere betalings- en valutaopties.",
+      "description2": "Onze missie is het visa aanvraagproces te vereenvoudigen door authentieke, verifieerbare vluchtreserveringen te bieden die worden geaccepteerd door ambassades wereldwijd. Met meer dan drie decennia ervaring begrijpen we de unieke vereisten van visa aanvragen en immigratieprocedures.",
+      "description3": "Wij zijn trots op onze inzet voor klanttevredenheid, bieden 24/7 ondersteuning en zorgen ervoor dat elke boeking voldoet aan de hoogste normen van authenticiteit en betrouwbaarheid."
+    },
+    "news": {
+      "title": "Laatste reisnieuws",
+      "items": [
+        {"title": "Fly Dubai voegt 2 extra bestemmingen toe in Saoedi-Arabië", "link": "https://www.dubaistandard.com/fly-dubai-adds-destination-saudi-arabia/"},
+        {"title": "Israël vluchten update 2024", "link": "https://www.dubaistandard.com/israel-flights-update-2024/"},
+        {"title": "Europese Unie en GCC bespreken Schengen visa vrijstelling voor GCC burgers", "link": "https://www.dubaistandard.com/gcc-eu-schengen-visa-waiver/"}
+      ]
+    },
+    "blog": {
+      "title": "Van de blog",
+      "posts": [
+        {"title": "Verschil tussen een nep ticket en een vluchtroute", "link": "#"},
+        {"title": "Waarom Dubai speciaal, veilig en populaire toeristenbestemming is en eerste keuze voor expats", "link": "https://www.dubaistandard.com/heres-why-dubai-is-special-safe-popular-tourist-spot-and-expats-as-a-first-choice/"}
+      ]
+    }
+  },
+  "affiliate": {
+    "title": "Partnerprogramma",
+    "subtitle": "Verdien met ons",
+    "description": "Sluit u aan bij ons partnerprogramma en verdien 15% commissie door klanten aan te brengen. Perfect voor reisbloggers, visumconsultants en bureaus.",
+    "commission": "Commissie",
+    "cookieDuration": "Cookie Duur",
+    "minPayout": "Minimale Uitbetaling",
+    "buttonText": "Nu Lid Worden",
+    "features": ["Real-time tracking", "Maandelijkse uitbetalingen", "Toegewijd support"]
+  },
+  "faq": {
+    "title": "Veelgestelde",
+    "highlighted": "Vragen",
+    "subtitle": "Vind antwoorden op veelgestelde vragen over onze dummy ticket diensten"
+  }
+}

@@ -6,12 +6,15 @@ import { useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
 import Link from "next/link"
+import { useTranslation } from "@/lib/translations"
 
 export function OtherServices() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
+  const { t, isLoading } = useTranslation()
 
-  const services = [
+  // Fallback data in case translations are not loaded yet
+  const fallbackServices = [
     {
       title: "Past dated tickets",
       price: "35 USD | 2400 INR | 128 AED | 32 EUR | 28 GBP",
@@ -54,6 +57,19 @@ export function OtherServices() {
     },
   ]
 
+  const services = isLoading ? fallbackServices :
+    (Array.isArray(t('otherServices.services')) ? t('otherServices.services').map((service, index) => ({
+      ...service,
+      link: [
+        "/services/past-dated-tickets",
+        "/services/schengen-plus-uk",
+        "/services/dummy-ticket-proof-of-return",
+        "/buy-ticket",
+        "/services/dummy-ticket-visa-application",
+        "/services/schengen-plus"
+      ][index]
+    })) : fallbackServices)
+
   return (
     <section ref={ref} className="py-12 md:py-20 bg-white">
       <div className="container mx-auto px-4">
@@ -64,7 +80,7 @@ export function OtherServices() {
           className="text-center mb-8 md:mb-12"
         >
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-            other services:
+            {t('otherServices.title')}
           </h2>
         </motion.div>
 
@@ -114,7 +130,7 @@ export function OtherServices() {
               size="lg"
               className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white px-6 py-4 md:px-8 md:py-6 rounded-2xl hover:shadow-xl transition-all text-sm md:text-base cursor-pointer"
             >
-              View all services
+              {t('otherServices.viewAll')}
               <ArrowRight className="ml-2 w-4 h-4 md:w-5 md:h-5" />
             </Button>
           </Link>

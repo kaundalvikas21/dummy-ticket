@@ -1,0 +1,232 @@
+{
+  "hero": {
+    "title": "Dummy Tickets for Visa Applications",
+    "subtitle": "Get verifiable flight reservations instantly for visa applications, proof of return, and travel planning",
+    "features": {
+      "embassyApproved": "Embassy Approved",
+      "quickDelivery": "5-Min Delivery",
+      "verifiable": "100% Verifiable"
+    },
+    "cta": "Get Your Ticket Now"
+  },
+  "whatIsDummyTicket": {
+    "learnMore": "Learn More",
+    "title": "Understanding Dummy Tickets",
+    "subtitle": "Everything you need to know about flight reservations for visa applications",
+    "whatIsIt": {
+      "title": "What is a Dummy Ticket?",
+      "description": "A dummy ticket is a verifiable flight reservation that looks exactly like a regular airline ticket with a valid PNR (Passenger Name Record) or booking reference number.",
+      "features": [
+        {
+          "title": "Valid PNR Code",
+          "desc": "6-digit alphanumeric code provided by airlines"
+        },
+        {
+          "title": "Verifiable Online",
+          "desc": "Check via airline's \"Manage Booking\" tool"
+        },
+        {
+          "title": "Also Known As",
+          "desc": "Flight reservation or travel itinerary"
+        }
+      ]
+    },
+    "whatUsedFor": {
+      "title": "What is it Used For?",
+      "description": "Primarily used for visa applications where embassies require proof of travel plans. Also serves multiple other travel-related purposes.",
+      "useCases": [
+        "Visa applications & embassy submissions",
+        "Proof of return or onward travel",
+        "Expedite passport renewal process",
+        "Company HR/Manager documentation",
+        "Exit visa procedures (GCC countries)",
+        "Car rental at airport locations"
+      ]
+    }
+  },
+  "useCases": {
+    "title": "Common Use Cases",
+    "subtitle": "Dummy tickets serve multiple purposes for travelers worldwide",
+    "cases": [
+      {
+        "title": "Visa Applications",
+        "description": "Required by embassies and consulates worldwide for visa processing"
+      },
+      {
+        "title": "Proof of Return",
+        "description": "Show immigration officers your onward or return travel plans"
+      },
+      {
+        "title": "Passport Services",
+        "description": "Expedite passport renewal with proof of upcoming travel"
+      },
+      {
+        "title": "Work Leave",
+        "description": "Submit to HR or managers for leave approval documentation"
+      },
+      {
+        "title": "Exit Visa",
+        "description": "Required for exit visa procedures in GCC countries"
+      },
+      {
+        "title": "Car Rental",
+        "description": "Rent vehicles at airport locations with flight proof"
+      }
+    ]
+  },
+  "pricing": {
+    "label": "AFFORDABLE",
+    "title": "Pricing",
+    "mostPopular": "MOST POPULAR",
+    "perPerson": "/ person",
+    "plans": [
+      {
+        "name": "DUMMY TICKET FOR VISA",
+        "description": "Person",
+        "features": [
+          "Flight reservation/ itinerary",
+          "verifiable on airline website",
+          "Up to 4 changes allowed",
+          "Use for visa application/ proof of return"
+        ],
+        "cta": "BUY TICKET",
+        "currencies": "19 USD | 1200 INR | 70 AED | 16 EUR | 14.50 GBP"
+      },
+      {
+        "name": "DUMMY TICKET & HOTEL",
+        "description": "Person",
+        "features": [
+          "Actual reservation from airline/hotel",
+          "Verifiable on airline/hotel website",
+          "Accomodation up to one month",
+          "Up to 4 changes allowed",
+          "Use for visa application/ proof of return"
+        ],
+        "cta": "BUY TICKET",
+        "currencies": "35 USD | 2750 INR | 128 AED | 30 EUR | 26.70 GBP"
+      },
+      {
+        "name": "DUMMY RETURN TICKET",
+        "description": "Person",
+        "features": [
+          "Return ticket for showing in immigration",
+          "Verifiable flight reservation with PNR",
+          "Can be used to show as proof of return or onward travel in most countries"
+        ],
+        "cta": "BUY TICKET",
+        "currencies": "15 USD | 990 INR | 55 AED | 14 EUR | 12.50 GBP"
+      }
+    ]
+  },
+  "otherServices": {
+    "title": "other services:",
+    "services": [
+      {
+        "title": "Past dated tickets",
+        "price": "35 USD | 2400 INR | 128 AED | 32 EUR | 28 GBP",
+        "cta": "Read more"
+      },
+      {
+        "title": "Schengen Plus UK",
+        "subtitle": "Dummy ticket with e-receipt",
+        "price": "39 GBP",
+        "cta": "Read more"
+      },
+      {
+        "title": "Dummy ticket with e-ticket",
+        "subtitle": "For proof of return",
+        "price": "49 USD | 3500 INR | 180 AED",
+        "cta": "Read more"
+      },
+      {
+        "title": "Dummy hotel booking",
+        "price": "20 USD | 1400 INR | 70 AED | 18 EUR | 16 GBP",
+        "cta": "Buy now"
+      },
+      {
+        "title": "Dummy ticket with e-ticket",
+        "subtitle": "For visa application",
+        "price": "79 USD | 6500 INR | 290 AED",
+        "cta": "Read more"
+      },
+      {
+        "title": "Schengen Plus",
+        "subtitle": "Dummy ticket with e-ticket number",
+        "price": "59 USD | 4900 INR | 210 AED",
+        "cta": "Read more"
+      }
+    ],
+    "viewAll": "View all services"
+  },
+  "whyChooseUs": {
+    "whyUs": "WHY DUMMYTICKET.COM",
+    "title": "Reasons to choose us",
+    "reasons": [
+      {
+        "title": "Quick delivery",
+        "description": "Get your dummy ticket within minutes of placing your order"
+      },
+      {
+        "title": "Verifiable flight reservations",
+        "description": "All our tickets have valid PNR codes that can be verified on airline websites"
+      },
+      {
+        "title": "Experienced staff",
+        "description": "Multi-lingual support team with years of experience in visa documentation"
+      }
+    ]
+  },
+  "aboutNews": {
+    "about": {
+      "title": "A little bit about Us",
+      "description1": "Dummyticket.com provides flight reservations and hotel bookings for visa applications. We are the original dummy ticket booking engine founded in the year 1990. Serving customers from all over the world with multi-lingual staff and multiple payment and currency options.",
+      "description2": "Our mission is to simplify the visa application process by providing authentic, verifiable flight reservations that are accepted by embassies worldwide. With over three decades of experience, we understand the unique requirements of visa applications and immigration procedures.",
+      "description3": "We pride ourselves on our commitment to customer satisfaction, offering round-the-clock support and ensuring every booking meets the highest standards of authenticity and reliability."
+    },
+    "news": {
+      "title": "Latest travel news",
+      "items": [
+        {
+          "title": "Fly Dubai adds 2 more destinations in Saudi Arabia",
+          "link": "https://www.dubaistandard.com/fly-dubai-adds-destination-saudi-arabia/"
+        },
+        {
+          "title": "Israel flights update 2024",
+          "link": "https://www.dubaistandard.com/israel-flights-update-2024/"
+        },
+        {
+          "title": "European Union and GCC discuss Schengen visa waiver for GCC citizens",
+          "link": "https://www.dubaistandard.com/gcc-eu-schengen-visa-waiver/"
+        }
+      ]
+    },
+    "blog": {
+      "title": "From the blog",
+      "posts": [
+        {
+          "title": "Difference between a fake ticket and a flight itinerary",
+          "link": "#"
+        },
+        {
+          "title": "Why Dubai is special, safe, and popular tourist spot",
+          "link": "https://www.dubaistandard.com/heres-why-dubai-is-special-safe-popular-tourist-spot-and-expats-as-a-first-choice/"
+        }
+      ]
+    }
+  },
+  "affiliate": {
+    "title": "Affiliate Program",
+    "subtitle": "Earn with us",
+    "description": "Join our affiliate program and earn 15% commission by referring customers. Perfect for travel bloggers, visa consultants, and agencies.",
+    "commission": "Commission",
+    "cookieDuration": "Cookie Duration",
+    "minPayout": "Min Payout",
+    "buttonText": "Join Now",
+    "features": ["Real-time tracking", "Monthly payouts", "Dedicated support"]
+  },
+  "faq": {
+    "title": "Frequently Asked",
+    "highlighted": "Questions",
+    "subtitle": "Find answers to common questions about our dummy ticket services"
+  }
+}
