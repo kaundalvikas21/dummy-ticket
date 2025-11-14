@@ -1,0 +1,156 @@
+{
+  "hero": {
+    "title": "Acerca de VisaFly",
+    "subtitle": "Su socio de confianza para billetes ficticios y documentación de visa desde 1990",
+    "trustedSince": "Confianza Desde 1990",
+    "heroTitle": "Su Socio de Confianza para",
+    "heroTitleHighlight": "Reservas de Vuelos Visa",
+    "heroDescription": "Ayudando a viajeros de todo el mundo a asegurar sus visas con reservas de vuelos auténticas y aprobadas por embajadas durante más de 35 años"
+  },
+  "stats": {
+    "loading": "Cargando Estadísticas",
+    "loadingSubtitle": "Por favor espere mientras cargamos las últimas estadísticas...",
+    "errorLoading": "No se Pueden Cargar las Estadísticas",
+    "tryAgain": "Intentar de Nuevo",
+    "noStats": "No Hay Estadísticas Disponibles",
+    "noStatsMessage": "Las estadísticas aparecerán aquí una vez que sean agregadas por el administrador.",
+    "yearsInBusiness": {
+      "number": "34+",
+      "label": "Años en el Negocio"
+    },
+    "countriesServed": {
+      "number": "150+",
+      "label": "Países Atendidos"
+    },
+    "happyCustomers": {
+      "number": "500K+",
+      "label": "Clientes Satisfechos"
+    },
+    "ticketsIssued": {
+      "number": "1M+",
+      "label": "Boletos Emitidos"
+    }
+  },
+  "whatAreDummyTickets": {
+    "whatAreTitle": "Qué Son",
+    "whatAreHighlight": "Boletos Ficticios",
+    "whatAreDescription": "Un boleto ficticio, también conocido como reserva de vuelo o itinerario de vuelo, es una reserva temporal utilizada como prueba de planes de viaje para solicitudes de visa.",
+    "noContent": "Aún no hay contenido disponible",
+    "noContentMessage": "El contenido aparecerá aquí una vez agregado desde el panel de administración.",
+    "description": "Un boleto ficticio es una reserva de vuelo verificable que se ve exactamente como un boleto de aerolínea regular con un PNR válido (Registro de Nombre de Pasajero) o número de referencia de reserva. Estos son comúnmente usados para solicitudes de visa donde se requiere prueba de planes de viaje.",
+    "features": [
+      {
+        "title": "Código PNR Válido",
+        "description": "Código alfanumérico de 6 dígitos proporcionado por aerolíneas"
+      },
+      {
+        "title": "Verificable en Línea",
+        "description": "Verifique a través de la herramienta \"Gestionar Reserva\" de la aerolínea"
+      },
+      {
+        "title": "Formato Profesional",
+        "description": "Se ve exactamente como un boleto de aerolínea real"
+      },
+      {
+        "title": "Aceptado Mundialmente",
+        "description": "Reconocido por embajadas y autoridades de inmigración"
+      }
+    ]
+  },
+  "whyChooseUs": {
+    "whyChooseTitle": "Por Qué Elegir",
+    "whyChooseHighlight": "VisaFly",
+    "whyChooseDescription": "Hemos sido líderes en la industria durante más de tres décadas, confiables por cientos de miles de viajeros de todo el mundo.",
+    "features": [
+      {
+        "title": "100% Auténtico",
+        "description": "Todas nuestras reservas de vuelo son genuinas y verificables con códigos PNR válidos aceptados por embajadas de todo el mundo."
+      },
+      {
+        "title": "Entrega Inmediata",
+        "description": "Reciba su boleto ficticio en minutos por correo electrónico. Sin esperas, sin retrasos, solo confirmación instantánea."
+      },
+      {
+        "title": "Aprobado por Embajada",
+        "description": "Nuestros boletos cumplen con todos los requisitos de embajada y son aceptados para solicitudes de visa globalmente."
+      },
+      {
+        "title": "Soporte 24/7",
+        "description": "Servicio al cliente disponible las 24 horas del día, los 7 días de la semana en múltiples idiomas para ayudarle cuando necesite asistencia."
+      },
+      {
+        "title": "Cobertura Global",
+        "description": "Reserve vuelos a cualquier destino mundial con soporte para todas las aerolíneas y rutas principales."
+      },
+      {
+        "title": "Confianza Desde 1990",
+        "description": "Más de tres décadas de excelencia proporcionando reservas de vuelo confiables para solicitudes de visa."
+      }
+    ],
+    "reasons": [
+      {
+        "title": "Experiencia Desde 1990",
+        "description": "Más de tres décadas de experiencia en documentación de visa y requisitos de viaje"
+      },
+      {
+        "title": "Soporte Multiidioma",
+        "description": "Nuestro equipo habla múltiples idiomas para servir a clientes de todo el mundo"
+      },
+      {
+        "title": "Pagos Seguros",
+        "description": "Múltiples opciones de pago con medidas de seguridad estándar de la industria"
+      },
+      {
+        "title": "Servicio al Cliente 24/7",
+        "description": "Soporte disponible las 24 horas para ayudar con sus necesidades urgentes"
+      },
+      {
+        "title": "Alcance Global",
+        "description": "Sirviendo clientes de todo el mundo con experiencia local"
+      },
+      {
+        "title": "Garantía de Calidad",
+        "description": "Cada reserva cumple con los más altos estándares de autenticidad y confiabilidad"
+      }
+    ]
+  },
+  "ourCommitment": {
+    "commitmentTitle": "Nuestro Compromiso con Usted",
+    "commitmentSubtitle": "Impulsados por la pasión, guiados por valores, enfocados en su éxito",
+    "missionTitle": "Nuestra Misión",
+    "visionTitle": "Nuestra Visión",
+    "valuesTitle": "Nuestros Valores",
+    "mission": "Simplificar el proceso de solicitud de visa proporcionando reservas de vuelo auténticas y confiables que ayuden a los viajeros a lograr sus sueños de explorar el mundo.",
+    "vision": "Ser la plataforma más confiable del mundo para boletos ficticios, estableciendo el estándar de calidad, confiabilidad y satisfacción del cliente en la industria de documentación de viajes.",
+    "values": "Integridad, transparencia y enfoque de cliente primero guían todo lo que hacemos. Creemos en construir relaciones duraderas a través de un servicio excepcional y un compromiso inquebrantable con la calidad.",
+    "valuesList": [
+      {
+        "title": "Excelencia",
+        "description": "Ofrecemos el servicio de más alta calidad con atención a cada detalle"
+      },
+      {
+        "title": "Integridad",
+        "description": "Prácticas comerciales honestas y transparentes con precios claros"
+      },
+      {
+        "title": "Cliente Primero",
+        "description": "Su éxito es nuestra prioridad: vamos más allá para ayudarle"
+      },
+      {
+        "title": "Innovación",
+        "description": "Mejorando continuamente nuestros servicios para satisfacer sus necesidades cambiantes"
+      }
+    ]
+  },
+  "readyToBook": {
+    "readyTitle": "¿Listo para Obtener su Boleto Ficticio?",
+    "readyDescription": "Únase a cientos de miles de clientes satisfechos que confían en nosotros para sus solicitudes de visa",
+    "bookNow": "Reserve su Boleto Ahora",
+    "cta": "Obtenga su Boleto Ficticio Ahora",
+    "support": {
+      "title": "¿Necesita Ayuda?",
+      "description": "Nuestro equipo de soporte al cliente está disponible 24/7 para ayudarle con cualquier pregunta o preocupación.",
+      "button": "Contactar Soporte"
+    }
+  }
+}

@@ -10,47 +10,44 @@ import {
   Globe,
   Award,
 } from "lucide-react"
+import { useTranslation } from "@/lib/translations"
 
 export default function WhyChooseUs() {
+  const { t } = useTranslation()
   const whyChooseUsRef = useRef(null)
   const whyChooseUsInView = useInView(whyChooseUsRef, { once: true, margin: "-100px" })
 
+  // Use the features from translations
   const features = [
     {
       icon: Shield,
-      title: "100% Authentic",
-      description:
-        "All our flight reservations are genuine and verifiable with valid PNR codes accepted by embassies worldwide.",
+      title: t('about.whyChooseUs.features.0.title'),
+      description: t('about.whyChooseUs.features.0.description'),
     },
     {
       icon: Clock,
-      title: "Instant Delivery",
-      description:
-        "Receive your dummy ticket within minutes via email. No waiting, no delays - just instant confirmation.",
+      title: t('about.whyChooseUs.features.1.title'),
+      description: t('about.whyChooseUs.features.1.description'),
     },
     {
       icon: FileCheck,
-      title: "Embassy Approved",
-      description:
-        "Our tickets meet all embassy requirements and are accepted for visa applications globally.",
+      title: t('about.whyChooseUs.features.2.title'),
+      description: t('about.whyChooseUs.features.2.description'),
     },
     {
       icon: HeadphonesIcon,
-      title: "24/7 Support",
-      description:
-        "Round-the-clock customer support in multiple languages to assist you whenever you need help.",
+      title: t('about.whyChooseUs.features.3.title'),
+      description: t('about.whyChooseUs.features.3.description'),
     },
     {
       icon: Globe,
-      title: "Global Coverage",
-      description:
-        "Book flights to any destination worldwide with support for all major airlines and routes.",
+      title: t('about.whyChooseUs.features.4.title'),
+      description: t('about.whyChooseUs.features.4.description'),
     },
     {
       icon: Award,
-      title: "Trusted Since 1990",
-      description:
-        "Over three decades of excellence in providing reliable flight reservations for visa applications.",
+      title: t('about.whyChooseUs.features.5.title'),
+      description: t('about.whyChooseUs.features.5.description'),
     },
   ]
 
@@ -64,11 +61,10 @@ export default function WhyChooseUs() {
           className="text-center mb-10 md:mb-16"
         >
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 md:mb-6 text-balance">
-            Why Choose <span className="text-[#0066FF]">VisaFly</span>?
+            {t('about.whyChooseUs.whyChooseTitle')} <span className="text-[#0066FF]">{t('about.whyChooseUs.whyChooseHighlight')}</span>?
           </h2>
           <p className="text-base md:text-lg text-gray-600 max-w-3xl mx-auto text-balance">
-            We've been the industry leader for over three decades, trusted by hundreds of thousands of travelers
-            worldwide.
+            {t('about.whyChooseUs.whyChooseDescription')}
           </p>
         </motion.div>
 

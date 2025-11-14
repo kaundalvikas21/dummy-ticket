@@ -4,8 +4,10 @@ import { motion, useInView } from "framer-motion"
 import { useRef, useState, useEffect } from "react"
 import * as LucideIcons from "lucide-react"
 import { useLocale } from "@/contexts/locale-context"
+import { useTranslation } from "@/lib/translations"
 
 export function StatsSection() {
+  const { t } = useTranslation()
   const ref = useRef(null)
   const inView = useInView(ref, { once: true, margin: "-100px" })
   const { locale } = useLocale()
@@ -83,8 +85,8 @@ export function StatsSection() {
       <section ref={ref} className="py-12 md:py-20 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-8">
-            <div className="text-xl font-semibold text-gray-900">Loading Statistics</div>
-            <div className="text-sm text-gray-600 mt-1">Please wait while we load the latest statistics...</div>
+            <div className="text-xl font-semibold text-gray-900">{t('about.stats.loading')}</div>
+            <div className="text-sm text-gray-600 mt-1">{t('about.stats.loadingSubtitle')}</div>
           </div>
           <LoadingSkeleton />
         </div>
@@ -100,13 +102,13 @@ export function StatsSection() {
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mb-4">
               <LucideIcons.AlertCircle className="w-8 h-8 text-red-600" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Unable to Load Statistics</h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">{t('about.stats.errorLoading')}</h3>
             <p className="text-gray-600 mb-4">{error}</p>
             <button
               onClick={() => window.location.reload()}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
-              Try Again
+              {t('about.stats.tryAgain')}
             </button>
           </div>
         </div>
@@ -122,8 +124,8 @@ export function StatsSection() {
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
               <LucideIcons.BarChart3 className="w-8 h-8 text-gray-400" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No Statistics Available</h3>
-            <p className="text-gray-600">Statistics will appear here once they are added by the administrator.</p>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">{t('about.stats.noStats')}</h3>
+            <p className="text-gray-600">{t('about.stats.noStatsMessage')}</p>
           </div>
         </div>
       </section>

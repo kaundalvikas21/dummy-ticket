@@ -4,29 +4,29 @@ import { motion } from "framer-motion"
 import { useRef } from "react"
 import { useInView } from "framer-motion"
 import { TrendingUp, Target, Heart } from "lucide-react"
+import { useTranslation } from "@/lib/translations"
 
 export default function OurCommitment() {
+  const { t } = useTranslation()
   const commitmentRef = useRef(null)
   const inView = useInView(commitmentRef, { once: true, margin: "-100px" })
 
+  // Use the values from translations
   const values = [
     {
       icon: Target,
-      title: "Our Mission",
-      description:
-        "To simplify the visa application process by providing authentic, reliable flight reservations that help travelers achieve their dreams of exploring the world.",
+      title: t('about.ourCommitment.missionTitle'),
+      description: t('about.ourCommitment.mission'),
     },
     {
       icon: TrendingUp,
-      title: "Our Vision",
-      description:
-        "To be the world's most trusted platform for dummy tickets, setting the standard for quality, reliability, and customer satisfaction in the travel documentation industry.",
+      title: t('about.ourCommitment.visionTitle'),
+      description: t('about.ourCommitment.vision'),
     },
     {
       icon: Heart,
-      title: "Our Values",
-      description:
-        "Integrity, transparency, and customer-first approach guide everything we do. We believe in building lasting relationships through exceptional service and unwavering commitment to quality.",
+      title: t('about.ourCommitment.valuesTitle'),
+      description: t('about.ourCommitment.values'),
     },
   ]
 
@@ -50,10 +50,10 @@ export default function OurCommitment() {
           className="text-center mb-10 md:mb-16"
         >
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6 text-balance">
-            Our Commitment to You
+            {t('about.ourCommitment.commitmentTitle')}
           </h2>
           <p className="text-base md:text-xl text-gray-100 max-w-3xl mx-auto text-balance">
-            Driven by passion, guided by values, focused on your success
+            {t('about.ourCommitment.commitmentSubtitle')}
           </p>
         </motion.div>
 

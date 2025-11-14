@@ -1,10 +1,19 @@
 {
   "hero": {
     "title": "About VisaFly",
-    "subtitle": "Your trusted partner for dummy tickets and visa documentation since 1990"
+    "subtitle": "Your trusted partner for dummy tickets and visa documentation since 1990",
+    "trustedSince": "Trusted Since 1990",
+    "heroTitle": "Your Trusted Partner for",
+    "heroTitleHighlight": "Visa Flight Reservations",
+    "heroDescription": "Helping travelers worldwide secure their visas with authentic, embassy-approved flight reservations for over 35 years"
   },
   "stats": {
-    "title": "Trusted by Travelers Worldwide",
+    "loading": "Loading Statistics",
+    "loadingSubtitle": "Please wait while we load the latest statistics...",
+    "errorLoading": "Unable to Load Statistics",
+    "tryAgain": "Try Again",
+    "noStats": "No Statistics Available",
+    "noStatsMessage": "Statistics will appear here once they are added by the administrator.",
     "yearsInBusiness": {
       "number": "34+",
       "label": "Years in Business"
@@ -23,8 +32,11 @@
     }
   },
   "whatAreDummyTickets": {
-    "title": "What Are Dummy Tickets?",
-    "subtitle": "Understanding flight reservations for visa applications",
+    "whatAreTitle": "What Are",
+    "whatAreHighlight": "Dummy Tickets",
+    "whatAreDescription": "A dummy ticket, also known as a flight reservation or flight itinerary, is a temporary booking used as proof of travel plans for visa applications.",
+    "noContent": "No content available yet",
+    "noContentMessage": "Content will appear here once added from the admin panel.",
     "description": "A dummy ticket is a verifiable flight reservation that looks exactly like a regular airline ticket with a valid PNR (Passenger Name Record) or booking reference number. These are commonly used for visa applications where proof of travel plans is required.",
     "features": [
       {
@@ -46,8 +58,35 @@
     ]
   },
   "whyChooseUs": {
-    "title": "Why Choose VisaFly",
-    "subtitle": "The original dummy ticket booking engine since 1990",
+    "whyChooseTitle": "Why Choose",
+    "whyChooseHighlight": "VisaFly",
+    "whyChooseDescription": "We've been the industry leader for over three decades, trusted by hundreds of thousands of travelers worldwide.",
+    "features": [
+      {
+        "title": "100% Authentic",
+        "description": "All our flight reservations are genuine and verifiable with valid PNR codes accepted by embassies worldwide."
+      },
+      {
+        "title": "Instant Delivery",
+        "description": "Receive your dummy ticket within minutes via email. No waiting, no delays - just instant confirmation."
+      },
+      {
+        "title": "Embassy Approved",
+        "description": "Our tickets meet all embassy requirements and are accepted for visa applications globally."
+      },
+      {
+        "title": "24/7 Support",
+        "description": "Round-the-clock customer support in multiple languages to assist you whenever you need help."
+      },
+      {
+        "title": "Global Coverage",
+        "description": "Book flights to any destination worldwide with support for all major airlines and routes."
+      },
+      {
+        "title": "Trusted Since 1990",
+        "description": "Over three decades of excellence in providing reliable flight reservations for visa applications."
+      }
+    ],
     "reasons": [
       {
         "title": "Experience Since 1990",
@@ -76,10 +115,15 @@
     ]
   },
   "ourCommitment": {
-    "title": "Our Commitment",
-    "subtitle": "Dedicated to making your visa application process smooth and successful",
-    "mission": "Our mission is to simplify the visa application process by providing authentic, verifiable flight reservations that are accepted by embassies worldwide. We understand the importance of proper documentation in your visa journey and strive to make it as seamless as possible.",
-    "values": [
+    "commitmentTitle": "Our Commitment to You",
+    "commitmentSubtitle": "Driven by passion, guided by values, focused on your success",
+    "missionTitle": "Our Mission",
+    "visionTitle": "Our Vision",
+    "valuesTitle": "Our Values",
+    "mission": "To simplify the visa application process by providing authentic, reliable flight reservations that help travelers achieve their dreams of exploring the world.",
+    "vision": "To be the world's most trusted platform for dummy tickets, setting the standard for quality, reliability, and customer satisfaction in the travel documentation industry.",
+    "values": "Integrity, transparency, and customer-first approach guide everything we do. We believe in building lasting relationships through exceptional service and unwavering commitment to quality.",
+    "valuesList": [
       {
         "title": "Excellence",
         "description": "We deliver the highest quality service with attention to every detail"
@@ -99,8 +143,9 @@
     ]
   },
   "readyToBook": {
-    "title": "Ready to Get Started?",
-    "subtitle": "Join thousands of satisfied customers who trust VisaFly for their visa documentation needs",
+    "readyTitle": "Ready to Get Your Dummy Ticket?",
+    "readyDescription": "Join hundreds of thousands of satisfied customers who trust us for their visa applications",
+    "bookNow": "Book Your Ticket Now",
     "cta": "Get Your Dummy Ticket Now",
     "support": {
       "title": "Need Help?",

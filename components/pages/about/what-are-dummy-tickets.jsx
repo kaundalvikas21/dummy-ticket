@@ -5,8 +5,10 @@ import { FileCheck, CheckCircle2 } from "lucide-react"
 import { useState, useEffect } from "react"
 import { useLocale } from "@/contexts/locale-context"
 import { SkeletonCard, SkeletonCardContent, SkeletonCardHeader } from "@/components/ui/skeleton-card"
+import { useTranslation } from "@/lib/translations"
 
 export function WhatAreDummyTickets() {
+  const { t } = useTranslation()
   const { locale } = useLocale()
   const [tickets, setTickets] = useState([])
   const [loading, setLoading] = useState(true)
@@ -137,10 +139,10 @@ export function WhatAreDummyTickets() {
           className="max-w-4xl mx-auto text-center mb-10 md:mb-16"
         >
           <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4">
-            What Are <span className="text-[#0066FF]">Dummy Tickets</span>?
+            {t('about.whatAreDummyTickets.whatAreTitle')} <span className="text-[#0066FF]">{t('about.whatAreDummyTickets.whatAreHighlight')}</span>?
           </h2>
           <p className="text-base md:text-lg text-gray-700 leading-relaxed">
-            A dummy ticket, also known as a flight reservation or flight itinerary, is a temporary booking used as proof of travel plans for visa applications.
+            {t('about.whatAreDummyTickets.whatAreDescription')}
           </p>
         </motion.div>
 
@@ -148,10 +150,10 @@ export function WhatAreDummyTickets() {
           <div className="text-center py-12">
             <FileCheck className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-xl font-medium text-gray-900 mb-2">
-              No content available yet
+              {t('about.whatAreDummyTickets.noContent')}
             </h3>
             <p className="text-gray-500">
-              Content will appear here once added from the admin panel.
+              {t('about.whatAreDummyTickets.noContentMessage')}
             </p>
           </div>
         ) : (
