@@ -87,7 +87,7 @@ export function ContactHero({ settings }) {
             >
               <MapPin className="w-6 h-6 md:w-8 md:h-8 mx-auto mb-2 md:mb-3" />
               <h3 className="font-semibold mb-1 md:mb-2 text-sm md:text-base">
-                {t('contact.office.title')}
+                {t('contact.contactInfo.methods.2.title')}
               </h3>
               <p className="text-white/80 text-xs md:text-sm leading-relaxed">
                 {address}
