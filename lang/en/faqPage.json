@@ -1,0 +1,25 @@
+{
+  "hero": {
+    "helpCenter": "Help Center",
+    "title": "Frequently Asked",
+    "titleHighlight": "Questions",
+    "subtitle": "Find answers to common questions about dummy tickets, booking process, and visa applications",
+    "searchPlaceholder": "Search for answers..."
+  },
+  "contact": {
+    "stillHaveQuestions": "Still Have Questions?",
+    "supportTeam": "Our support team is available 24/7 to help you with any questions or concerns",
+    "contactSupport": "Contact Support",
+    "bookTicket": "Book Your Ticket"
+  },
+  "emptyState": {
+    "noFaqsFound": "No FAQs Found",
+    "noFaqsFoundWithSearch": "No FAQs found matching \"{searchQuery}\". Try different search terms.",
+    "noContentAvailable": "No FAQ content is available at the moment. Please check back later.",
+    "contentNotAvailable": "Content may not be available in this language yet."
+  },
+  "errors": {
+    "failedToLoad": "Failed to load FAQ content",
+    "tryAgain": "Please try refreshing the page or contact support."
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "hero": {
+    "helpCenter": "Centre d'aide",
+    "title": "Questions Fréquemment",
+    "titleHighlight": "Posées",
+    "subtitle": "Trouvez des réponses aux questions courantes sur les billets factices, le processus de réservation et les demandes de visa",
+    "searchPlaceholder": "Rechercher des réponses..."
+  },
+  "contact": {
+    "stillHaveQuestions": "Vous avez encore des questions ?",
+    "supportTeam": "Notre équipe de support est disponible 24h/24 et 7j/7 pour vous aider avec toutes questions ou préoccupations",
+    "contactSupport": "Contacter le support",
+    "bookTicket": "Réserver votre billet"
+  },
+  "emptyState": {
+    "noFaqsFound": "Aucune FAQ trouvée",
+    "noFaqsFoundWithSearch": "Aucune FAQ trouvée correspondant à \"{searchQuery}\". Essayez d'autres termes de recherche.",
+    "noContentAvailable": "Aucun contenu FAQ n'est disponible pour le moment. Veuillez revenir plus tard.",
+    "contentNotAvailable": "Le contenu peut ne pas être disponible dans cette langue pour le moment."
+  },
+  "errors": {
+    "failedToLoad": "Échec du chargement du contenu FAQ",
+    "tryAgain": "Veuillez essayer de rafraîchir la page ou contacter le support."
+  }
+}

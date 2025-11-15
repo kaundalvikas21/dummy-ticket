@@ -1,0 +1,25 @@
+{
+  "hero": {
+    "helpCenter": "Helpcentrum",
+    "title": "Veelgestelde",
+    "titleHighlight": "Vragen",
+    "subtitle": "Vind antwoorden op veelvoorkomende vragen over dummy tickets, boekingsproces en visa-aanvragen",
+    "searchPlaceholder": "Zoek naar antwoorden..."
+  },
+  "contact": {
+    "stillHaveQuestions": "Heeft u nog vragen?",
+    "supportTeam": "Ons ondersteuningsteam is 24/7 beschikbaar om u te helpen met vragen of zorgen",
+    "contactSupport": "Neem contact op met ondersteuning",
+    "bookTicket": "Boek uw ticket"
+  },
+  "emptyState": {
+    "noFaqsFound": "Geen FAQ's gevonden",
+    "noFaqsFoundWithSearch": "Geen FAQ's gevonden die overeenkomen met \"{searchQuery}\". Probeer andere zoektermen.",
+    "noContentAvailable": "Er is momenteel geen FAQ-inhoud beschikbaar. Kom later terug.",
+    "contentNotAvailable": "Inhoud is mogelijk nog niet beschikbaar in deze taal."
+  },
+  "errors": {
+    "failedToLoad": "Kan FAQ-inhoud niet laden",
+    "tryAgain": "Probeer de pagina te vernieuwen of neem contact op met de ondersteuning."
+  }
+}

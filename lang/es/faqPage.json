@@ -1,0 +1,25 @@
+{
+  "hero": {
+    "helpCenter": "Centro de ayuda",
+    "title": "Preguntas",
+    "titleHighlight": "Frecuentes",
+    "subtitle": "Encuentra respuestas a preguntas comunes sobre tickets falsos, proceso de reserva y solicitudes de visa",
+    "searchPlaceholder": "Buscar respuestas..."
+  },
+  "contact": {
+    "stillHaveQuestions": "¿Aún tienes preguntas?",
+    "supportTeam": "Nuestro equipo de soporte está disponible 24/7 para ayudarte con cualquier pregunta o preocupación",
+    "contactSupport": "Contactar soporte",
+    "bookTicket": "Reservar tu ticket"
+  },
+  "emptyState": {
+    "noFaqsFound": "No se encontraron preguntas frecuentes",
+    "noFaqsFoundWithSearch": "No se encontraron preguntas frecuentes que coincidan con \"{searchQuery}\". Prueba otros términos de búsqueda.",
+    "noContentAvailable": "No hay contenido de preguntas frecuentes disponible en este momento. Vuelve a revisar más tarde.",
+    "contentNotAvailable": "Es posible que el contenido no esté disponible en este idioma aún."
+  },
+  "errors": {
+    "failedToLoad": "Error al cargar el contenido de preguntas frecuentes",
+    "tryAgain": "Por favor intenta actualizar la página o contactar al soporte."
+  }
+}

@@ -7,6 +7,10 @@ import StillHaveQuestions from "@/components/pages/faq/StillHaveQuestions"
 import { HelpCircle, Clock, MessageSquare, CreditCard, FileText, Globe, Phone, Settings, Info, Users, ShoppingCart, Shield, BookOpen, CheckCircle, AlertCircle, Zap, Package, Truck } from "lucide-react"
 import { SkeletonCard, SkeletonCardContent, SkeletonCardHeader } from "@/components/ui/skeleton-card"
 import { useLocale } from "@/contexts/locale-context"
+import { useTranslation } from "@/lib/translations"
+
+// Define default locale constant
+const DEFAULT_LOCALE = 'en'
 
 export default function FAQPage() {
   const [searchQuery, setSearchQuery] = useState("")
@@ -14,6 +18,7 @@ export default function FAQPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const { locale, isLoading: localeLoading } = useLocale()
+  const { t } = useTranslation()
 
   // Fetch FAQ sections with items from API
   useEffect(() => {
@@ -28,11 +33,11 @@ export default function FAQPage() {
           setSections(result.sections || [])
         } else {
           console.error('Failed to fetch FAQ sections:', result.error)
-          setError('Failed to load FAQ content')
+          setError(t('faqPage.errors.failedToLoad'))
         }
       } catch (error) {
         console.error('Error fetching FAQ sections:', error)
-        setError('Failed to load FAQ content')
+        setError(t('faqPage.errors.failedToLoad'))
       } finally {
         setLoading(false)
       }
@@ -112,14 +117,13 @@ export default function FAQPage() {
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
             <p className="text-red-800 text-sm">{error}</p>
           </div>
-          <p className="text-gray-600 text-sm">Please try refreshing the page or contact support.</p>
+          <p className="text-gray-600 text-sm">{t('faqPage.errors.tryAgain')}</p>
         </div>
       </div>
     )
   }
 
   if (filteredCategories.length === 0) {
-    const isEnglish = locale === 'en'
     return (
       <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-50">
         <HeroSection searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
@@ -128,23 +132,17 @@ export default function FAQPage() {
           <div className="container mx-auto px-4">
             <div className="max-w-5xl mx-auto text-center">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                {isEnglish ? "No FAQs Found" : "No FAQs Found"}
+                {t('faqPage.emptyState.noFaqsFound')}
               </h2>
               <p className="text-gray-600">
                 {searchQuery
-                  ? (isEnglish
-                    ? `No FAQs found matching "${searchQuery}". Try different search terms.`
-                    : `No FAQs found matching "${searchQuery}". Try different search terms.`)
-                  : (isEnglish
-                    ? "No FAQ content is available at the moment. Please check back later."
-                    : "No FAQ content is available at the moment. Please check back later.")
+                  ? t('faqPage.emptyState.noFaqsFoundWithSearch', { searchQuery })
+                  : t('faqPage.emptyState.noContentAvailable')
                 }
               </p>
               {!searchQuery && locale !== DEFAULT_LOCALE && (
                 <p className="text-sm text-gray-500 mt-2">
-                  {isEnglish
-                    ? "Content may not be available in this language yet."
-                    : "Content may not be available in this language yet."}
+                  {t('faqPage.emptyState.contentNotAvailable')}
                 </p>
               )}
             </div>
