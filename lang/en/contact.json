@@ -1,11 +1,11 @@
 {
   "hero": {
-    "title": "Contact Us",
-    "subtitle": "Get in touch with our team for any questions or support"
+    "title": "Get in Touch",
+    "subtitle": "We're here to help you 24/7. Reach out to us anytime, anywhere."
   },
   "form": {
-    "title": "Send us a Message",
-    "subtitle": "We'll get back to you within 24 hours",
+    "title": "Get a call back!",
+    "subtitle": "Fill up the form below and one of us will get in touch with you",
     "fields": {
       "name": {
         "label": "Full Name",
@@ -55,13 +55,13 @@
     "subtitle": "Multiple ways to reach us",
     "methods": [
       {
-        "title": "Email Support",
+        "title": "Email Us",
         "description": "Send us an email and we'll respond within 24 hours",
         "value": "support@dummyticket.com",
         "action": "Email Us"
       },
       {
-        "title": "Phone Support",
+        "title": "Call Us",
         "description": "Call us for immediate assistance during business hours",
         "value": "+1 (555) 123-4567",
         "action": "Call Now"
@@ -74,7 +74,7 @@
     ]
   },
   "office": {
-    "title": "Visit Our Office",
+    "title": "Visit Us",
     "address": {
       "title": "Head Office",
       "street": "123 Business Avenue, Suite 100",

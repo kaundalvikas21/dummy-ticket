@@ -11,10 +11,11 @@ export function ContactInfoSection({ settings }) {
 
   // Static content for support information
   const contactSupportTitle = "Contact Support"
-  const contactSupportDescription = "Get in touch with our support team from around the world."
+  const contactSupportDescription = "Reach out to our support team in your region. We're here to help you with your travel documentation needs."
 
   // Static content for working hours description
-  const workingHoursText = "Due to the nature of the travel industry we at dummyticket.com understand the need to be available to the customer at any time of day or night. The company is open 24/7 and customer service is available at least 18 hours a day."
+  const workingHoursTitle = "Contact Support"
+  const workingHoursDescription = "Due to the nature of the travel industry we at dummyticket.com understand the need to be available to the customer at any time of day or night. The company is open 24/7 and customer service is available at least 18 hours a day."
 
   // Parse working hours from settings
   const parseWorkingHours = () => {
@@ -103,11 +104,11 @@ export function ContactInfoSection({ settings }) {
                 <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-gradient-to-br from-[#0066FF] to-[#00D4AA] flex items-center justify-center">
                   <Clock className="w-5 h-5 md:w-6 md:h-6 text-white" />
                 </div>
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Working Hours</h2>
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900">{workingHoursTitle}</h2>
               </div>
 
               <p className="text-gray-600 mb-6 md:mb-8 leading-relaxed text-sm md:text-base">
-                {workingHoursText}
+                {workingHoursDescription}
               </p>
 
               <div className="grid grid-cols-2 gap-3 md:gap-4">
