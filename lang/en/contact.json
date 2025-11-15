@@ -80,52 +80,5 @@
   "support": {
     "title": "Contact Support",
     "description": "Reach out to our support team in your region. We're here to help you with your travel documentation needs."
-  },
-  "office": {
-    "title": "Visit Us",
-    "address": {
-      "title": "Head Office",
-      "street": "123 Business Avenue, Suite 100",
-      "city": "New York, NY 10001",
-      "country": "United States"
-    },
-    "hours": {
-      "title": "Business Hours",
-      "weekdays": "Monday - Friday: 9:00 AM - 6:00 PM",
-      "saturday": "Saturday: 10:00 AM - 4:00 PM",
-      "sunday": "Sunday: Closed"
-    }
-  },
-  "social": {
-    "title": "Follow Us",
-    "subtitle": "Stay connected for updates and travel tips",
-    "platforms": {
-      "facebook": "Facebook",
-      "twitter": "Twitter",
-      "instagram": "Instagram",
-      "linkedin": "LinkedIn"
-    }
-  },
-  "faq": {
-    "title": "Frequently Asked Questions",
-    "subtitle": "Quick answers to common questions",
-    "questions": [
-      {
-        "question": "How quickly will I receive my dummy ticket?",
-        "answer": "Most dummy tickets are delivered within 5-30 minutes after payment confirmation."
-      },
-      {
-        "question": "Are your dummy tickets verifiable?",
-        "answer": "Yes, all our tickets come with valid PNR codes that can be verified on airline websites."
-      },
-      {
-        "question": "What payment methods do you accept?",
-        "answer": "We accept credit/debit cards, PayPal, and various international payment methods."
-      },
-      {
-        "question": "Can I make changes to my booking?",
-        "answer": "Yes, we allow up to 4 changes to your booking details free of charge."
-      }
-    ]
   }
 }

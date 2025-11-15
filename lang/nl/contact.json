@@ -80,52 +80,5 @@
   "support": {
     "title": "Contact Ondersteuning",
     "description": "Neem contact op met ons ondersteuningsteam in uw regio. We staan klaar om u te helpen met uw reisdocumentatiebehoeften."
-  },
-  "office": {
-    "title": "Bezoek ons",
-    "address": {
-      "title": "Hoofdkantoor",
-      "street": "123 Zakelijke Avenue, Suite 100",
-      "city": "New York, NY 10001",
-      "country": "Verenigde Staten"
-    },
-    "hours": {
-      "title": "Kantooruren",
-      "weekdays": "Maandag - Vrijdag: 9:00 - 18:00",
-      "saturday": "Zaterdag: 10:00 - 16:00",
-      "sunday": "Zondag: Gesloten"
-    }
-  },
-  "social": {
-    "title": "Volg ons",
-    "subtitle": "Blijf verbonden voor updates en reistips",
-    "platforms": {
-      "facebook": "Facebook",
-      "twitter": "Twitter",
-      "instagram": "Instagram",
-      "linkedin": "LinkedIn"
-    }
-  },
-  "faq": {
-    "title": "Veelgestelde vragen",
-    "subtitle": "Snelle antwoorden op veelvoorkomende vragen",
-    "questions": [
-      {
-        "question": "Hoe snel ontvang ik mijn dummy ticket?",
-        "answer": "De meeste dummy tickets worden binnen 5-30 minuten na betalingsbevestiging geleverd."
-      },
-      {
-        "question": "Zijn uw dummy tickets verifieerbaar?",
-        "answer": "Ja, al onze tickets worden geleverd met geldige PNR-codes die geverifieerd kunnen worden op de websites van luchtvaartmaatschappijen."
-      },
-      {
-        "question": "Welke betaalmethodes accepteert u?",
-        "answer": "We accepteren creditcard/betaalpas, PayPal en diverse internationale betaalmethodes."
-      },
-      {
-        "question": "Kan ik wijzigingen aanbrengen in mijn boeking?",
-        "answer": "Ja, we staan tot 4 wijzigingen in uw boekingsdetails gratis toe."
-      }
-    ]
   }
 }

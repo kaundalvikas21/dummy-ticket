@@ -80,52 +80,5 @@
   "support": {
     "title": "Contacto de Soporte",
     "description": "Comunícate con nuestro equipo de soporte en tu región. Estamos aquí para ayudarte con tus necesidades de documentación de viaje."
-  },
-  "office": {
-    "title": "Visítanos",
-    "address": {
-      "title": "Oficina principal",
-      "street": "123 Avenida Empresarial, Suite 100",
-      "city": "New York, NY 10001",
-      "country": "Estados Unidos"
-    },
-    "hours": {
-      "title": "Horario comercial",
-      "weekdays": "Lunes - Viernes: 9:00 AM - 6:00 PM",
-      "saturday": "Sábado: 10:00 AM - 4:00 PM",
-      "sunday": "Domingo: Cerrado"
-    }
-  },
-  "social": {
-    "title": "Síguenos",
-    "subtitle": "Mantente conectado para actualizaciones y consejos de viaje",
-    "platforms": {
-      "facebook": "Facebook",
-      "twitter": "Twitter",
-      "instagram": "Instagram",
-      "linkedin": "LinkedIn"
-    }
-  },
-  "faq": {
-    "title": "Preguntas frecuentes",
-    "subtitle": "Respuestas rápidas a preguntas comunes",
-    "questions": [
-      {
-        "question": "¿Qué tan rápido recibiré mi ticket dummy?",
-        "answer": "La mayoría de los tickets dummy se entregan dentro de 5-30 minutos después de la confirmación del pago."
-      },
-      {
-        "question": "¿Sus tickets dummy son verificables?",
-        "answer": "Sí, todos nuestros tickets vienen con códigos PNR válidos que pueden ser verificados en los sitios web de las aerolíneas."
-      },
-      {
-        "question": "¿Qué métodos de pago aceptan?",
-        "answer": "Aceptamos tarjetas de crédito/débito, PayPal y varios métodos de pago internacionales."
-      },
-      {
-        "question": "¿Puedo hacer cambios a mi reserva?",
-        "answer": "Sí, permitimos hasta 4 cambios en los detalles de tu reserva sin costo."
-      }
-    ]
   }
 }

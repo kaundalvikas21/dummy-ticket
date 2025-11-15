@@ -80,52 +80,5 @@
   "support": {
     "title": "Contacter le support",
     "description": "Contactez notre équipe de support dans votre région. Nous sommes là pour vous aider avec vos besoins de documentation de voyage."
-  },
-  "office": {
-    "title": "Visitez-nous",
-    "address": {
-      "title": "Siège social",
-      "street": "123 Avenue des Affaires, Bureau 100",
-      "city": "New York, NY 10001",
-      "country": "États-Unis"
-    },
-    "hours": {
-      "title": "Heures de bureau",
-      "weekdays": "Lundi - Vendredi : 9h00 - 18h00",
-      "saturday": "Samedi : 10h00 - 16h00",
-      "sunday": "Dimanche : Fermé"
-    }
-  },
-  "social": {
-    "title": "Suivez-nous",
-    "subtitle": "Restez connecté pour les mises à jour et les conseils de voyage",
-    "platforms": {
-      "facebook": "Facebook",
-      "twitter": "Twitter",
-      "instagram": "Instagram",
-      "linkedin": "LinkedIn"
-    }
-  },
-  "faq": {
-    "title": "Questions fréquentes",
-    "subtitle": "Réponses rapides aux questions courantes",
-    "questions": [
-      {
-        "question": "À quelle vitesse recevrai-je mon billet factice ?",
-        "answer": "La plupart des billets factices sont livrés dans les 5-30 minutes après confirmation du paiement."
-      },
-      {
-        "question": "Vos billets factices sont-ils vérifiables ?",
-        "answer": "Oui, tous nos billets sont livrés avec des codes PNR valides qui peuvent être vérifiés sur les sites web des compagnies aériennes."
-      },
-      {
-        "question": "Quelles méthodes de paiement acceptez-vous ?",
-        "answer": "Nous acceptons les cartes de crédit/débit, PayPal et diverses méthodes de paiement internationales."
-      },
-      {
-        "question": "Puis-je apporter des modifications à ma réservation ?",
-        "answer": "Oui, nous autorisons jusqu'à 4 modifications aux détails de votre réservation gratuitement."
-      }
-    ]
   }
 }
