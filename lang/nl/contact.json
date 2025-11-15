@@ -1,0 +1,131 @@
+{
+  "hero": {
+    "title": "Neem contact op",
+    "subtitle": "Wij staan 24/7 voor u klaar. Neem op elk moment, overal contact met ons op."
+  },
+  "form": {
+    "title": "Bel me terug!",
+    "subtitle": "Vul het onderstaande formulier in en een van ons neemt contact met u op",
+    "fields": {
+      "name": {
+        "label": "Volledige naam",
+        "placeholder": "Voer uw volledige naam in",
+        "required": "Volledige naam is vereist"
+      },
+      "email": {
+        "label": "E-mailadres",
+        "placeholder": "uw.email@voorbeeld.com",
+        "required": "E-mailadres is vereist",
+        "invalid": "Voer een geldig e-mailadres in"
+      },
+      "phone": {
+        "label": "Telefoonnummer",
+        "placeholder": "+31 (20) 123-4567",
+        "optional": "Optioneel"
+      },
+      "subject": {
+        "label": "Onderwerp",
+        "placeholder": "Selecteer een onderwerp",
+        "options": {
+          "general": "Algemeen verzoek",
+          "support": "Technische ondersteuning",
+          "billing": "Facturatievraag",
+          "partnership": "Partnerschapskans",
+          "feedback": "Feedback",
+          "other": "Anders"
+        },
+        "required": "Selecteer een onderwerp"
+      },
+      "message": {
+        "label": "Uw bericht",
+        "placeholder": "Vertel ons hoe we u kunnen helpen...",
+        "required": "Bericht is vereist",
+        "minLength": "Bericht moet minimaal 10 tekens bevatten"
+      }
+    },
+    "submit": {
+      "text": "Bericht versturen",
+      "sending": "Versturen...",
+      "success": "Uw bericht is succesvol verzonden. We nemen snel contact met u op!",
+      "error": "Kan uw bericht niet verzenden. Probeer het opnieuw."
+    }
+  },
+  "contactInfo": {
+    "title": "Neem contact op",
+    "subtitle": "Meerdere manieren om ons te bereiken",
+    "methods": [
+      {
+        "title": "E-mail ons",
+        "description": "Stuur ons een e-mail en we reageren binnen 24 uur",
+        "value": "support@dummyticket.com",
+        "action": "E-mail sturen"
+      },
+      {
+        "title": "Bel ons",
+        "description": "Bel ons voor directe assistentie tijdens kantooruren",
+        "value": "+1 (555) 123-4567",
+        "action": "Nu bellen"
+      },
+      {
+        "title": "Live chat",
+        "description": "Chat met onze ondersteuningsteam in real-time",
+        "action": "Chat starten"
+      }
+    ]
+  },
+  "workingHours": {
+    "title": "Openingstijden",
+    "description": "Vanwege de aard van de reisindustrie begrijpen we bij dummyticket.com de noodzaak om op elk moment van de dag of nacht beschikbaar te zijn voor de klant. Het bedrijf is 24/7 geopend en klantenservice is ten minste 18 uur per dag beschikbaar."
+  },
+  "support": {
+    "title": "Contact Ondersteuning",
+    "description": "Neem contact op met ons ondersteuningsteam in uw regio. We staan klaar om u te helpen met uw reisdocumentatiebehoeften."
+  },
+  "office": {
+    "title": "Bezoek ons",
+    "address": {
+      "title": "Hoofdkantoor",
+      "street": "123 Zakelijke Avenue, Suite 100",
+      "city": "New York, NY 10001",
+      "country": "Verenigde Staten"
+    },
+    "hours": {
+      "title": "Kantooruren",
+      "weekdays": "Maandag - Vrijdag: 9:00 - 18:00",
+      "saturday": "Zaterdag: 10:00 - 16:00",
+      "sunday": "Zondag: Gesloten"
+    }
+  },
+  "social": {
+    "title": "Volg ons",
+    "subtitle": "Blijf verbonden voor updates en reistips",
+    "platforms": {
+      "facebook": "Facebook",
+      "twitter": "Twitter",
+      "instagram": "Instagram",
+      "linkedin": "LinkedIn"
+    }
+  },
+  "faq": {
+    "title": "Veelgestelde vragen",
+    "subtitle": "Snelle antwoorden op veelvoorkomende vragen",
+    "questions": [
+      {
+        "question": "Hoe snel ontvang ik mijn dummy ticket?",
+        "answer": "De meeste dummy tickets worden binnen 5-30 minuten na betalingsbevestiging geleverd."
+      },
+      {
+        "question": "Zijn uw dummy tickets verifieerbaar?",
+        "answer": "Ja, al onze tickets worden geleverd met geldige PNR-codes die geverifieerd kunnen worden op de websites van luchtvaartmaatschappijen."
+      },
+      {
+        "question": "Welke betaalmethodes accepteert u?",
+        "answer": "We accepteren creditcard/betaalpas, PayPal en diverse internationale betaalmethodes."
+      },
+      {
+        "question": "Kan ik wijzigingen aanbrengen in mijn boeking?",
+        "answer": "Ja, we staan tot 4 wijzigingen in uw boekingsdetails gratis toe."
+      }
+    ]
+  }
+}

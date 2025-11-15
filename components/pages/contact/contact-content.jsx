@@ -121,7 +121,7 @@ export default function ContactContent({ settings }) {
       if (response.ok) {
         toast({
           title: "Success!",
-          description: "Your message has been sent successfully. We'll get back to you soon!",
+          description: t('contact.form.submit.success'),
         })
 
         // Reset form
@@ -129,13 +129,13 @@ export default function ContactContent({ settings }) {
           name: "",
           email: "",
           phone: "",
-          subject: "General Inquiry",
+          subject: t('contact.form.fields.subject.options.general'),
           message: "",
         })
       } else {
         toast({
           title: "Error",
-          description: result.error || "Failed to send your message. Please try again.",
+          description: result.error || t('contact.form.submit.error'),
           variant: "destructive",
         })
       }
@@ -143,7 +143,7 @@ export default function ContactContent({ settings }) {
       console.error('Error submitting contact form:', error)
       toast({
         title: "Error",
-        description: "Failed to send your message. Please try again.",
+        description: t('contact.form.submit.error'),
         variant: "destructive",
       })
     } finally {
@@ -165,11 +165,11 @@ export default function ContactContent({ settings }) {
             <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-gradient-to-br from-[#0066FF] to-[#00D4AA] flex items-center justify-center">
               <PhoneIcon className="w-5 h-5 md:w-6 md:h-6 text-white" />
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Get a call back!</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">{t('contact.form.title')}</h2>
           </div>
 
           <p className="text-gray-600 mb-6 md:mb-8 text-center text-sm md:text-base">
-            Fill up the form below and one of us will get in touch with you
+            {t('contact.form.subtitle')}
           </p>
 
           {/* Contact Form */}
@@ -178,7 +178,7 @@ export default function ContactContent({ settings }) {
               {/* Name */}
               <div>
                 <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1.5 md:mb-2">
-                  Full Name
+                  {t('contact.form.fields.name.label')}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 md:pl-4 flex items-center pointer-events-none text-gray-400">
@@ -190,7 +190,7 @@ export default function ContactContent({ settings }) {
                     autoComplete="name"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="Enter your full name"
+                    placeholder={t('contact.form.fields.name.placeholder')}
                     className="w-full pl-10 md:pl-12 pr-3 md:pr-4 py-2.5 md:py-3.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#0066FF] focus:border-transparent transition-all text-gray-900 placeholder:text-gray-400 text-sm md:text-base"
                     required
                   />
@@ -200,7 +200,7 @@ export default function ContactContent({ settings }) {
               {/* Email */}
               <div>
                 <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1.5 md:mb-2">
-                  Email Address
+                  {t('contact.form.fields.email.label')}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 md:pl-4 flex items-center pointer-events-none text-gray-400">
@@ -212,7 +212,7 @@ export default function ContactContent({ settings }) {
                     autoComplete="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="your.email@example.com"
+                    placeholder={t('contact.form.fields.email.placeholder')}
                     className="w-full pl-10 md:pl-12 pr-3 md:pr-4 py-2.5 md:py-3.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#0066FF] focus:border-transparent transition-all text-gray-900 placeholder:text-gray-400 text-sm md:text-base"
                     required
                   />
@@ -222,7 +222,7 @@ export default function ContactContent({ settings }) {
               {/* Phone */}
               <div>
                 <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1.5 md:mb-2">
-                  Phone Number
+                  {t('contact.form.fields.phone.label')}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 md:pl-4 flex items-center pointer-events-none text-gray-400">
@@ -234,7 +234,7 @@ export default function ContactContent({ settings }) {
                     autoComplete="tel"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    placeholder="+1 (555) 000-0000"
+                    placeholder={t('contact.form.fields.phone.placeholder')}
                     className="w-full pl-10 md:pl-12 pr-3 md:pr-4 py-2.5 md:py-3.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#0066FF] focus:border-transparent transition-all text-gray-900 placeholder:text-gray-400 text-sm md:text-base"
                     required
                   />
@@ -244,7 +244,7 @@ export default function ContactContent({ settings }) {
               {/* Message */}
               <div>
                 <label className="block text-xs md:text-sm font-semibold text-gray-700 mb-1.5 md:mb-2">
-                  Your Message
+                  {t('contact.form.fields.message.label')}
                 </label>
                 <div className="relative">
                   <div className="absolute top-2.5 md:top-3.5 left-0 pl-3 md:pl-4 pointer-events-none text-gray-400">
@@ -254,7 +254,7 @@ export default function ContactContent({ settings }) {
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                     rows="5"
-                    placeholder="Tell us how we can help you..."
+                    placeholder={t('contact.form.fields.message.placeholder')}
                     className="w-full pl-10 md:pl-12 pr-3 md:pr-4 py-2.5 md:py-3.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#0066FF] focus:border-transparent transition-all resize-none text-gray-900 placeholder:text-gray-400 text-sm md:text-base"
                     required
                   />
@@ -270,10 +270,10 @@ export default function ContactContent({ settings }) {
                 {isSubmitting ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Sending...
+                    {t('contact.form.submit.sending')}
                   </>
                 ) : (
-                  "Send Message"
+                  t('contact.form.submit.text')
                 )}
               </Button>
             </form>

@@ -1,0 +1,131 @@
+{
+  "hero": {
+    "title": "Contactez-nous",
+    "subtitle": "Nous sommes là pour vous aider 24h/24 et 7j/7. Contactez-nous à tout moment, de n'importe où."
+  },
+  "form": {
+    "title": "Appelez-moi !",
+    "subtitle": "Remplissez le formulaire ci-dessous et l'un de nos membres prendra contact avec vous",
+    "fields": {
+      "name": {
+        "label": "Nom complet",
+        "placeholder": "Entrez votre nom complet",
+        "required": "Le nom complet est requis"
+      },
+      "email": {
+        "label": "Adresse e-mail",
+        "placeholder": "votre.email@exemple.com",
+        "required": "L'adresse e-mail est requise",
+        "invalid": "Veuillez entrer une adresse e-mail valide"
+      },
+      "phone": {
+        "label": "Numéro de téléphone",
+        "placeholder": "+33 (1) 234-5678",
+        "optional": "Optionnel"
+      },
+      "subject": {
+        "label": "Sujet",
+        "placeholder": "Sélectionnez un sujet",
+        "options": {
+          "general": "Demande générale",
+          "support": "Support technique",
+          "billing": "Question de facturation",
+          "partnership": "Opportunité de partenariat",
+          "feedback": "Commentaires",
+          "other": "Autre"
+        },
+        "required": "Veuillez sélectionner un sujet"
+      },
+      "message": {
+        "label": "Votre message",
+        "placeholder": "Dites-nous comment nous pouvons vous aider...",
+        "required": "Le message est requis",
+        "minLength": "Le message doit contenir au moins 10 caractères"
+      }
+    },
+    "submit": {
+      "text": "Envoyer le message",
+      "sending": "Envoi en cours...",
+      "success": "Votre message a été envoyé avec succès. Nous reviendrons vers vous bientôt !",
+      "error": "Échec de l'envoi de votre message. Veuillez réessayer."
+    }
+  },
+  "contactInfo": {
+    "title": "Contactez-nous",
+    "subtitle": "Plusieurs façons de nous joindre",
+    "methods": [
+      {
+        "title": "Envoyez-nous un e-mail",
+        "description": "Envoyez-nous un e-mail et nous répondrons dans les 24 heures",
+        "value": "support@dummyticket.com",
+        "action": "Envoyer un e-mail"
+      },
+      {
+        "title": "Appelez-nous",
+        "description": "Appelez-nous pour une assistance immédiate pendant les heures de bureau",
+        "value": "+1 (555) 123-4567",
+        "action": "Appeler maintenant"
+      },
+      {
+        "title": "Chat en direct",
+        "description": "Discutez avec notre équipe de support en temps réel",
+        "action": "Commencer le chat"
+      }
+    ]
+  },
+  "workingHours": {
+    "title": "Heures d'ouverture",
+    "description": "En raison de la nature de l'industrie du voyage, nous chez dummyticket.com comprenons la nécessité d'être disponible pour le client à tout moment de la journée ou de la nuit. L'entreprise est ouverte 24h/24 et 7j/7 et le service client est disponible au moins 18 heures par jour."
+  },
+  "support": {
+    "title": "Contacter le support",
+    "description": "Contactez notre équipe de support dans votre région. Nous sommes là pour vous aider avec vos besoins de documentation de voyage."
+  },
+  "office": {
+    "title": "Visitez-nous",
+    "address": {
+      "title": "Siège social",
+      "street": "123 Avenue des Affaires, Bureau 100",
+      "city": "New York, NY 10001",
+      "country": "États-Unis"
+    },
+    "hours": {
+      "title": "Heures de bureau",
+      "weekdays": "Lundi - Vendredi : 9h00 - 18h00",
+      "saturday": "Samedi : 10h00 - 16h00",
+      "sunday": "Dimanche : Fermé"
+    }
+  },
+  "social": {
+    "title": "Suivez-nous",
+    "subtitle": "Restez connecté pour les mises à jour et les conseils de voyage",
+    "platforms": {
+      "facebook": "Facebook",
+      "twitter": "Twitter",
+      "instagram": "Instagram",
+      "linkedin": "LinkedIn"
+    }
+  },
+  "faq": {
+    "title": "Questions fréquentes",
+    "subtitle": "Réponses rapides aux questions courantes",
+    "questions": [
+      {
+        "question": "À quelle vitesse recevrai-je mon billet factice ?",
+        "answer": "La plupart des billets factices sont livrés dans les 5-30 minutes après confirmation du paiement."
+      },
+      {
+        "question": "Vos billets factices sont-ils vérifiables ?",
+        "answer": "Oui, tous nos billets sont livrés avec des codes PNR valides qui peuvent être vérifiés sur les sites web des compagnies aériennes."
+      },
+      {
+        "question": "Quelles méthodes de paiement acceptez-vous ?",
+        "answer": "Nous acceptons les cartes de crédit/débit, PayPal et diverses méthodes de paiement internationales."
+      },
+      {
+        "question": "Puis-je apporter des modifications à ma réservation ?",
+        "answer": "Oui, nous autorisons jusqu'à 4 modifications aux détails de votre réservation gratuitement."
+      }
+    ]
+  }
+}

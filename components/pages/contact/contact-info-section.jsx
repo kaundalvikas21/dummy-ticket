@@ -4,18 +4,20 @@ import { motion } from "framer-motion"
 import { useInView } from "framer-motion"
 import { useRef } from "react"
 import { Clock, Phone } from "lucide-react"
+import { useTranslation } from "@/lib/translations"
 
 export function ContactInfoSection({ settings }) {
+  const { t } = useTranslation()
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
 
-  // Static content for support information
-  const contactSupportTitle = "Contact Support"
-  const contactSupportDescription = "Reach out to our support team in your region. We're here to help you with your travel documentation needs."
+  // Static content for support information - now translated
+  const contactSupportTitle = t('contact.support.title')
+  const contactSupportDescription = t('contact.support.description')
 
-  // Static content for working hours description
-  const workingHoursTitle = "Working Hours"
-  const workingHoursDescription = "Due to the nature of the travel industry we at dummyticket.com understand the need to be available to the customer at any time of day or night. The company is open 24/7 and customer service is available at least 18 hours a day."
+  // Static content for working hours description - now translated
+  const workingHoursTitle = t('contact.workingHours.title')
+  const workingHoursDescription = t('contact.workingHours.description')
 
   // Parse working hours from settings
   const parseWorkingHours = () => {

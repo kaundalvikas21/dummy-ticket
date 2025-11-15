@@ -14,13 +14,13 @@
       },
       "email": {
         "label": "Email Address",
-        "placeholder": "Enter your email address",
+        "placeholder": "your.email@example.com",
         "required": "Email address is required",
         "invalid": "Please enter a valid email address"
       },
       "phone": {
         "label": "Phone Number",
-        "placeholder": "Enter your phone number",
+        "placeholder": "+1 (555) 000-0000",
         "optional": "Optional"
       },
       "subject": {
@@ -37,8 +37,8 @@
         "required": "Please select a subject"
       },
       "message": {
-        "label": "Message",
-        "placeholder": "Type your message here...",
+        "label": "Your Message",
+        "placeholder": "Tell us how we can help you...",
         "required": "Message is required",
         "minLength": "Message must be at least 10 characters"
       }
@@ -46,8 +46,8 @@
     "submit": {
       "text": "Send Message",
       "sending": "Sending...",
-      "success": "Message sent successfully!",
-      "error": "Failed to send message. Please try again."
+      "success": "Your message has been sent successfully. We'll get back to you soon!",
+      "error": "Failed to send your message. Please try again."
     }
   },
   "contactInfo": {
@@ -72,6 +72,14 @@
         "action": "Start Chat"
       }
     ]
+  },
+  "workingHours": {
+    "title": "Working Hours",
+    "description": "Due to the nature of the travel industry we at dummyticket.com understand the need to be available to the customer at any time of day or night. The company is open 24/7 and customer service is available at least 18 hours a day."
+  },
+  "support": {
+    "title": "Contact Support",
+    "description": "Reach out to our support team in your region. We're here to help you with your travel documentation needs."
   },
   "office": {
     "title": "Visit Us",
