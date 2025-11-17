@@ -1,0 +1,31 @@
+{
+  "hero": {
+    "title": "Nuestros Servicios",
+    "subtitle": "Soluciones integrales de tickets ficticios para todas sus necesidades de solicitud de visa"
+  },
+  "mainServices": {
+    "title": "Nuestros Servicios Principales",
+    "subtitle": "Servicios profesionales de tickets ficticios confiables para miles de viajeros en todo el mundo"
+  },
+  "benefits": {
+    "title": "Por Qué Elegir Nuestros Servicios",
+    "items": [
+      {
+        "title": "100% Verificable",
+        "description": "Todos los tickets pueden ser verificados en los sitios web de las aerolíneas"
+      },
+      {
+        "title": "Entrega Inmediata",
+        "description": "Reciba su ticket en minutos"
+      },
+      {
+        "title": "Seguro y Confiable",
+        "description": "Pago seguro y protección de datos"
+      },
+      {
+        "title": "Soporte 24/7",
+        "description": "Asistencia experta cuando lo necesite"
+      }
+    ]
+  }
+}

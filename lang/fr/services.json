@@ -1,0 +1,31 @@
+{
+  "hero": {
+    "title": "Nos Services",
+    "subtitle": "Solutions complètes de billets factices pour tous vos besoins de demande de visa"
+  },
+  "mainServices": {
+    "title": "Nos Services Principaux",
+    "subtitle": "Services professionnels de billets factices approuvés par des milliers de voyageurs dans le monde entier"
+  },
+  "benefits": {
+    "title": "Pourquoi Choisir Nos Services",
+    "items": [
+      {
+        "title": "100% Vérifiable",
+        "description": "Tous les billets peuvent être vérifiés sur les sites web des compagnies aériennes"
+      },
+      {
+        "title": "Livraison Instantanée",
+        "description": "Recevez votre billet en quelques minutes"
+      },
+      {
+        "title": "Sécurisé et Fiable",
+        "description": "Paiement sécurisé et protection des données"
+      },
+      {
+        "title": "Support 24/7",
+        "description": "Assistance d'experts quand vous en avez besoin"
+      }
+    ]
+  }
+}

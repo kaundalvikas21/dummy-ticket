@@ -6,11 +6,44 @@ import { useRef } from "react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { CheckCircle2, Plane, Hotel, ArrowLeftRight, FileText, Calendar, Globe2 } from "lucide-react"
+import { useTranslation } from "@/lib/translations"
 
 
 export default function MainServices({ servicePlans }) {
+  const { t, isLoading } = useTranslation()
   const mainRef = useRef(null)
   const mainInView = useInView(mainRef, { once: true, margin: "-100px" })
+
+  if (isLoading) {
+    return (
+      <section ref={mainRef} className="py-12 md:py-24 bg-gradient-to-b from-gray-50 to-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12 md:mb-16">
+            <div className="animate-pulse">
+              <div className="h-8 md:h-10 lg:h-12 bg-gray-200 rounded-lg mb-3 md:mb-4 mx-auto max-w-2xl"></div>
+              <div className="h-4 md:h-6 bg-gray-200 rounded-lg mx-auto max-w-3xl"></div>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+            {[...Array(6)].map((_, index) => (
+              <div key={index} className="animate-pulse">
+                <div className="bg-gray-200 h-48 md:h-56 rounded-t-2xl"></div>
+                <div className="bg-white p-5 md:p-8 rounded-b-2xl border border-gray-100">
+                  <div className="h-6 md:h-8 bg-gray-200 rounded-lg mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded-lg mb-3"></div>
+                  <div className="space-y-2">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="h-3 bg-gray-200 rounded"></div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
 
   // Helper function to map service IDs to Lucide icons
   const getServiceIcon = (id) => {
@@ -41,9 +74,9 @@ export default function MainServices({ servicePlans }) {
           transition={{ duration: 0.6 }}
           className="text-center mb-12 md:mb-16"
         >
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 md:mb-4">Our Main Services</h2>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 md:mb-4">{t('services.mainServices.title')}</h2>
           <p className="text-base md:text-xl text-gray-600 max-w-3xl mx-auto">
-            Professional dummy ticket services trusted by thousands of travelers worldwide
+            {t('services.mainServices.subtitle')}
           </p>
         </motion.div>
 

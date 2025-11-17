@@ -1,0 +1,31 @@
+{
+  "hero": {
+    "title": "Onze Diensten",
+    "subtitle": "Comprehensieve dummy ticket oplossingen voor al uw visum aanvraag behoeften"
+  },
+  "mainServices": {
+    "title": "Onze Hoofddiensten",
+    "subtitle": "Professionele dummy ticket diensten vertrouwd door duizenden reizers wereldwijd"
+  },
+  "benefits": {
+    "title": "Waarom Onze Diensten Kiezen",
+    "items": [
+      {
+        "title": "100% Verifieerbaar",
+        "description": "Alle tickets kunnen worden geverifieerd op luchtvaartmaatschappij websites"
+      },
+      {
+        "title": "Directe Levering",
+        "description": "Ontvang uw ticket binnen enkele minuten"
+      },
+      {
+        "title": "Veilig en Betrouwbaar",
+        "description": "Veilige betaling en databescherming"
+      },
+      {
+        "title": "24/7 Ondersteuning",
+        "description": "Deskundige assistentie wanneer u het nodig heeft"
+      }
+    ]
+  }
+}

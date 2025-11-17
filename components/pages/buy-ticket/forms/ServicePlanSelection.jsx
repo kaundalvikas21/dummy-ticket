@@ -60,7 +60,7 @@ function PlanCard({ plan, isSelected, onSelect }) {
       {plan.popular && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2">
           <span className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white px-4 py-1 rounded-full text-xs font-semibold">
-            {t('buyTicket.servicePlan.mostPopular')}
+            MOST POPULAR
           </span>
         </div>
       )}
@@ -75,7 +75,7 @@ function PlanCard({ plan, isSelected, onSelect }) {
             <span className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#0066FF] to-[#00D4AA] bg-clip-text text-transparent">
               {plan.price}
             </span>
-            <span className="text-xs md:text-sm text-gray-500 ml-1">{t('buyTicket.servicePlan.perPerson')}</span>
+            <span className="text-xs md:text-sm text-gray-500 ml-1">/person</span>
           </div>
           <p className="text-[10px] md:text-xs text-gray-500">{plan.currencies}</p>
         </div>

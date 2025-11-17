@@ -25,8 +25,6 @@
   "servicePlan": {
     "title": "Select Your Service Plan",
     "description": "Choose the plan that best fits your travel needs",
-    "mostPopular": "MOST POPULAR",
-    "perPerson": "/ person",
     "allPlansInclude": "All plans include: Valid PNR code, verifiable reservations, instant delivery, and 24/7 customer support. Select your plan to continue with the booking process.",
     "dummyTicket": {
       "name": "DUMMY TICKET FOR VISA",
