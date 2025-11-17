@@ -76,47 +76,7 @@
   },
   "pricing": {
     "label": "ASEQUIBLE",
-    "title": "Precios",
-    "mostPopular": "MÁS POPULAR",
-    "perPerson": "/ persona",
-    "plans": [
-      {
-        "name": "BOLETO FALSO PARA VISA",
-        "description": "Persona",
-        "features": [
-          "Reserva de vuelo/ itinerario",
-          "verificable en sitio web de aerolínea",
-          "Hasta 4 cambios permitidos",
-          "Use para solicitud de visa/ prueba de regreso"
-        ],
-        "cta": "COMPRAR BOLETO",
-        "currencies": "19 USD | 1200 INR | 70 AED | 16 EUR | 14.50 GBP"
-      },
-      {
-        "name": "BOLETO FALSO & HOTEL",
-        "description": "Persona",
-        "features": [
-          "Reserva real de aerolínea/hotel",
-          "Verificable en sitio web de aerolínea/hotel",
-          "Alojamiento hasta un mes",
-          "Hasta 4 cambios permitidos",
-          "Use para solicitud de visa/ prueba de regreso"
-        ],
-        "cta": "COMPRAR BOLETO",
-        "currencies": "35 USD | 2750 INR | 128 AED | 30 EUR | 26.70 GBP"
-      },
-      {
-        "name": "BOLETO REGRESO FALSO",
-        "description": "Persona",
-        "features": [
-          "Boleto de regreso para mostrar en inmigración",
-          "Reserva de vuelo verificable con PNR",
-          "Puede ser usado como prueba de regreso o viaje continuo en la mayoría de países"
-        ],
-        "cta": "COMPRAR BOLETO",
-        "currencies": "15 USD | 990 INR | 55 AED | 14 EUR | 12.50 GBP"
-      }
-    ]
+    "title": "Precios"
   },
   "otherServices": {
     "title": "otros servicios:",

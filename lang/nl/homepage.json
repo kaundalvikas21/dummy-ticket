@@ -76,47 +76,7 @@
   },
   "pricing": {
     "label": "BETAALBAAR",
-    "title": "Prijzen",
-    "mostPopular": "MEEST POPULAIR",
-    "perPerson": "/ persoon",
-    "plans": [
-      {
-        "name": "DUMMY TICKET VOOR VISA",
-        "description": "Persoon",
-        "features": [
-          "Vluchtreservering/ route",
-          "verifieerbaar op luchtvaartmaatschappij website",
-          "Tot 4 wijzigingen toegestaan",
-          "Gebruik voor visa aanvraag/ bewijs van terugkeer"
-        ],
-        "cta": "KOOP TICKET",
-        "currencies": "19 USD | 1200 INR | 70 AED | 16 EUR | 14.50 GBP"
-      },
-      {
-        "name": "DUMMY TICKET & HOTEL",
-        "description": "Persoon",
-        "features": [
-          "Werkelijke reservering van luchtvaartmaatschappij/hotel",
-          "Verifieerbaar op luchtvaartmaatschappij/hotel website",
-          "Verblijf tot een maand",
-          "Tot 4 wijzigingen toegestaan",
-          "Gebruik voor visa aanvraag/ bewijs van terugkeer"
-        ],
-        "cta": "KOOP TICKET",
-        "currencies": "35 USD | 2750 INR | 128 AED | 30 EUR | 26.70 GBP"
-      },
-      {
-        "name": "DUMMY RETOUR TICKET",
-        "description": "Persoon",
-        "features": [
-          "Retourticket voor presentatie aan immigratie",
-          "Verifieerbare vluchtreservering met PNR",
-          "Kan worden gebruikt als bewijs van terugkeer of doorgaande reis in de meeste landen"
-        ],
-        "cta": "KOOP TICKET",
-        "currencies": "15 USD | 990 INR | 55 AED | 14 EUR | 12.50 GBP"
-      }
-    ]
+    "title": "Prijzen"
   },
   "otherServices": {
     "title": "andere diensten:",

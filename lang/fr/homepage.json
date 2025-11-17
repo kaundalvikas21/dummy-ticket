@@ -76,47 +76,7 @@
   },
   "pricing": {
     "label": "ABORDABLE",
-    "title": "Tarifs",
-    "mostPopular": "LE PLUS POPULAIRE",
-    "perPerson": "/ personne",
-    "plans": [
-      {
-        "name": "BILLET FICTIF POUR VISA",
-        "description": "Personne",
-        "features": [
-          "Réservation de vol/ itinéraire",
-          "vérifiable sur site de compagnie aérienne",
-          "Jusqu'à 4 modifications autorisées",
-          "Utilisez pour demande de visa/ preuve de retour"
-        ],
-        "cta": "ACHETER BILLET",
-        "currencies": "19 USD | 1200 INR | 70 AED | 16 EUR | 14.50 GBP"
-      },
-      {
-        "name": "BILLET FICTIF & HÔTEL",
-        "description": "Personne",
-        "features": [
-          "Réservation réelle de compagnie/hôtel",
-          "Vérifiable sur site de compagnie/hôtel",
-          "Hébergement jusqu'à un mois",
-          "Jusqu'à 4 modifications autorisées",
-          "Utilisez pour demande de visa/ preuve de retour"
-        ],
-        "cta": "ACHETER BILLET",
-        "currencies": "35 USD | 2750 INR | 128 AED | 30 EUR | 26.70 GBP"
-      },
-      {
-        "name": "BILLET RETOUR FICTIF",
-        "description": "Personne",
-        "features": [
-          "Billet retour pour présentation en immigration",
-          "Réservation de vol vérifiable avec PNR",
-          "Peut être utilisé comme preuve de retour ou voyage de continuation dans la plupart des pays"
-        ],
-        "cta": "ACHETER BILLET",
-        "currencies": "15 USD | 990 INR | 55 AED | 14 EUR | 12.50 GBP"
-      }
-    ]
+    "title": "Tarifs"
   },
   "otherServices": {
     "title": "autres services:",

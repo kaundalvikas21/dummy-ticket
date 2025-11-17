@@ -76,47 +76,7 @@
   },
   "pricing": {
     "label": "AFFORDABLE",
-    "title": "Pricing",
-    "mostPopular": "MOST POPULAR",
-    "perPerson": "/ person",
-    "plans": [
-      {
-        "name": "DUMMY TICKET FOR VISA",
-        "description": "Person",
-        "features": [
-          "Flight reservation/ itinerary",
-          "verifiable on airline website",
-          "Up to 4 changes allowed",
-          "Use for visa application/ proof of return"
-        ],
-        "cta": "BUY TICKET",
-        "currencies": "19 USD | 1200 INR | 70 AED | 16 EUR | 14.50 GBP"
-      },
-      {
-        "name": "DUMMY TICKET & HOTEL",
-        "description": "Person",
-        "features": [
-          "Actual reservation from airline/hotel",
-          "Verifiable on airline/hotel website",
-          "Accomodation up to one month",
-          "Up to 4 changes allowed",
-          "Use for visa application/ proof of return"
-        ],
-        "cta": "BUY TICKET",
-        "currencies": "35 USD | 2750 INR | 128 AED | 30 EUR | 26.70 GBP"
-      },
-      {
-        "name": "DUMMY RETURN TICKET",
-        "description": "Person",
-        "features": [
-          "Return ticket for showing in immigration",
-          "Verifiable flight reservation with PNR",
-          "Can be used to show as proof of return or onward travel in most countries"
-        ],
-        "cta": "BUY TICKET",
-        "currencies": "15 USD | 990 INR | 55 AED | 14 EUR | 12.50 GBP"
-      }
-    ]
+    "title": "Pricing"
   },
   "otherServices": {
     "title": "other services:",
