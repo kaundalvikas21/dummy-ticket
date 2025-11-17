@@ -50,7 +50,7 @@ export default function MainServices({ servicePlans }) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {servicePlans.map((service, index) => {
             const ServiceIcon = getServiceIcon(service.id)
-            const priceParts = service.currencies.split(' | ')[0].split(' ') // Get "19 USD" and split
+            const priceParts = service.currencies.split(' | ')[0].split(' ') 
             const priceValue = priceParts[0]
             const priceCurrency = priceParts[1]
 
@@ -108,15 +108,14 @@ export default function MainServices({ servicePlans }) {
                       {service.name}
                     </h3>
                     <p className="text-sm md:text-base text-gray-600">
-                      {/* A short description might be needed in servicePlans.js if this is desired */}
-                      {service.features[0]} {/* Using the first feature as a short description for now */}
+                      {service.description} 
                     </p>
 
                     <ul className="space-y-2 mt-3">
                       {service.features.map((feature) => (
                         <li key={feature} className="flex items-start gap-2">
                           <CheckCircle2
-                            className={`w-4 h-4 ${
+                            className={`w-4 h-4 flex-shrink-0 ${
                               service.popular ? "text-[#0066FF]" : "text-[#00D4AA]"
                             }`}
                           />
@@ -125,7 +124,7 @@ export default function MainServices({ servicePlans }) {
                       ))}
                     </ul>
 
-                    <div className="pt-4 mt-auto border-t border-gray-100">
+                    <div className="pt-4 mt-4 border-t border-gray-100">
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-baseline gap-1">
                           <span
@@ -135,9 +134,9 @@ export default function MainServices({ servicePlans }) {
                                 : "text-gray-900"
                             }`}
                           >
-                            {priceValue}
+                            ${priceValue}
                           </span>
-                          <span className="text-gray-500 text-sm">/ {priceCurrency}</span>
+                          <span className="text-gray-500 text-sm">/person</span>
                         </div>
                       </div>
 

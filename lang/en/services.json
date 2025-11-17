@@ -5,100 +5,27 @@
   },
   "mainServices": {
     "title": "Our Main Services",
-    "subtitle": "Professional dummy ticket services trusted by thousands of travelers worldwide",
-    "mostPopular": "MOST POPULAR",
-    "bookNow": "Book Now"
-  },
-  "services": {
-    "visaTicket": {
-      "name": "DUMMY TICKET FOR VISA",
-      "description": "Flight reservation/itinerary",
-      "features": [
-        "Verifiable on airline website",
-        "Up to 4 changes allowed",
-        "Use for visa application/proof of return"
-      ]
-    },
-    "ticketHotel": {
-      "name": "DUMMY TICKET & HOTEL",
-      "description": "Flight reservation + hotel booking",
-      "features": [
-        "Actual reservation from airline/hotel",
-        "Verifiable on airline/hotel website",
-        "Accommodation up to one month",
-        "Up to 4 changes allowed"
-      ]
-    },
-    "returnTicket": {
-      "name": "DUMMY RETURN TICKET",
-      "description": "Return ticket for immigration",
-      "features": [
-        "Verifiable flight reservation with PNR",
-        "Proof of return or onward travel",
-        "Accepted in most countries"
-      ]
-    },
-    "ticketReceipt": {
-      "name": "DUMMY TICKET WITH E-RECEIPT",
-      "description": "For visa applications",
-      "features": [
-        "Electronic receipt included",
-        "Verifiable booking details",
-        "Professional documentation"
-      ]
-    },
-    "pastDated": {
-      "name": "PAST DATED TICKETS",
-      "description": "For visa renewal applications",
-      "features": [
-        "Historical flight records",
-        "Proof of previous travel",
-        "Supports visa processing"
-      ]
-    },
-    "hotelOnly": {
-      "name": "DUMMY HOTEL BOOKING",
-      "description": "Hotel reservation only",
-      "features": [
-        "Verifiable hotel booking",
-        "Accommodation proof",
-        "Supports visa requirements"
-      ]
-    }
+    "subtitle": "Professional dummy ticket services trusted by thousands of travelers worldwide"
   },
   "benefits": {
     "title": "Why Choose Our Services",
-    "subtitle": "Experience the benefits of working with visa documentation experts",
     "items": [
       {
-        "title": "Quick Delivery",
-        "description": "Receive your dummy tickets within minutes of placing your order"
+        "title": "100% Verifiable",
+        "description": "All tickets can be verified on airline websites"
       },
       {
-        "title": "100% Verifiable",
-        "description": "All our tickets come with valid PNR codes that can be verified on airline websites"
+        "title": "Instant Delivery",
+        "description": "Receive your ticket within minutes"
+      },
+      {
+        "title": "Secure & Trusted",
+        "description": "Safe payment and data protection"
       },
       {
         "title": "24/7 Support",
-        "description": "Our customer support team is available round the clock to assist you"
-      },
-      {
-        "title": "Multiple Currencies",
-        "description": "Pay in your preferred currency with our flexible payment options"
-      },
-      {
-        "title": "Secure Processing",
-        "description": "Your personal and payment information is protected with industry-standard security"
-      },
-      {
-        "title": "Expert Team",
-        "description": "Years of experience in visa documentation and travel requirements"
+        "description": "Expert assistance whenever you need"
       }
     ]
-  },
-  "pricing": {
-    "currencyPrefix": "Starting from",
-    "perPerson": "per person",
-    "taxIncluded": "Tax included"
   }
 }
