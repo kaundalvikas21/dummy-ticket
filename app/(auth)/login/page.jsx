@@ -20,7 +20,7 @@ const loginSchema = z.object({
 
 export default function LoginPage() {
   const router = useRouter()
-  const { login } = useAuth()
+  const { login, getRedirectUrl } = useAuth()
   const [error, setError] = useState('')
   const [errorType, setErrorType] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -42,8 +42,9 @@ export default function LoginPage() {
       const result = await login(data.email, data.password)
 
       if (result.success) {
-        // Redirect all users to home page after successful login
-        router.push('/')
+        // Redirect to the appropriate dashboard based on user role
+        const redirectUrl = getRedirectUrl()
+        router.push(redirectUrl)
       } else {
         // Handle specific error messages
         const errorMessage = result.error || 'Login failed'

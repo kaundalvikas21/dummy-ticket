@@ -374,6 +374,14 @@ export function AuthProvider({ children }) {
     }
   }
 
+  // Helper function to get the appropriate redirect URL based on user role
+  const getRedirectUrl = () => {
+    if (profile?.role === 'admin') return '/admin'
+    if (profile?.role === 'vendor') return '/vendor'
+    if (profile?.role === 'user') return '/user'
+    return '/' // Fallback to home page
+  }
+
   const value = {
     user,
     profile,
@@ -382,6 +390,7 @@ export function AuthProvider({ children }) {
     register,
     logout,
     updateProfile,
+    getRedirectUrl,
     isAuthenticated: !!user,
     isAdmin: profile?.role === 'admin',
     isVendor: profile?.role === 'vendor',
