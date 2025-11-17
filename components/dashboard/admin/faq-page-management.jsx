@@ -961,13 +961,6 @@ export function FAQPageManagement() {
               <DialogTitle>
                 Translate Section: {selectedSection?.title}
               </DialogTitle>
-              <Button
-                onClick={bulkSaveSectionTranslations}
-                disabled={isBulkSaving || Object.keys(sectionTranslationData).length === 0}
-                className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white"
-              >
-                {isBulkSaving ? 'Saving...' : 'Save All Translations'}
-              </Button>
             </div>
           </DialogHeader>
 
@@ -989,6 +982,13 @@ export function FAQPageManagement() {
               </div>
             )}
           </TranslationTabs>
+          <Button
+                onClick={bulkSaveSectionTranslations}
+                disabled={isBulkSaving || Object.keys(sectionTranslationData).length === 0}
+                className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white"
+              >
+                {isBulkSaving ? 'Saving...' : 'Save All Translations'}
+              </Button>
         </DialogContent>
       </Dialog>
 
@@ -1008,13 +1008,6 @@ export function FAQPageManagement() {
               <DialogTitle>
                 Translate FAQ Item: {selectedItem?.question}
               </DialogTitle>
-              <Button
-                onClick={bulkSaveItemTranslations}
-                disabled={isBulkSaving || Object.keys(itemTranslationData).length === 0}
-                className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white"
-              >
-                {isBulkSaving ? 'Saving...' : 'Save All Translations'}
-              </Button>
             </div>
           </DialogHeader>
 
@@ -1037,6 +1030,13 @@ export function FAQPageManagement() {
               </div>
             )}
           </TranslationTabs>
+           <Button
+                onClick={bulkSaveItemTranslations}
+                disabled={isBulkSaving || Object.keys(itemTranslationData).length === 0}
+                className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white"
+              >
+                {isBulkSaving ? 'Saving...' : 'Save All Translations'}
+              </Button>
         </DialogContent>
       </Dialog>
     </div>
