@@ -13,7 +13,6 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
-  ChevronUp,
   Plane,
   UserCircle,
   FileCheck,
@@ -22,8 +21,8 @@ import {
   HelpCircle,
   Phone,
   Info,
-  Globe,
   Inbox,
+  Home,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -41,6 +40,7 @@ const menuItems = [
   { id: "analytics", label: "Analytics", icon: BarChart3, href: "/admin/analytics" },
   { id: "pages", label: "Pages", icon: FileText, href: "/admin/pages", hasSubmenu: true,
     submenu: [
+      { id: "home", label: "Home", icon: Home, href: "/admin/pages/home" },
       { id: "contact", label: "Contact Us", icon: Phone, href: "/admin/pages/contact" },
       { id: "faq", label: "FAQ", icon: HelpCircle, href: "/admin/pages/faq" },
       { id: "about", label: "About Us", icon: Info, href: "/admin/pages/about" }

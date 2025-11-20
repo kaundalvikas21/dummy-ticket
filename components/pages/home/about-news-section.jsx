@@ -2,47 +2,90 @@
 
 import { motion } from "framer-motion"
 import { useInView } from "framer-motion"
-import { useRef } from "react"
+import { useRef, useState, useEffect } from "react"
 import { Building2, Newspaper, BookOpen, ExternalLink } from "lucide-react"
 import { useTranslation } from "@/lib/translations"
 
 export function AboutNewsSection() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
-  const { t, isLoading } = useTranslation()
+  const { t, locale } = useTranslation()
 
-  // Fallback data in case translations are not loaded yet
-  const fallbackNewsItems = [
-    {
-      title: "Fly Dubai adds 2 more destinations in Saudi Arabia",
-      link: "https://www.dubaistandard.com/fly-dubai-adds-destination-saudi-arabia/",
-    },
-    {
-      title: "Israel flights update 2024",
-      link: "https://www.dubaistandard.com/israel-flights-update-2024/",
-    },
-    {
-      title: "European Union and GCC discuss Schengen visa waiver for GCC citizens",
-      link: "https://www.dubaistandard.com/gcc-eu-schengen-visa-waiver/",
-    },
-  ]
+  const [newsItems, setNewsItems] = useState([])
+  const [blogPosts, setBlogPosts] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  const fallbackBlogPosts = [
-    {
-      title: "Difference between a fake ticket and a flight itinerary",
-      link: "#",
-    },
-    {
-      title: "Why Dubai is special, safe, and popular tourist spot",
-      link: "https://www.dubaistandard.com/heres-why-dubai-is-special-safe-popular-tourist-spot-and-expats-as-a-first-choice/",
-    },
-  ]
+  // Fetch dynamic data from API
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        const response = await fetch("/api/homepage-news-blog")
+        const result = await response.json()
 
-  const newsItems = isLoading ? fallbackNewsItems :
-    (Array.isArray(t('homepage.aboutNews.news.items')) ? t('homepage.aboutNews.news.items') : fallbackNewsItems)
+        if (result.success) {
+          setNewsItems(result.data.news || [])
+          setBlogPosts(result.data.blog || [])
+        } else {
+          // Fallback to static data if API fails
+          setNewsItems([
+            {
+              title: "Fly Dubai adds 2 more destinations in Saudi Arabia",
+              link: "https://www.dubaistandard.com/fly-dubai-adds-destination-saudi-arabia/",
+            },
+            {
+              title: "Israel flights update 2024",
+              link: "https://www.dubaistandard.com/israel-flights-update-2024/",
+            },
+            {
+              title: "European Union and GCC discuss Schengen visa waiver for GCC citizens",
+              link: "https://www.dubaistandard.com/gcc-eu-schengen-visa-waiver/",
+            },
+          ])
+          setBlogPosts([
+            {
+              title: "Difference between a fake ticket and a flight itinerary",
+              link: "#",
+            },
+            {
+              title: "Why Dubai is special, safe, and popular tourist spot",
+              link: "https://www.dubaistandard.com/heres-why-dubai-is-special-safe-popular-tourist-spot-and-expats-as-a-first-choice/",
+            },
+          ])
+        }
+      } catch (error) {
+        console.error("Error fetching homepage content:", error)
+        // Fallback to static data
+        setNewsItems([
+          {
+            title: "Fly Dubai adds 2 more destinations in Saudi Arabia",
+            link: "https://www.dubaistandard.com/fly-dubai-adds-destination-saudi-arabia/",
+          },
+          {
+            title: "Israel flights update 2024",
+            link: "https://www.dubaistandard.com/israel-flights-update-2024/",
+          },
+          {
+            title: "European Union and GCC discuss Schengen visa waiver for GCC citizens",
+            link: "https://www.dubaistandard.com/gcc-eu-schengen-visa-waiver/",
+          },
+        ])
+        setBlogPosts([
+          {
+            title: "Difference between a fake ticket and a flight itinerary",
+            link: "#",
+          },
+          {
+            title: "Why Dubai is special, safe, and popular tourist spot",
+            link: "https://www.dubaistandard.com/heres-why-dubai-is-special-safe-popular-tourist-spot-and-expats-as-a-first-choice/",
+          },
+        ])
+      } finally {
+        setLoading(false)
+      }
+    }
 
-  const blogPosts = isLoading ? fallbackBlogPosts :
-    (Array.isArray(t('homepage.aboutNews.blog.posts')) ? t('homepage.aboutNews.blog.posts') : fallbackBlogPosts)
+    fetchContent()
+  }, [])
 
   return (
     <section ref={ref} className="py-12 md:py-20 bg-white">
@@ -92,23 +135,33 @@ export function AboutNewsSection() {
                 <h3 className="text-lg md:text-xl font-bold text-gray-900">{t('homepage.aboutNews.news.title')}</h3>
               </div>
               <div className="space-y-2">
-                {newsItems.map((item, index) => (
-                  <motion.a
-                    key={index}
-                    href={item.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={isInView ? { opacity: 1, y: 0 } : {}}
-                    transition={{ delay: 0.1 * index }}
-                    className="flex items-center justify-between p-2.5 md:p-3 rounded-xl bg-gray-50 hover:bg-[#0066FF]/5 transition-all group"
-                  >
-                    <span className="text-gray-700 group-hover:text-[#0066FF] transition-colors text-xs md:text-sm">
-                      {item.title}
-                    </span>
-                    <ExternalLink className="w-3.5 h-3.5 md:w-4 md:h-4 text-gray-400 group-hover:text-[#0066FF] transition-colors flex-shrink-0 ml-2" />
-                  </motion.a>
-                ))}
+                {newsItems.map((item, index) => {
+                  // Get localized title or fallback to English
+                  const getLocalizedTitle = (item) => {
+                    if (item.translations && item.translations[locale] && item.translations[locale].title) {
+                      return item.translations[locale].title
+                    }
+                    return item.translations?.en?.title || item.title || 'No title'
+                  }
+
+                  return (
+                    <motion.a
+                      key={item.id || index}
+                      href={item.external_link || item.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={isInView ? { opacity: 1, y: 0 } : {}}
+                      transition={{ delay: 0.1 * index }}
+                      className="flex items-center justify-between p-2.5 md:p-3 rounded-xl bg-gray-50 hover:bg-[#0066FF]/5 transition-all group"
+                    >
+                      <span className="text-gray-700 group-hover:text-[#0066FF] transition-colors text-xs md:text-sm">
+                        {getLocalizedTitle(item)}
+                      </span>
+                      <ExternalLink className="w-3.5 h-3.5 md:w-4 md:h-4 text-gray-400 group-hover:text-[#0066FF] transition-colors flex-shrink-0 ml-2" />
+                    </motion.a>
+                  )
+                })}
               </div>
             </div>
 
@@ -121,23 +174,35 @@ export function AboutNewsSection() {
                 <h3 className="text-lg md:text-xl font-bold text-gray-900">{t('homepage.aboutNews.blog.title')}</h3>
               </div>
               <div className="space-y-2">
-                {blogPosts.map((post, index) => (
-                  <motion.a
-                    key={index}
-                    href={post.link}
-                    target={post.link === "#" ? "_self" : "_blank"}
-                    rel="noopener noreferrer"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={isInView ? { opacity: 1, y: 0 } : {}}
-                    transition={{ delay: 0.1 * index }}
-                    className="flex items-center justify-between p-2.5 md:p-3 rounded-xl bg-gray-50 hover:bg-[#00D4AA]/5 transition-all group"
-                  >
-                    <span className="text-gray-700 group-hover:text-[#00D4AA] transition-colors text-xs md:text-sm">
-                      {post.title}
-                    </span>
-                    <ExternalLink className="w-3.5 h-3.5 md:w-4 md:h-4 text-gray-400 group-hover:text-[#00D4AA] transition-colors flex-shrink-0 ml-2" />
-                  </motion.a>
-                ))}
+                {blogPosts.map((post, index) => {
+                  // Get localized title or fallback to English
+                  const getLocalizedTitle = (item) => {
+                    if (item.translations && item.translations[locale] && item.translations[locale].title) {
+                      return item.translations[locale].title
+                    }
+                    return item.translations?.en?.title || item.title || 'No title'
+                  }
+
+                  const postLink = post.external_link || post.link
+
+                  return (
+                    <motion.a
+                      key={post.id || index}
+                      href={postLink}
+                      target={postLink === "#" ? "_self" : "_blank"}
+                      rel="noopener noreferrer"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={isInView ? { opacity: 1, y: 0 } : {}}
+                      transition={{ delay: 0.1 * index }}
+                      className="flex items-center justify-between p-2.5 md:p-3 rounded-xl bg-gray-50 hover:bg-[#00D4AA]/5 transition-all group"
+                    >
+                      <span className="text-gray-700 group-hover:text-[#00D4AA] transition-colors text-xs md:text-sm">
+                        {getLocalizedTitle(post)}
+                      </span>
+                      <ExternalLink className="w-3.5 h-3.5 md:w-4 md:h-4 text-gray-400 group-hover:text-[#00D4AA] transition-colors flex-shrink-0 ml-2" />
+                    </motion.a>
+                  )
+                })}
               </div>
             </div>
           </motion.div>

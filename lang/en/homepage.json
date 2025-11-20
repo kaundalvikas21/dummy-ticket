@@ -144,34 +144,10 @@
       "description3": "We pride ourselves on our commitment to customer satisfaction, offering round-the-clock support and ensuring every booking meets the highest standards of authenticity and reliability."
     },
     "news": {
-      "title": "Latest travel news",
-      "items": [
-        {
-          "title": "Fly Dubai adds 2 more destinations in Saudi Arabia",
-          "link": "https://www.dubaistandard.com/fly-dubai-adds-destination-saudi-arabia/"
-        },
-        {
-          "title": "Israel flights update 2024",
-          "link": "https://www.dubaistandard.com/israel-flights-update-2024/"
-        },
-        {
-          "title": "European Union and GCC discuss Schengen visa waiver for GCC citizens",
-          "link": "https://www.dubaistandard.com/gcc-eu-schengen-visa-waiver/"
-        }
-      ]
+      "title": "Latest travel news"
     },
     "blog": {
-      "title": "From the blog",
-      "posts": [
-        {
-          "title": "Difference between a fake ticket and a flight itinerary",
-          "link": "#"
-        },
-        {
-          "title": "Why Dubai is special, safe, and popular tourist spot",
-          "link": "https://www.dubaistandard.com/heres-why-dubai-is-special-safe-popular-tourist-spot-and-expats-as-a-first-choice/"
-        }
-      ]
+      "title": "From the blog"
     }
   },
   "affiliate": {
