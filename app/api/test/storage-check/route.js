@@ -5,37 +5,67 @@ export async function GET() {
   try {
     console.log('Testing Supabase storage configuration...')
 
-    // Test 1: Check if avatars bucket exists
-    let bucketExists = false
-    let bucketError = null
+    // Test 1: Check if avatars bucket exists (for user profiles)
+    let avatarsBucketExists = false
+    let avatarsBucketError = null
 
     try {
       const { data, error } = await supabase.storage.getBucket('avatars')
-      bucketExists = !error
-      bucketError = error
-      console.log('Bucket check result:', { data, error })
+      avatarsBucketExists = !error
+      avatarsBucketError = error
+      console.log('Avatars bucket check result:', { data, error })
     } catch (err) {
-      bucketError = err.message
-      console.error('Bucket check failed:', err)
+      avatarsBucketError = err.message
+      console.error('Avatars bucket check failed:', err)
     }
 
-    // Test 2: Try to list files in avatars bucket
-    let filesAccessible = false
-    let filesError = null
+    // Test 2: Check if assets bucket exists (for logos)
+    let assetsBucketExists = false
+    let assetsBucketError = null
+
+    try {
+      const { data, error } = await supabase.storage.getBucket('assets')
+      assetsBucketExists = !error
+      assetsBucketError = error
+      console.log('Assets bucket check result:', { data, error })
+    } catch (err) {
+      assetsBucketError = err.message
+      console.error('Assets bucket check failed:', err)
+    }
+
+    // Test 3: Try to list files in avatars bucket
+    let avatarsFilesAccessible = false
+    let avatarsFilesError = null
 
     try {
       const { data, error } = await supabase.storage
         .from('avatars')
         .list('', { limit: 1 })
-      filesAccessible = !error
-      filesError = error
-      console.log('Files list result:', { data, error })
+      avatarsFilesAccessible = !error
+      avatarsFilesError = error
+      console.log('Avatars files list result:', { data, error })
     } catch (err) {
-      filesError = err.message
-      console.error('Files list failed:', err)
+      avatarsFilesError = err.message
+      console.error('Avatars files list failed:', err)
     }
 
-    // Test 3: Check environment variables
+    // Test 4: Try to list files in assets bucket
+    let assetsFilesAccessible = false
+    let assetsFilesError = null
+
+    try {
+      const { data, error } = await supabase.storage
+        .from('assets')
+        .list('', { limit: 1 })
+      assetsFilesAccessible = !error
+      assetsFilesError = error
+      console.log('Assets files list result:', { data, error })
+    } catch (err) {
+      assetsFilesError = err.message
+      console.error('Assets files list failed:', err)
+    }
+
+    // Test 5: Check environment variables
     const envCheck = {
       supabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
       supabaseAnonKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
@@ -45,14 +75,27 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       checks: {
-        bucket: {
-          exists: bucketExists,
-          error: bucketError?.message || bucketError,
-          name: 'avatars'
+        avatars: {
+          bucket: {
+            exists: avatarsBucketExists,
+            error: avatarsBucketError?.message || avatarsBucketError,
+            name: 'avatars'
+          },
+          files: {
+            accessible: avatarsFilesAccessible,
+            error: avatarsFilesError?.message || avatarsFilesError
+          }
         },
-        files: {
-          accessible: filesAccessible,
-          error: filesError?.message || filesError
+        assets: {
+          bucket: {
+            exists: assetsBucketExists,
+            error: assetsBucketError?.message || assetsBucketError,
+            name: 'assets'
+          },
+          files: {
+            accessible: assetsFilesAccessible,
+            error: assetsFilesError?.message || assetsFilesError
+          }
         },
         environment: envCheck
       },
