@@ -137,15 +137,19 @@ export async function GET(request) {
             href: contact.link_type === 'tel' ? `tel:${contact.content}` :
                  contact.link_type === 'mailto' ? `mailto:${contact.content}` :
                  contact.content,
-            icon: contact.icon || 'Phone',
+            icon: contact.icon_type || contact.icon || 'Phone',
             country: contact.country || '',
-            link_type: contact.link_type || 'tel'
+            link_type: contact.link_type || 'tel',
+            visible: contact.visible !== undefined ? contact.visible : true
           }))
                     break
 
         case 'social':
-          // Extract social links
-          organizedData.social_links = content || []
+          // Extract social links and map url to href for frontend compatibility
+          organizedData.social_links = (content || []).map(social => ({
+            ...social,
+            href: social.url || ''
+          }))
                     break
       }
     })
@@ -184,7 +188,54 @@ export async function POST(request) {
 
     
     if (operation === 'add_to_array') {
-      // Add new item to array section (links, contact, social)
+      // Server-side validation for new items
+      if (section === 'links') {
+        if (!data.title || !data.title.trim()) {
+          return NextResponse.json(
+            { error: 'Link title is required' },
+            { status: 400 }
+          )
+        }
+        if (!data.href || !data.href.trim()) {
+          return NextResponse.json(
+            { error: 'Link URL is required' },
+            { status: 400 }
+          )
+        }
+      } else if (section === 'contact') {
+        if (!data.title || !data.title.trim()) {
+          return NextResponse.json(
+            { error: 'Contact title is required' },
+            { status: 400 }
+          )
+        }
+        if (!data.content || !data.content.trim()) {
+          return NextResponse.json(
+            { error: 'Contact information is required' },
+            { status: 400 }
+          )
+        }
+      } else if (section === 'social') {
+        if (!data.name || !data.name.trim()) {
+          return NextResponse.json(
+            { error: 'Social media name is required' },
+            { status: 400 }
+          )
+        }
+        if (!data.url || !data.url.trim()) {
+          return NextResponse.json(
+            { error: 'Social media URL is required' },
+            { status: 400 }
+          )
+        }
+        if (!data.icon_name) {
+          return NextResponse.json(
+            { error: 'Social media icon is required' },
+            { status: 400 }
+          )
+        }
+      }
+
       const { data: existingRecord, error: fetchError } = await supabaseAdmin
         .from('footer_content')
         .select('content')
@@ -193,14 +244,13 @@ export async function POST(request) {
         .single()
 
       if (fetchError || !existingRecord) {
-        console.error('Error fetching section for add:', { section, fetchError, existingRecord })
         return NextResponse.json(
           { error: `Section ${section} not found: ${fetchError?.message || 'No record'}` },
           { status: 404 }
         )
       }
 
-      
+
       // Add new item with generated ID
       const newItem = {
         id: crypto.randomUUID(),
@@ -339,21 +389,32 @@ export async function PUT(request) {
       if (section === 'links') {
         const linkType = data.linkType || 'company'
         const links = existingRecord.content[`${linkType}_links`] || []
-        const updatedLinks = links.map(item =>
-          item.id === itemId ? { ...item, ...data.updateData } : item
-        )
+
+        const updatedLinks = links.map(item => {
+          if (item.id === itemId) {
+            return { ...item, ...data.updateData }
+          }
+          return item
+        })
+
         updatedContent = {
           ...existingRecord.content,
           [`${linkType}_links`]: updatedLinks
         }
       } else if (section === 'contact') {
-        updatedContent = existingRecord.content.map(item =>
-          item.id === itemId ? { ...item, ...data.updateData } : item
-        )
+        updatedContent = existingRecord.content.map(item => {
+          if (item.id === itemId) {
+            return { ...item, ...data.updateData }
+          }
+          return item
+        })
       } else if (section === 'social') {
-        updatedContent = existingRecord.content.map(item =>
-          item.id === itemId ? { ...item, ...data.updateData } : item
-        )
+        updatedContent = existingRecord.content.map(item => {
+          if (item.id === itemId) {
+            return { ...item, ...data.updateData }
+          }
+          return item
+        })
       }
 
       const { data: updatedRecord, error } = await supabaseAdmin
@@ -364,7 +425,6 @@ export async function PUT(request) {
         .single()
 
       if (error) {
-        console.error('Footer array update error:', error)
         return NextResponse.json(
           { error: `Failed to update item in ${section}` },
           { status: 500 }
