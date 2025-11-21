@@ -1,9 +1,4 @@
--- ===================================================================
 -- Footer Content Migration - JSON Arrays Approach
--- ===================================================================
--- Purpose: Migrate from individual records to JSON arrays per section
--- This creates a new optimized structure and migrates existing data
--- ===================================================================
 
 -- Create backup of current data
 CREATE TABLE footer_backup AS SELECT * FROM footer;
@@ -14,13 +9,13 @@ CREATE TABLE footer_content (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
 
     -- Section identification (unique sections only)
-    section VARCHAR(50) NOT NULL UNIQUE,                     -- 'primary_info', 'links', 'contact', 'social'
+    section VARCHAR(50) NOT NULL UNIQUE,                    
 
     -- Main content as JSON arrays
-    content JSONB NOT NULL,                                   -- Structured data per section
+    content JSONB NOT NULL,                                 
 
     -- Status management
-    status VARCHAR(20) DEFAULT 'active',                      -- 'active', 'inactive'
+    status VARCHAR(20) DEFAULT 'active',                      
 
     -- Audit fields
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -56,9 +51,8 @@ CREATE POLICY "Admin full access - footer_content" ON footer_content
         )
     );
 
--- ===================================================================
+
 -- DATA MIGRATION
--- ===================================================================
 
 -- Migrate primary info (logo, description, address)
 INSERT INTO footer_content (section, content)
@@ -161,10 +155,8 @@ INSERT INTO footer_content (section, content)
 VALUES ('social', '[]'::json)
 ON CONFLICT (section) DO NOTHING;
 
--- ===================================================================
--- MIGRATION VALIDATION
--- ===================================================================
 
+-- MIGRATION VALIDATION
 -- Validate migration success
 DO $$
 DECLARE
@@ -202,17 +194,3 @@ BEGIN
     END IF;
 END $$;
 
--- ===================================================================
--- ROLLBACK PROCEDURE (if needed)
--- ===================================================================
--- To rollback, run:
--- DROP TABLE footer_content;
--- ALTER TABLE footer RENAME TO footer_content_new;
--- ALTER TABLE footer_backup RENAME TO footer;
-
--- ===================================================================
--- CLEANUP (to be run after successful migration and testing)
--- ===================================================================
--- After confirming migration works:
--- DROP TABLE footer;
--- DROP TABLE footer_backup;
