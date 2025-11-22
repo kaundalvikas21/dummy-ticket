@@ -1,46 +1,49 @@
--- FAQ Page Item Translations Table
--- This table stores translations for FAQ page item questions and answers
+-- FAQ Page Item Translations Migration for New Database
+-- Creates optimized table with Supabase Auth integration
 
+-- Translations table for multilingual support
 CREATE TABLE faq_page_item_translations (
+    -- Primary identification
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+
+    -- Foreign key relationship
     item_id UUID NOT NULL REFERENCES faq_page_items(id) ON DELETE CASCADE,
+
+    -- Translation fields
     locale VARCHAR(10) NOT NULL,
     question TEXT NOT NULL,
     answer TEXT NOT NULL,
+
+    -- Audit fields
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+
+    -- Constraints
     UNIQUE(item_id, locale)
 );
 
--- Create indexes for performance
+-- Performance indexes
 CREATE INDEX idx_faq_page_item_translations_item_id ON faq_page_item_translations(item_id);
 CREATE INDEX idx_faq_page_item_translations_locale ON faq_page_item_translations(locale);
 
--- Create RLS (Row Level Security) policies
+-- Enable Row Level Security
 ALTER TABLE faq_page_item_translations ENABLE ROW LEVEL SECURITY;
 
--- Policy for public read access (for active items)
-CREATE POLICY "Public can read FAQ page item translations" ON faq_page_item_translations
-    FOR SELECT USING (
-        EXISTS (
-            SELECT 1 FROM faq_page_items
-            INNER JOIN faq_page_sections ON faq_page_items.section_id = faq_page_sections.id
-            WHERE faq_page_items.id = faq_page_item_translations.item_id
-            AND faq_page_items.status = 'active'
-            AND faq_page_sections.status = 'active'
-        )
-    );
+-- RLS Policies using Supabase Auth patterns
+-- Public read access for translations (simplified for performance)
+CREATE POLICY "Public read access - faq_page_item_translations" ON faq_page_item_translations
+    FOR SELECT USING (true);
 
--- Policy for authenticated users to read all translations
-CREATE POLICY "Authenticated users can read all FAQ page item translations" ON faq_page_item_translations
+-- Authenticated users can read all translations
+CREATE POLICY "Authenticated read access - faq_page_item_translations" ON faq_page_item_translations
     FOR SELECT USING (auth.role() = 'authenticated');
 
--- Policy for admin users to manage translations
-CREATE POLICY "Admin users can manage FAQ page item translations" ON faq_page_item_translations
+-- Admin full access using Supabase Auth role
+CREATE POLICY "Admin full access - faq_page_item_translations" ON faq_page_item_translations
     FOR ALL USING (
-        EXISTS (
-            SELECT 1 FROM users
-            WHERE users.id = auth.uid()
-            AND users.role = 'admin'
-        )
+        auth.jwt() ->> 'role' = 'admin' OR
+        auth.jwt() -> 'app_metadata' ->> 'role' = 'admin'
+    ) WITH CHECK (
+        auth.jwt() ->> 'role' = 'admin' OR
+        auth.jwt() -> 'app_metadata' ->> 'role' = 'admin'
     );

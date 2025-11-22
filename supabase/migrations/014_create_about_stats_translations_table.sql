@@ -1,31 +1,30 @@
--- Create about_stats_translations table for multi-language support
+-- About Stats Translations Migration for New Database
+-- Creates optimized table with Supabase Auth integration
+
+-- Translations table for multilingual support
 CREATE TABLE about_stats_translations (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  stat_id UUID NOT NULL REFERENCES about_stats(id) ON DELETE CASCADE,
-  locale VARCHAR(10) NOT NULL,
-  label TEXT NOT NULL,
-  value TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  UNIQUE(stat_id, locale)
+    -- Primary identification
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+
+    -- Foreign key relationship
+    stat_id UUID NOT NULL REFERENCES about_stats(id) ON DELETE CASCADE,
+
+    -- Translation fields
+    locale VARCHAR(10) NOT NULL,
+    label TEXT NOT NULL,
+    value TEXT,
+
+    -- Audit fields
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+
+    -- Constraints
+    UNIQUE(stat_id, locale)
 );
 
--- Create indexes for performance
+-- Performance indexes
 CREATE INDEX idx_about_stats_translations_stat_id ON about_stats_translations(stat_id);
 CREATE INDEX idx_about_stats_translations_locale ON about_stats_translations(locale);
-
--- Create trigger to update updated_at timestamp
-CREATE OR REPLACE FUNCTION update_about_stats_translations_updated_at()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = NOW();
-    RETURN NEW;
-END;
-$$ language 'plpgsql';
-
-CREATE TRIGGER update_about_stats_translations_updated_at
-    BEFORE UPDATE ON about_stats_translations
-    FOR EACH ROW EXECUTE FUNCTION update_about_stats_translations_updated_at();
 
 -- Backfill existing stats with English translations
 INSERT INTO about_stats_translations (stat_id, locale, label, value)
@@ -41,17 +40,24 @@ WHERE id NOT IN (
   WHERE locale = 'en'
 );
 
--- Create RLS policies (if using Supabase)
+-- Enable Row Level Security
 ALTER TABLE about_stats_translations ENABLE ROW LEVEL SECURITY;
 
--- Policy: Users can read all translations
-CREATE POLICY "Public read access for about_stats_translations" ON about_stats_translations
-  FOR SELECT USING (true);
+-- RLS Policies using Supabase Auth patterns
+-- Public read access for translations (simplified for performance)
+CREATE POLICY "Public read access - about_stats_translations" ON about_stats_translations
+    FOR SELECT USING (true);
 
--- Policy: Authenticated users can insert/update translations
-CREATE POLICY "Authenticated users can manage about_stats_translations" ON about_stats_translations
-  FOR ALL USING (
-    auth.role() = 'authenticated'
-  ) WITH CHECK (
-    auth.role() = 'authenticated'
-  );
+-- Authenticated users can read all translations
+CREATE POLICY "Authenticated read access - about_stats_translations" ON about_stats_translations
+    FOR SELECT USING (auth.role() = 'authenticated');
+
+-- Admin full access using Supabase Auth role
+CREATE POLICY "Admin full access - about_stats_translations" ON about_stats_translations
+    FOR ALL USING (
+        auth.jwt() ->> 'role' = 'admin' OR
+        auth.jwt() -> 'app_metadata' ->> 'role' = 'admin'
+    ) WITH CHECK (
+        auth.jwt() ->> 'role' = 'admin' OR
+        auth.jwt() -> 'app_metadata' ->> 'role' = 'admin'
+    );

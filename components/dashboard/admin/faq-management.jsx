@@ -42,7 +42,9 @@ export function FAQManagement() {
   // Fetch FAQs from API
   const fetchFaqs = async () => {
     try {
-      const response = await fetch('/api/faqs/admin')
+      const response = await fetch('/api/faqs/admin', {
+      credentials: 'include', // Include authentication cookies
+    })
       const result = await response.json()
 
       if (response.ok) {
@@ -80,6 +82,7 @@ export function FAQManagement() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // Include authentication cookies
         body: JSON.stringify(formData),
       })
 

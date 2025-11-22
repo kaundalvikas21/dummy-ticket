@@ -1,11 +1,5 @@
 import { NextResponse } from 'next/server'
-import bcrypt from 'bcryptjs'
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-)
+import { createClient } from '@/lib/supabase/server'
 
 export async function POST(request) {
   try {
@@ -46,95 +40,61 @@ export async function POST(request) {
       )
     }
 
-    // Check if user already exists
-    const { data: existingUser, error: checkError } = await supabase
-      .from('users')
-      .select('id')
-      .eq('email', email)
-      .single()
+    const supabase = await createClient()
 
-    if (existingUser) {
+    // Create user with Supabase Auth - let database handle profile creation via triggers
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          first_name: firstName,
+          last_name: lastName,
+          role: role || 'user',
+          phone_number: phoneNumber || null,
+          nationality: nationality || null,
+          preferred_language: 'en'
+        }
+      }
+    })
+
+    if (authError) {
+      console.error('Supabase auth error:', authError)
+
+      // Map Supabase auth errors to our existing error codes
+      let errorMessage = authError.message
+
+      if (authError.message.includes('User already registered')) {
+        return NextResponse.json(
+          { success: false, error: 'User with this email already exists' },
+          { status: 409 }
+        )
+      }
+
       return NextResponse.json(
-        { success: false, error: 'User with this email already exists' },
-        { status: 409 }
+        { success: false, error: errorMessage || 'Registration failed' },
+        { status: 400 }
       )
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 12)
-
-    // Create user and profile in a transaction
-    const { data: user, error: userError } = await supabase
-      .from('users')
-      .insert({
-        email,
-        password: hashedPassword,
-        role: role || 'user',
-        status: 'active'
-      })
-      .select()
-      .single()
-
-    if (userError) {
-      console.error('User creation error:', userError)
+    if (!authData.user) {
       return NextResponse.json(
         { success: false, error: 'Failed to create user account' },
         { status: 500 }
       )
     }
 
-    // Create user profile
-    const { data: profile, error: profileError } = await supabase
-      .from('user_profiles')
-      .insert({
-        user_id: user.id,
-        first_name: firstName,
-        last_name: lastName,
-        phone_number: phoneNumber || null,
-        nationality: nationality || null,
-        // Other fields will be filled from dashboard profile
-      })
-      .select()
-      .single()
-
-    if (profileError) {
-      console.error('Profile creation error:', profileError)
-      // Rollback user creation if profile creation fails
-      await supabase.from('users').delete().eq('id', user.id)
-      return NextResponse.json(
-        { success: false, error: 'Failed to create user profile' },
-        { status: 500 }
-      )
-    }
-
+    // Return success - profile will be created automatically by database triggers
     return NextResponse.json({
       success: true,
-      message: 'Registration successful',
+      message: 'Registration successful! Please check your email to confirm your account.',
       user: {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        status: user.status,
-      },
-      profile: {
-        id: profile.id,
-        first_name: profile.first_name,
-        last_name: profile.last_name,
-        phone_number: profile.phone_number,
-        country_code: profile.country_code,
-        date_of_birth: profile.date_of_birth,
-        nationality: profile.nationality,
-        address: profile.address,
-        city: profile.city,
-        postal_code: profile.postal_code,
-        preferred_language: profile.preferred_language || 'en',
-        avatar_url: profile.avatar_url,
-        notification_preferences: profile.notification_preferences || {},
-        privacy_settings: profile.privacy_settings || {},
-        // Backward compatibility fields
-        email: user.email,
-        role: user.role,
-        status: user.status
+        id: authData.user.id,
+        email: authData.user.email,
+        role: role || 'user',
+        created_at: authData.user.created_at,
+        updated_at: authData.user.updated_at,
+        email_confirmed_at: authData.user.email_confirmed_at
       }
     })
 

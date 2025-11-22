@@ -34,6 +34,9 @@ export function HomepageNewsBlogManagement() {
   const [selectedItems, setSelectedItems] = useState(new Set())
   const [isBulkDeleting, setIsBulkDeleting] = useState(false)
   const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [itemToDelete, setItemToDelete] = useState(null)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [formData, setFormData] = useState({
     content_type: "news",
     external_link: "",
@@ -231,11 +234,18 @@ export function HomepageNewsBlogManagement() {
     setIsDialogOpen(true)
   }
 
-  const handleDelete = async (id) => {
-    if (!confirm("Are you sure you want to delete this item?")) return
+  const handleDelete = (item) => {
+    setItemToDelete(item)
+    setShowDeleteDialog(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!itemToDelete) return
+
+    setIsDeleting(true)
 
     try {
-      const response = await fetch(`/api/homepage-news-blog/${id}`, {
+      const response = await fetch(`/api/homepage-news-blog/${itemToDelete.id}`, {
         method: "DELETE"
       })
 
@@ -246,6 +256,8 @@ export function HomepageNewsBlogManagement() {
           title: "Success",
           description: "Homepage news blog item deleted successfully"
         })
+        setShowDeleteDialog(false)
+        setItemToDelete(null)
         fetchItems()
       } else {
         toast({
@@ -261,6 +273,8 @@ export function HomepageNewsBlogManagement() {
         description: "Failed to delete homepage news blog item",
         variant: "destructive"
       })
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -332,6 +346,7 @@ export function HomepageNewsBlogManagement() {
           </div>
           <div className="flex items-center gap-2">
             <Button
+              type="button"
               variant="ghost"
               size="sm"
               onClick={() => handleEdit(item)}
@@ -341,9 +356,10 @@ export function HomepageNewsBlogManagement() {
               <Edit className="w-4 h-4 text-blue-600" />
             </Button>
             <Button
+              type="button"
               variant="ghost"
               size="sm"
-              onClick={() => handleDelete(item.id)}
+              onClick={() => handleDelete(item)}
               className={selectionMode ? 'opacity-50' : ''}
               disabled={selectionMode}
             >
@@ -714,6 +730,61 @@ export function HomepageNewsBlogManagement() {
                 <>
                   <Trash2 className="w-4 h-4 mr-2" />
                   Delete {getSelectedItemCount()} Item{getSelectedItemCount() !== 1 ? 's' : ''}
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Single Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Trash2 className="w-5 h-5 text-red-600" />
+              Confirm Delete
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-sm text-red-900">
+                Are you sure you want to delete <strong>{itemToDelete?.translations.en?.title || 'this item'}</strong>?
+              </p>
+              <p className="text-xs text-red-700 mt-2">
+                This action cannot be undone. The item will be permanently deleted from the database.
+              </p>
+            </div>
+
+            <div className="text-sm text-gray-600">
+              This {itemToDelete?.content_type} item will be removed from the homepage display.
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowDeleteDialog(false)}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleConfirmDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete Item
                 </>
               )}
             </Button>

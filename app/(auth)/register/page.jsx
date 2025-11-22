@@ -52,7 +52,7 @@ const registerSchema = z.object({
 })
 
 export default function RegisterPage() {
-  const { register } = useAuth()
+  const { register } = useAuth()  // Temporarily revert to register method
   const router = useRouter()
   const { toast } = useToast()
   const [error, setError] = useState('')
@@ -97,22 +97,34 @@ export default function RegisterPage() {
 
       console.log('Registration data:', registrationData)
 
-      // Call register function from auth context
+      // Call register function from auth context (original format)
       const result = await register(registrationData)
 
       if (result.success) {
         resetRegisterForm()
 
-        // Show success toast
-        toast({
-          title: "Account Created Successfully! 🎉",
-          description: `Welcome to VisaFly, ${data.firstName}! Redirecting to your dashboard...`,
-        })
+        // Check if email confirmation is required
+        if (result.data?.user?.email_confirmed_at) {
+          // User already confirmed, redirect to dashboard
+          toast({
+            title: "Account Created Successfully! 🎉",
+            description: `Welcome to VisaFly, ${data.firstName}! Redirecting to your dashboard...`,
+          })
 
-        // Redirect to user dashboard profile after a short delay
-        setTimeout(() => {
-          router.push('/user/profile')
-        }, 2000)
+          setTimeout(() => {
+            router.push('/user/profile')
+          }, 2000)
+        } else {
+          // Email confirmation required
+          toast({
+            title: "Registration Successful! 📧",
+            description: `Welcome ${data.firstName}! Please check your email to confirm your account.`,
+          })
+
+          setTimeout(() => {
+            router.push('/login?message=Please check your email to confirm your account')
+          }, 3000)
+        }
       } else {
         // Show error toast
         toast({

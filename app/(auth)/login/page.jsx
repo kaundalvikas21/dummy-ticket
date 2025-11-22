@@ -20,7 +20,7 @@ const loginSchema = z.object({
 
 export default function LoginPage() {
   const router = useRouter()
-  const { login, getRedirectUrl } = useAuth()
+  const { login, getRedirectUrl } = useAuth()  // Temporarily revert to login method
   const [error, setError] = useState('')
   const [errorType, setErrorType] = useState('')
   const [isLoading, setIsLoading] = useState(false)

@@ -1,8 +1,9 @@
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
 export async function GET(request) {
   try {
+    const supabase = await createClient()
     const { searchParams } = new URL(request.url)
     const locale = searchParams.get('locale') || 'en'
 
@@ -54,6 +55,7 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
+    const supabase = await createClient()
     const { question, answer, status = 'active', sort_order } = await request.json()
 
     if (!question || !answer) {
@@ -62,6 +64,22 @@ export async function POST(request) {
         { status: 400 }
       )
     }
+
+    // Verify user is admin using server-side auth
+    console.log('🔍 FAQ API: Getting user for authentication')
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    console.log('📝 FAQ API: Auth result:', { authError, user: user?.id })
+
+    if (authError || !user) {
+      console.log('❌ FAQ API: Authentication failed:', authError?.message)
+      return NextResponse.json(
+        { error: 'Authentication required', details: authError?.message },
+        { status: 401 }
+      )
+    }
+
+    console.log('✅ FAQ API: User authenticated:', user.id)
 
     // If sort_order is not provided, automatically assign the next available one
     let finalSortOrder = sort_order
@@ -75,6 +93,8 @@ export async function POST(request) {
 
       finalSortOrder = maxSortData ? maxSortData.sort_order + 1 : 0
     }
+
+    console.log('📝 FAQ API: Attempting to create FAQ:', { question: question.trim(), status, sort_order: finalSortOrder })
 
     const { data: faq, error } = await supabase
       .from('faqs')
@@ -91,14 +111,17 @@ export async function POST(request) {
       .select()
       .single()
 
+    console.log('📝 FAQ API: Insert result:', { error, faq })
+
     if (error) {
-      console.error('Error creating FAQ:', error)
+      console.error('❌ FAQ API: Error creating FAQ:', error)
       return NextResponse.json(
-        { error: 'Failed to create FAQ' },
+        { error: 'Failed to create FAQ', details: error.message, code: error.code },
         { status: 500 }
       )
     }
 
+    console.log('✅ FAQ API: FAQ created successfully:', faq)
     return NextResponse.json({ faq }, { status: 201 })
   } catch (error) {
     console.error('Error in POST /api/faqs:', error)

@@ -236,18 +236,47 @@ export async function POST(request) {
         }
       }
 
-      const { data: existingRecord, error: fetchError } = await supabaseAdmin
+      let { data: existingRecord, error: fetchError } = await supabaseAdmin
         .from('footer_content')
         .select('content')
         .eq('section', section)
         .eq('status', 'active')
         .single()
 
+      // Create initial structure if no record exists
       if (fetchError || !existingRecord) {
-        return NextResponse.json(
-          { error: `Section ${section} not found: ${fetchError?.message || 'No record'}` },
-          { status: 404 }
-        )
+        console.log(`Creating initial ${section} structure`)
+
+        let initialContent = {}
+        if (section === 'links') {
+          initialContent = { company_links: [], support_links: [] }
+        } else if (section === 'contact') {
+          initialContent = []
+        } else if (section === 'social') {
+          initialContent = []
+        }
+
+        // Create the section with initial empty structure
+        const { data: newRecord, error: createError } = await supabaseAdmin
+          .from('footer_content')
+          .insert({
+            section,
+            content: initialContent,
+            status: 'active'
+          })
+          .select()
+          .single()
+
+        if (createError) {
+          console.error('Error creating initial section:', createError)
+          return NextResponse.json(
+            { error: `Failed to create ${section} section: ${createError.message}` },
+            { status: 500 }
+          )
+        }
+
+        // Use the newly created record's content
+        existingRecord = newRecord
       }
 
 
@@ -257,7 +286,8 @@ export async function POST(request) {
         ...data
       }
 
-      
+      console.log('Adding new item:', { section, newItem })
+
       let updatedContent
       if (section === 'links') {
         const linkType = data.linkType || 'company' // Default to company links
@@ -266,7 +296,7 @@ export async function POST(request) {
           ...existingRecord.content,
           [`${linkType}_links`]: [...existingLinks, newItem]
         }
-              } else if (section === 'contact') {
+      } else if (section === 'contact') {
         updatedContent = [...(existingRecord.content || []), newItem]
       } else if (section === 'social') {
         updatedContent = [...(existingRecord.content || []), newItem]
@@ -371,7 +401,7 @@ export async function PUT(request) {
     
     if (operation === 'update_array_item') {
       // Update existing item in array
-      const { data: existingRecord } = await supabaseAdmin
+      let { data: existingRecord } = await supabaseAdmin
         .from('footer_content')
         .select('content')
         .eq('section', section)
@@ -379,11 +409,32 @@ export async function PUT(request) {
         .single()
 
       if (!existingRecord) {
-        return NextResponse.json(
-          { error: `Section ${section} not found` },
-          { status: 404 }
-        )
+        // Create initial structure if it doesn't exist
+        console.log(`Creating initial ${section} structure for update`)
+
+        let initialContent = {}
+        if (section === 'links') {
+          initialContent = { company_links: [], support_links: [] }
+        } else if (section === 'contact') {
+          initialContent = []
+        } else if (section === 'social') {
+          initialContent = []
+        }
+
+        const { data: newRecord } = await supabaseAdmin
+          .from('footer_content')
+          .insert({
+            section,
+            content: initialContent,
+            status: 'active'
+          })
+          .select()
+          .single()
+
+        existingRecord = newRecord
       }
+
+      console.log('Updating item:', { section, itemId, updateData: data.updateData })
 
       let updatedContent
       if (section === 'links') {
@@ -471,7 +522,7 @@ export async function DELETE(request) {
     }
 
     // Get current record
-    const { data: existingRecord, error: fetchError } = await supabaseAdmin
+    let { data: existingRecord, error: fetchError } = await supabaseAdmin
       .from('footer_content')
       .select('content')
       .eq('section', section)
@@ -479,10 +530,9 @@ export async function DELETE(request) {
       .single()
 
     if (fetchError || !existingRecord) {
-      return NextResponse.json(
-        { error: `Section ${section} not found` },
-        { status: 404 }
-      )
+      // If record doesn't exist, just return success since item is already "deleted"
+      console.log(`Section ${section} not found, item ${itemId} already deleted`)
+      return NextResponse.json({ success: true })
     }
 
     // Remove item from array
@@ -558,7 +608,7 @@ export async function PATCH(request) {
       if (status !== undefined) updateData.status = status
 
       return supabaseAdmin
-        .from('footer')
+        .from('footer_content')
         .update(updateData)
         .eq('id', id)
     })

@@ -1,15 +1,36 @@
+import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
 export async function POST(request) {
   try {
-    // In a real application with server-side sessions, you would:
-    // 1. Invalidate server-side session
-    // 2. Clear session tokens from database
-    // 3. Log the logout event for security tracking
-    // 4. Revoke any refresh tokens
+    const supabase = await createClient()
 
-    // For this client-side authentication system, we'll just return success
-    // The actual logout logic is handled by the AuthContext on the client
+    // Get current session
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+
+    if (sessionError) {
+      console.error('Session retrieval error:', sessionError)
+    }
+
+    // Log user info before logout (optional, for security tracking)
+    if (session?.user) {
+      console.log(`User logout: ${session.user.email} (${session.user.id}) at ${new Date().toISOString()}`)
+    }
+
+    // Sign out from Supabase Auth
+    const { error } = await supabase.auth.signOut()
+
+    if (error) {
+      console.error('Supabase logout error:', error)
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Failed to logout from authentication service',
+          details: error.message
+        },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json({
       success: true,
@@ -21,7 +42,8 @@ export async function POST(request) {
     return NextResponse.json(
       {
         success: false,
-        error: 'Failed to logout'
+        error: 'Internal server error during logout',
+        details: error.message
       },
       { status: 500 }
     )

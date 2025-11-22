@@ -410,6 +410,7 @@ export function FooterManagement() {
       const response = await fetch("/api/footer", {
         method,
         headers: { "Content-Type": "application/json" },
+        credentials: 'include', // Include authentication cookies
         body: JSON.stringify(payload),
       });
 
@@ -467,6 +468,7 @@ export function FooterManagement() {
       const response = await fetch("/api/footer", {
         method,
         headers: { "Content-Type": "application/json" },
+        credentials: 'include', // Include authentication cookies
         body: JSON.stringify(payload),
       });
 
@@ -515,6 +517,7 @@ export function FooterManagement() {
       const response = await fetch("/api/footer", {
         method,
         headers: { "Content-Type": "application/json" },
+        credentials: 'include', // Include authentication cookies
         body: JSON.stringify(payload),
       });
 
@@ -656,6 +659,7 @@ export function FooterManagement() {
         const response = await fetch("/api/footer", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
+          credentials: 'include', // Include authentication cookies
           body: JSON.stringify({
             operation: "update_array_item",
             section: "links",
@@ -676,6 +680,7 @@ export function FooterManagement() {
         const response = await fetch("/api/footer", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          credentials: 'include', // Include authentication cookies
           body: JSON.stringify({
             operation: "add_to_array",
             section: "links",
@@ -763,6 +768,7 @@ export function FooterManagement() {
         const response = await fetch("/api/footer", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
+          credentials: 'include', // Include authentication cookies
           body: JSON.stringify({
             operation: "update_array_item",
             section: "contact",
@@ -785,6 +791,7 @@ export function FooterManagement() {
         const response = await fetch("/api/footer", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          credentials: 'include', // Include authentication cookies
           body: JSON.stringify({
             operation: "add_to_array",
             section: "contact",
@@ -870,6 +877,7 @@ export function FooterManagement() {
         const response = await fetch("/api/footer", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
+          credentials: 'include', // Include authentication cookies
           body: JSON.stringify({
             operation: "update_array_item",
             section: "social",
@@ -890,6 +898,7 @@ export function FooterManagement() {
         const response = await fetch("/api/footer", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          credentials: 'include', // Include authentication cookies
           body: JSON.stringify({
             operation: "add_to_array",
             section: "social",
@@ -1030,6 +1039,7 @@ export function FooterManagement() {
       const response = await fetch("/api/footer", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
+        credentials: 'include', // Include authentication cookies
         body: JSON.stringify(requestBody),
       });
 

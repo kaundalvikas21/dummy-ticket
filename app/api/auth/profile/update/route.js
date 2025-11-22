@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase'
 
 export async function PUT(request) {
   try {
@@ -44,6 +45,17 @@ export async function PUT(request) {
       )
     }
 
+    // Get Supabase Auth user to verify authentication
+    const supabase = await createClient()
+    const { data: authUser, error: authError } = await supabase.auth.getUser(userId)
+
+    if (authError || !authUser?.user) {
+      return NextResponse.json(
+        { success: false, error: 'User not authenticated' },
+        { status: 401 }
+      )
+    }
+
     // Prepare data for user_profiles table update
     const profileUpdatePayload = {
       first_name: profileData.first_name?.trim() || null,
@@ -65,10 +77,10 @@ export async function PUT(request) {
     }
 
     // Update user profile in database
-    const { data: updatedProfile, error } = await supabase
+    const { data: updatedProfile, error } = await supabaseAdmin
       .from('user_profiles')
       .update(profileUpdatePayload)
-      .eq('user_id', userId)
+      .eq('auth_user_id', userId)
       .select()
       .single()
 
@@ -100,20 +112,14 @@ export async function PUT(request) {
       )
     }
 
-    // Get current user data to return unchanged email
-    const { data: currentUser } = await supabase
-      .from('users')
-      .select('email')
-      .eq('id', userId)
-      .single()
-
     // Return updated profile data with consistent format
     return NextResponse.json({
       success: true,
       message: 'Profile updated successfully',
       profile: {
         id: updatedProfile.id,
-        email: currentUser?.email, // Email from users table (unchanged)
+        auth_user_id: updatedProfile.auth_user_id,
+        email: authUser.user.email, // Email from Supabase Auth
         first_name: updatedProfile.first_name,
         last_name: updatedProfile.last_name,
         phone_number: updatedProfile.phone_number,

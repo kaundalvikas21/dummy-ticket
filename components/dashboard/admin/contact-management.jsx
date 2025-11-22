@@ -34,6 +34,17 @@ export function ContactManagement() {
   const [selectedSetting, setSelectedSetting] = useState(null)
   const [isSaving, setIsSaving] = useState(false)
 
+  // Working Hours deletion state
+  const [showWorkingHoursDeleteDialog, setShowWorkingHoursDeleteDialog] = useState(false)
+  const [workingHoursToDelete, setWorkingHoursToDelete] = useState(null)
+
+  // Country Support deletion state
+  const [showCountrySupportDeleteDialog, setShowCountrySupportDeleteDialog] = useState(false)
+  const [countrySupportToDelete, setCountrySupportToDelete] = useState(null)
+
+  // Loading states for deletion
+  const [isDeleting, setIsDeleting] = useState(false)
+
   // Working hours state
   const [workingHours, setWorkingHours] = useState([])
   const [showWorkingHoursDialog, setShowWorkingHoursDialog] = useState(false)
@@ -354,11 +365,39 @@ export function ContactManagement() {
     setEditingWorkingHours(null)
   }
 
-  const handleDeleteWorkingHours = async (dayToDelete) => {
-    const updatedWorkingHours = workingHours.filter(item => item.day !== dayToDelete)
-    setWorkingHours(updatedWorkingHours)
+  const handleDeleteWorkingHours = (dayToDelete) => {
+    setWorkingHoursToDelete(dayToDelete)
+    setShowWorkingHoursDeleteDialog(true)
+  }
 
-    await saveWorkingHoursToSettings(updatedWorkingHours)
+  const handleConfirmDeleteWorkingHours = async () => {
+    if (!workingHoursToDelete) return
+
+    setIsDeleting(true)
+
+    try {
+      const updatedWorkingHours = workingHours.filter(item => item.day !== workingHoursToDelete)
+      setWorkingHours(updatedWorkingHours)
+
+      await saveWorkingHoursToSettings(updatedWorkingHours)
+
+      toast({
+        title: "Success",
+        description: `Working hours for ${workingHoursToDelete} deleted successfully`,
+      })
+
+      setShowWorkingHoursDeleteDialog(false)
+      setWorkingHoursToDelete(null)
+    } catch (error) {
+      console.error('Error deleting working hours:', error)
+      toast({
+        title: "Error",
+        description: "Failed to delete working hours",
+        variant: "destructive"
+      })
+    } finally {
+      setIsDeleting(false)
+    }
   }
 
   const saveWorkingHoursToSettings = async (hoursData) => {
@@ -439,11 +478,39 @@ export function ContactManagement() {
     setEditingCountrySupport(null)
   }
 
-  const handleDeleteCountrySupport = async (countryToDelete) => {
-    const updatedCountrySupport = countrySupport.filter(item => item.country !== countryToDelete)
-    setCountrySupport(updatedCountrySupport)
+  const handleDeleteCountrySupport = (countryToDelete) => {
+    setCountrySupportToDelete(countryToDelete)
+    setShowCountrySupportDeleteDialog(true)
+  }
 
-    await saveCountrySupportToSettings(updatedCountrySupport)
+  const handleConfirmDeleteCountrySupport = async () => {
+    if (!countrySupportToDelete) return
+
+    setIsDeleting(true)
+
+    try {
+      const updatedCountrySupport = countrySupport.filter(item => item.country !== countrySupportToDelete)
+      setCountrySupport(updatedCountrySupport)
+
+      await saveCountrySupportToSettings(updatedCountrySupport)
+
+      toast({
+        title: "Success",
+        description: `Country support for ${countrySupportToDelete} deleted successfully`,
+      })
+
+      setShowCountrySupportDeleteDialog(false)
+      setCountrySupportToDelete(null)
+    } catch (error) {
+      console.error('Error deleting country support:', error)
+      toast({
+        title: "Error",
+        description: "Failed to delete country support",
+        variant: "destructive"
+      })
+    } finally {
+      setIsDeleting(false)
+    }
   }
 
   const saveCountrySupportToSettings = async (supportData) => {
@@ -1341,6 +1408,70 @@ export function ContactManagement() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
               Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Working Hours Delete Confirmation Dialog */}
+      <AlertDialog open={showWorkingHoursDeleteDialog} onOpenChange={setShowWorkingHoursDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Clock className="w-5 h-5 text-red-600" />
+              Delete Working Hours
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete the working hours for "<strong>{workingHoursToDelete}</strong>"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDeleteWorkingHours}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Country Support Delete Confirmation Dialog */}
+      <AlertDialog open={showCountrySupportDeleteDialog} onOpenChange={setShowCountrySupportDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Globe className="w-5 h-5 text-red-600" />
+              Delete Country Support
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete the country support for "<strong>{countrySupportToDelete}</strong>"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDeleteCountrySupport}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

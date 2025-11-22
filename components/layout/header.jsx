@@ -129,7 +129,7 @@ export function Header() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem asChild>
-                        <Link href={`/${user?.role}`} className="flex items-center gap-2">
+                        <Link href={`/${profile?.role || user?.role}`} className="flex items-center gap-2">
                           <User className="w-4 h-4" />
                           Dashboard
                         </Link>
@@ -227,10 +227,10 @@ export function Header() {
                         {getUserDisplayName()}
                       </div>
                       <div className="text-xs text-gray-500 capitalize">
-                        {user?.role} Account
+                        {profile?.role || user?.role} Account
                       </div>
                     </div>
-                    <Link href={`/${user?.role}`} className="block py-2 text-gray-700 hover:text-[#0066FF] font-medium">
+                    <Link href={`/${profile?.role || user?.role}`} className="block py-2 text-gray-700 hover:text-[#0066FF] font-medium">
                       Dashboard
                     </Link>
                     <button

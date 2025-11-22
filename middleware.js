@@ -1,16 +1,37 @@
+import { createClient } from '@/lib/supabase/server'
+import { supabaseAdmin } from '@/lib/supabase'
 import { NextResponse } from 'next/server'
-import { parse } from 'cookie'
 
-export function middleware(request) {
+export async function middleware(request) {
   const { pathname } = request.nextUrl
 
-  // Get cookies from the request
-  const cookies = parse(request.headers.get('cookie') || '')
+  // Create Supabase client for middleware
+  const supabase = await createClient()
 
-  // Check if user is authenticated by looking for stored auth data in cookies
-  const storedUser = cookies.auth_user
+  // Refresh session if expired - required for Server Components
+  const { data: { user } } = await supabase.auth.getUser()
 
-  // Define protected routes
+  let userRole = user?.app_metadata?.role
+
+  // Try to get role from database profile if available
+  if (user) {
+    try {
+      const { data: profile } = await supabaseAdmin
+        .from('user_profiles')
+        .select('role')
+        .eq('auth_user_id', user.id)
+        .single()
+
+      if (profile?.role) {
+        userRole = profile.role
+      }
+    } catch (error) {
+      // If profile lookup fails, use auth metadata role
+      console.error('Middleware profile lookup failed:', error)
+    }
+  }
+
+  // Define protected routes and their required roles
   const protectedRoutes = {
     '/admin': 'admin',
     '/vendor': 'vendor',
@@ -29,45 +50,39 @@ export function middleware(request) {
   const isAuthRoute = authRoutes.some(route => pathname.startsWith(route))
 
   // If accessing protected route without authentication, redirect to login
-  if (isProtectedRoute && !storedUser) {
+  if (isProtectedRoute && !user) {
     const loginUrl = new URL('/login', request.url)
-    loginUrl.searchParams.set('redirect', pathname)
+    loginUrl.searchParams.set('returnTo', pathname)
     return NextResponse.redirect(loginUrl)
   }
 
-  // If accessing auth route while authenticated, redirect to dashboard
-  if (isAuthRoute && storedUser) {
-    try {
-      const user = JSON.parse(storedUser)
-      const dashboardUrl = new URL(`/${user.role}`, request.url)
-      return NextResponse.redirect(dashboardUrl)
-    } catch (error) {
-      // Invalid stored data, proceed to auth route
-    }
+  // If accessing auth route while authenticated, redirect to role-appropriate dashboard
+  if (isAuthRoute && user && userRole) {
+    const dashboardUrl = new URL(`/${userRole}`, request.url)
+    return NextResponse.redirect(dashboardUrl)
   }
 
-  // If accessing protected route, check role
-  if (isProtectedRoute && storedUser) {
-    try {
-      const user = JSON.parse(storedUser)
-
-      // Check if the route matches the user's role
-      for (const [route, requiredRole] of Object.entries(protectedRoutes)) {
-        if (pathname.startsWith(route) && user.role !== requiredRole) {
-          // User doesn't have permission for this route
-          const correctDashboard = new URL(`/${user.role}`, request.url)
-          return NextResponse.redirect(correctDashboard)
-        }
+  // If accessing protected route, check role-based access
+  if (isProtectedRoute && user && userRole) {
+    // Check if the route matches the user's role
+    for (const [route, requiredRole] of Object.entries(protectedRoutes)) {
+      if (pathname.startsWith(route) && userRole !== requiredRole) {
+        // User doesn't have permission for this route
+        // Redirect to their correct dashboard
+        const correctDashboard = new URL(`/${userRole}`, request.url)
+        return NextResponse.redirect(correctDashboard)
       }
-    } catch (error) {
-      // Invalid stored data, redirect to login
-      const loginUrl = new URL('/login', request.url)
-      return NextResponse.redirect(loginUrl)
     }
   }
 
-  // Allow request to proceed
-  return NextResponse.next()
+  // If no redirects needed, continue with the request and refresh session
+  const response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  })
+
+  return response
 }
 
 export const config = {
