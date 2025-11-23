@@ -57,4 +57,3 @@ export function AuthLayout({ children, title, description, backLink }) {
   )
 }
 
-export { AuthLayout }

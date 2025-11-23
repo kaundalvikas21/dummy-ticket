@@ -11,7 +11,7 @@ async function testSupabaseAuth() {
     // Test creating a user with admin API
     const { data, error } = await supabaseAdmin.auth.admin.createUser({
       email: 'test-auth@example.com',
-      password: 'test123456',
+      password: process.env.TEST_USER_PASSWORD || 'TestUser123456!',
       email_confirm: true,
       user_metadata: {
         first_name: 'Test',

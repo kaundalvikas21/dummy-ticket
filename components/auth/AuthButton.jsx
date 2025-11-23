@@ -29,4 +29,3 @@ export function AuthButton({
   )
 }
 
-export { AuthButton }
