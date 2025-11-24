@@ -1,9 +1,30 @@
-import { supabase } from '@/lib/supabase'
+import {
+  requireAdmin,
+  createSupabaseClientWithAuth,
+  createAuthError
+} from "@/lib/auth-helper"
+import { createClient } from '@supabase/supabase-js'
 
-export async function GET() {
+export async function GET(request) {
   try {
+    // SECURITY: Require admin authentication
+    const supabase = createSupabaseClientWithAuth(request)
+    await requireAdmin(supabase)
+
+    // Use admin client for database operations to bypass RLS if needed
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+
     // Fetch ALL homepage news and blog items (including inactive) for admin panel
-    const { data: items, error } = await supabase
+    const { data: items, error } = await supabaseAdmin
       .from('homepage_news_blog')
       .select(`
         *,
@@ -16,10 +37,7 @@ export async function GET() {
 
     if (error) {
       console.error('Error fetching homepage news blog items:', error)
-      return new Response(JSON.stringify({ error: 'Failed to fetch homepage news blog items' }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      })
+      return createAuthError('Failed to fetch homepage news blog items', 500)
     }
 
     // Group items by content type
@@ -53,16 +71,13 @@ export async function GET() {
       groupedItems[item.content_type].push(itemWithTranslations)
     })
 
-      return new Response(JSON.stringify({ success: true, data: groupedItems }), {
+    return new Response(JSON.stringify({ success: true, data: groupedItems }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     })
 
   } catch (error) {
     console.error('Unexpected error:', error)
-    return new Response(JSON.stringify({ error: 'Unexpected error occurred' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    })
+    return createAuthError('Unexpected error occurred', 500)
   }
 }

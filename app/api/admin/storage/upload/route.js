@@ -1,7 +1,13 @@
-import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from "next/server"
+import { 
+  requireAdmin, 
+  createSupabaseClientWithAuth, 
+  createAuthError, 
+  createSuccessResponse 
+} from "@/lib/auth-helper"
 
 // Create Supabase admin client with service role key to bypass RLS
+import { createClient } from '@supabase/supabase-js'
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY,
@@ -13,68 +19,11 @@ const supabaseAdmin = createClient(
   }
 )
 
-// Authentication middleware - check if user is admin via cookies
-async function checkAdminAuth(request) {
-  try {
-    // Get auth data from cookies
-    const cookieHeader = request.headers.get('cookie')
-
-    if (!cookieHeader) {
-      console.log('No cookies found')
-      return null
-    }
-
-    // Parse cookies
-    const cookies = {}
-    cookieHeader.split(';').forEach(cookie => {
-      const [name, value] = cookie.trim().split('=')
-      if (name && value) {
-        try {
-          cookies[name] = decodeURIComponent(value)
-        } catch (e) {
-          cookies[name] = value
-        }
-      }
-    })
-
-    // Check for auth_profile cookie
-    const authProfileCookie = cookies['auth_profile']
-    if (!authProfileCookie) {
-      console.log('No auth_profile cookie found')
-      return null
-    }
-
-    let profile
-    try {
-      profile = JSON.parse(authProfileCookie)
-    } catch (error) {
-      console.error('Failed to parse auth_profile cookie:', error)
-      return null
-    }
-
-    // Check if user has admin role
-    if (profile.role !== 'admin') {
-      console.log('User is not admin:', profile.role)
-      return null
-    }
-
-    return profile
-  } catch (error) {
-    console.error('Auth error:', error)
-    return null
-  }
-}
-
 export async function POST(request) {
   try {
-    // Check admin authentication
-    const adminUser = await checkAdminAuth(request)
-    if (!adminUser) {
-      return NextResponse.json(
-        { error: 'Unauthorized. Admin access required.' },
-        { status: 401 }
-      )
-    }
+    // Check admin authentication using Supabase
+    const supabase = createSupabaseClientWithAuth(request)
+    await requireAdmin(supabase)
 
     // Parse form data
     const formData = await request.formData()
@@ -155,14 +104,9 @@ export async function POST(request) {
 
 export async function DELETE(request) {
   try {
-    // Check admin authentication
-    const adminUser = await checkAdminAuth(request)
-    if (!adminUser) {
-      return NextResponse.json(
-        { error: 'Unauthorized. Admin access required.' },
-        { status: 401 }
-      )
-    }
+    // Check admin authentication using Supabase
+    const supabase = createSupabaseClientWithAuth(request)
+    await requireAdmin(supabase)
 
     const { searchParams } = new URL(request.url)
     const path = searchParams.get('path')

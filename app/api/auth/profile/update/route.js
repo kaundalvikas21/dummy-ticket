@@ -1,58 +1,40 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import {
+  requireAuth,
+  createSupabaseClientWithAuth,
+  createAuthError
+} from "@/lib/auth-helper"
+import { createClient } from '@supabase/supabase-js'
 
 export async function PUT(request) {
   try {
+    // Create authenticated Supabase client and get authenticated user
+    const supabase = createSupabaseClientWithAuth(request)
+    const user = await requireAuth(supabase)
+
+    // Get update data from request body
     const updateData = await request.json()
 
-    // Get user ID from Authorization header or from request body
-    const userId = updateData.userId
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, error: 'User ID is required' },
-        { status: 400 }
-      )
-    }
+    // CRITICAL SECURITY: Never allow userId from request body - use authenticated user's ID only
+    const userId = user.id
 
-    // Remove userId from updateData as it shouldn't be updated
+    // Remove any userId from updateData to prevent confusion
     const { userId: _, ...profileData } = updateData
 
     // Validate required fields
-    if (!profileData.first_name || profileData.first_name.trim().length === 0) {
-      return NextResponse.json(
-        { success: false, error: 'First name is required' },
-        { status: 400 }
-      )
+    if (profileData.first_name && profileData.first_name.trim().length === 0) {
+      return createAuthError('First name cannot be empty', 400)
     }
 
-    if (!profileData.last_name || profileData.last_name.trim().length === 0) {
-      return NextResponse.json(
-        { success: false, error: 'Last name is required' },
-        { status: 400 }
-      )
+    if (profileData.last_name && profileData.last_name.trim().length === 0) {
+      return createAuthError('Last name cannot be empty', 400)
     }
 
     // Validate that email is not being updated (security measure)
     if (profileData.email) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Email changes are not allowed for security reasons. Please contact support if you need to update your email address.',
-          details: 'Email addresses are immutable after account creation to prevent account takeover.'
-        },
-        { status: 400 }
-      )
-    }
-
-    // Get Supabase Auth user to verify authentication
-    const supabase = await createClient()
-    const { data: authUser, error: authError } = await supabase.auth.getUser(userId)
-
-    if (authError || !authUser?.user) {
-      return NextResponse.json(
-        { success: false, error: 'User not authenticated' },
-        { status: 401 }
+      return createAuthError(
+        'Email changes are not allowed for security reasons. Please contact support if you need to update your email address.',
+        400
       )
     }
 
@@ -76,8 +58,20 @@ export async function PUT(request) {
       updated_at: new Date().toISOString()
     }
 
-    // Update user profile in database
-    const { data: updatedProfile, error } = await supabaseAdmin
+    // Use admin client for database operations to bypass RLS if needed
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+
+    // Update user profile in database - only the authenticated user's profile
+    let { data: updatedProfile, error } = await supabaseAdmin
       .from('user_profiles')
       .update(profileUpdatePayload)
       .eq('auth_user_id', userId)
@@ -94,22 +88,27 @@ export async function PUT(request) {
         userId: userId,
         profileUpdatePayload: profileUpdatePayload
       })
-      return NextResponse.json(
-        {
-          success: false,
-          error: `Failed to update profile: ${error.message || 'Unknown error'}`,
-          details: error.details,
-          code: error.code
-        },
-        { status: 500 }
-      )
+      return createAuthError(`Failed to update profile: ${error.message || 'Unknown error'}`, 500)
     }
 
     if (!updatedProfile) {
-      return NextResponse.json(
-        { success: false, error: 'Profile not found' },
-        { status: 404 }
-      )
+      // Create profile if it doesn't exist
+      const { data: newProfile, error: createError } = await supabaseAdmin
+        .from('user_profiles')
+        .insert({
+          auth_user_id: userId,
+          ...profileUpdatePayload,
+          created_at: new Date().toISOString()
+        })
+        .select()
+        .single()
+
+      if (createError) {
+        console.error('Profile creation error:', createError)
+        return createAuthError(`Failed to create profile: ${createError.message}`, 500)
+      }
+
+      updatedProfile = newProfile
     }
 
     // Return updated profile data with consistent format
@@ -119,7 +118,7 @@ export async function PUT(request) {
       profile: {
         id: updatedProfile.id,
         auth_user_id: updatedProfile.auth_user_id,
-        email: authUser.user.email, // Email from Supabase Auth
+        email: user.email, // Email from authenticated user
         first_name: updatedProfile.first_name,
         last_name: updatedProfile.last_name,
         phone_number: updatedProfile.phone_number,
@@ -141,17 +140,9 @@ export async function PUT(request) {
     console.error('Profile update API error details:', {
       error: error,
       message: error.message,
-      stack: error.stack,
-      userId: updateData?.userId,
-      updateData: updateData
+      stack: error.stack
     })
-    return NextResponse.json(
-      {
-        success: false,
-        error: `Server error: ${error.message || 'Internal server error'}`
-      },
-      { status: 500 }
-    )
+    return createAuthError(`Server error: ${error.message || 'Internal server error'}`, 500)
   }
 }
 

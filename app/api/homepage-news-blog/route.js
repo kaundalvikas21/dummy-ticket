@@ -1,4 +1,10 @@
 import { supabase } from '@/lib/supabase'
+import { 
+  requireAdmin, 
+  createSupabaseClientWithAuth, 
+  createAuthError, 
+  createSuccessResponse 
+} from "@/lib/auth-helper"
 
 export async function GET() {
   try {
@@ -72,6 +78,10 @@ export async function GET() {
 
 export async function POST(request) {
   try {
+    // Check admin authentication using Supabase
+    const supabase = createSupabaseClientWithAuth(request)
+    await requireAdmin(supabase)
+
     const body = await request.json()
     const { content_type, external_link, status = 'active', translations } = body
 

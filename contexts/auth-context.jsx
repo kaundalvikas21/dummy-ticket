@@ -59,7 +59,11 @@ export function AuthProvider({ children }) {
 
         // Fetch user profile
         try {
-          const response = await fetch(`/api/auth/profile?userId=${session.user.id}`)
+          const response = await fetch('/api/auth/profile', {
+            headers: {
+              'Authorization': `Bearer ${session.access_token}`
+            }
+          })
           if (response.ok) {
             const result = await response.json()
             if (result.success) {

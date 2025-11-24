@@ -1,9 +1,30 @@
-import { supabase } from '@/lib/supabase'
 import { NextResponse } from 'next/server'
+import {
+  requireAdmin,
+  createSupabaseClientWithAuth,
+  createAuthError
+} from "@/lib/auth-helper"
+import { createClient } from '@supabase/supabase-js'
 
-export async function GET() {
+export async function GET(request) {
   try {
-    const { data: faqs, error } = await supabase
+    // SECURITY: Require admin authentication
+    const supabase = createSupabaseClientWithAuth(request)
+    await requireAdmin(supabase)
+
+    // Use admin client for database operations to bypass RLS if needed
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+
+    const { data: faqs, error } = await supabaseAdmin
       .from('faqs')
       .select(`
         *,
@@ -21,18 +42,12 @@ export async function GET() {
 
     if (error) {
       console.error('Error fetching FAQs:', error)
-      return NextResponse.json(
-        { error: 'Failed to fetch FAQs' },
-        { status: 500 }
-      )
+      return createAuthError('Failed to fetch FAQs', 500)
     }
 
     return NextResponse.json({ faqs })
   } catch (error) {
     console.error('Error in GET /api/faqs/admin:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return createAuthError('Internal server error', 500)
   }
 }

@@ -11,8 +11,10 @@ import {
   Plane,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/auth-context";
 
-export function UserDashboard() { 
+export function UserDashboard() {
+  const { user, profile } = useAuth(); 
   const router = useRouter();
 
   const handleBookTicket = () => {
@@ -101,7 +103,9 @@ export function UserDashboard() {
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold mb-2">Welcome back, John!</h2>
+              <h2 className="text-2xl font-bold mb-2">
+                Welcome back, {profile?.first_name || user?.user_metadata?.first_name || user?.email?.split('@')[0] || 'User'}!
+              </h2>
               <p className="text-blue-100">
                 You have 2 upcoming trips. Ready for your next adventure?
               </p>

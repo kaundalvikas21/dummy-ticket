@@ -7,6 +7,7 @@ import { PhoneIcon, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/contexts/auth-context"
 import { useTranslation } from "@/lib/translations"
+import { createClient } from '@/lib/supabase/client'
 
 // --- Custom SVG Icons ---
 const UserIcon = () => (
@@ -60,6 +61,7 @@ export default function ContactContent({ settings }) {
   const { user } = useAuth()
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
+  const supabase = createClient()
 
   const [formData, setFormData] = useState({
     name: "",
@@ -80,8 +82,20 @@ export default function ContactContent({ settings }) {
       }
 
       try {
-        // Fetch user profile using the user ID
-        const response = await fetch(`/api/auth/profile?userId=${user.id}`)
+        // Get session token for authenticated request
+        const { data: { session } } = await supabase.auth.getSession()
+
+        if (!session?.access_token) {
+          console.error('No session token available')
+          return
+        }
+
+        // Fetch user profile with JWT authentication
+        const response = await fetch('/api/auth/profile', {
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`
+          }
+        })
 
         if (response.ok) {
           const userData = await response.json()

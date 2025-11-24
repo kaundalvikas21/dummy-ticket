@@ -3,9 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "check-env": "node scripts/check-env.js",
-    "dev": "npm run check-env && next dev --turbopack",
-    "build": "npm run check-env && next build --turbopack",
+    "dev": "next dev --turbopack",
+    "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint"
   },
