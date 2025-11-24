@@ -12,7 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { toast } from "@/hooks/use-toast"
 import { apiClient } from "@/lib/api-client"
 import { TranslationTabs } from "@/components/admin/translation/TranslationTabs"
-import { Newspaper, BookOpen, Plus, Edit, Trash2, ExternalLink, Globe, CheckSquare, Square, X } from "lucide-react"
+import { Newspaper, BookOpen, Plus, Edit, Trash2, ExternalLink, Globe, CheckSquare, Square, X, MoveUp, MoveDown } from "lucide-react"
 
 const SUPPORTED_LOCALES = [
   { code: "en", name: "English", flag: "🇺🇸" },
@@ -38,6 +38,7 @@ export function HomepageNewsBlogManagement() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [itemToDelete, setItemToDelete] = useState(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [reorderingItem, setReorderingItem] = useState(null)
   const [formData, setFormData] = useState({
     content_type: "news",
     external_link: "",
@@ -239,6 +240,49 @@ export function HomepageNewsBlogManagement() {
     }
   }
 
+  const moveItem = async (item, direction) => {
+    const items = item.content_type === 'news' ? newsItems : blogItems
+    const currentIndex = items.findIndex(i => i.id === item.id)
+
+    // Don't allow moving if selection mode is active
+    if (selectionMode) return
+
+    // Check boundaries
+    if (direction === 'up' && currentIndex === 0) return
+    if (direction === 'down' && currentIndex === items.length - 1) return
+
+    const targetItem = direction === 'up'
+      ? items[currentIndex - 1]
+      : items[currentIndex + 1]
+
+    if (!targetItem) return
+
+    setReorderingItem(item.id)
+
+    try {
+      await apiClient.post(`/api/homepage-news-blog/${item.id}`, {
+        itemId: item.id,
+        direction,
+        contentType: item.content_type
+      })
+
+      await fetchItems()
+      toast({
+        title: "Success",
+        description: `Moved ${item.content_type} item ${direction} successfully`
+      })
+    } catch (error) {
+      console.error("Error moving item:", error)
+      toast({
+        title: "Error",
+        description: "Failed to move item",
+        variant: "destructive"
+      })
+    } finally {
+      setReorderingItem(null)
+    }
+  }
+
   const handleBulkDelete = async () => {
     if (selectedItems.size === 0) return
 
@@ -308,6 +352,32 @@ export function HomepageNewsBlogManagement() {
             </Badge>
           </div>
           <div className="flex items-center gap-2">
+            {/* Move Controls */}
+            <div className="flex flex-col gap-1">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => moveItem(item, 'up')}
+                className={selectionMode ? 'opacity-50' : ''}
+                disabled={selectionMode || reorderingItem === item.id}
+                title="Move up"
+              >
+                <MoveUp className="w-2 h-2" />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => moveItem(item, 'down')}
+                className={selectionMode ? 'opacity-50' : ''}
+                disabled={selectionMode || reorderingItem === item.id}
+                title="Move down"
+              >
+                <MoveDown className="w-2 h-2" />
+              </Button>
+            </div>
+
             <Button
               type="button"
               variant="ghost"

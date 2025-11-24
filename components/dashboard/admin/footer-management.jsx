@@ -418,9 +418,13 @@ export function FooterManagement() {
   };
 
   const saveDescription = async () => {
-    try {
-      setSavingDescription(true);
+    // Update local state immediately (optimistic update)
+    setFooterData(prev => ({
+      ...prev,
+      description: description
+    }));
 
+    try {
       // Find existing description item
       const existingDescription =
         footerData.description && typeof footerData.description === "object"
@@ -432,35 +436,41 @@ export function FooterManagement() {
         content: description,
       };
 
-      let response;
       if (existingDescription?.id) {
         payload.id = existingDescription.id;
-        response = await apiClient.put("/api/footer", payload);
+        await apiClient.put("/api/footer", payload);
       } else {
-        response = await apiClient.post("/api/footer", payload);
+        await apiClient.post("/api/footer", payload);
       }
 
-      await fetchFooterData();
       toast({
         title: "Success",
         description: "Description saved successfully",
       });
     } catch (error) {
+      // Rollback: restore original description
+      setFooterData(prev => ({
+        ...prev,
+        description: typeof footerData.description === "object" ? "" : footerData.description
+      }));
+
       console.error("Save description error:", error);
       toast({
         title: "Error",
         description: error.message || "Failed to save description",
         variant: "destructive",
       });
-    } finally {
-      setSavingDescription(false);
     }
   };
 
   const saveAddress = async () => {
-    try {
-      setSavingAddress(true);
+    // Update local state immediately (optimistic update)
+    setFooterData(prev => ({
+      ...prev,
+      address: address
+    }));
 
+    try {
       // Find existing address item
       const existingAddress =
         footerData.address && typeof footerData.address === "object"
@@ -472,25 +482,27 @@ export function FooterManagement() {
         content: address,
       };
 
-      let response;
       if (existingAddress?.id) {
         payload.id = existingAddress.id;
-        response = await apiClient.put("/api/footer", payload);
+        await apiClient.put("/api/footer", payload);
       } else {
-        response = await apiClient.post("/api/footer", payload);
+        await apiClient.post("/api/footer", payload);
       }
 
-      await fetchFooterData();
       toast({ title: "Success", description: "Address saved successfully" });
     } catch (error) {
+      // Rollback: restore original address
+      setFooterData(prev => ({
+        ...prev,
+        address: typeof footerData.address === "object" ? "" : footerData.address
+      }));
+
       console.error("Save address error:", error);
       toast({
         title: "Error",
         description: error.message || "Failed to save address",
         variant: "destructive",
       });
-    } finally {
-      setSavingAddress(false);
     }
   };
 
@@ -573,33 +585,37 @@ export function FooterManagement() {
   };
 
   const saveLink = async () => {
-    try {
-      setSavingLink(true);
+    // Validation: Check if required fields are empty
+    if (!linkFormData.title || !linkFormData.title.trim()) {
+      toast({
+        title: "Error",
+        description: "Link title is required",
+        variant: "destructive",
+      });
+      return;
+    }
 
-      // Validation: Check if required fields are empty
-      if (!linkFormData.title || !linkFormData.title.trim()) {
-        toast({
-          title: "Error",
-          description: "Link title is required",
-          variant: "destructive",
-        });
-        setSavingLink(false);
-        return;
-      }
+    if (!linkFormData.url || !linkFormData.url.trim()) {
+      toast({
+        title: "Error",
+        description: "Link URL is required",
+        variant: "destructive",
+      });
+      return;
+    }
 
-      if (!linkFormData.url || !linkFormData.url.trim()) {
-        toast({
-          title: "Error",
-          description: "Link URL is required",
-          variant: "destructive",
-        });
-        setSavingLink(false);
-        return;
-      }
-
-      if (linkFormData.id) {
-        // Update existing link
-        await apiClient.put("/api/footer", {
+    if (linkFormData.id) {
+      // Update existing link
+      await performOptimisticUpdate(
+        () => {
+          const updateData = {
+            title: linkFormData.title,
+            href: linkFormData.url,
+          };
+          updateLinkOptimistically(linkFormData.id, updateData, linkFormData.section);
+          return { id: linkFormData.id, section: linkFormData.section };
+        },
+        () => apiClient.put("/api/footer", {
           operation: "update_array_item",
           section: "links",
           itemId: linkFormData.id,
@@ -610,10 +626,19 @@ export function FooterManagement() {
               href: linkFormData.url,
             },
           },
-        });
-      } else {
-        // Add new link
-        await apiClient.post("/api/footer", {
+        }),
+        () => {
+          // Rollback function would need to restore original data
+          // For simplicity, we'll refetch on error
+          fetchFooterData();
+        },
+        "Failed to update link"
+      );
+    } else {
+      // Add new link
+      await performOptimisticUpdate(
+        () => addLinkOptimistically(linkFormData, linkFormData.section),
+        () => apiClient.post("/api/footer", {
           operation: "add_to_array",
           section: "links",
           data: {
@@ -624,77 +649,75 @@ export function FooterManagement() {
               footerData[`${linkFormData.section}_links`]?.length || 0,
             visible: true, // New items are visible by default
           },
-        });
-      }
-
-      // Reset form and close dialog
-      setLinkFormData({ title: "", url: "", section: "", id: null });
-      setShowLinkDialog(false);
-      await fetchFooterData();
-      toast({
-        title: "Success",
-        description: linkFormData.id
-          ? "Link updated successfully"
-          : "Link saved successfully",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to save link",
-        variant: "destructive",
-      });
-    } finally {
-      setSavingLink(false);
+        }),
+        () => {
+          // Rollback: remove the optimistically added link
+          const tempLink = addLinkOptimistically(linkFormData, linkFormData.section);
+          deleteItemOptimistically('links', tempLink.id, linkFormData.section);
+        },
+        "Failed to save link"
+      );
     }
+
+    // Reset form and close dialog
+    setLinkFormData({ title: "", url: "", section: "", id: null });
+    setOriginalLinkData({ title: "", url: "", section: "", id: null });
+    setShowLinkDialog(false);
   };
 
   const saveContact = async () => {
-    try {
-      setSavingContact(true);
+    const {
+      title,
+      content,
+      icon_type,
+      country,
+      link_type,
+      id
+    } = contactFormData;
 
-      const {
-        title,
-        content,
-        icon_type,
-        country,
-        link_type,
-        id
-      } = contactFormData;
+    // Validation: Check if required fields are empty
+    if (!title || !title.trim()) {
+      toast({
+        title: "Error",
+        description: "Contact title is required",
+        variant: "destructive",
+      });
+      return;
+    }
 
-      // Validation: Check if required fields are empty
-      if (!title || !title.trim()) {
-        toast({
-          title: "Error",
-          description: "Contact title is required",
-          variant: "destructive",
-        });
-        setSavingContact(false);
-        return;
-      }
+    if (!content || !content.trim()) {
+      toast({
+        title: "Error",
+        description: "Contact information (phone/email) is required",
+        variant: "destructive",
+      });
+      return;
+    }
 
-      if (!content || !content.trim()) {
-        toast({
-          title: "Error",
-          description: "Contact information (phone/email) is required",
-          variant: "destructive",
-        });
-        setSavingContact(false);
-        return;
-      }
+    if (!link_type) {
+      toast({
+        title: "Error",
+        description: "Contact type is required",
+        variant: "destructive",
+      });
+      return;
+    }
 
-      if (!link_type) {
-        toast({
-          title: "Error",
-          description: "Contact type is required",
-          variant: "destructive",
-        });
-        setSavingContact(false);
-        return;
-      }
-
-      if (id) {
-        // Update existing contact
-        await apiClient.put("/api/footer", {
+    if (id) {
+      // Update existing contact
+      await performOptimisticUpdate(
+        () => {
+          const updateData = {
+            text: title,
+            href: link_type === 'tel' ? `tel:${content}` : `mailto:${content}`,
+            icon: icon_type,
+            country,
+            link_type
+          };
+          updateContactOptimistically(id, updateData);
+          return { id };
+        },
+        () => apiClient.put("/api/footer", {
           operation: "update_array_item",
           section: "contact",
           itemId: id,
@@ -707,10 +730,18 @@ export function FooterManagement() {
               link_type
             }
           }
-        });
-      } else {
-        // Add new contact
-        await apiClient.post("/api/footer", {
+        }),
+        () => {
+          // Rollback: refetch data on error
+          fetchFooterData();
+        },
+        "Failed to update contact item"
+      );
+    } else {
+      // Add new contact
+      await performOptimisticUpdate(
+        () => addContactOptimistically(contactFormData),
+        () => apiClient.post("/api/footer", {
           operation: "add_to_array",
           section: "contact",
           data: {
@@ -722,74 +753,69 @@ export function FooterManagement() {
             link_type,
             visible: true // New items are visible by default
           }
-        });
-      }
-
-      resetContactForm();
-      setShowContactDialog(false);
-      await fetchFooterData();
-      toast({
-        title: "Success",
-        description: contactFormData.id
-          ? "Contact item updated successfully"
-          : "Contact item saved successfully",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to save contact item",
-        variant: "destructive",
-      });
-    } finally {
-      setSavingContact(false);
+        }),
+        () => {
+          // Rollback: remove the optimistically added contact
+          const tempContact = addContactOptimistically(contactFormData);
+          deleteItemOptimistically('contact', tempContact.id);
+        },
+        "Failed to save contact item"
+      );
     }
+
+    resetContactForm();
+    setShowContactDialog(false);
   };
 
   const saveSocial = async () => {
-    try {
-      setSavingSocial(true);
+    const {
+      name,
+      url,
+      icon_name,
+      id
+    } = socialFormData;
 
-      const {
-        name,
-        url,
-        icon_name,
-        id
-      } = socialFormData;
+    // Validation: Check if required fields are empty
+    if (!name || !name.trim()) {
+      toast({
+        title: "Error",
+        description: "Social media name is required",
+        variant: "destructive",
+      });
+      return;
+    }
 
-      // Validation: Check if required fields are empty
-      if (!name || !name.trim()) {
-        toast({
-          title: "Error",
-          description: "Social media name is required",
-          variant: "destructive",
-        });
-        setSavingSocial(false);
-        return;
-      }
+    if (!url || !url.trim()) {
+      toast({
+        title: "Error",
+        description: "Social media URL is required",
+        variant: "destructive",
+      });
+      return;
+    }
 
-      if (!url || !url.trim()) {
-        toast({
-          title: "Error",
-          description: "Social media URL is required",
-          variant: "destructive",
-        });
-        setSavingSocial(false);
-        return;
-      }
+    if (!icon_name) {
+      toast({
+        title: "Error",
+        description: "Social media icon is required",
+        variant: "destructive",
+      });
+      return;
+    }
 
-      if (!icon_name) {
-        toast({
-          title: "Error",
-          description: "Social media icon is required",
-          variant: "destructive",
-        });
-        setSavingSocial(false);
-        return;
-      }
-
-      if (id) {
-        // Update existing social link
-        await apiClient.put("/api/footer", {
+    if (id) {
+      // Update existing social link
+      await performOptimisticUpdate(
+        () => {
+          const updateData = {
+            name,
+            href: url,
+            icon_name
+          };
+          updateSocialOptimistically(id, updateData);
+          return { id };
+        },
+        () => apiClient.put("/api/footer", {
           operation: "update_array_item",
           section: "social",
           itemId: id,
@@ -800,10 +826,18 @@ export function FooterManagement() {
               icon_name
             }
           }
-        });
-      } else {
-        // Add new social link
-        await apiClient.post("/api/footer", {
+        }),
+        () => {
+          // Rollback: refetch data on error
+          fetchFooterData();
+        },
+        "Failed to update social link"
+      );
+    } else {
+      // Add new social link
+      await performOptimisticUpdate(
+        () => addSocialOptimistically(socialFormData),
+        () => apiClient.post("/api/footer", {
           operation: "add_to_array",
           section: "social",
           data: {
@@ -814,73 +848,73 @@ export function FooterManagement() {
             sort_order: footerData.social_links?.length || 0,
             visible: true // New items are visible by default
           }
-        });
-      }
-
-      // Reset form and close dialog
-      setSocialFormData({ name: "", url: "", icon_name: "facebook", id: null });
-      setShowSocialDialog(false);
-      await fetchFooterData();
-      toast({
-        title: "Success",
-        description: socialFormData.id
-          ? "Social link updated successfully"
-          : "Social link saved successfully",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to save social link",
-        variant: "destructive",
-      });
-    } finally {
-      setSavingSocial(false);
+        }),
+        () => {
+          // Rollback: remove the optimistically added social link
+          const tempSocial = addSocialOptimistically(socialFormData);
+          deleteItemOptimistically('social', tempSocial.id);
+        },
+        "Failed to save social link"
+      );
     }
+
+    // Reset form and close dialog
+    setSocialFormData({ name: "", url: "", icon_name: "facebook", id: null });
+    setOriginalSocialData({ name: "", url: "", icon_name: "facebook", id: null });
+    setShowSocialDialog(false);
   };
 
   const deleteItem = async () => {
     if (!selectedItem) return;
 
-    try {
-      // Use a separate loading state for delete
-      setSavingLogo(true);
+    // Determine which section the item belongs to
+    let section = "";
+    let linkType = null;
 
-      // Determine which section the item belongs to
-      let section = "";
-      if (
-        selectedItem.href &&
-        !selectedItem.link_type &&
-        !selectedItem.icon_name
-      ) {
-        // It's a link item (company or support)
-        section = "links";
-      } else if (selectedItem.link_type) {
-        // It's a contact item
-        section = "contact";
-      } else if (selectedItem.icon_name) {
-        // It's a social item
-        section = "social";
-      }
+    if (
+      selectedItem.href &&
+      !selectedItem.link_type &&
+      !selectedItem.icon_name
+    ) {
+      // It's a link item (company or support)
+      section = "links";
+      // Determine if it's company or support link based on context
+      linkType = footerData.company_links?.some(link => link.id === selectedItem.id) ? 'company' : 'support';
+    } else if (selectedItem.link_type) {
+      // It's a contact item
+      section = "contact";
+    } else if (selectedItem.icon_name) {
+      // It's a social item
+      section = "social";
+    }
 
-      if (!section) {
-        throw new Error("Unable to determine item section");
-      }
-
-      await apiClient.delete(`/api/footer?section=${section}&itemId=${selectedItem.id}`);
-
-      setShowDeleteDialog(false);
-      setSelectedItem(null);
-      await fetchFooterData();
-      toast({ title: "Success", description: "Item deleted successfully" });
-    } catch (error) {
+    if (!section) {
       toast({
         title: "Error",
-        description: "Failed to delete item",
+        description: "Unable to determine item section",
         variant: "destructive",
       });
-    } finally {
-      setSavingLogo(false);
+      return;
     }
+
+    // Optimistic delete
+    const deletedItem = deleteItemOptimistically(section, selectedItem.id, linkType);
+
+    await performOptimisticUpdate(
+      () => {
+        // Item already deleted optimistically
+        return { deletedItem, section, linkType };
+      },
+      () => apiClient.delete(`/api/footer?section=${section}&itemId=${selectedItem.id}`),
+      () => {
+        // Rollback: restore the deleted item
+        restoreDeletedItem(section, deletedItem, linkType);
+      },
+      "Failed to delete item"
+    );
+
+    setShowDeleteDialog(false);
+    setSelectedItem(null);
   };
 
   // Toggle visibility of footer items by updating visible field
@@ -943,6 +977,164 @@ export function FooterManagement() {
         variant: "destructive",
       });
     }
+  };
+
+  // Optimistic update helper functions
+  const performOptimisticUpdate = async (updateFn, apiCall, rollbackFn, errorMessage) => {
+    try {
+      // Perform optimistic update
+      const optimisticState = updateFn();
+
+      // Make API call in background
+      await apiCall();
+
+      // Show success message
+      toast({
+        title: "Success",
+        description: "Operation completed successfully",
+      });
+
+      return optimisticState;
+    } catch (error) {
+      // Rollback on error
+      rollbackFn();
+      console.error("Operation failed:", error);
+      toast({
+        title: "Error",
+        description: errorMessage || "Operation failed",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
+  // Helper functions for section-specific updates
+  const addLinkOptimistically = (linkData, linkType) => {
+    const newLink = {
+      id: crypto.randomUUID(), // Temporary ID
+      title: linkData.title,
+      href: linkData.url,
+      visible: true,
+      linkType: linkType,
+      sort_order: footerData[`${linkType}_links`]?.length || 0,
+    };
+
+    setFooterData(prev => ({
+      ...prev,
+      [`${linkType}_links`]: [...(prev[`${linkType}_links`] || []), newLink]
+    }));
+
+    return newLink;
+  };
+
+  const updateLinkOptimistically = (linkId, updateData, linkType) => {
+    setFooterData(prev => ({
+      ...prev,
+      [`${linkType}_links`]: prev[`${linkType}_links`].map(link =>
+        link.id === linkId ? { ...link, ...updateData } : link
+      )
+    }));
+  };
+
+  const addContactOptimistically = (contactData) => {
+    const newContact = {
+      id: crypto.randomUUID(), // Temporary ID
+      text: contactData.title,
+      href: contactData.link_type === 'tel' ? `tel:${contactData.content}` : `mailto:${contactData.content}`,
+      icon: contactData.icon_type,
+      country: contactData.country,
+      link_type: contactData.link_type,
+      visible: true,
+    };
+
+    setFooterData(prev => ({
+      ...prev,
+      contact_items: [...(prev.contact_items || []), newContact]
+    }));
+
+    return newContact;
+  };
+
+  const updateContactOptimistically = (contactId, updateData) => {
+    setFooterData(prev => ({
+      ...prev,
+      contact_items: prev.contact_items.map(item =>
+        item.id === contactId ? { ...item, ...updateData } : item
+      )
+    }));
+  };
+
+  const addSocialOptimistically = (socialData) => {
+    const newSocial = {
+      id: crypto.randomUUID(), // Temporary ID
+      name: socialData.name,
+      href: socialData.url,
+      icon_name: socialData.icon_name,
+      visible: true,
+      sort_order: footerData.social_links?.length || 0,
+    };
+
+    setFooterData(prev => ({
+      ...prev,
+      social_links: [...(prev.social_links || []), newSocial]
+    }));
+
+    return newSocial;
+  };
+
+  const updateSocialOptimistically = (socialId, updateData) => {
+    setFooterData(prev => ({
+      ...prev,
+      social_links: prev.social_links.map(social =>
+        social.id === socialId ? { ...social, ...updateData } : social
+      )
+    }));
+  };
+
+  const deleteItemOptimistically = (section, itemId, linkType = null) => {
+    let originalItem = null;
+
+    setFooterData(prev => {
+      const newState = { ...prev };
+
+      if (section === 'links') {
+        const linkTypeKey = linkType || 'company';
+        const links = [...newState[`${linkTypeKey}_links`]];
+        originalItem = links.find(link => link.id === itemId);
+        newState[`${linkTypeKey}_links`] = links.filter(link => link.id !== itemId);
+      } else if (section === 'contact') {
+        const contacts = [...newState.contact_items];
+        originalItem = contacts.find(item => item.id === itemId);
+        newState.contact_items = contacts.filter(item => item.id !== itemId);
+      } else if (section === 'social') {
+        const socials = [...newState.social_links];
+        originalItem = socials.find(social => social.id === itemId);
+        newState.social_links = socials.filter(social => social.id !== itemId);
+      }
+
+      return newState;
+    });
+
+    return originalItem;
+  };
+
+  const restoreDeletedItem = (section, item, linkType = null) => {
+    if (!item) return;
+
+    setFooterData(prev => {
+      const newState = { ...prev };
+
+      if (section === 'links') {
+        const linkTypeKey = linkType || 'company';
+        newState[`${linkTypeKey}_links`] = [...(newState[`${linkTypeKey}_links`] || []), item];
+      } else if (section === 'contact') {
+        newState.contact_items = [...(newState.contact_items || []), item];
+      } else if (section === 'social') {
+        newState.social_links = [...(newState.social_links || []), item];
+      }
+
+      return newState;
+    });
   };
 
   const getSocialIcon = (iconName) => {
