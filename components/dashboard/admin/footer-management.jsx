@@ -52,6 +52,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
+import { apiClient } from "@/lib/api-client";
 import {
   SkeletonCard,
   SkeletonCardContent,
@@ -281,15 +282,10 @@ export function FooterManagement() {
         const filePath = encodeURIComponent(urlMatch[1]);
 
         // Use admin storage API to delete the file
-        const response = await fetch(
-          `/api/admin/storage/upload?path=${filePath}`,
-          {
-            method: "DELETE",
-          }
-        );
-
-        if (!response.ok) {
-          console.error("Error deleting old logo:", response.statusText);
+        try {
+          await apiClient.delete(`/api/admin/storage/upload?path=${filePath}`);
+        } catch (error) {
+          console.error("Error deleting old logo:", error.message);
           // Don't throw error here, just log it as cleanup is not critical
         }
       }
@@ -338,22 +334,7 @@ export function FooterManagement() {
       formData.append("file", file);
 
       // Upload to admin storage API
-      const response = await fetch("/api/admin/storage/upload", {
-        method: "POST",
-        body: formData,
-        // No need to set Content-Type header for FormData
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Storage upload failed:", {
-          status: response.status,
-          error: errorData,
-        });
-        throw new Error(errorData.error || "Failed to upload logo");
-      }
-
-      const result = await response.json();
+      const result = await apiClient.post("/api/admin/storage/upload", formData);
       console.log("Storage upload successful:", result);
 
       // Update logo data with the new URL (but don't save to database yet)
@@ -402,24 +383,15 @@ export function FooterManagement() {
       };
 
       // Use POST if no ID exists (create new), PUT if ID exists (update)
-      const method = footerData.logo?.id ? "PUT" : "POST";
+      let response;
       if (footerData.logo?.id) {
         payload.id = footerData.logo.id;
+        response = await apiClient.put("/api/footer", payload);
+      } else {
+        response = await apiClient.post("/api/footer", payload);
       }
 
-      const response = await fetch("/api/footer", {
-        method,
-        headers: { "Content-Type": "application/json" },
-        credentials: 'include', // Include authentication cookies
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to save logo");
-      }
-
-      const responseData = await response.json();
+      const responseData = response;
 
       // Only refresh the logo data, not entire footer
       const refreshResponse = await fetch("/api/footer");
@@ -460,21 +432,12 @@ export function FooterManagement() {
         content: description,
       };
 
-      const method = existingDescription?.id ? "PUT" : "POST";
+      let response;
       if (existingDescription?.id) {
         payload.id = existingDescription.id;
-      }
-
-      const response = await fetch("/api/footer", {
-        method,
-        headers: { "Content-Type": "application/json" },
-        credentials: 'include', // Include authentication cookies
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to save description");
+        response = await apiClient.put("/api/footer", payload);
+      } else {
+        response = await apiClient.post("/api/footer", payload);
       }
 
       await fetchFooterData();
@@ -509,21 +472,12 @@ export function FooterManagement() {
         content: address,
       };
 
-      const method = existingAddress?.id ? "PUT" : "POST";
+      let response;
       if (existingAddress?.id) {
         payload.id = existingAddress.id;
-      }
-
-      const response = await fetch("/api/footer", {
-        method,
-        headers: { "Content-Type": "application/json" },
-        credentials: 'include', // Include authentication cookies
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to save address");
+        response = await apiClient.put("/api/footer", payload);
+      } else {
+        response = await apiClient.post("/api/footer", payload);
       }
 
       await fetchFooterData();
@@ -581,22 +535,11 @@ export function FooterManagement() {
       };
 
       // Single API call to update primary info
-      const response = await fetch("/api/footer", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          operation: "update_primary",
-          section: "primary_info",
-          data: primaryInfoData,
-        }),
+      await apiClient.post("/api/footer", {
+        operation: "update_primary",
+        section: "primary_info",
+        data: primaryInfoData,
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.error || "Failed to save primary information"
-        );
-      }
 
       // Reset pending removal state
       setLogoToRemove(null);
@@ -656,46 +599,32 @@ export function FooterManagement() {
 
       if (linkFormData.id) {
         // Update existing link
-        const response = await fetch("/api/footer", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          credentials: 'include', // Include authentication cookies
-          body: JSON.stringify({
-            operation: "update_array_item",
-            section: "links",
-            itemId: linkFormData.id,
-            data: {
-              linkType: linkFormData.section,
-              updateData: {
-                title: linkFormData.title,
-                href: linkFormData.url,
-              },
-            },
-          }),
-        });
-
-        if (!response.ok) throw new Error("Failed to update link");
-      } else {
-        // Add new link
-        const response = await fetch("/api/footer", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: 'include', // Include authentication cookies
-          body: JSON.stringify({
-            operation: "add_to_array",
-            section: "links",
-            data: {
+        await apiClient.put("/api/footer", {
+          operation: "update_array_item",
+          section: "links",
+          itemId: linkFormData.id,
+          data: {
+            linkType: linkFormData.section,
+            updateData: {
               title: linkFormData.title,
               href: linkFormData.url,
-              linkType: linkFormData.section, // 'company' or 'support'
-              sort_order:
-                footerData[`${linkFormData.section}_links`]?.length || 0,
-              visible: true, // New items are visible by default
             },
-          }),
+          },
         });
-
-        if (!response.ok) throw new Error("Failed to save link");
+      } else {
+        // Add new link
+        await apiClient.post("/api/footer", {
+          operation: "add_to_array",
+          section: "links",
+          data: {
+            title: linkFormData.title,
+            href: linkFormData.url,
+            linkType: linkFormData.section, // 'company' or 'support'
+            sort_order:
+              footerData[`${linkFormData.section}_links`]?.length || 0,
+            visible: true, // New items are visible by default
+          },
+        });
       }
 
       // Reset form and close dialog
@@ -765,49 +694,35 @@ export function FooterManagement() {
 
       if (id) {
         // Update existing contact
-        const response = await fetch("/api/footer", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          credentials: 'include', // Include authentication cookies
-          body: JSON.stringify({
-            operation: "update_array_item",
-            section: "contact",
-            itemId: id,
-            data: {
-              updateData: {
-                title,
-                content,
-                icon_type,
-                country,
-                link_type
-              }
-            }
-          }),
-        });
-
-        if (!response.ok) throw new Error("Failed to update contact");
-      } else {
-        // Add new contact
-        const response = await fetch("/api/footer", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: 'include', // Include authentication cookies
-          body: JSON.stringify({
-            operation: "add_to_array",
-            section: "contact",
-            data: {
-              id: crypto.randomUUID(),
+        await apiClient.put("/api/footer", {
+          operation: "update_array_item",
+          section: "contact",
+          itemId: id,
+          data: {
+            updateData: {
               title,
               content,
               icon_type,
               country,
-              link_type,
-              visible: true // New items are visible by default
+              link_type
             }
-          }),
+          }
         });
-
-        if (!response.ok) throw new Error("Failed to save contact");
+      } else {
+        // Add new contact
+        await apiClient.post("/api/footer", {
+          operation: "add_to_array",
+          section: "contact",
+          data: {
+            id: crypto.randomUUID(),
+            title,
+            content,
+            icon_type,
+            country,
+            link_type,
+            visible: true // New items are visible by default
+          }
+        });
       }
 
       resetContactForm();
@@ -874,46 +789,32 @@ export function FooterManagement() {
 
       if (id) {
         // Update existing social link
-        const response = await fetch("/api/footer", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          credentials: 'include', // Include authentication cookies
-          body: JSON.stringify({
-            operation: "update_array_item",
-            section: "social",
-            itemId: id,
-            data: {
-              updateData: {
-                name,
-                url,
-                icon_name
-              }
-            }
-          }),
-        });
-
-        if (!response.ok) throw new Error("Failed to update social link");
-      } else {
-        // Add new social link
-        const response = await fetch("/api/footer", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: 'include', // Include authentication cookies
-          body: JSON.stringify({
-            operation: "add_to_array",
-            section: "social",
-            data: {
-              id: crypto.randomUUID(),
+        await apiClient.put("/api/footer", {
+          operation: "update_array_item",
+          section: "social",
+          itemId: id,
+          data: {
+            updateData: {
               name,
               url,
-              icon_name,
-              sort_order: footerData.social_links?.length || 0,
-              visible: true // New items are visible by default
+              icon_name
             }
-          }),
+          }
         });
-
-        if (!response.ok) throw new Error("Failed to save social link");
+      } else {
+        // Add new social link
+        await apiClient.post("/api/footer", {
+          operation: "add_to_array",
+          section: "social",
+          data: {
+            id: crypto.randomUUID(),
+            name,
+            url,
+            icon_name,
+            sort_order: footerData.social_links?.length || 0,
+            visible: true // New items are visible by default
+          }
+        });
       }
 
       // Reset form and close dialog
@@ -965,14 +866,7 @@ export function FooterManagement() {
         throw new Error("Unable to determine item section");
       }
 
-      const response = await fetch(
-        `/api/footer?section=${section}&itemId=${selectedItem.id}`,
-        {
-          method: "DELETE",
-        }
-      );
-
-      if (!response.ok) throw new Error("Failed to delete item");
+      await apiClient.delete(`/api/footer?section=${section}&itemId=${selectedItem.id}`);
 
       setShowDeleteDialog(false);
       setSelectedItem(null);
@@ -1036,18 +930,7 @@ export function FooterManagement() {
         requestBody.data.linkType = linkType;
       }
 
-      const response = await fetch("/api/footer", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: 'include', // Include authentication cookies
-        body: JSON.stringify(requestBody),
-      });
-
-      if (!response.ok) {
-        // If database update fails, revert the local state
-        await fetchFooterData();
-        throw new Error("Failed to update visibility");
-      }
+      await apiClient.put("/api/footer", requestBody);
 
       toast({
         title: "Success",

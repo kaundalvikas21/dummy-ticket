@@ -24,6 +24,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { LOCALES, DEFAULT_LOCALE } from "@/lib/locales"
 import { FlagIcon } from "@/components/ui/flag-icon"
 import { useToast } from "@/hooks/use-toast"
+import { apiClient } from "@/lib/api-client"
 
 export function FAQManagementMultiLang() {
   const { toast } = useToast()
@@ -65,16 +66,10 @@ export function FAQManagementMultiLang() {
   // Fetch FAQs from API
   const fetchFaqs = async () => {
     try {
-      const response = await fetch('/api/faqs/admin')
-      const result = await response.json()
-
-      if (response.ok) {
-        setFaqs(result.faqs || [])
-      } else {
-        console.error('Failed to fetch FAQs:', result.error)
-      }
+      const result = await apiClient.get('/api/faqs/admin')
+      setFaqs(result.faqs || [])
     } catch (error) {
-      console.error('Error fetching FAQs:', error)
+      console.error('Error fetching FAQs:', error.message)
     } finally {
       setLoading(false)
     }
@@ -118,26 +113,21 @@ export function FAQManagementMultiLang() {
 
     try {
       // Create/update main FAQ
-      const url = selectedFaq ? `/api/faqs/${selectedFaq.id}` : '/api/faqs'
-      const method = selectedFaq ? 'PUT' : 'POST'
+      const faqData = {
+        question: englishTranslation.question,
+        answer: englishTranslation.answer,
+        status: formData.status,
+        sort_order: formData.sort_order
+      }
 
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          question: englishTranslation.question,
-          answer: englishTranslation.answer,
-          status: formData.status,
-          sort_order: formData.sort_order
-        }),
-      })
+      let result;
+      if (selectedFaq) {
+        result = await apiClient.put(`/api/faqs/${selectedFaq.id}`, faqData)
+      } else {
+        result = await apiClient.post('/api/faqs', faqData)
+      }
 
-      const result = await response.json()
-
-      if (response.ok) {
-        const faqId = selectedFaq?.id || result.faq.id
+      const faqId = selectedFaq?.id || result.faq.id
 
         // Handle translations
         await Promise.all(Object.entries(formData.translations).map(async ([locale, translation]) => {
@@ -149,27 +139,19 @@ export function FAQManagementMultiLang() {
 
             if (existingTranslation) {
               // Update existing translation
-              await fetch(`/api/faq-translations/${existingTranslation.id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  faq_id: faqId,
-                  locale,
-                  question: translation.question,
-                  answer: translation.answer
-                })
+              await apiClient.put(`/api/faq-translations/${existingTranslation.id}`, {
+                faq_id: faqId,
+                locale,
+                question: translation.question,
+                answer: translation.answer
               })
             } else {
               // Create new translation
-              await fetch('/api/faq-translations', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  faq_id: faqId,
-                  locale,
-                  question: translation.question,
-                  answer: translation.answer
-                })
+              await apiClient.post('/api/faq-translations', {
+                faq_id: faqId,
+                locale,
+                question: translation.question,
+                answer: translation.answer
               })
             }
           }
@@ -180,9 +162,6 @@ export function FAQManagementMultiLang() {
         setShowEditDialog(false)
         resetForm()
         setSelectedFaq(null)
-      } else {
-        console.error('Failed to save FAQ:', result.error)
-      }
     } catch (error) {
       console.error('Error saving FAQ:', error)
     }
@@ -211,30 +190,16 @@ export function FAQManagementMultiLang() {
     try {
       console.log(`Deleting FAQ: ${selectedFaq.id} - ${selectedFaq.question}`)
 
-      const response = await fetch(`/api/faqs/${selectedFaq.id}`, {
-        method: 'DELETE',
+      await apiClient.delete(`/api/faqs/${selectedFaq.id}`)
+      console.log('Delete successful')
+
+      await fetchFaqs()
+      setShowDeleteDialog(false)
+      setSelectedFaq(null)
+      toast({
+        title: "Success",
+        description: "FAQ deleted successfully"
       })
-
-      const result = await response.json()
-      console.log('Delete response:', result)
-
-      if (response.ok) {
-        await fetchFaqs()
-        setShowDeleteDialog(false)
-        setSelectedFaq(null)
-        toast({
-          title: "Success",
-          description: "FAQ deleted successfully"
-        })
-      } else {
-        const errorMessage = result.error || result.details || 'Unknown error'
-        console.error('Failed to delete FAQ:', errorMessage)
-        toast({
-          title: "Delete Failed",
-          description: `Failed to delete FAQ: ${errorMessage}`,
-          variant: "destructive"
-        })
-      }
     } catch (error) {
       console.error('Error deleting FAQ:', error)
       toast({
@@ -248,20 +213,12 @@ export function FAQManagementMultiLang() {
   // Toggle status
   const toggleStatus = async (faq) => {
     try {
-      const response = await fetch(`/api/faqs/${faq.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...faq,
-          status: faq.status === 'active' ? 'inactive' : 'active'
-        }),
+      await apiClient.put(`/api/faqs/${faq.id}`, {
+        ...faq,
+        status: faq.status === 'active' ? 'inactive' : 'active'
       })
 
-      if (response.ok) {
-        await fetchFaqs()
-      }
+      await fetchFaqs()
     } catch (error) {
       console.error('Error toggling status:', error)
     }
@@ -281,35 +238,16 @@ export function FAQManagementMultiLang() {
     const targetSortOrder = targetFaq.sort_order !== undefined ? targetFaq.sort_order : newIndex
 
     try {
-      const currentResponse = await fetch(`/api/faqs/${currentFaq.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      await Promise.all([
+        apiClient.put(`/api/faqs/${currentFaq.id}`, {
           ...currentFaq,
           sort_order: targetSortOrder
         }),
-      })
-
-      if (!currentResponse.ok) {
-        throw new Error('Failed to update current FAQ position')
-      }
-
-      const targetResponse = await fetch(`/api/faqs/${targetFaq.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+        apiClient.put(`/api/faqs/${targetFaq.id}`, {
           ...targetFaq,
           sort_order: currentSortOrder
-        }),
-      })
-
-      if (!targetResponse.ok) {
-        throw new Error('Failed to update target FAQ position')
-      }
+        })
+      ])
 
       await fetchFaqs()
     } catch (error) {
@@ -370,29 +308,16 @@ export function FAQManagementMultiLang() {
         setDeletingFaqIds(prev => new Set(prev).add(faqId))
 
         try {
-          const response = await fetch(`/api/faqs/${faqId}`, {
-            method: 'DELETE',
-          })
-
-          if (response.ok) {
-            deletedCount++
-            console.log(`Successfully deleted FAQ: ${faqId}`)
-          } else {
-            const errorData = await response.json().catch(() => ({}))
-            failedDeletions.push({
-              faqId,
-              question: translation?.question || faq?.question || 'Unknown FAQ',
-              error: errorData.error || errorData.details || 'Unknown error'
-            })
-            console.error(`Failed to delete FAQ ${faqId}:`, errorData)
-          }
+          await apiClient.delete(`/api/faqs/${faqId}`)
+          deletedCount++
+          console.log(`Successfully deleted FAQ: ${faqId}`)
         } catch (error) {
           failedDeletions.push({
             faqId,
             question: translation?.question || faq?.question || 'Unknown FAQ',
             error: error.message || 'Network error'
           })
-          console.error(`Network error deleting FAQ ${faqId}:`, error)
+          console.error(`Error deleting FAQ ${faqId}:`, error)
         } finally {
           // Remove from currently deleting set
           setDeletingFaqIds(prev => {

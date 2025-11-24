@@ -51,6 +51,7 @@ import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsList, TabsContent, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
+import { apiClient } from "@/lib/api-client"
 
 export function AboutStatsManagement() {
   const { toast } = useToast()
@@ -114,16 +115,10 @@ export function AboutStatsManagement() {
   // Fetch stats from API
   const fetchStats = async () => {
     try {
-      const response = await fetch('/api/about/stats/admin')
-      const result = await response.json()
-
-      if (response.ok) {
-        setStats(result.stats || [])
-      } else {
-        console.error('Failed to fetch about stats:', result.error)
-      }
+      const result = await apiClient.get('/api/about/stats/admin')
+      setStats(result.stats || [])
     } catch (error) {
-      console.error('Error fetching about stats:', error)
+      console.error('Error fetching about stats:', error.message)
     } finally {
       setLoading(false)
     }

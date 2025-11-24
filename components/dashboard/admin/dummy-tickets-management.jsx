@@ -25,6 +25,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
 import { LOCALES, DEFAULT_LOCALE } from "@/lib/locales"
 import { FlagIcon } from "@/components/ui/flag-icon"
+import { apiClient } from "@/lib/api-client"
 
 // Skeleton components (inline implementation)
 const SkeletonCard = ({ children, className }) => (
@@ -148,16 +149,10 @@ export function DummyTicketsManagement() {
   // Fetch tickets from API
   const fetchTickets = async () => {
     try {
-      const response = await fetch('/api/about/dummy-tickets/admin')
-      const result = await response.json()
-
-      if (response.ok) {
-        setTickets(result.tickets || [])
-      } else {
-        console.error('Failed to fetch dummy tickets:', result.error)
-      }
+      const result = await apiClient.get('/api/about/dummy-tickets/admin')
+      setTickets(result.tickets || [])
     } catch (error) {
-      console.error('Error fetching dummy tickets:', error)
+      console.error('Error fetching dummy tickets:', error.message)
     } finally {
       setLoading(false)
     }

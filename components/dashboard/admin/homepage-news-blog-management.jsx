@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { toast } from "@/hooks/use-toast"
+import { apiClient } from "@/lib/api-client"
 import { TranslationTabs } from "@/components/admin/translation/TranslationTabs"
 import { Newspaper, BookOpen, Plus, Edit, Trash2, ExternalLink, Globe, CheckSquare, Square, X } from "lucide-react"
 
@@ -49,21 +50,11 @@ export function HomepageNewsBlogManagement() {
 
   const fetchItems = async () => {
     try {
-      const response = await fetch("/api/admin/homepage-news-blog")
-      const result = await response.json()
-
-      if (result.success) {
-        setNewsItems(result.data.news || [])
-        setBlogItems(result.data.blog || [])
-      } else {
-        toast({
-          title: "Error",
-          description: "Failed to fetch homepage news blog items",
-          variant: "destructive"
-        })
-      }
+      const result = await apiClient.get("/api/admin/homepage-news-blog")
+      setNewsItems(result.data.news || [])
+      setBlogItems(result.data.blog || [])
     } catch (error) {
-      console.error("Error fetching items:", error)
+      console.error("Error fetching items:", error.message)
       toast({
         title: "Error",
         description: "Failed to fetch homepage news blog items",
@@ -169,40 +160,22 @@ export function HomepageNewsBlogManagement() {
     setIsSubmitting(true)
 
     try {
-      const url = editingItem
-        ? `/api/homepage-news-blog/${editingItem.id}`
-        : "/api/homepage-news-blog"
+      if (editingItem) {
+        await apiClient.put(`/api/homepage-news-blog/${editingItem.id}`, submissionData)
+      } else {
+        await apiClient.post("/api/homepage-news-blog", submissionData)
+      }
 
-      const method = editingItem ? "PUT" : "POST"
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(submissionData)
+      toast({
+        title: "Success",
+        description: editingItem
+          ? "Homepage news blog item updated successfully"
+          : "Homepage news blog item created successfully"
       })
 
-      const result = await response.json()
-
-      if (result.success) {
-        toast({
-          title: "Success",
-          description: editingItem
-            ? "Homepage news blog item updated successfully"
-            : "Homepage news blog item created successfully"
-        })
-
-        setIsDialogOpen(false)
-        resetForm()
-        fetchItems()
-      } else {
-        toast({
-          title: "Error",
-          description: result.error || "Failed to save homepage news blog item",
-          variant: "destructive"
-        })
-      }
+      setIsDialogOpen(false)
+      resetForm()
+      fetchItems()
     } catch (error) {
       console.error("Error saving item:", error)
       toast({
@@ -245,27 +218,15 @@ export function HomepageNewsBlogManagement() {
     setIsDeleting(true)
 
     try {
-      const response = await fetch(`/api/homepage-news-blog/${itemToDelete.id}`, {
-        method: "DELETE"
+      await apiClient.delete(`/api/homepage-news-blog/${itemToDelete.id}`)
+
+      toast({
+        title: "Success",
+        description: "Homepage news blog item deleted successfully"
       })
-
-      const result = await response.json()
-
-      if (result.success) {
-        toast({
-          title: "Success",
-          description: "Homepage news blog item deleted successfully"
-        })
-        setShowDeleteDialog(false)
-        setItemToDelete(null)
-        fetchItems()
-      } else {
-        toast({
-          title: "Error",
-          description: result.error || "Failed to delete homepage news blog item",
-          variant: "destructive"
-        })
-      }
+      setShowDeleteDialog(false)
+      setItemToDelete(null)
+      fetchItems()
     } catch (error) {
       console.error("Error deleting item:", error)
       toast({
@@ -285,16 +246,18 @@ export function HomepageNewsBlogManagement() {
       setIsBulkDeleting(true)
 
       const deletePromises = Array.from(selectedItems).map(async (id) => {
-        const response = await fetch(`/api/homepage-news-blog/${id}`, {
-          method: "DELETE"
-        })
-        return { id, response: await response.json() }
+        try {
+          await apiClient.delete(`/api/homepage-news-blog/${id}`)
+          return { id, success: true }
+        } catch (error) {
+          return { id, success: false, error: error.message }
+        }
       })
 
       const results = await Promise.all(deletePromises)
 
-      const successful = results.filter(r => r.response.success)
-      const failed = results.filter(r => !r.response.success)
+      const successful = results.filter(r => r.success)
+      const failed = results.filter(r => !r.success)
 
       if (successful.length > 0) {
         toast({
