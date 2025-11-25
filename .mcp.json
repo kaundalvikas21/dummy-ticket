@@ -2,7 +2,7 @@
 {
   "mcpServers": { 
     "sequential-thinking": {
-      "command": "/home/vikas_kaundal/.local/bin/uvx",
+      "command": "/home/vikas/.local/bin/uvx",
       "args": [
         "--from",
         "git+https://github.com/arben-adm/mcp-sequential-thinking",
@@ -17,7 +17,7 @@
       "args": ["chrome-devtools-mcp@latest"]
     },
     "serena": {
-            "command": "/home/vikas_kaundal/.local/bin/uvx",
+            "command": "/home/vikas/.local/bin/uvx",
             "args": ["--from", "git+https://github.com/oraios/serena", "serena", "start-mcp-server"]
         },
  "context7": {
