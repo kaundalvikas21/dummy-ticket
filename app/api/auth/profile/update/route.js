@@ -40,8 +40,11 @@ export async function PUT(request) {
 
     // Prepare data for user_profiles table update
     const profileUpdatePayload = {
+      // Required fields - keep existing values if empty strings provided
       first_name: profileData.first_name?.trim() || null,
       last_name: profileData.last_name?.trim() || null,
+
+      // Optional fields - can be null
       phone_number: profileData.phone_number?.trim() || null,
       address: profileData.address?.trim() || null,
       date_of_birth: profileData.date_of_birth || null,
@@ -51,6 +54,7 @@ export async function PUT(request) {
       country_code: profileData.country_code?.trim() || null,
       preferred_language: profileData.preferred_language || 'en',
       passport_number: profileData.passport_number?.trim() || null,
+
       // Only update avatar_url if explicitly provided (not null/undefined)
       ...(profileData.avatar_url !== undefined && { avatar_url: profileData.avatar_url?.trim() || null }),
       notification_preferences: profileData.notification_preferences || {},
@@ -69,6 +73,23 @@ export async function PUT(request) {
         }
       }
     )
+
+    // Get existing profile to preserve required fields if needed
+    const { data: existingProfile } = await supabaseAdmin
+      .from('user_profiles')
+      .select('first_name, last_name')
+      .eq('auth_user_id', userId)
+      .single()
+
+    // Ensure required fields are never null
+    if (existingProfile) {
+      profileUpdatePayload.first_name = profileUpdatePayload.first_name || existingProfile.first_name
+      profileUpdatePayload.last_name = profileUpdatePayload.last_name || existingProfile.last_name
+    } else {
+      // For new profiles, provide default values for required fields
+      profileUpdatePayload.first_name = profileUpdatePayload.first_name || 'User'
+      profileUpdatePayload.last_name = profileUpdatePayload.last_name || 'Name'
+    }
 
     // Update user profile in database - only the authenticated user's profile
     let { data: updatedProfile, error } = await supabaseAdmin

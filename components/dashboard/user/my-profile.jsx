@@ -8,13 +8,24 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Upload } from "lucide-react"
+import { Upload, Trash2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/contexts/auth-context"
 import { createClient } from "@/lib/supabase/client"
 import { DatePicker } from "@/components/ui/input/DatePicker"
 import { SelectInput } from "@/components/ui/input/SelectInput"
 import { getUserInitials, getAvatarDisplayUrl } from "@/lib/utils"
+import { formatFileSize, truncateFilename } from "@/lib/avatar-utils"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 const nationalityOptions = [
   { value: "US", label: "United States" },
@@ -83,6 +94,10 @@ export function MyProfile() {
   const [profileImage, setProfileImage] = useState("")
   const [selectedFile, setSelectedFile] = useState(null)
   const [imageLoading, setImageLoading] = useState(false)
+  const [isRemoveDialogOpen, setIsRemoveDialogOpen] = useState(false)
+  const [isRemoving, setIsRemoving] = useState(false)
+  const [avatarFileName, setAvatarFileName] = useState("")
+  const [avatarFileSize, setAvatarFileSize] = useState(null)
   const [profile, setProfile] = useState({
     firstName: "",
     lastName: "",
@@ -101,6 +116,33 @@ export function MyProfile() {
   // Initialize profile data from AuthContext
   useEffect(() => {
     if (authProfile) {
+      const newProfileData = {
+        firstName: authProfile.first_name || "",
+        lastName: authProfile.last_name || "",
+        email: user?.email || "",
+        phone: authProfile.phone_number || "",
+        address: authProfile.address || "",
+        dateOfBirth: authProfile.date_of_birth || "",
+        nationality: authProfile.nationality || "",
+        passportNumber: authProfile.passport_number || "",
+        city: authProfile.city || "",
+        postalCode: authProfile.postal_code || "",
+        countryCode: authProfile.country_code || "",
+        preferredLanguage: authProfile.preferred_language || "en",
+      }
+
+      setProfile(newProfileData)
+
+      // Set profile image and filename from database
+      setProfileImage(getAvatarDisplayUrl(authProfile.avatar_url))
+      setAvatarFileName(authProfile.avatar_filename || "")
+      setAvatarFileSize(authProfile.avatar_file_size || null)
+    }
+  }, [authProfile, user])
+
+  const handleCancel = () => {
+    // Reset the form to original values from authProfile
+    if (authProfile) {
       setProfile({
         firstName: authProfile.first_name || "",
         lastName: authProfile.last_name || "",
@@ -115,11 +157,12 @@ export function MyProfile() {
         countryCode: authProfile.country_code || "",
         preferredLanguage: authProfile.preferred_language || "en",
       })
-
-      // Set profile image from database
-      setProfileImage(getAvatarDisplayUrl(authProfile.avatar_url))
     }
-  }, [authProfile, user])
+    // Clear any selected file
+    setSelectedFile(null)
+    // Exit editing mode
+    setIsEditing(false)
+  }
 
   const handleSave = async () => {
     setIsSaving(true)
@@ -136,9 +179,7 @@ export function MyProfile() {
         return
       }
 
-      console.log('Saving profile for user:', user.id)
-      console.log('Current profile data:', profile)
-
+  
       // Validate required fields
       if (!profile.firstName?.trim() || !profile.lastName?.trim()) {
         toast({
@@ -152,9 +193,16 @@ export function MyProfile() {
 
       // Upload image if selected
       let avatarUrl = null
+      let uploadedFileName = null
+      let uploadedFileSize = null
+
       if (selectedFile) {
-        avatarUrl = await uploadImage(selectedFile)
-        if (!avatarUrl) {
+        const uploadResult = await uploadImage(selectedFile)
+        if (uploadResult) {
+          avatarUrl = uploadResult.avatarUrl
+          uploadedFileName = uploadResult.avatarFileName
+          uploadedFileSize = uploadResult.avatarFileSize
+        } else {
           // Image upload failed, but we'll continue with profile update
           console.error('Image upload failed during profile save')
           toast({
@@ -169,26 +217,28 @@ export function MyProfile() {
       // Prepare data for API (convert to database field names)
       // Note: Email is excluded as it cannot be changed for security reasons
       const profileData = {
-        first_name: profile.firstName?.trim(),
-        last_name: profile.lastName?.trim(),
-        phone_number: profile.phone?.trim(),
-        address: profile.address?.trim(),
-        date_of_birth: profile.dateOfBirth,
-        nationality: profile.nationality?.trim(),
-        passport_number: profile.passportNumber?.trim(),
-        city: profile.city?.trim(),
-        postal_code: profile.postalCode?.trim(),
-        country_code: profile.countryCode?.trim(),
-        preferred_language: profile.preferredLanguage,
+        // Required fields - never send null/undefined to database
+        first_name: profile.firstName?.trim() || authProfile?.firstName || '',
+        last_name: profile.lastName?.trim() || authProfile?.lastName || '',
+
+        // Optional fields - can be null/empty
+        phone_number: profile.phone?.trim() || null,
+        address: profile.address?.trim() || null,
+        date_of_birth: profile.dateOfBirth || null,
+        nationality: profile.nationality?.trim() || null,
+        passport_number: profile.passportNumber?.trim() || null,
+        city: profile.city?.trim() || null,
+        postal_code: profile.postalCode?.trim() || null,
+        country_code: profile.countryCode?.trim() || null,
+        preferred_language: profile.preferredLanguage || 'en',
+
         // Include uploaded image URL, or keep existing one if no new image uploaded
-        avatar_url: avatarUrl || authProfile?.avatar_url
+        avatar_url: avatarUrl || authProfile?.avatar_url || null
       }
 
-      console.log('Prepared profile data for API:', profileData)
-
+      
       // Call updateProfile function from AuthContext
       const result = await updateProfile(profileData)
-      console.log('Update profile result:', result)
 
       if (result.success) {
         toast({
@@ -203,6 +253,8 @@ export function MyProfile() {
         // Update local profile image state if avatar was uploaded
         if (avatarUrl) {
           setProfileImage(avatarUrl)
+          setAvatarFileName(uploadedFileName || "")
+          setAvatarFileSize(uploadedFileSize || null)
         }
       } else {
         // Provide more specific error messages
@@ -292,7 +344,12 @@ export function MyProfile() {
         })
       }
 
-      return result.avatarUrl
+      // Return both URL and filename information
+      return {
+        avatarUrl: result.avatarUrl,
+        avatarFileName: result.avatarFileName,
+        avatarFileSize: result.avatarFileSize
+      }
     } catch (error) {
       console.error('Image upload error:', error)
       toast({
@@ -303,6 +360,72 @@ export function MyProfile() {
       return null
     } finally {
       setIsUploading(false)
+    }
+  }
+
+  const handleRemoveAvatar = async () => {
+    setIsRemoving(true)
+
+    try {
+      const supabase = createClient()
+
+      // Get current session for authentication
+      const { data: { session } } = await supabase.auth.getSession()
+
+      if (!session?.access_token) {
+        toast({
+          variant: "destructive",
+          title: "Authentication Required",
+          description: "Please log in again to remove your profile photo.",
+        })
+        return
+      }
+
+      const response = await fetch('/api/auth/profile/remove-avatar', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        // Clear local state
+        setProfileImage('')
+        setSelectedFile(null)
+        setAvatarFileName('')
+        setAvatarFileSize(null)
+
+        // Update profile via auth context to clear avatar fields
+        if (result.code !== 'NO_AVATAR') {
+          await updateProfile({
+            avatar_url: null,
+            avatar_filename: null,
+            avatar_storage_path: null
+          })
+        }
+
+        toast({
+          title: result.code === 'NO_AVATAR' ? "No Avatar to Remove" : "Avatar Removed Successfully",
+          description: result.message,
+        })
+
+        setIsRemoveDialogOpen(false)
+      } else {
+        throw new Error(result.error || 'Failed to remove avatar')
+      }
+    } catch (error) {
+      console.error('Avatar removal error:', error)
+      toast({
+        variant: "destructive",
+        title: "Removal Failed",
+        description: error.message || "Failed to remove profile picture.",
+      })
+    } finally {
+      setIsRemoving(false)
+      setIsRemoveDialogOpen(false)
     }
   }
 
@@ -349,7 +472,7 @@ export function MyProfile() {
           <Button className="cursor-pointer" onClick={() => setIsEditing(true)}>Edit Profile</Button>
         ) : (
           <div className="flex gap-2">
-            <Button className="cursor-pointer" variant="outline" onClick={() => setIsEditing(false)} disabled={isSaving}>
+            <Button className="cursor-pointer" variant="outline" onClick={handleCancel} disabled={isSaving}>
               Cancel
             </Button>
             <Button className="cursor-pointer" onClick={handleSave} disabled={isSaving}>
@@ -366,9 +489,9 @@ export function MyProfile() {
             <CardTitle>Profile Picture</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col items-center">
-            <Avatar className="h-32 w-32">
+            <Avatar className="h-32 w-32 border-4 border-white shadow-lg">
               <AvatarImage
-                src={profileImage || "/placeholder.svg"}
+                src={profileImage || undefined}
                 alt="Profile picture"
                 onLoad={() => setImageLoading(false)}
                 onError={(e) => {
@@ -378,14 +501,31 @@ export function MyProfile() {
                 }}
                 onLoadStart={() => setImageLoading(true)}
               />
-              <AvatarFallback className="text-2xl">
+              <AvatarFallback className="text-3xl font-bold bg-gradient-to-br from-blue-500 to-purple-600 text-white">
                 {imageLoading ? (
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600"></div>
+                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
                 ) : (
                   getUserInitials(profile.firstName, profile.lastName, profile.email)
                 )}
               </AvatarFallback>
             </Avatar>
+
+            {/* Filename Display - Only show when avatar exists */}
+            {profileImage && avatarFileName && (
+              <div className="text-center mt-2">
+                <p
+                  className="text-xs text-gray-600 truncate max-w-[140px] mx-auto"
+                  title={avatarFileName}
+                >
+                  {truncateFilename(avatarFileName, 20).displayText}
+                </p>
+                {avatarFileSize && (
+                  <p className="text-xs text-gray-400">
+                    {formatFileSize(avatarFileSize)}
+                  </p>
+                )}
+              </div>
+            )}
             {isEditing && (
               <>
                 <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
@@ -394,7 +534,7 @@ export function MyProfile() {
                   className="mt-4 bg-transparent"
                   size="sm"
                   onClick={handleUploadPhoto}
-                  disabled={isUploading || isSaving}
+                  disabled={isUploading || isRemoving || isSaving}
                 >
                   {isUploading ? (
                     <>
@@ -408,6 +548,29 @@ export function MyProfile() {
                     </>
                   )}
                 </Button>
+
+                {/* Show remove button only when user has a custom avatar (not default placeholder) */}
+                {isEditing && profileImage && profileImage !== '/placeholder.svg' && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsRemoveDialogOpen(true)}
+                    disabled={isUploading || isRemoving || isSaving}
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    {isRemoving ? (
+                      <>
+                        <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-red-300 border-t-red-600"></div>
+                        Removing...
+                      </>
+                    ) : (
+                      <>
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Remove Photo
+                      </>
+                    )}
+                  </Button>
+                )}
               </>
             )}
             <div className="mt-6 w-full space-y-2 text-center">
@@ -592,6 +755,29 @@ export function MyProfile() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Avatar Removal Confirmation Dialog */}
+      <AlertDialog open={isRemoveDialogOpen} onOpenChange={setIsRemoveDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Profile Photo</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove your profile photo? This action cannot be undone.
+              Your initials will be shown instead of your photo.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isRemoving}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleRemoveAvatar}
+              disabled={isRemoving}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isRemoving ? 'Removing...' : 'Remove Photo'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

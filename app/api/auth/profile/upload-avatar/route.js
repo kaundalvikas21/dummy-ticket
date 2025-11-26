@@ -5,6 +5,12 @@ import {
   createSupabaseClientWithAuth,
   createAuthError
 } from '@/lib/auth-helper'
+import {
+  generateUniqueFileName,
+  cleanupOldAvatar,
+  validateAvatarFile,
+  extractStoragePathFromUrl
+} from '@/lib/avatar-utils'
 
 export async function POST(request) {
   try {
@@ -25,20 +31,11 @@ export async function POST(request) {
       )
     }
 
-    // Validate file type
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
-    if (!allowedTypes.includes(file.type)) {
+    // Enhanced file validation using utility function
+    const validation = validateAvatarFile(file)
+    if (!validation.isValid) {
       return NextResponse.json(
-        { success: false, error: 'Invalid file type. Only JPEG, PNG, GIF, and WebP images are allowed.' },
-        { status: 400 }
-      )
-    }
-
-    // Validate file size (5MB max)
-    const maxSize = 5 * 1024 * 1024 // 5MB
-    if (file.size > maxSize) {
-      return NextResponse.json(
-        { success: false, error: 'File size too large. Maximum size is 5MB.' },
+        { success: false, error: validation.error },
         { status: 400 }
       )
     }
@@ -88,15 +85,35 @@ export async function POST(request) {
       console.log('User profile exists:', profile.id)
     }
 
-    // Generate unique filename
-    const fileExt = file.name.split('.').pop()
-    const fileName = `avatar_${userId}_${Date.now()}.${fileExt}`
-    const filePath = `${userId}/${fileName}`
+    // Get current profile to check for existing avatar
+    const { data: currentProfile } = await supabaseClient
+      .from('user_profiles')
+      .select('avatar_url, avatar_storage_path')
+      .eq('auth_user_id', userId)
+      .single()
+
+    // STEP 1: Clean up old avatar if it exists
+    if (currentProfile?.avatar_storage_path) {
+      console.log('Cleaning up old avatar:', currentProfile.avatar_storage_path)
+      await cleanupOldAvatar(userId, supabaseClient, currentProfile.avatar_storage_path)
+    }
+
+    // STEP 2: Generate unique filename with conflict resolution
+    const originalFileName = file.name
+    const uniqueFileName = await generateUniqueFileName(userId, originalFileName, supabaseClient)
+    const filePath = `${userId}/${uniqueFileName}`
+
+    console.log('Generated unique filename:', {
+      original: originalFileName,
+      unique: uniqueFileName,
+      path: filePath
+    })
 
     // Upload to Supabase Storage
     console.log('Attempting to upload to bucket: avatars, file path:', filePath)
     console.log('File details:', {
-      name: file.name,
+      originalName: originalFileName,
+      uniqueName: uniqueFileName,
       size: file.size,
       type: file.type,
       userId: userId
@@ -148,12 +165,14 @@ export async function POST(request) {
 
     const avatarUrl = urlData.publicUrl
 
-    // Update user profile with new avatar URL
-    console.log('Updating user profile with avatar URL for user:', userId)
+    // Update user profile with comprehensive avatar information
+    console.log('Updating user profile with avatar data for user:', userId)
     const { error: updateError } = await supabaseClient
       .from('user_profiles')
       .update({
         avatar_url: avatarUrl,
+        avatar_filename: uniqueFileName,
+        avatar_storage_path: filePath,
         updated_at: new Date().toISOString()
       })
       .eq('auth_user_id', userId)
@@ -171,6 +190,8 @@ export async function POST(request) {
         success: true,
         message: 'Avatar uploaded successfully, but profile update failed',
         avatarUrl: avatarUrl,
+        avatarFileName: uniqueFileName,
+        avatarFileSize: file.size,
         filePath: filePath,
         warning: 'Profile update failed. Please try updating your profile manually.',
         error: updateError.message
@@ -181,6 +202,8 @@ export async function POST(request) {
       success: true,
       message: 'Avatar uploaded successfully',
       avatarUrl: avatarUrl,
+      avatarFileName: uniqueFileName,
+      avatarFileSize: file.size,
       filePath: filePath
     })
 
