@@ -1,22 +1,26 @@
 import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
+import {
+  requireAuth,
+  createSupabaseClientWithAuth,
+  createAuthError
+} from '@/lib/auth-helper'
 
 export async function POST(request) {
   try {
+    // Create authenticated Supabase client and get authenticated user
+    const supabaseClient = createSupabaseClientWithAuth(request)
+    const user = await requireAuth(supabaseClient)
+
+    // Use authenticated user's ID - never accept from request
+    const userId = user.id
+
     const formData = await request.formData()
     const file = formData.get('file')
-    const userId = formData.get('userId')
 
     if (!file) {
       return NextResponse.json(
         { success: false, error: 'No file provided' },
-        { status: 400 }
-      )
-    }
-
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, error: 'User ID is required' },
         { status: 400 }
       )
     }
@@ -39,10 +43,55 @@ export async function POST(request) {
       )
     }
 
+    // Check if user profile exists, create if missing
+    console.log('Checking if user profile exists for user:', userId)
+    const { data: profile, error: profileError } = await supabaseClient
+      .from('user_profiles')
+      .select('id')
+      .eq('auth_user_id', userId)
+      .single()
+
+    if (profileError || !profile) {
+      console.log('User profile not found, creating new profile...')
+
+      // Get user metadata for profile creation
+      const { data: { user: authUser } } = await supabaseClient.auth.getUser()
+
+      if (authUser) {
+        const { error: createError } = await supabaseClient
+          .from('user_profiles')
+          .insert({
+            auth_user_id: userId,
+            first_name: authUser.user_metadata?.first_name || 'User',
+            last_name: authUser.user_metadata?.last_name || 'Name',
+            phone_number: authUser.user_metadata?.phone_number || null,
+            nationality: authUser.user_metadata?.nationality || 'US',
+            preferred_language: authUser.user_metadata?.preferred_language || 'en',
+            role: authUser.user_metadata?.role || 'user',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+
+        if (createError) {
+          console.error('Profile creation failed:', createError)
+          return NextResponse.json({
+            success: false,
+            error: 'Failed to create user profile',
+            details: createError.message,
+            code: 'PROFILE_CREATION_FAILED'
+          }, { status: 500 })
+        }
+
+        console.log('User profile created successfully')
+      }
+    } else {
+      console.log('User profile exists:', profile.id)
+    }
+
     // Generate unique filename
     const fileExt = file.name.split('.').pop()
     const fileName = `avatar_${userId}_${Date.now()}.${fileExt}`
-    const filePath = `avatars/${userId}/${fileName}`
+    const filePath = `${userId}/${fileName}`
 
     // Upload to Supabase Storage
     console.log('Attempting to upload to bucket: avatars, file path:', filePath)
@@ -53,7 +102,7 @@ export async function POST(request) {
       userId: userId
     })
 
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { data: uploadData, error: uploadError } = await supabaseClient.storage
       .from('avatars')
       .upload(filePath, file, {
         cacheControl: '3600',
@@ -93,7 +142,7 @@ export async function POST(request) {
     }
 
     // Get public URL
-    const { data: urlData } = supabase.storage
+    const { data: urlData } = supabaseClient.storage
       .from('avatars')
       .getPublicUrl(filePath)
 
@@ -101,13 +150,13 @@ export async function POST(request) {
 
     // Update user profile with new avatar URL
     console.log('Updating user profile with avatar URL for user:', userId)
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseClient
       .from('user_profiles')
       .update({
         avatar_url: avatarUrl,
         updated_at: new Date().toISOString()
       })
-      .eq('user_id', userId)
+      .eq('auth_user_id', userId)
 
     if (updateError) {
       console.error('Profile update error:', {
@@ -137,6 +186,19 @@ export async function POST(request) {
 
   } catch (error) {
     console.error('Avatar upload API error:', error)
+
+    // Handle authentication errors specifically
+    if (error.message.includes('Authentication') || error.message.includes('required')) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Authentication required. Please log in and try again.',
+          code: 'AUTH_REQUIRED'
+        },
+        { status: 401 }
+      )
+    }
+
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

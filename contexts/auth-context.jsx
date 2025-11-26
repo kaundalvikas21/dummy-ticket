@@ -161,8 +161,15 @@ export function AuthProvider({ children }) {
         return { success: false, error: 'User not authenticated' }
       }
 
+      // Get current session to access JWT token
+      const { data: { session } } = await supabase.auth.getSession()
+
+      if (!session?.access_token) {
+        return { success: false, error: 'No valid authentication session' }
+      }
+
+      // Don't include userId in payload - use authenticated session instead
       const updatePayload = {
-        userId: user.id,
         ...profileData
       }
 
@@ -170,6 +177,7 @@ export function AuthProvider({ children }) {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
         },
         body: JSON.stringify(updatePayload),
       })

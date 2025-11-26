@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Upload } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/contexts/auth-context"
+import { createClient } from "@/lib/supabase/client"
 import { DatePicker } from "@/components/ui/input/DatePicker"
 import { SelectInput } from "@/components/ui/input/SelectInput"
 import { getUserInitials, getAvatarDisplayUrl } from "@/lib/utils"
@@ -57,6 +58,7 @@ export function MyProfile() {
   const { toast } = useToast()
   const { user, profile: authProfile, updateProfile } = useAuth()
   const fileInputRef = useRef(null)
+  const supabase = createClient()
 
   // Function to format member since date with fallback
   const getMemberSinceText = () => {
@@ -127,8 +129,8 @@ export function MyProfile() {
       if (!user?.id) {
         toast({
           variant: "destructive",
-          title: "Authentication Error",
-          description: "You must be logged in to update your profile.",
+          title: "Authentication Required",
+          description: "Please log in again to update your profile. Your session may have expired.",
         })
         setIsSaving(false)
         return
@@ -242,11 +244,20 @@ export function MyProfile() {
     setIsUploading(true)
     const formData = new FormData()
     formData.append('file', file)
-    formData.append('userId', user.id)
+    // Removed userId - backend now uses authenticated user's ID for security
 
     try {
+      // Get JWT token for authenticated request
+      const { data: { session } } = await supabase.auth.getSession()
+
+      const headers = {}
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`
+      }
+
       const response = await fetch('/api/auth/profile/upload-avatar', {
         method: 'POST',
+        headers,
         body: formData,
       })
 
@@ -256,11 +267,13 @@ export function MyProfile() {
 
         // Create more specific error message
         let errorMessage = errorData.error || 'Failed to upload image'
-        if (errorData.code === 'STORAGE_ERROR') {
+        if (errorData.code === 'AUTH_REQUIRED' || response.status === 401) {
+          errorMessage = 'Authentication required. Please log in again and try again.'
+        } else if (errorData.code === 'STORAGE_ERROR') {
           errorMessage = 'Storage configuration error. Please contact support.'
         } else if (errorData.details?.includes('bucket')) {
           errorMessage = 'Photo storage not configured. Please contact administrator.'
-        } else if (errorData.details?.includes('permission')) {
+        } else if (errorData.details?.includes('permission') || response.status === 403) {
           errorMessage = 'You do not have permission to upload photos.'
         }
 
