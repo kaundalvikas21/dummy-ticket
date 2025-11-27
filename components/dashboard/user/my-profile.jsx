@@ -504,8 +504,11 @@ export function MyProfile() {
               <AvatarFallback className="text-3xl font-bold bg-gradient-to-br from-blue-500 to-purple-600 text-white">
                 {imageLoading ? (
                   <div className="h-6 w-6 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                ) : (
+                ) : profile.firstName || profile.lastName ? (
                   getUserInitials(profile.firstName, profile.lastName, profile.email)
+                ) : (
+                  // Show skeleton avatar when no name is provided
+                  <div className="w-full h-full bg-gray-200/20 animate-pulse rounded-full"></div>
                 )}
               </AvatarFallback>
             </Avatar>
@@ -574,11 +577,22 @@ export function MyProfile() {
               </>
             )}
             <div className="mt-6 w-full space-y-2 text-center">
-              <p className="font-semibold text-lg">
-                {profile.firstName} {profile.lastName}
-              </p>
-              <p className="text-sm text-gray-600">{profile.email}</p>
-              <p className="text-sm text-gray-600">{getMemberSinceText()}</p>
+              {authProfile ? (
+                <>
+                  <p className="font-semibold text-lg">
+                    {profile.firstName} {profile.lastName}
+                  </p>
+                  <p className="text-sm text-gray-600">{profile.email}</p>
+                  <p className="text-sm text-gray-600">{getMemberSinceText()}</p>
+                </>
+              ) : (
+                // Skeleton loading for profile info
+                <>
+                  <div className="h-6 w-32 bg-gray-200 animate-pulse rounded mx-auto mb-1"></div>
+                  <div className="h-4 w-40 bg-gray-200 animate-pulse rounded mx-auto mb-1"></div>
+                  <div className="h-4 w-36 bg-gray-200 animate-pulse rounded mx-auto"></div>
+                </>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -589,6 +603,17 @@ export function MyProfile() {
             <CardTitle>Personal Information</CardTitle>
           </CardHeader>
           <CardContent>
+            {!authProfile ? (
+              // Skeleton loading for profile form
+              <div className="grid gap-6 md:grid-cols-2">
+                {[...Array(12)].map((_, i) => (
+                  <div key={i} className="space-y-2">
+                    <div className="h-4 w-20 bg-gray-200 animate-pulse rounded"></div>
+                    <div className="h-10 bg-gray-200 animate-pulse rounded"></div>
+                  </div>
+                ))}
+              </div>
+            ) : (
             <div className="grid gap-6 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="firstName">First Name</Label>
@@ -725,6 +750,7 @@ export function MyProfile() {
                 />
               </div>
             </div>
+            )}
           </CardContent>
         </Card>
       </div>

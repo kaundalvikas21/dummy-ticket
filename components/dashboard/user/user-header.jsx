@@ -2,6 +2,9 @@
 
 import { Bell, LogOut, Settings, User, UserCircle, HelpCircle, ChevronDown, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { AvatarSkeleton, AvatarFallbackSkeleton } from "@/components/ui/avatar-skeleton"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,12 +16,13 @@ import { Badge } from "@/components/ui/badge"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/contexts/auth-context"
+import { getAvatarDisplayUrl, getUserInitials } from "@/lib/utils"
 import { useState, useEffect } from "react"
 
 export function UserHeader() {
   const router = useRouter()
   const { toast } = useToast()
-  const { logout, profile } = useAuth()
+  const { logout, profile, loading } = useAuth()
   const [isLoggingOut, setIsLoggingOut] = useState(false)
 
   const [mounted, setMounted] = useState(false);
@@ -109,7 +113,7 @@ export function UserHeader() {
     if (profile?.first_name) {
       return `${profile.first_name} ${profile.last_name || ''}`.trim()
     }
-    return "User"
+    return "" // Return empty string - skeleton will handle loading state
   }
 
   return (
@@ -167,18 +171,45 @@ export function UserHeader() {
               className="flex items-center gap-2 px-3 py-2 h-auto hover:bg-gray-100 transition-colors rounded-lg"
             >
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#0066FF] to-[#00D4AA] ring-2 ring-white shadow-sm">
-                <User className="h-5 w-5 text-white" />
+                {loading || !profile ? (
+                  <div className="h-5 w-5 bg-gray-200/30 animate-pulse rounded-full"></div>
+                ) : profile?.avatar_url ? (
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage
+                      src={getAvatarDisplayUrl(profile?.avatar_url)}
+                      alt="Profile picture"
+                    />
+                  </Avatar>
+                ) : profile?.first_name || profile?.last_name ? (
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback className="bg-gradient-to-br from-[#0066FF] to-[#00D4AA] text-white text-xs">
+                      {getUserInitials(profile?.first_name, profile?.last_name, profile?.email)}
+                    </AvatarFallback>
+                  </Avatar>
+                ) : (
+                  <div className="h-8 w-8 bg-gradient-to-br from-[#0066FF] to-[#00D4AA] ring-2 ring-white shadow-sm flex items-center justify-center">
+                    <User className="h-4 w-4 text-white" />
+                  </div>
+                )}
               </div>
               <div className="flex flex-col items-start">
-                <span className="text-sm font-medium text-gray-900">{getUserDisplayName()}</span>
+                <span className="text-sm font-medium text-gray-900">
+                  {loading || !profile ? <Skeleton className="w-32 h-4" /> : getUserDisplayName()}
+                </span>
               </div>
               <ChevronDown className="h-4 w-4 text-gray-500" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <div className="px-2 py-1.5">
-              <p className="text-sm font-semibold">{getUserDisplayName()}</p>
-              <p className="text-xs text-gray-500">{profile?.email || 'user@example.com'}</p>
+              <p className="text-sm font-semibold">
+                {loading || !profile ? <Skeleton className="w-32 h-4" /> : getUserDisplayName()}
+              </p>
+              {profile?.email && (
+                <p className="text-xs text-gray-500">
+                  {profile?.email}
+                </p>
+              )}
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => router.push("/user/profile")} className="cursor-pointer">

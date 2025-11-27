@@ -1,9 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import { Bell, ChevronDown, UserCircle, Settings, LogOut, Loader2 } from "lucide-react"
+import { Bell, ChevronDown, UserCircle, Settings, LogOut, Loader2, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { AvatarSkeleton, AvatarFallbackSkeleton } from "@/components/ui/avatar-skeleton"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,17 +14,19 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { useMounted } from "@/lib/hooks/use-mounted"
 import { useAuth } from "@/contexts/auth-context"
+import { getAvatarDisplayUrl, getUserInitials } from "@/lib/utils"
 
 export function VendorHeader() {
   const mounted = useMounted()
   const { toast } = useToast()
   const router = useRouter()
-  const { logout, profile } = useAuth()
+  const { logout, profile, loading } = useAuth()
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [notifications, setNotifications] = useState([
     {
@@ -87,7 +91,7 @@ export function VendorHeader() {
     if (profile?.first_name) {
       return `${profile.first_name} ${profile.last_name || ''}`.trim()
     }
-    return "Global Travel Agency"
+    return "" // Return empty string - skeleton will handle loading state
   }
 
   return (
@@ -98,16 +102,16 @@ export function VendorHeader() {
           <p className="text-sm text-gray-600">Manage your business operations</p>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           {/* Notifications */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="relative">
                 <Bell className="w-5 h-5" />
-                {mounted && unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                {unreadCount > 0 && (
+                  <Badge className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center p-0 bg-red-500 text-white text-xs">
                     {unreadCount}
-                  </span>
+                  </Badge>
                 )}
               </Button>
             </DropdownMenuTrigger>
@@ -141,26 +145,50 @@ export function VendorHeader() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* User Profile Dropdown */}
+          {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-2 hover:bg-gray-100 transition-colors">
-                <Avatar className="w-8 h-8 ring-2 ring-blue-500">
-                  <AvatarFallback className="bg-gradient-to-br from-[#0066FF] to-[#00D4AA] text-white text-sm">
-                    {getUserDisplayName().substring(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="text-sm font-medium text-gray-700">{getUserDisplayName()}</span>
-                <ChevronDown className="w-4 h-4 text-gray-500" />
+              <Button
+                variant="ghost"
+                className="flex items-center gap-2 px-3 py-2 h-auto hover:bg-gray-100 transition-colors rounded-lg"
+              >
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#0066FF] to-[#00D4AA] ring-2 ring-white shadow-sm">
+                  {loading || !profile ? (
+                    <div className="h-5 w-5 bg-gray-200/30 animate-pulse rounded-full"></div>
+                  ) : (
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage
+                        src={getAvatarDisplayUrl(profile?.avatar_url)}
+                        alt="Profile picture"
+                      />
+                      <AvatarFallback className="bg-gradient-to-br from-[#0066FF] to-[#00D4AA] text-white text-xs">
+                        {profile?.first_name || profile?.last_name
+                          ? getUserInitials(profile?.first_name, profile?.last_name, profile?.email)
+                          : "U"
+                        }
+                      </AvatarFallback>
+                    </Avatar>
+                  )}
+                </div>
+                <div className="flex flex-col items-start">
+                  <span className="text-sm font-medium text-gray-900">
+                    {loading || !profile ? <Skeleton className="w-32 h-4" /> : getUserDisplayName()}
+                  </span>
+                </div>
+                <ChevronDown className="h-4 w-4 text-gray-500" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>
-                <div className="flex flex-col gap-1">
-                  <p className="text-sm font-medium">{getUserDisplayName()}</p>
-                  <p className="text-xs text-gray-500">{profile?.email || 'contact@globaltravel.com'}</p>
-                </div>
-              </DropdownMenuLabel>
+              {profile?.email && (
+              <div className="px-2 py-1.5">
+                <p className="text-sm font-semibold">
+                  {loading || !profile ? <Skeleton className="w-32 h-4" /> : getUserDisplayName()}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {profile?.email}
+                </p>
+              </div>
+            )}
               <DropdownMenuSeparator />
               <Link href="/vendor/profile">
                 <DropdownMenuItem className="cursor-pointer">

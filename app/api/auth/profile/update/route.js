@@ -38,30 +38,6 @@ export async function PUT(request) {
       )
     }
 
-    // Prepare data for user_profiles table update
-    const profileUpdatePayload = {
-      // Required fields - keep existing values if empty strings provided
-      first_name: profileData.first_name?.trim() || null,
-      last_name: profileData.last_name?.trim() || null,
-
-      // Optional fields - can be null
-      phone_number: profileData.phone_number?.trim() || null,
-      address: profileData.address?.trim() || null,
-      date_of_birth: profileData.date_of_birth || null,
-      nationality: profileData.nationality?.trim() || null,
-      city: profileData.city?.trim() || null,
-      postal_code: profileData.postal_code?.trim() || null,
-      country_code: profileData.country_code?.trim() || null,
-      preferred_language: profileData.preferred_language || 'en',
-      passport_number: profileData.passport_number?.trim() || null,
-
-      // Only update avatar_url if explicitly provided (not null/undefined)
-      ...(profileData.avatar_url !== undefined && { avatar_url: profileData.avatar_url?.trim() || null }),
-      notification_preferences: profileData.notification_preferences || {},
-      privacy_settings: profileData.privacy_settings || {},
-      updated_at: new Date().toISOString()
-    }
-
     // Use admin client for database operations to bypass RLS if needed
     const supabaseAdmin = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -74,19 +50,56 @@ export async function PUT(request) {
       }
     )
 
-    // Get existing profile to preserve required fields if needed
+    // Get existing complete profile to preserve fields during partial updates
     const { data: existingProfile } = await supabaseAdmin
       .from('user_profiles')
-      .select('first_name, last_name')
+      .select('*')
       .eq('auth_user_id', userId)
       .single()
 
-    // Ensure required fields are never null
-    if (existingProfile) {
-      profileUpdatePayload.first_name = profileUpdatePayload.first_name || existingProfile.first_name
-      profileUpdatePayload.last_name = profileUpdatePayload.last_name || existingProfile.last_name
-    } else {
-      // For new profiles, provide default values for required fields
+    // Prepare data for user_profiles table update with proper partial update handling
+    const profileUpdatePayload = {
+      // Only include fields that are explicitly provided in profileData
+      // undefined fields will preserve existing values, null/empty strings will be updated
+      ...(profileData.first_name !== undefined && { first_name: profileData.first_name?.trim() || null }),
+      ...(profileData.last_name !== undefined && { last_name: profileData.last_name?.trim() || null }),
+      ...(profileData.phone_number !== undefined && { phone_number: profileData.phone_number?.trim() || null }),
+      ...(profileData.address !== undefined && { address: profileData.address?.trim() || null }),
+      ...(profileData.date_of_birth !== undefined && { date_of_birth: profileData.date_of_birth || null }),
+      ...(profileData.nationality !== undefined && { nationality: profileData.nationality?.trim() || null }),
+      ...(profileData.city !== undefined && { city: profileData.city?.trim() || null }),
+      ...(profileData.postal_code !== undefined && { postal_code: profileData.postal_code?.trim() || null }),
+      ...(profileData.country_code !== undefined && { country_code: profileData.country_code?.trim() || null }),
+      ...(profileData.preferred_language !== undefined && { preferred_language: profileData.preferred_language || 'en' }),
+      ...(profileData.passport_number !== undefined && { passport_number: profileData.passport_number?.trim() || null }),
+      ...(profileData.avatar_url !== undefined && { avatar_url: profileData.avatar_url?.trim() || null }),
+      ...(profileData.avatar_filename !== undefined && { avatar_filename: profileData.avatar_filename?.trim() || null }),
+      ...(profileData.avatar_storage_path !== undefined && { avatar_storage_path: profileData.avatar_storage_path?.trim() || null }),
+      ...(profileData.avatar_file_size !== undefined && { avatar_file_size: profileData.avatar_file_size || null }),
+
+      notification_preferences: profileData.notification_preferences || existingProfile?.notification_preferences || {},
+      privacy_settings: profileData.privacy_settings || existingProfile?.privacy_settings || {},
+      updated_at: new Date().toISOString()
+    }
+
+    // If this is a partial update and we have existing profile, preserve fields not provided
+    if (existingProfile && Object.keys(profileData).length < 15) { // Less than full profile update
+      // Preserve all fields that weren't explicitly updated
+      const allProfileFields = [
+        'first_name', 'last_name', 'phone_number', 'address', 'date_of_birth',
+        'nationality', 'city', 'postal_code', 'country_code', 'preferred_language',
+        'passport_number', 'notification_preferences', 'privacy_settings'
+      ]
+
+      allProfileFields.forEach(field => {
+        if (profileData[field] === undefined && existingProfile[field] !== undefined) {
+          profileUpdatePayload[field] = existingProfile[field]
+        }
+      })
+    }
+
+    // Ensure required fields are never null for new profiles
+    if (!existingProfile) {
       profileUpdatePayload.first_name = profileUpdatePayload.first_name || 'User'
       profileUpdatePayload.last_name = profileUpdatePayload.last_name || 'Name'
     }
