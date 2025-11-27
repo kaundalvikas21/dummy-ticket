@@ -761,22 +761,22 @@ export function MyProfile() {
           <CardTitle>Account Statistics</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-6 md:grid-cols-4">
-            <div className="text-center">
-              <p className="text-3xl font-bold text-blue-600">12</p>
-              <p className="text-sm text-gray-600">Total Bookings</p>
+          <div className="grid gap-4 sm:gap-6 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="text-center p-3 sm:p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+              <p className="text-2xl sm:text-3xl font-bold text-blue-600">12</p>
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">Total Bookings</p>
             </div>
-            <div className="text-center">
-              <p className="text-3xl font-bold text-green-600">9</p>
-              <p className="text-sm text-gray-600">Completed Trips</p>
+            <div className="text-center p-3 sm:p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+              <p className="text-2xl sm:text-3xl font-bold text-green-600">9</p>
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">Completed Trips</p>
             </div>
-            <div className="text-center">
-              <p className="text-3xl font-bold text-orange-600">3</p>
-              <p className="text-sm text-gray-600">Active Bookings</p>
+            <div className="text-center p-3 sm:p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+              <p className="text-2xl sm:text-3xl font-bold text-orange-600">3</p>
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">Active Bookings</p>
             </div>
-            <div className="text-center">
-              <p className="text-3xl font-bold text-purple-600">$247</p>
-              <p className="text-sm text-gray-600">Total Spent</p>
+            <div className="text-center p-3 sm:p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+              <p className="text-2xl sm:text-3xl font-bold text-purple-600">$247</p>
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">Total Spent</p>
             </div>
           </div>
         </CardContent>

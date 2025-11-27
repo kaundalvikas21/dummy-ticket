@@ -97,22 +97,22 @@ export function UserDashboard() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Welcome Banner */}
       <Card className="bg-gradient-to-r from-blue-600 to-teal-500 text-white">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-bold mb-2">
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="text-center sm:text-left">
+              <h2 className="text-xl sm:text-2xl font-bold mb-2">
                 Welcome back, {profile?.first_name || user?.user_metadata?.first_name || user?.email?.split('@')[0] || 'User'}!
               </h2>
-              <p className="text-blue-100">
+              <p className="text-blue-100 text-sm sm:text-base">
                 You have 2 upcoming trips. Ready for your next adventure?
               </p>
             </div>
 
             <Button
-              className="bg-white text-blue-600 hover:bg-blue-50 cursor-pointer"
+              className="w-full sm:w-auto bg-white text-blue-600 hover:bg-blue-50 cursor-pointer min-h-[44px] px-6 py-3"
               onClick={handleBookTicket}
             >
               Book New Ticket
@@ -122,19 +122,19 @@ export function UserDashboard() {
       </Card>
 
       {/* Stats Grid */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
             <Card key={stat.title}>
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between">
-                  <div>
+                  <div className="flex-1">
                     <p className="text-sm text-gray-600">{stat.title}</p>
-                    <p className="text-3xl font-bold mt-2">{stat.value}</p>
+                    <p className="text-2xl sm:text-3xl font-bold mt-2">{stat.value}</p>
                   </div>
-                  <div className={`${stat.bgColor} p-3 rounded-lg`}>
-                    <Icon className={`h-6 w-6 ${stat.color}`} />
+                  <div className={`${stat.bgColor} p-2 sm:p-3 rounded-lg flex-shrink-0 ml-4`}>
+                    <Icon className={`h-5 w-5 sm:h-6 sm:w-6 ${stat.color}`} />
                   </div>
                 </div>
               </CardContent>
@@ -143,43 +143,49 @@ export function UserDashboard() {
         })}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2">
         {/* Upcoming Bookings */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center justify-between text-lg sm:text-xl">
               <span>Upcoming Bookings</span>
-              <Button variant="ghost" size="sm" onClick={handleViewAllBookings}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleViewAllBookings}
+                className="min-h-[40px] touch-manipulation"
+              >
                 View All
               </Button>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {upcomingBookings.map((booking) => (
                 <div
                   key={booking.id}
-                  className="flex items-center justify-between rounded-lg border p-4"
+                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between rounded-lg border p-3 sm:p-4 gap-3"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100">
-                      <Plane className="h-6 w-6 text-blue-600" />
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-lg bg-blue-100 flex-shrink-0">
+                      <Plane className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
                     </div>
                     <div>
-                      <p className="font-semibold">{booking.route}</p>
+                      <p className="font-semibold text-sm sm:text-base">{booking.route}</p>
                       <p className="text-sm text-gray-600">{booking.id}</p>
-                      <p className="text-sm text-gray-500">{booking.date}</p>
+                      <p className="text-xs sm:text-sm text-gray-500">{booking.date}</p>
                     </div>
                   </div>
-                  <div className="text-right">
+                  <div className="flex sm:flex-col items-start sm:items-end gap-2 sm:gap-1">
                     <Badge
                       variant={
                         booking.status === "Confirmed" ? "default" : "secondary"
                       }
+                      className="text-xs"
                     >
                       {booking.status}
                     </Badge>
-                    <p className="text-xs text-gray-500 mt-1">{booking.type}</p>
+                    <p className="text-xs text-gray-500">{booking.type}</p>
                   </div>
                 </div>
               ))}
@@ -190,17 +196,17 @@ export function UserDashboard() {
         {/* Recent Activity */}
         <Card>
           <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
+            <CardTitle className="text-lg sm:text-xl">Recent Activity</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {recentActivity.map((activity, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between border-b pb-4 last:border-0"
+                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b pb-3 sm:pb-4 last:border-0 gap-2"
                 >
                   <div>
-                    <p className="font-medium">{activity.action}</p>
+                    <p className="font-medium text-sm sm:text-base">{activity.action}</p>
                     <p className="text-sm text-gray-600">{activity.ticket}</p>
                   </div>
                   <p className="text-sm text-gray-500">{activity.time}</p>
@@ -214,25 +220,25 @@ export function UserDashboard() {
       {/* Quick Actions */}
       <Card>
         <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
+          <CardTitle className="text-lg sm:text-xl">Quick Actions</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
             <Button
-              className="h-auto flex-col gap-2 py-6 bg-transparent"
+              className="h-auto flex-col gap-2 py-4 sm:py-6 bg-transparent border-2 min-h-[80px] touch-manipulation"
               variant="outline"
               onClick={handleBookTicket}
             >
-              <Ticket className="h-6 w-6" />
-              <span>Book New Ticket</span>
+              <Ticket className="h-5 w-5 sm:h-6 sm:w-6" />
+              <span className="text-sm sm:text-base">Book New Ticket</span>
             </Button>
             <Button
-              className="h-auto flex-col gap-2 py-6 bg-transparent"
+              className="h-auto flex-col gap-2 py-4 sm:py-6 bg-transparent border-2 min-h-[80px] touch-manipulation"
               variant="outline"
               onClick={handleTrackBooking}
             >
-              <CheckCircle className="h-6 w-6" />
-              <span>Track Booking</span>
+              <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6" />
+              <span className="text-sm sm:text-base">Track Booking</span>
             </Button>
           </div>
         </CardContent>

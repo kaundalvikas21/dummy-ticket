@@ -1,9 +1,8 @@
 "use client"
 
-import { Bell, LogOut, Settings, User, UserCircle, HelpCircle, ChevronDown, Loader2 } from "lucide-react"
+import { Bell, LogOut, Settings, User, UserCircle, HelpCircle, ChevronDown, Loader2, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { AvatarSkeleton, AvatarFallbackSkeleton } from "@/components/ui/avatar-skeleton"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   DropdownMenu,
@@ -19,7 +18,7 @@ import { useAuth } from "@/contexts/auth-context"
 import { getAvatarDisplayUrl, getUserInitials } from "@/lib/utils"
 import { useState, useEffect } from "react"
 
-export function UserHeader() {
+export function UserHeader({ onMenuClick, sidebarOpen }) {
   const router = useRouter()
   const { toast } = useToast()
   const { logout, profile, loading } = useAuth()
@@ -117,23 +116,52 @@ export function UserHeader() {
   }
 
   return (
-    <header className="flex items-center justify-between border-b bg-white px-6 py-4">
-      <div className="flex items-center gap-4">
-        <h1 className="text-2xl font-bold text-gray-900">My Dashboard</h1>
+    <header className="flex items-center justify-between border-b bg-white px-4 sm:px-6 py-4">
+      <div className="flex items-center gap-2 sm:gap-4">
+        {/* Mobile Hamburger Menu */}
+        <button
+          type="button"
+          onClick={onMenuClick}
+          className={`
+            relative w-10 h-10 lg:hidden flex items-center justify-center
+            rounded-lg hover:bg-gray-100 active:bg-gray-200
+            transition-colors focus-visible:outline-2
+            focus-visible:outline-[#0066FF] focus-visible:outline-offset-2
+            touch-manipulation
+          `}
+          aria-expanded={sidebarOpen}
+          aria-controls="mobile-sidebar"
+          aria-label={sidebarOpen ? "Close navigation menu" : "Open navigation menu"}
+        >
+          <span className="sr-only">Toggle navigation menu</span>
+          <Menu className="w-5 h-5 text-gray-700" />
+        </button>
+
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">My Dashboard</h1>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 sm:gap-4">
         {/* Notifications */}
         <DropdownMenu open={notificationDropdownOpen} onOpenChange={setNotificationDropdownOpen}>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative h-10 w-10 min-h-[44px] min-w-[44px] touch-manipulation"
+              aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
+            >
               <Bell className="h-5 w-5" />
               {mounted && unreadCount > 0 && (
                 <Badge className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 text-xs bg-red-500 text-white">{unreadCount}</Badge>
               )}
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80">
+          <DropdownMenuContent
+            align="end"
+            className="w-80 max-w-[90vw] sm:max-w-full"
+            sideOffset={8}
+            collisionPadding={8}
+          >
             <div className="p-4">
               <h3 className="font-semibold mb-2">Notifications</h3>
               {unreadCount === 0 ? (
@@ -168,7 +196,12 @@ export function UserHeader() {
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
-              className="flex items-center gap-2 px-3 py-2 h-auto hover:bg-gray-100 transition-colors rounded-lg"
+              className="
+                flex items-center gap-2 px-3 py-2 h-auto
+                hover:bg-gray-100 transition-colors rounded-lg
+                min-h-[44px] touch-manipulation
+              "
+              aria-label="User menu"
             >
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#0066FF] to-[#00D4AA] ring-2 ring-white shadow-sm">
                 {loading || !profile ? (
@@ -192,15 +225,20 @@ export function UserHeader() {
                   </div>
                 )}
               </div>
-              <div className="flex flex-col items-start">
+              <div className="flex flex-col items-start hidden sm:block">
                 <span className="text-sm font-medium text-gray-900">
-                  {loading || !profile ? <Skeleton className="w-32 h-4" /> : getUserDisplayName()}
+                  {loading || !profile ? <Skeleton className="w-24 sm:w-32 h-4" /> : getUserDisplayName()}
                 </span>
               </div>
               <ChevronDown className="h-4 w-4 text-gray-500" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuContent
+            align="end"
+            className="w-56 max-w-[85vw] sm:max-w-full"
+            sideOffset={8}
+            collisionPadding={8}
+          >
             <div className="px-2 py-1.5">
               <p className="text-sm font-semibold">
                 {loading || !profile ? <Skeleton className="w-32 h-4" /> : getUserDisplayName()}

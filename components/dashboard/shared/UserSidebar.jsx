@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { Home, Ticket, User, CreditCard, FileText, HelpCircle, Settings, Plane } from "lucide-react"
+import { Home, Ticket, User, CreditCard, FileText, HelpCircle, Settings, Plane, X } from "lucide-react"
 
 const menuItems = [
   { id: "dashboard", href: "/user", label: "Dashboard", icon: Home },
@@ -15,23 +15,45 @@ const menuItems = [
   { id: "settings", href: "/user/settings", label: "Settings", icon: Settings },
 ]
 
-
-export default function UserSidebar() {
+export default function UserSidebar({ mobileMode = false, onClose = () => {} }) {
   const pathname = usePathname()
 
+  const handleLinkClick = () => {
+    if (mobileMode) {
+      onClose()
+    }
+  }
+
   return (
-    <aside className="sticky top-0 left-0 h-screen w-64 bg-gradient-to-b from-[#0a1628] to-[#1b263b] text-white">
+    <aside className={cn(
+      "h-screen w-64 bg-gradient-to-b from-[#0a1628] to-[#1b263b] text-white",
+      mobileMode ? "h-full overflow-y-auto" : "sticky top-0 left-0"
+    )}>
       <div className="flex h-full flex-col">
-         <div className="border-b border-white/10 p-6">
-      <Link href="/" className="flex items-center gap-3">
-        <div className="bg-gradient-to-br from-[#0066FF] to-[#00D4AA] p-2.5 rounded-xl">
-          <Plane className="w-6 h-6 text-white" />
+        {/* Mobile Close Button */}
+        {mobileMode && (
+          <div className="flex justify-end p-4 lg:hidden">
+            <button
+              onClick={onClose}
+              className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2"
+              aria-label="Close sidebar"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        )}
+
+        {/* Logo Section */}
+        <div className="border-b border-white/10 p-6">
+          <Link href="/" className="flex items-center gap-3" onClick={handleLinkClick}>
+            <div className="bg-gradient-to-br from-[#0066FF] to-[#00D4AA] p-2.5 rounded-xl">
+              <Plane className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <span className="text-xl font-bold text-white">VisaFly</span>
+            </div>
+          </Link>
         </div>
-        <div>
-          <span className="text-xl font-bold text-white">VisaFly</span>
-        </div>
-      </Link>
-    </div>
 
         {/* Navigation */}
         <nav
@@ -63,15 +85,16 @@ export default function UserSidebar() {
               <Link
                 key={item.label}
                 href={item.href}
+                onClick={handleLinkClick}
                 className={cn(
-                  "flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors",
+                  "flex items-center gap-3 rounded-lg px-4 py-3 min-h-[44px] transition-colors touch-manipulation",
                   isActive
                     ? "bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white font-semibold"
                     : "text-gray-300 hover:bg-white/10 hover:text-white",
                 )}
               >
-                <Icon className="h-5 w-5" />
-                <span>{item.label}</span>
+                <Icon className="h-5 w-5 flex-shrink-0" />
+                <span className="font-medium">{item.label}</span>
               </Link>
             )
           })}

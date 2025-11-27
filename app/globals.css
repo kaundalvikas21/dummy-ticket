@@ -265,3 +265,112 @@ header, nav, footer, .container {
 .admin-header {
   direction: ltr !important;
 }
+
+/* Mobile Touch Optimizations */
+
+/* Touch-friendly targets for mobile devices */
+@media (hover: none) and (pointer: coarse) {
+  button, [role="button"], a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Enhanced touch feedback */
+  *:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+
+  /* Improved button spacing for touch */
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+
+  /* Ensure dropdown items are touch-friendly */
+  [role="menuitem"], [role="menuitemradio"], [role="menuitemcheckbox"] {
+    min-height: 44px;
+    padding: 12px 16px;
+  }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Safe area support for mobile devices */
+:root {
+  --safe-area-inset-top: env(safe-area-inset-top, 0);
+  --safe-area-inset-right: env(safe-area-inset-right, 0);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0);
+  --safe-area-inset-left: env(safe-area-inset-left, 0);
+}
+
+.safe-area-inset-top {
+  padding-top: var(--safe-area-inset-top);
+}
+
+.safe-area-inset-right {
+  padding-right: var(--safe-area-inset-right);
+}
+
+.safe-area-inset-bottom {
+  padding-bottom: var(--safe-area-inset-bottom);
+}
+
+.safe-area-inset-left {
+  padding-left: var(--safe-area-inset-left);
+}
+
+/* Dashboard-specific mobile optimizations */
+@media (max-width: 768px) {
+  /* Improved scrollbar for mobile */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 2px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Enhanced focus styles for better accessibility */
+button:focus-visible,
+[role="button"]:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid #0066FF;
+  outline-offset: 2px;
+}
+
+/* Prevent horizontal scroll on mobile */
+@media (max-width: 767px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  /* Ensure sidebar doesn't cause overflow */
+  .sidebar-drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+  }
+}
