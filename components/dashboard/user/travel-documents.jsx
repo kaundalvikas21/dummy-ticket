@@ -281,7 +281,7 @@ export const TravelDocuments = ({ setActiveSection }) => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold">Travel Documents</h2>
+        <h2 className="lg:text-3xl text-2xl font-bold">Travel Documents</h2>
       </div>
 
       <Card>

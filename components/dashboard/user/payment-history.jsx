@@ -213,7 +213,7 @@ startxref
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold">Payment History</h2>
+        <h2 className="lg:text-3xl text-2xl font-bold">Payment History</h2>
         <Button className="cursor-pointer" variant="outline" onClick={handleExportAll} disabled={filteredPayments.length === 0}>
           <Download className="mr-2 h-4 w-4" />
           Export All

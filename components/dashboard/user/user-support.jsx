@@ -58,7 +58,7 @@ export function UserSupport() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-3xl font-bold">Support & Help</h2>
+      <h2 className="lg:text-3xl text-2xl font-bold">Support & Help</h2>
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Contact Methods */}

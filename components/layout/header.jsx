@@ -147,22 +147,24 @@ export function Header() {
                       <Button variant="ghost" className="flex items-center gap-2 hover:bg-gray-100 transition-colors cursor-pointer">
                         {loading || !profile ? (
                           <div className="w-8 h-8 bg-gray-200/30 animate-pulse rounded-full"></div>
-                        ) : profile?.avatar_url ? (
-                          <Avatar className="w-8 h-8">
-                            <AvatarImage
-                              src={getAvatarDisplayUrl(profile?.avatar_url)}
-                              alt="Profile picture"
-                            />
-                          </Avatar>
-                        ) : profile?.first_name || profile?.last_name ? (
-                          <Avatar className="w-8 h-8">
-                            <AvatarFallback className="bg-gradient-to-br from-[#0066FF] to-[#00D4AA] text-white text-xs">
-                              {getUserInitials(profile?.first_name, profile?.last_name, profile?.email)}
-                            </AvatarFallback>
-                          </Avatar>
                         ) : (
-                          <div className="w-8 h-8 bg-gradient-to-br from-[#0066FF] to-[#00D4AA] ring-2 ring-white shadow-sm flex items-center justify-center">
-                            <User className="h-4 w-4 text-white" />
+                          <div className="flex w-9 h-9 items-center justify-center rounded-full bg-gradient-to-br from-[#0066FF] to-[#00D4AA] ring-2 ring-white shadow-sm">
+                            {profile?.avatar_url ? (
+                              <Avatar className="w-8 h-8">
+                                <AvatarImage
+                                  src={getAvatarDisplayUrl(profile?.avatar_url)}
+                                  alt="Profile picture"
+                                />
+                              </Avatar>
+                            ) : profile?.first_name || profile?.last_name ? (
+                              <Avatar className="w-8 h-8">
+                                <AvatarFallback className="bg-gradient-to-br from-[#0066FF] to-[#00D4AA] text-white text-xs">
+                                  {getUserInitials(profile?.first_name, profile?.last_name, profile?.email)}
+                                </AvatarFallback>
+                              </Avatar>
+                            ) : (
+                              <User className="w-5 h-5 text-white" />
+                            )}
                           </div>
                         )}
                         <span className="hidden sm:inline">
@@ -268,23 +270,25 @@ export function Header() {
                   <>
                     <div className="py-2 border-t border-gray-200 mt-2 flex items-center gap-2">
                       {loading || !profile ? (
-                        <div className="w-6 h-6 bg-gray-200/30 animate-pulse rounded-full"></div>
-                      ) : profile?.avatar_url ? (
-                        <Avatar className="w-6 h-6">
-                          <AvatarImage
-                            src={getAvatarDisplayUrl(profile?.avatar_url)}
-                            alt="Profile picture"
-                          />
-                        </Avatar>
-                      ) : profile?.first_name || profile?.last_name ? (
-                        <Avatar className="w-6 h-6">
-                          <AvatarFallback className="bg-gradient-to-br from-[#0066FF] to-[#00D4AA] text-white text-xs">
-                            {getUserInitials(profile?.first_name, profile?.last_name, profile?.email)}
-                          </AvatarFallback>
-                        </Avatar>
+                        <div className="w-9 h-9 bg-gray-200/30 animate-pulse rounded-full"></div>
                       ) : (
-                        <div className="w-6 h-6 bg-gradient-to-br from-[#0066FF] to-[#00D4AA] ring-2 ring-white shadow-sm flex items-center justify-center">
-                          <User className="h-3 w-3 text-white" />
+                        <div className="flex w-9 h-9 items-center justify-center rounded-full bg-gradient-to-br from-[#0066FF] to-[#00D4AA] ring-2 ring-white shadow-sm">
+                          {profile?.avatar_url ? (
+                            <Avatar className="w-8 h-8">
+                              <AvatarImage
+                                src={getAvatarDisplayUrl(profile?.avatar_url)}
+                                alt="Profile picture"
+                              />
+                            </Avatar>
+                          ) : profile?.first_name || profile?.last_name ? (
+                            <Avatar className="w-8 h-8">
+                              <AvatarFallback className="bg-gradient-to-br from-[#0066FF] to-[#00D4AA] text-white text-xs">
+                                {getUserInitials(profile?.first_name, profile?.last_name, profile?.email)}
+                              </AvatarFallback>
+                            </Avatar>
+                          ) : (
+                            <User className="w-5 h-5 text-white" />
+                          )}
                         </div>
                       )}
                       <div className="flex-1">

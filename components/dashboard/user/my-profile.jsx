@@ -467,7 +467,7 @@ export function MyProfile() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold">My Profile</h2>
+        <h2 className="lg:text-3xl text-2xl font-bold">My Profile</h2>
         {!isEditing ? (
           <Button className="cursor-pointer" onClick={() => setIsEditing(true)}>Edit Profile</Button>
         ) : (

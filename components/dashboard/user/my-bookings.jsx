@@ -298,7 +298,7 @@ startxref
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold">My Bookings</h2>
+        <h2 className="lg:text-3xl text-2xl font-bold">My Bookings</h2>
         <Button className="cursor-pointer" onClick={() => router.push("/buy-ticket")}>Book New Ticket</Button>
       </div>
 
