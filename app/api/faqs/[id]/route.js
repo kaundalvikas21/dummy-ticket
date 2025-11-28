@@ -1,19 +1,39 @@
-import { supabase } from '@/lib/supabase'
 import { NextResponse } from 'next/server'
+import {
+  requireAdmin,
+  createSupabaseClientWithAuth,
+  createAuthError,
+  validateInput
+} from "@/lib/auth-helper"
+import { createClient } from '@supabase/supabase-js'
 
 export async function PUT(request, { params }) {
   try {
+    // SECURITY: Require admin authentication
+    const supabase = createSupabaseClientWithAuth(request)
+    await requireAdmin(supabase)
+
     const { id } = await params
-    const { question, answer, status, sort_order } = await request.json()
 
-    if (!question || !answer) {
-      return NextResponse.json(
-        { error: 'Question and answer are required' },
-        { status: 400 }
-      )
-    }
+    // Validate input data
+    const body = await request.json()
+    validateInput(body, ['question', 'answer'])
 
-    const { data: faq, error } = await supabase
+    const { question, answer, status, sort_order } = body
+
+    // Use admin client for database operations to properly handle RLS
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+
+    const { data: faq, error } = await supabaseAdmin
       .from('faqs')
       .update({
         question: question.trim(),
@@ -28,37 +48,50 @@ export async function PUT(request, { params }) {
 
     if (error) {
       console.error('Error updating FAQ:', error)
-      return NextResponse.json(
-        { error: 'Failed to update FAQ' },
-        { status: 500 }
-      )
+      return createAuthError('Failed to update FAQ', 500)
     }
 
     if (!faq) {
-      return NextResponse.json(
-        { error: 'FAQ not found' },
-        { status: 404 }
-      )
+      return createAuthError('FAQ not found', 404)
     }
 
     return NextResponse.json({ faq })
   } catch (error) {
     console.error('Error in PUT /api/faqs/[id]:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+
+    // Handle authentication errors specifically
+    if (error.message.includes('Admin') || error.message.includes('Authentication')) {
+      return createAuthError(error.message, 403)
+    }
+
+    return createAuthError('Internal server error', 500)
   }
 }
 
 export async function DELETE(request, { params }) {
   try {
+    // SECURITY: Require admin authentication
+    const supabase = createSupabaseClientWithAuth(request)
+    await requireAdmin(supabase)
+
     const { id } = await params
+
+    // Use admin client for database operations to properly handle RLS
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
 
     console.log('DELETE FAQ - ID:', id)
 
     // First check if the FAQ exists
-    const { data: existingFaq, error: checkError } = await supabase
+    const { data: existingFaq, error: checkError } = await supabaseAdmin
       .from('faqs')
       .select('id, question, answer, status')
       .eq('id', id)
@@ -67,22 +100,16 @@ export async function DELETE(request, { params }) {
 
     if (checkError) {
       console.error('Error checking existing FAQ for deletion:', checkError)
-      return NextResponse.json(
-        { error: 'Failed to check FAQ existence', details: checkError.message },
-        { status: 500 }
-      )
+      return createAuthError('Failed to check FAQ existence', 500)
     }
 
     if (!existingFaq || existingFaq.length === 0) {
       console.error('FAQ not found for deletion with ID:', id)
-      return NextResponse.json(
-        { error: 'FAQ not found', details: `No FAQ found with ID: ${id}` },
-        { status: 404 }
-      )
+      return createAuthError('FAQ not found', 404)
     }
 
     // Delete the FAQ (cascade delete should handle translations if properly set up)
-    const { data: deletedFaq, error } = await supabase
+    const { data: deletedFaq, error } = await supabaseAdmin
       .from('faqs')
       .delete()
       .eq('id', id)
@@ -92,18 +119,12 @@ export async function DELETE(request, { params }) {
 
     if (error) {
       console.error('Error deleting FAQ:', error)
-      return NextResponse.json(
-        { error: 'Failed to delete FAQ', details: error.message },
-        { status: 500 }
-      )
+      return createAuthError('Failed to delete FAQ', 500)
     }
 
     if (!deletedFaq || deletedFaq.length === 0) {
       console.error('FAQ deletion failed - no rows affected')
-      return NextResponse.json(
-        { error: 'FAQ deletion failed', details: 'No rows were deleted' },
-        { status: 500 }
-      )
+      return createAuthError('FAQ deletion failed - no rows were affected', 500)
     }
 
     console.log('FAQ deleted successfully:', deletedFaq[0])
@@ -113,9 +134,12 @@ export async function DELETE(request, { params }) {
     })
   } catch (error) {
     console.error('Error in DELETE /api/faqs/[id]:', error)
-    return NextResponse.json(
-      { error: 'Internal server error', details: error.message },
-      { status: 500 }
-    )
+
+    // Handle authentication errors specifically
+    if (error.message.includes('Admin') || error.message.includes('Authentication')) {
+      return createAuthError(error.message, 403)
+    }
+
+    return createAuthError('Internal server error', 500)
   }
 }
