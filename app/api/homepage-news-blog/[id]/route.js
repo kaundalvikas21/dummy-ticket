@@ -1,4 +1,10 @@
-import { supabase } from '@/lib/supabase'
+import { NextResponse } from 'next/server'
+import {
+  requireAdmin,
+  createSupabaseClientWithAuth,
+  createAuthError,
+  createSuccessResponse
+} from "@/lib/auth-helper"
 import { createClient } from '@supabase/supabase-js'
 
 // Create admin client for database operations
@@ -167,18 +173,17 @@ export async function GET(request, { params }) {
 
 export async function PUT(request, { params }) {
   try {
+    // SECURITY: Require admin authentication
+    const supabase = createSupabaseClientWithAuth(request)
+    await requireAdmin(supabase)
+
     const { id } = await params
     const body = await request.json()
     const { content_type, external_link, status, translations } = body
 
-    // supabase is already imported
-
     // Validate required fields
     if (content_type && !['news', 'blog'].includes(content_type)) {
-      return new Response(JSON.stringify({ error: 'Invalid content_type' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      })
+      return createAuthError('Invalid content_type', 400)
     }
 
     // Update the main item
@@ -190,7 +195,7 @@ export async function PUT(request, { params }) {
     // Handle content_type change with proper sort_order
     if (content_type) {
       // Get current item to check if content type is changing
-      const { data: currentItem } = await supabase
+      const { data: currentItem } = await supabaseAdmin
         .from('homepage_news_blog')
         .select('content_type, sort_order')
         .eq('id', id)
@@ -198,7 +203,7 @@ export async function PUT(request, { params }) {
 
       if (currentItem && currentItem.content_type !== content_type) {
         // Content type is changing, need to reassign sort_order
-        const { data: maxOrderResult } = await supabase
+        const { data: maxOrderResult } = await supabaseAdmin
           .from('homepage_news_blog')
           .select('sort_order')
           .eq('content_type', content_type)
@@ -213,17 +218,14 @@ export async function PUT(request, { params }) {
 
     updateData.updated_at = new Date().toISOString()
 
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseAdmin
       .from('homepage_news_blog')
       .update(updateData)
       .eq('id', id)
 
     if (updateError) {
       console.error('Error updating homepage news blog item:', updateError)
-      return new Response(JSON.stringify({ error: 'Failed to update homepage news blog item' }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      })
+      return createAuthError('Failed to update homepage news blog item', 500)
     }
 
     // Update translations if provided
@@ -231,7 +233,7 @@ export async function PUT(request, { params }) {
       const translationPromises = Object.entries(translations).map(async ([locale, translationData]) => {
         if (translationData.title) {
           // Upsert translation
-          const { error: translationError } = await supabase
+          const { error: translationError } = await supabaseAdmin
             .from('homepage_news_blog_translations')
             .upsert({
               homepage_news_blog_id: id,
@@ -251,48 +253,42 @@ export async function PUT(request, { params }) {
       await Promise.all(translationPromises)
     }
 
-    return new Response(JSON.stringify({
-      success: true,
-      data: { message: 'Homepage news blog item updated successfully' }
-    }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
+    return createSuccessResponse({
+      message: 'Homepage news blog item updated successfully'
     })
 
   } catch (error) {
     console.error('Error in PUT /api/homepage-news-blog/[id]:', error)
-    return new Response(JSON.stringify({ error: 'Failed to update homepage news blog item' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    })
+
+    // Handle authentication errors specifically
+    if (error.message.includes('Admin') || error.message.includes('Authentication')) {
+      return createAuthError(error.message, 403)
+    }
+
+    return createAuthError('Failed to update homepage news blog item', 500)
   }
 }
 
 export async function POST(request) {
   try {
+    // SECURITY: Require admin authentication
+    const supabase = createSupabaseClientWithAuth(request)
+    await requireAdmin(supabase)
+
     const body = await request.json()
     const { itemId, direction, contentType } = body
 
     // Validate required fields
     if (!itemId || !direction || !contentType) {
-      return new Response(JSON.stringify({ error: 'Missing required fields: itemId, direction, contentType' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      })
+      return createAuthError('Missing required fields: itemId, direction, contentType', 400)
     }
 
     if (!['up', 'down'].includes(direction)) {
-      return new Response(JSON.stringify({ error: 'Invalid direction. Must be "up" or "down"' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      })
+      return createAuthError('Invalid direction. Must be "up" or "down"', 400)
     }
 
     if (!['news', 'blog'].includes(contentType)) {
-      return new Response(JSON.stringify({ error: 'Invalid content type. Must be "news" or "blog"' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      })
+      return createAuthError('Invalid content type. Must be "news" or "blog"', 400)
     }
 
     // Get current item and find adjacent item for swapping
@@ -304,10 +300,7 @@ export async function POST(request) {
       .single()
 
     if (!currentItem) {
-      return new Response(JSON.stringify({ error: 'Item not found' }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' }
-      })
+      return createAuthError('Item not found', 404)
     }
 
     // Find adjacent item
@@ -331,68 +324,59 @@ export async function POST(request) {
     const { data: adjacentItem } = await adjacentItemQuery
 
     if (!adjacentItem || adjacentItem.length === 0) {
-      return new Response(JSON.stringify({ error: `Cannot move ${direction} - ${direction === 'up' ? 'already at top' : 'already at bottom'}` }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      })
+      return createAuthError(`Cannot move ${direction} - ${direction === 'up' ? 'already at top' : 'already at bottom'}`, 400)
     }
 
     // Swap sort orders
     await swapSortOrders(contentType, itemId, adjacentItem[0].id)
 
-    return new Response(JSON.stringify({
-      success: true,
-      data: { message: `Successfully moved item ${direction}` }
-    }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
+    return createSuccessResponse({
+      message: `Successfully moved item ${direction}`
     })
 
   } catch (error) {
     console.error('Error in POST /api/homepage-news-blog/[id] (reorder):', error)
-    return new Response(JSON.stringify({ error: 'Failed to reorder item' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    })
+
+    // Handle authentication errors specifically
+    if (error.message.includes('Admin') || error.message.includes('Authentication')) {
+      return createAuthError(error.message, 403)
+    }
+
+    return createAuthError('Failed to reorder item', 500)
   }
 }
 
 export async function DELETE(request, { params }) {
   try {
+    // SECURITY: Require admin authentication
+    const supabase = createSupabaseClientWithAuth(request)
+    await requireAdmin(supabase)
+
     const { id } = await params
 
     // Get the item content type before deletion for order refresh
-    const { data: itemToDelete } = await supabase
+    const { data: itemToDelete } = await supabaseAdmin
       .from('homepage_news_blog')
       .select('content_type')
       .eq('id', id)
       .single()
 
     if (!itemToDelete) {
-      return new Response(JSON.stringify({ error: 'Homepage news blog item not found' }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' }
-      })
+      return createAuthError('Homepage news blog item not found', 404)
     }
 
     // Delete the homepage news blog item (translations will be deleted automatically due to CASCADE)
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('homepage_news_blog')
       .delete()
       .eq('id', id)
 
     if (error) {
       if (error.code === 'PGRST116') {
-        return new Response(JSON.stringify({ error: 'Homepage news blog item not found' }), {
-          status: 404,
-          headers: { 'Content-Type': 'application/json' }
-        })
+        return createAuthError('Homepage news blog item not found', 404)
       }
       console.error('Error deleting homepage news blog item:', error)
-      return new Response(JSON.stringify({ error: 'Failed to delete homepage news blog item' }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      })
+      return createAuthError('Failed to delete homepage news blog item', 500)
     }
 
     // Refresh sort orders for the content type to ensure gapless sequence
@@ -403,19 +387,18 @@ export async function DELETE(request, { params }) {
       // Don't fail the delete operation, just log the error
     }
 
-    return new Response(JSON.stringify({
-      success: true,
-      data: { message: 'Homepage news blog item deleted successfully' }
-    }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
+    return createSuccessResponse({
+      message: 'Homepage news blog item deleted successfully'
     })
 
   } catch (error) {
     console.error('Error in DELETE /api/homepage-news-blog/[id]:', error)
-    return new Response(JSON.stringify({ error: 'Failed to delete homepage news blog item' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    })
+
+    // Handle authentication errors specifically
+    if (error.message.includes('Admin') || error.message.includes('Authentication')) {
+      return createAuthError(error.message, 403)
+    }
+
+    return createAuthError('Failed to delete homepage news blog item', 500)
   }
 }
