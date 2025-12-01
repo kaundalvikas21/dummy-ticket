@@ -44,8 +44,8 @@ export async function GET(request, { params }) {
     const transformedItem = {
       id: item.id,
       section_id: item.section_id,
-      question: item.faq_item_translations?.[0]?.question || item.question,
-      answer: item.faq_item_translations?.[0]?.answer || item.answer,
+      question: item.faq_page_item_translations?.[0]?.question || item.question,
+      answer: item.faq_page_item_translations?.[0]?.answer || item.answer,
       status: item.status,
       sort_order: item.sort_order
     }

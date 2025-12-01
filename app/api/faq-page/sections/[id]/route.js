@@ -54,7 +54,7 @@ export async function GET(request, { params }) {
     // Transform the data to include fallbacks
     const transformedSection = {
       id: section.id,
-      title: section.faq_section_translations?.[0]?.title || section.title,
+      title: section.faq_page_section_translations?.[0]?.title || section.title,
       icon: section.icon,
       status: section.status,
       sort_order: section.sort_order,
@@ -62,8 +62,8 @@ export async function GET(request, { params }) {
         .sort((a, b) => a.sort_order - b.sort_order)
         .map(item => ({
           id: item.id,
-          question: item.faq_item_translations?.[0]?.question || item.question,
-          answer: item.faq_item_translations?.[0]?.answer || item.answer,
+          question: item.faq_page_item_translations?.[0]?.question || item.question,
+          answer: item.faq_page_item_translations?.[0]?.answer || item.answer,
           status: item.status,
           sort_order: item.sort_order
         }))

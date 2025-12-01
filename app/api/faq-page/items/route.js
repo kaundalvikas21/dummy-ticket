@@ -13,7 +13,14 @@ export async function GET(request) {
     const locale = searchParams.get('locale') || 'en'
     const includeInactive = searchParams.get('include_inactive') === 'true'
 
-    let query = supabase
+    // Use admin authentication if requesting inactive items
+    let supabaseClient = supabase
+    if (includeInactive) {
+      supabaseClient = createSupabaseClientWithAuth(request)
+      await requireAdmin(supabaseClient)
+    }
+
+    let query = supabaseClient
       .from('faq_page_items')
       .select(`
         *,
@@ -47,8 +54,8 @@ export async function GET(request) {
     const transformedItems = items.map(item => ({
       id: item.id,
       section_id: item.section_id,
-      question: item.faq_item_translations?.[0]?.question || item.question,
-      answer: item.faq_item_translations?.[0]?.answer || item.answer,
+      question: item.faq_page_item_translations?.[0]?.question || item.question,
+      answer: item.faq_page_item_translations?.[0]?.answer || item.answer,
       status: item.status,
       sort_order: item.sort_order
     }))
@@ -56,8 +63,14 @@ export async function GET(request) {
     return NextResponse.json({ items: transformedItems })
   } catch (error) {
     console.error('Error in GET /api/faq-page/items:', error)
+
+    // Handle authentication errors specifically
+    if (error.message.includes('Authentication') || error.message.includes('Admin')) {
+      return createAuthError(error.message, 401)
+    }
+
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', details: error.message },
       { status: 500 }
     )
   }

@@ -565,7 +565,7 @@ export function FAQPageManagement() {
                             </Badge>
                           </div>
                           <p className="text-sm text-gray-600">
-                            {section.items?.length || 0} FAQ items
+                            {section.items?.length || 0} FAQ items • Order: {section.sort_order}
                           </p>
                         </div>
                       </div>
@@ -636,6 +636,7 @@ export function FAQPageManagement() {
                                   >
                                     {item.status}
                                   </Badge>
+                                  <span className="text-xs text-gray-500">Order: {item.sort_order}</span>
                                 </div>
                               </div>
 
@@ -737,6 +738,19 @@ export function FAQPageManagement() {
               </select>
             </div>
 
+            <div>
+              <Label htmlFor="section-sort-order">Sort Order</Label>
+              <Input
+                id="section-sort-order"
+                type="number"
+                value={sectionFormData.sort_order}
+                onChange={(e) => setSectionFormData({ ...sectionFormData, sort_order: parseInt(e.target.value) || 0 })}
+                placeholder="Enter sort order (0 = first)"
+                min="0"
+              />
+              <p className="text-xs text-gray-500 mt-1">Lower numbers appear first. Leave empty to auto-assign.</p>
+            </div>
+
             <div className="flex items-center space-x-2">
               <Switch
                 id="section-status"
@@ -799,6 +813,19 @@ export function FAQPageManagement() {
                 rows={4}
                 required
               />
+            </div>
+
+            <div>
+              <Label htmlFor="item-sort-order">Sort Order</Label>
+              <Input
+                id="item-sort-order"
+                type="number"
+                value={itemFormData.sort_order}
+                onChange={(e) => setItemFormData({ ...itemFormData, sort_order: parseInt(e.target.value) || 0 })}
+                placeholder="Enter sort order (0 = first)"
+                min="0"
+              />
+              <p className="text-xs text-gray-500 mt-1">Lower numbers appear first. Leave empty to auto-assign.</p>
             </div>
 
             <div className="flex items-center space-x-2">

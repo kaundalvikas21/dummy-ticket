@@ -28,8 +28,15 @@ export async function GET(request) {
     const locale = searchParams.get('locale') || 'en'
     const includeInactive = searchParams.get('include_inactive') === 'true'
 
+    // Use admin authentication if requesting inactive sections
+    let supabaseClient = supabase
+    if (includeInactive) {
+      supabaseClient = createSupabaseClientWithAuth(request)
+      await requireAdmin(supabaseClient)
+    }
+
     // Get sections with their items and translations
-    let query = supabase
+    let query = supabaseClient
       .from('faq_page_sections')
       .select(`
         *,
@@ -88,8 +95,14 @@ export async function GET(request) {
     return NextResponse.json({ sections: transformedSections })
   } catch (error) {
     console.error('Error in GET /api/faq-page/sections:', error)
+
+    // Handle authentication errors specifically
+    if (error.message.includes('Authentication') || error.message.includes('Admin')) {
+      return createAuthError(error.message, 401)
+    }
+
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', details: error.message },
       { status: 500 }
     )
   }
