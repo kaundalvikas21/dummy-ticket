@@ -1,8 +1,17 @@
 import { supabase } from '@/lib/supabase'
 import { NextResponse } from 'next/server'
+import {
+  requireAdmin,
+  createSupabaseClientWithAuth,
+  createAuthError
+} from "@/lib/auth-helper"
 
 export async function POST(request, { params }) {
   try {
+    // Check admin authentication using Supabase
+    const supabase = createSupabaseClientWithAuth(request)
+    await requireAdmin(supabase)
+
     const { id } = await params
     const { translations } = await request.json()
 
@@ -114,6 +123,12 @@ export async function POST(request, { params }) {
 
   } catch (error) {
     console.error('Error in POST /api/faq-page/sections/[id]/translations/batch:', error)
+
+    // Handle authentication errors specifically
+    if (error.message.includes('Authentication') || error.message.includes('Admin')) {
+      return createAuthError(error.message, 401)
+    }
+
     return NextResponse.json(
       { error: 'Internal server error', details: error.message },
       { status: 500 }

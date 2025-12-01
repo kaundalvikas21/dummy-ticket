@@ -1,5 +1,10 @@
 import { supabase } from '@/lib/supabase'
 import { NextResponse } from 'next/server'
+import {
+  requireAdmin,
+  createSupabaseClientWithAuth,
+  createAuthError
+} from "@/lib/auth-helper"
 
 export async function GET(request, { params }) {
   try {
@@ -57,6 +62,10 @@ export async function GET(request, { params }) {
 
 export async function PUT(request, { params }) {
   try {
+    // Check admin authentication using Supabase
+    const supabase = createSupabaseClientWithAuth(request)
+    await requireAdmin(supabase)
+
     const { id } = await params
     const { section_id, question, answer, status, sort_order } = await request.json()
 
@@ -118,6 +127,12 @@ export async function PUT(request, { params }) {
     return NextResponse.json({ item: items[0] })
   } catch (error) {
     console.error('Error in PUT /api/faq-page/items/[id]:', error)
+
+    // Handle authentication errors specifically
+    if (error.message.includes('Authentication') || error.message.includes('Admin')) {
+      return createAuthError(error.message, 401)
+    }
+
     return NextResponse.json(
       { error: 'Internal server error', details: error.message },
       { status: 500 }
@@ -127,6 +142,10 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
+    // Check admin authentication using Supabase
+    const supabase = createSupabaseClientWithAuth(request)
+    await requireAdmin(supabase)
+
     const { id } = await params
 
     // First check if the item exists
@@ -179,6 +198,12 @@ export async function DELETE(request, { params }) {
     })
   } catch (error) {
     console.error('Error in DELETE /api/faq-page/items/[id]:', error)
+
+    // Handle authentication errors specifically
+    if (error.message.includes('Authentication') || error.message.includes('Admin')) {
+      return createAuthError(error.message, 401)
+    }
+
     return NextResponse.json(
       { error: 'Internal server error', details: error.message },
       { status: 500 }

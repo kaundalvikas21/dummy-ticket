@@ -21,6 +21,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { useToast } from "@/hooks/use-toast"
+import { apiClient } from "@/lib/api-client"
 import { TranslationTabs } from "@/components/admin/translation/TranslationTabs"
 import { SectionTranslationForm } from "@/components/admin/translation/SectionTranslationForm"
 import { ItemTranslationForm } from "@/components/admin/translation/ItemTranslationForm"
@@ -71,16 +72,15 @@ export function FAQPageManagement() {
   // Fetch sections with items
   const fetchSections = async () => {
     try {
-      const response = await fetch('/api/faq-page/sections?include_inactive=true')
-      const result = await response.json()
-
-      if (response.ok) {
-        setSections(result.sections || [])
-      } else {
-        console.error('Failed to fetch FAQ page sections:', result.error)
-      }
+      const result = await apiClient.get('/api/faq-page/sections?include_inactive=true')
+      setSections(result.sections || [])
     } catch (error) {
       console.error('Error fetching FAQ page sections:', error)
+      toast({
+        title: "Error",
+        description: "Failed to fetch FAQ page sections",
+        variant: "destructive"
+      })
     } finally {
       setLoading(false)
     }
@@ -123,41 +123,26 @@ export function FAQPageManagement() {
   const handleSectionSubmit = async (e) => {
     e.preventDefault()
     try {
-      const url = selectedSection ? `/api/faq-page/sections/${selectedSection.id}` : '/api/faq-page/sections'
-      const method = selectedSection ? 'PUT' : 'POST'
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(sectionFormData),
-      })
-
-      const result = await response.json()
-
-      if (response.ok) {
-        await fetchSections()
-        setShowAddSectionDialog(false)
-        setShowEditSectionDialog(false)
-        resetSectionForm()
-        setSelectedSection(null)
-        toast({
-          title: "Success",
-          description: `Section ${selectedSection ? 'updated' : 'created'} successfully`
-        })
+      if (selectedSection) {
+        await apiClient.put(`/api/faq-page/sections/${selectedSection.id}`, sectionFormData)
       } else {
-        toast({
-          title: "Error",
-          description: `Failed to ${selectedSection ? 'update' : 'create'} section: ${result.error}`,
-          variant: "destructive"
-        })
+        await apiClient.post('/api/faq-page/sections', sectionFormData)
       }
+
+      await fetchSections()
+      setShowAddSectionDialog(false)
+      setShowEditSectionDialog(false)
+      resetSectionForm()
+      setSelectedSection(null)
+      toast({
+        title: "Success",
+        description: `Section ${selectedSection ? 'updated' : 'created'} successfully`
+      })
     } catch (error) {
       console.error('Error saving section:', error)
       toast({
         title: "Error",
-        description: "Network error occurred. Please try again.",
+        description: `Failed to ${selectedSection ? 'update' : 'create'} section: ${error.message}`,
         variant: "destructive"
       })
     }
@@ -167,41 +152,26 @@ export function FAQPageManagement() {
   const handleItemSubmit = async (e) => {
     e.preventDefault()
     try {
-      const url = selectedItem ? `/api/faq-page/items/${selectedItem.id}` : '/api/faq-page/items'
-      const method = selectedItem ? 'PUT' : 'POST'
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(itemFormData),
-      })
-
-      const result = await response.json()
-
-      if (response.ok) {
-        await fetchSections()
-        setShowAddItemDialog(false)
-        setShowEditItemDialog(false)
-        resetItemForm()
-        setSelectedItem(null)
-        toast({
-          title: "Success",
-          description: `FAQ item ${selectedItem ? 'updated' : 'created'} successfully`
-        })
+      if (selectedItem) {
+        await apiClient.put(`/api/faq-page/items/${selectedItem.id}`, itemFormData)
       } else {
-        toast({
-          title: "Error",
-          description: `Failed to ${selectedItem ? 'update' : 'create'} FAQ item: ${result.error}`,
-          variant: "destructive"
-        })
+        await apiClient.post('/api/faq-page/items', itemFormData)
       }
+
+      await fetchSections()
+      setShowAddItemDialog(false)
+      setShowEditItemDialog(false)
+      resetItemForm()
+      setSelectedItem(null)
+      toast({
+        title: "Success",
+        description: `FAQ item ${selectedItem ? 'updated' : 'created'} successfully`
+      })
     } catch (error) {
       console.error('Error saving FAQ item:', error)
       toast({
         title: "Error",
-        description: "Network error occurred. Please try again.",
+        description: `Failed to ${selectedItem ? 'update' : 'create'} FAQ item: ${error.message}`,
         variant: "destructive"
       })
     }
@@ -210,44 +180,27 @@ export function FAQPageManagement() {
   // Handle delete
   const handleDelete = async () => {
     try {
-      let url, type
       if (selectedSection) {
-        url = `/api/faq-page/sections/${selectedSection.id}`
-        type = 'section'
+        await apiClient.delete(`/api/faq-page/sections/${selectedSection.id}`)
       } else if (selectedItem) {
-        url = `/api/faq-page/items/${selectedItem.id}`
-        type = 'item'
+        await apiClient.delete(`/api/faq-page/items/${selectedItem.id}`)
       } else {
         return
       }
 
-      const response = await fetch(url, {
-        method: 'DELETE',
+      await fetchSections()
+      setShowDeleteDialog(false)
+      setSelectedSection(null)
+      setSelectedItem(null)
+      toast({
+        title: "Success",
+        description: `${selectedSection ? 'Section' : 'FAQ item'} deleted successfully`
       })
-
-      const result = await response.json()
-
-      if (response.ok) {
-        await fetchSections()
-        setShowDeleteDialog(false)
-        setSelectedSection(null)
-        setSelectedItem(null)
-        toast({
-          title: "Success",
-          description: `${type.charAt(0).toUpperCase() + type.slice(1)} deleted successfully`
-        })
-      } else {
-        toast({
-          title: "Error",
-          description: `Failed to delete ${type}: ${result.error}`,
-          variant: "destructive"
-        })
-      }
     } catch (error) {
       console.error('Error deleting:', error)
       toast({
         title: "Error",
-        description: "Network error occurred. Please try again.",
+        description: `Failed to delete ${selectedSection ? 'section' : 'FAQ item'}: ${error.message}`,
         variant: "destructive"
       })
     }
@@ -326,16 +279,12 @@ export function FAQPageManagement() {
   // Fetch translations
   const fetchSectionTranslations = async (sectionId) => {
     try {
-      const response = await fetch(`/api/faq-page/sections/${sectionId}/translations`)
-      const result = await response.json()
-
-      if (response.ok) {
-        const translations = {}
-        result.translations?.forEach(t => {
-          translations[t.locale] = t
-        })
-        setSectionTranslations(translations)
-      }
+      const result = await apiClient.get(`/api/faq-page/sections/${sectionId}/translations`)
+      const translations = {}
+      result.translations?.forEach(t => {
+        translations[t.locale] = t
+      })
+      setSectionTranslations(translations)
     } catch (error) {
       console.error('Error fetching section translations:', error)
     }
@@ -343,16 +292,12 @@ export function FAQPageManagement() {
 
   const fetchItemTranslations = async (itemId) => {
     try {
-      const response = await fetch(`/api/faq-page/items/${itemId}/translations`)
-      const result = await response.json()
-
-      if (response.ok) {
-        const translations = {}
-        result.translations?.forEach(t => {
-          translations[t.locale] = t
-        })
-        setItemTranslations(translations)
-      }
+      const result = await apiClient.get(`/api/faq-page/items/${itemId}/translations`)
+      const translations = {}
+      result.translations?.forEach(t => {
+        translations[t.locale] = t
+      })
+      setItemTranslations(translations)
     } catch (error) {
       console.error('Error fetching item translations:', error)
     }
@@ -421,46 +366,30 @@ export function FAQPageManagement() {
         return
       }
 
-      const response = await fetch(`/api/faq-page/sections/${selectedSection.id}/translations/batch`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          translations: translationsToSave
-        }),
+      const result = await apiClient.post(`/api/faq-page/sections/${selectedSection.id}/translations/batch`, {
+        translations: translationsToSave
       })
 
-      const result = await response.json()
+      // Show success toast
+      toast({
+        title: "Translations saved successfully!",
+        description: result.message || `Saved ${result.summary?.success || 0} translations for this section.`,
+      })
 
-      if (response.ok) {
-        // Show success toast
-        toast({
-          title: "Translations saved successfully!",
-          description: result.message || `Saved ${result.summary?.success || 0} translations for this section.`,
-        })
+      // Close the modal
+      setShowSectionTranslationDialog(false)
+      setSelectedSection(null)
+      setSectionTranslations({})
+      setSectionTranslationData({})
+      setActiveLocale('en')
 
-        // Close the modal
-        setShowSectionTranslationDialog(false)
-        setSelectedSection(null)
-        setSectionTranslations({})
-        setSectionTranslationData({})
-        setActiveLocale('en')
-
-        // Refresh sections data to show updated translations
-        await fetchSections()
-      } else {
-        toast({
-          title: "Failed to save translations",
-          description: result.error || "An error occurred while saving translations.",
-          variant: "destructive"
-        })
-      }
+      // Refresh sections data to show updated translations
+      await fetchSections()
     } catch (error) {
       console.error('Error in bulk save:', error)
       toast({
         title: "Error",
-        description: "An unexpected error occurred while saving translations.",
+        description: `Failed to save translations: ${error.message}`,
         variant: "destructive"
       })
     } finally {
@@ -484,46 +413,30 @@ export function FAQPageManagement() {
         return
       }
 
-      const response = await fetch(`/api/faq-page/items/${selectedItem.id}/translations/batch`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          translations: translationsToSave
-        }),
+      const result = await apiClient.post(`/api/faq-page/items/${selectedItem.id}/translations/batch`, {
+        translations: translationsToSave
       })
 
-      const result = await response.json()
+      // Show success toast
+      toast({
+        title: "Translations saved successfully!",
+        description: result.message || `Saved ${result.summary?.success || 0} translations for this FAQ item.`,
+      })
 
-      if (response.ok) {
-        // Show success toast
-        toast({
-          title: "Translations saved successfully!",
-          description: result.message || `Saved ${result.summary?.success || 0} translations for this FAQ item.`,
-        })
+      // Close the modal
+      setShowItemTranslationDialog(false)
+      setSelectedItem(null)
+      setItemTranslations({})
+      setItemTranslationData({})
+      setActiveLocale('en')
 
-        // Close the modal
-        setShowItemTranslationDialog(false)
-        setSelectedItem(null)
-        setItemTranslations({})
-        setItemTranslationData({})
-        setActiveLocale('en')
-
-        // Refresh sections data to show updated translations
-        await fetchSections()
-      } else {
-        toast({
-          title: "Failed to save translations",
-          description: result.error || "An error occurred while saving translations.",
-          variant: "destructive"
-        })
-      }
+      // Refresh sections data to show updated translations
+      await fetchSections()
     } catch (error) {
       console.error('Error in bulk save:', error)
       toast({
         title: "Error",
-        description: "An unexpected error occurred while saving translations.",
+        description: `Failed to save translations: ${error.message}`,
         variant: "destructive"
       })
     } finally {

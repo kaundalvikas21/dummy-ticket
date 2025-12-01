@@ -1,5 +1,10 @@
 import { supabase } from '@/lib/supabase'
 import { NextResponse } from 'next/server'
+import {
+  requireAdmin,
+  createSupabaseClientWithAuth,
+  createAuthError
+} from "@/lib/auth-helper"
 
 export async function GET(request, { params }) {
   try {
@@ -58,6 +63,10 @@ export async function GET(request, { params }) {
 
 export async function POST(request, { params }) {
   try {
+    // Check admin authentication using Supabase
+    const supabase = createSupabaseClientWithAuth(request)
+    await requireAdmin(supabase)
+
     const { id } = await params
     const { locale, question, answer } = await request.json()
 
@@ -138,6 +147,12 @@ export async function POST(request, { params }) {
     })
   } catch (error) {
     console.error('Error in POST /api/faq-page/items/[id]/translations:', error)
+
+    // Handle authentication errors specifically
+    if (error.message.includes('Authentication') || error.message.includes('Admin')) {
+      return createAuthError(error.message, 401)
+    }
+
     return NextResponse.json(
       { error: 'Internal server error', details: error.message },
       { status: 500 }
@@ -147,6 +162,10 @@ export async function POST(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
+    // Check admin authentication using Supabase
+    const supabase = createSupabaseClientWithAuth(request)
+    await requireAdmin(supabase)
+
     const { id } = await params
     const { searchParams } = new URL(request.url)
     const locale = searchParams.get('locale')
@@ -187,6 +206,12 @@ export async function DELETE(request, { params }) {
     })
   } catch (error) {
     console.error('Error in DELETE /api/faq-page/items/[id]/translations:', error)
+
+    // Handle authentication errors specifically
+    if (error.message.includes('Authentication') || error.message.includes('Admin')) {
+      return createAuthError(error.message, 401)
+    }
+
     return NextResponse.json(
       { error: 'Internal server error', details: error.message },
       { status: 500 }
