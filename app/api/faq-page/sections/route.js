@@ -73,13 +73,15 @@ export async function GET(request) {
       )
     }
 
-    // Transform the data to include fallbacks and proper structure
+    // Transform the data to include fallbacks, localized content, and raw translation data
     const transformedSections = sections.map(section => ({
       id: section.id,
       title: getLocalizedTitle(section, locale),
       icon: section.icon,
       status: section.status,
       sort_order: section.sort_order,
+      // Include raw translation data for editing
+      section_translations: section.faq_page_section_translations || [],
       items: (section.faq_page_items || [])
         .filter(item => includeInactive || item.status === 'active')
         .sort((a, b) => a.sort_order - b.sort_order)
@@ -88,7 +90,9 @@ export async function GET(request) {
           question: getLocalizedQuestion(item, locale),
           answer: getLocalizedAnswer(item, locale),
           status: item.status,
-          sort_order: item.sort_order
+          sort_order: item.sort_order,
+          // Include raw translation data for editing
+          item_translations: item.faq_page_item_translations || []
         }))
     }))
 
