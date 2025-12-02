@@ -136,6 +136,27 @@ export async function POST(request) {
       )
     }
 
+    // Create English translation entry (same as default content)
+    const { data: englishTranslation, error: translationError } = await supabase
+      .from('faq_page_item_translations')
+      .insert([
+        {
+          item_id: item.id,
+          locale: 'en',
+          question: item.question, // Use the same question as the default
+          answer: item.answer,     // Use the same answer as the default
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+      ])
+      .select()
+      .single()
+
+    if (translationError) {
+      console.error('Error creating English item translation:', translationError)
+      // Continue even if translation creation fails, but log the error
+    }
+
     return NextResponse.json({ item }, { status: 201 })
   } catch (error) {
     console.error('Error in POST /api/faq-page/items:', error)

@@ -22,10 +22,9 @@ import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { useToast } from "@/hooks/use-toast"
 import { apiClient } from "@/lib/api-client"
-import { TranslationTabs } from "@/components/admin/translation/TranslationTabs"
+import { TranslationTabs } from "@/components/ui/translation-tabs"
 import { LOCALES, DEFAULT_LOCALE } from "@/lib/locales"
 import { FlagIcon } from "@/components/ui/flag-icon"
-import { Check } from "lucide-react"
 
 export function FAQPageManagement() {
   const { toast } = useToast()

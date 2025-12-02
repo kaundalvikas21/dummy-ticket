@@ -163,6 +163,26 @@ export async function POST(request) {
       )
     }
 
+    // Create English translation entry (same as default content)
+    const { data: englishTranslation, error: translationError } = await supabase
+      .from('faq_page_section_translations')
+      .insert([
+        {
+          section_id: section.id,
+          locale: 'en',
+          title: section.title, // Use the same title as the default
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+      ])
+      .select()
+      .single()
+
+    if (translationError) {
+      console.error('Error creating English section translation:', translationError)
+      // Continue even if translation creation fails, but log the error
+    }
+
     return NextResponse.json({ section }, { status: 201 })
   } catch (error) {
     console.error('Error in POST /api/faq-page/sections:', error)

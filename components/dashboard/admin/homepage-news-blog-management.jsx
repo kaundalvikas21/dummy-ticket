@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { toast } from "@/hooks/use-toast"
 import { apiClient } from "@/lib/api-client"
-import { TranslationTabs } from "@/components/admin/translation/TranslationTabs"
+import { TranslationTabs } from "@/components/ui/translation-tabs"
 import { Newspaper, BookOpen, Plus, Edit, Trash2, ExternalLink, Globe, CheckSquare, Square, X, MoveUp, MoveDown } from "lucide-react"
 
 const SUPPORTED_LOCALES = [
