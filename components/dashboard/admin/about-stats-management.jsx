@@ -170,21 +170,22 @@ export function AboutStatsManagement() {
         sort_order: formData.sort_order
       }
 
-      // Create/update main stat
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(mainStatData),
-      })
+      // Create/update main stat using apiClient for authentication
+      let response
+      if (method === 'POST') {
+        response = await apiClient.post('/api/about/stats', mainStatData)
+      } else {
+        response = await apiClient.put(`/api/about/stats/${selectedStat.id}`, mainStatData)
+      }
 
-      const result = await response.json()
+      // apiClient already handles JSON parsing
+      const result = response
 
       // Dismiss saving toast
       savingToast.dismiss()
 
-      if (response.ok) {
+      // Check if the operation was successful
+      if (result.stat) {
         const statId = selectedStat?.id || result.stat.id
 
         // Handle translations for all languages (excluding English value since it's stored in main table)
@@ -203,16 +204,21 @@ export function AboutStatsManagement() {
 
         if (translationsToSave.length > 0) {
           const savePromises = translationsToSave.map(async (translation) => {
-            const translationResponse = await fetch('/api/about-stats-translations', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(translation),
-            })
-            const translationResult = await translationResponse.json()
-            return { response: translationResponse, result: translationResult }
+            try {
+              const translationResult = await apiClient.post('/api/about-stats-translations', translation)
+              return { success: true, result: translationResult }
+            } catch (error) {
+              console.error('Error saving translation:', error)
+              return { success: false, error: error.message }
+            }
           })
 
-          await Promise.all(savePromises)
+          const results = await Promise.all(savePromises)
+          const failedTranslations = results.filter(r => !r.success)
+
+          if (failedTranslations.length > 0) {
+            console.error('Some translations failed to save:', failedTranslations)
+          }
         }
 
         await fetchStats()
@@ -250,13 +256,9 @@ export function AboutStatsManagement() {
     if (!selectedStat) return
 
     try {
-      const response = await fetch(`/api/about/stats/${selectedStat.id}`, {
-        method: 'DELETE',
-      })
+      const result = await apiClient.delete(`/api/about/stats/${selectedStat.id}`)
 
-      const result = await response.json()
-
-      if (response.ok) {
+      if (result.stat) {
         await fetchStats()
         setShowDeleteDialog(false)
         setSelectedStat(null)
@@ -285,18 +287,12 @@ export function AboutStatsManagement() {
   // Toggle status
   const toggleStatus = async (stat) => {
     try {
-      const response = await fetch(`/api/about/stats/${stat.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...stat,
-          status: stat.status === 'active' ? 'inactive' : 'active'
-        }),
+      const result = await apiClient.put(`/api/about/stats/${stat.id}`, {
+        ...stat,
+        status: stat.status === 'active' ? 'inactive' : 'active'
       })
 
-      if (response.ok) {
+      if (result.stat) {
         await fetchStats()
         toast({
           title: "Success",
@@ -316,18 +312,12 @@ export function AboutStatsManagement() {
   // Update stat order
   const updateStatOrder = async (stat, newOrder) => {
     try {
-      const response = await fetch(`/api/about/stats/${stat.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...stat,
-          sort_order: parseInt(newOrder)
-        }),
+      const result = await apiClient.put(`/api/about/stats/${stat.id}`, {
+        ...stat,
+        sort_order: parseInt(newOrder)
       })
 
-      if (response.ok) {
+      if (result.stat) {
         await fetchStats()
         toast({
           title: "Success",

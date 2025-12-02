@@ -1,35 +1,48 @@
 import { supabase } from '@/lib/supabase'
+import {
+  requireAdmin,
+  createSupabaseClientWithAuth,
+  createAuthError,
+  validateInput
+} from "@/lib/auth-helper"
+import { createClient } from '@supabase/supabase-js'
 
 export async function POST(request, { params }) {
   try {
+    // SECURITY: Require admin authentication
+    const supabase = createSupabaseClientWithAuth(request)
+    await requireAdmin(supabase)
+
     const { id } = await params
     const body = await request.json()
 
     // Validate required fields
     const { translations } = body
     if (!translations || !Array.isArray(translations)) {
-      return new Response(JSON.stringify({
-        error: 'Missing required field: translations (must be an array)'
-      }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      })
+      return createAuthError('Missing required field: translations (must be an array)', 400)
     }
 
     // Validate each translation object
     for (const translation of translations) {
       if (!translation.locale || !translation.title || !translation.content) {
-        return new Response(JSON.stringify({
-          error: 'Each translation must have: locale, title, content'
-        }), {
-          status: 400,
-          headers: { 'Content-Type': 'application/json' }
-        })
+        return createAuthError('Each translation must have: locale, title, content', 400)
       }
     }
 
+    // Use admin client for database operations to properly handle RLS
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+
     // Verify the dummy ticket exists
-    const { data: ticket, error: ticketError } = await supabase
+    const { data: ticket, error: ticketError } = await supabaseAdmin
       .from('about_dummy_tickets')
       .select('id')
       .eq('id', id)
@@ -37,10 +50,7 @@ export async function POST(request, { params }) {
 
     if (ticketError) {
       if (ticketError.code === 'PGRST116') {
-        return new Response(JSON.stringify({ error: 'Dummy ticket not found' }), {
-          status: 404,
-          headers: { 'Content-Type': 'application/json' }
-        })
+        return createAuthError('Dummy ticket not found', 404)
       }
       throw ticketError
     }
@@ -57,7 +67,7 @@ export async function POST(request, { params }) {
         const { locale, title, content } = translationData
 
         // Check if translation already exists
-        const { data: existingTranslation, error: checkError } = await supabase
+        const { data: existingTranslation, error: checkError } = await supabaseAdmin
           .from('about_dummy_tickets_translations')
           .select('id')
           .eq('ticket_id', id)
@@ -70,7 +80,7 @@ export async function POST(request, { params }) {
 
         if (existingTranslation) {
           // Update existing translation
-          const { data: updatedTranslation, error: updateError } = await supabase
+          const { data: updatedTranslation, error: updateError } = await supabaseAdmin
             .from('about_dummy_tickets_translations')
             .update({
               title,
@@ -91,7 +101,7 @@ export async function POST(request, { params }) {
           }
         } else {
           // Create new translation
-          const { data: createdTranslation, error: createError } = await supabase
+          const { data: createdTranslation, error: createError } = await supabaseAdmin
             .from('about_dummy_tickets_translations')
             .insert({
               ticket_id: id,
@@ -133,34 +143,39 @@ export async function POST(request, { params }) {
 
   } catch (error) {
     console.error('Error in POST /api/about/dummy-tickets/[id]/translations/batch:', error)
-    return new Response(JSON.stringify({
-      error: 'Failed to process batch translations',
-      details: error.message
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    })
+    return createAuthError('Failed to process batch translations', 500)
   }
 }
 
 export async function PUT(request, { params }) {
   try {
+    // SECURITY: Require admin authentication
+    const supabase = createSupabaseClientWithAuth(request)
+    await requireAdmin(supabase)
+
     const { id } = await params
     const body = await request.json()
 
     // For PUT, we'll replace all translations for this dummy ticket
     const { translations } = body
     if (!translations || !Array.isArray(translations)) {
-      return new Response(JSON.stringify({
-        error: 'Missing required field: translations (must be an array)'
-      }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      })
+      return createAuthError('Missing required field: translations (must be an array)', 400)
     }
 
+    // Use admin client for database operations to properly handle RLS
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+
     // Verify the dummy ticket exists
-    const { data: ticket, error: ticketError } = await supabase
+    const { data: ticket, error: ticketError } = await supabaseAdmin
       .from('about_dummy_tickets')
       .select('id')
       .eq('id', id)
@@ -168,16 +183,13 @@ export async function PUT(request, { params }) {
 
     if (ticketError) {
       if (ticketError.code === 'PGRST116') {
-        return new Response(JSON.stringify({ error: 'Dummy ticket not found' }), {
-          status: 404,
-          headers: { 'Content-Type': 'application/json' }
-        })
+        return createAuthError('Dummy ticket not found', 404)
       }
       throw ticketError
     }
 
     // Delete all existing translations for this dummy ticket
-    const { error: deleteError } = await supabase
+    const { error: deleteError } = await supabaseAdmin
       .from('about_dummy_tickets_translations')
       .delete()
       .eq('ticket_id', id)
@@ -194,7 +206,7 @@ export async function PUT(request, { params }) {
       content: t.content
     }))
 
-    const { data: insertedTranslations, error: insertError } = await supabase
+    const { data: insertedTranslations, error: insertError } = await supabaseAdmin
       .from('about_dummy_tickets_translations')
       .insert(translationsToInsert)
       .select()
@@ -211,12 +223,6 @@ export async function PUT(request, { params }) {
 
   } catch (error) {
     console.error('Error in PUT /api/about/dummy-tickets/[id]/translations/batch:', error)
-    return new Response(JSON.stringify({
-      error: 'Failed to replace translations',
-      details: error.message
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    })
+    return createAuthError('Failed to replace translations', 500)
   }
 }

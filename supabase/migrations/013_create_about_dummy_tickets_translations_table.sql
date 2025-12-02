@@ -29,21 +29,4 @@ CREATE INDEX idx_about_dummy_tickets_translations_locale ON about_dummy_tickets_
 -- Enable Row Level Security
 ALTER TABLE about_dummy_tickets_translations ENABLE ROW LEVEL SECURITY;
 
--- RLS Policies using Supabase Auth patterns
--- Public read access for translations (simplified for performance)
-CREATE POLICY "Public read access - about_dummy_tickets_translations" ON about_dummy_tickets_translations
-    FOR SELECT USING (true);
-
--- Authenticated users can read all translations
-CREATE POLICY "Authenticated read access - about_dummy_tickets_translations" ON about_dummy_tickets_translations
-    FOR SELECT USING (auth.role() = 'authenticated');
-
--- Admin full access using Supabase Auth role
-CREATE POLICY "Admin full access - about_dummy_tickets_translations" ON about_dummy_tickets_translations
-    FOR ALL USING (
-        auth.jwt() ->> 'role' = 'admin' OR
-        auth.jwt() -> 'app_metadata' ->> 'role' = 'admin'
-    ) WITH CHECK (
-        auth.jwt() ->> 'role' = 'admin' OR
-        auth.jwt() -> 'app_metadata' ->> 'role' = 'admin'
-    );
+-- RLS policies will be applied separately via about_dummy_tickets_translations_policies.sql

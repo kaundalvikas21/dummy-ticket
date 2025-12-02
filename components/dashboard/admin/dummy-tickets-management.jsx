@@ -281,25 +281,22 @@ export function DummyTicketsManagement() {
 
       // Create/update main dummy ticket
       const url = editingCard ? `/api/about/dummy-tickets/${editingCard.id}` : '/api/about/dummy-tickets'
-      const method = editingCard ? 'PUT' : 'POST'
+      const requestBody = {
+        title: englishTranslation.title,
+        content: finalContent,
+        content_type: formData.content_type,
+        status: formData.status,
+        sort_order: formData.sort_order
+      }
 
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          title: englishTranslation.title,
-          content: finalContent,
-          content_type: formData.content_type,
-          status: formData.status,
-          sort_order: formData.sort_order
-        }),
-      })
+      let result
+      if (editingCard) {
+        result = await apiClient.put(url, requestBody)
+      } else {
+        result = await apiClient.post(url, requestBody)
+      }
 
-      const result = await response.json()
-
-      if (response.ok) {
+      if (result) {
         const ticketId = editingCard?.id || result.ticket.id
 
         // Handle translations using the new batch endpoint
@@ -314,14 +311,12 @@ export function DummyTicketsManagement() {
           }))
 
         if (translationsToSave.length > 0) {
-          const batchResponse = await fetch(`/api/about/dummy-tickets/${ticketId}/translations/batch`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ translations: translationsToSave })
-          })
-
-          if (!batchResponse.ok) {
-            console.error('Failed to save translations:', await batchResponse.text())
+          try {
+            await apiClient.post(`/api/about/dummy-tickets/${ticketId}/translations/batch`, {
+              translations: translationsToSave
+            })
+          } catch (error) {
+            console.error('Failed to save translations:', error.message)
           }
         }
 
@@ -378,33 +373,20 @@ export function DummyTicketsManagement() {
     if (!selectedCard) return
 
     try {
-      const response = await fetch(`/api/about/dummy-tickets/${selectedCard.id}`, {
-        method: 'DELETE',
+      await apiClient.delete(`/api/about/dummy-tickets/${selectedCard.id}`)
+
+      await fetchTickets()
+      setShowDeleteDialog(false)
+      setSelectedCard(null)
+      toast({
+        title: "Success",
+        description: "Dummy ticket deleted successfully",
       })
-
-      const result = await response.json()
-
-      if (response.ok) {
-        await fetchTickets()
-        setShowDeleteDialog(false)
-        setSelectedCard(null)
-        toast({
-          title: "Success",
-          description: "Dummy ticket deleted successfully",
-        })
-      } else {
-        console.error('Failed to delete dummy ticket:', result.error)
-        toast({
-          title: "Error",
-          description: "Failed to delete dummy ticket. Please try again.",
-          variant: "destructive"
-        })
-      }
     } catch (error) {
-      console.error('Error deleting dummy ticket:', error)
+      console.error('Failed to delete dummy ticket:', error.message)
       toast({
         title: "Error",
-        description: "An error occurred. Please try again.",
+        description: "Failed to delete dummy ticket. Please try again.",
         variant: "destructive"
       })
     }
@@ -413,24 +395,16 @@ export function DummyTicketsManagement() {
   // Toggle status
   const toggleStatus = async (ticket) => {
     try {
-      const response = await fetch(`/api/about/dummy-tickets/${ticket.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...ticket,
-          status: ticket.status === 'active' ? 'inactive' : 'active'
-        }),
+      await apiClient.put(`/api/about/dummy-tickets/${ticket.id}`, {
+        ...ticket,
+        status: ticket.status === 'active' ? 'inactive' : 'active'
       })
 
-      if (response.ok) {
-        await fetchTickets()
-        toast({
-          title: "Success",
-          description: `Dummy ticket ${ticket.status === 'active' ? 'deactivated' : 'activated'} successfully`,
-        })
-      }
+      await fetchTickets()
+      toast({
+        title: "Success",
+        description: `Dummy ticket ${ticket.status === 'active' ? 'deactivated' : 'activated'} successfully`,
+      })
     } catch (error) {
       console.error('Error toggling status:', error)
       toast({

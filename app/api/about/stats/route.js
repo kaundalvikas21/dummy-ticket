@@ -1,8 +1,17 @@
-import { supabase } from '@/lib/supabase'
 import { NextResponse } from 'next/server'
+import {
+  requireAdmin,
+  createSupabaseClientWithAuth,
+  createAuthError,
+  validateInput
+} from "@/lib/auth-helper"
+import { createClient } from '@supabase/supabase-js'
+import { createClient as createServerClient } from '@/lib/supabase/server'
 
 export async function GET(request) {
   try {
+    // For public read access, use server client (RLS will handle filtering)
+    const supabase = await createServerClient()
     const { searchParams } = new URL(request.url)
     const locale = searchParams.get('locale') || 'en'
 
@@ -64,18 +73,29 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
+    // SECURITY: Require admin authentication
+    const supabase = createSupabaseClientWithAuth(request)
+    await requireAdmin(supabase)
+
+    // Validate input data
     const body = await request.json()
+    validateInput(body, ['icon', 'value', 'label'])
+
     const { icon, value, label, status = 'active', sort_order = 1 } = body
 
-    // Validation
-    if (!icon || !value || !label) {
-      return NextResponse.json(
-        { error: 'Icon, value, and label are required' },
-        { status: 400 }
-      )
-    }
+    // Use admin client for database operations to properly handle RLS
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
 
-    const { data: stat, error } = await supabase
+    const { data: stat, error } = await supabaseAdmin
       .from('about_stats')
       .insert([
         {
@@ -91,18 +111,12 @@ export async function POST(request) {
 
     if (error) {
       console.error('Error creating about stat:', error)
-      return NextResponse.json(
-        { error: 'Failed to create about stat' },
-        { status: 500 }
-      )
+      return createAuthError('Failed to create about stat', 500)
     }
 
     return NextResponse.json({ stat }, { status: 201 })
   } catch (error) {
     console.error('Error in POST /api/about/stats:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return createAuthError('Internal server error', 500)
   }
 }

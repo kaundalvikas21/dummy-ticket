@@ -1,21 +1,41 @@
 import { supabase } from '@/lib/supabase'
 import { NextResponse } from 'next/server'
+import {
+  requireAdmin,
+  createSupabaseClientWithAuth,
+  createAuthError,
+  validateInput
+} from "@/lib/auth-helper"
+import { createClient } from '@supabase/supabase-js'
 
 export async function PUT(request, { params }) {
   try {
+    // SECURITY: Require admin authentication
+    const supabase = createSupabaseClientWithAuth(request)
+    await requireAdmin(supabase)
+
     const { id } = await params
     const body = await request.json()
     const { title, content, content_type, status, sort_order } = body
 
     // Validation
     if (!title || !content) {
-      return NextResponse.json(
-        { error: 'Title and content are required' },
-        { status: 400 }
-      )
+      return createAuthError('Title and content are required', 400)
     }
 
-    const { data: ticket, error } = await supabase
+    // Use admin client for database operations to properly handle RLS
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+
+    const { data: ticket, error } = await supabaseAdmin
       .from('about_dummy_tickets')
       .update({
         title,
@@ -31,34 +51,41 @@ export async function PUT(request, { params }) {
 
     if (error) {
       console.error('Error updating dummy ticket:', error)
-      return NextResponse.json(
-        { error: 'Failed to update dummy ticket' },
-        { status: 500 }
-      )
+      return createAuthError('Failed to update dummy ticket', 500)
     }
 
     if (!ticket) {
-      return NextResponse.json(
-        { error: 'Dummy ticket not found' },
-        { status: 404 }
-      )
+      return createAuthError('Dummy ticket not found', 404)
     }
 
     return NextResponse.json({ ticket })
   } catch (error) {
     console.error('Error in PUT /api/about/dummy-tickets/[id]:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return createAuthError('Internal server error', 500)
   }
 }
 
 export async function DELETE(request, { params }) {
   try {
+    // SECURITY: Require admin authentication
+    const supabase = createSupabaseClientWithAuth(request)
+    await requireAdmin(supabase)
+
     const { id } = await params
 
-    const { data: ticket, error } = await supabase
+    // Use admin client for database operations to properly handle RLS
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+
+    const { data: ticket, error } = await supabaseAdmin
       .from('about_dummy_tickets')
       .delete()
       .eq('id', id)
@@ -67,25 +94,16 @@ export async function DELETE(request, { params }) {
 
     if (error) {
       console.error('Error deleting dummy ticket:', error)
-      return NextResponse.json(
-        { error: 'Failed to delete dummy ticket' },
-        { status: 500 }
-      )
+      return createAuthError('Failed to delete dummy ticket', 500)
     }
 
     if (!ticket) {
-      return NextResponse.json(
-        { error: 'Dummy ticket not found' },
-        { status: 404 }
-      )
+      return createAuthError('Dummy ticket not found', 404)
     }
 
     return NextResponse.json({ ticket })
   } catch (error) {
     console.error('Error in DELETE /api/about/dummy-tickets/[id]:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return createAuthError('Internal server error', 500)
   }
 }

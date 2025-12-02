@@ -27,21 +27,4 @@ CREATE INDEX idx_about_stats_status ON about_stats(status);
 -- Enable Row Level Security (CRITICAL - was missing!)
 ALTER TABLE about_stats ENABLE ROW LEVEL SECURITY;
 
--- RLS Policies using Supabase Auth patterns
--- Public read access for active stats only
-CREATE POLICY "Public read access - about_stats" ON about_stats
-    FOR SELECT USING (status = 'active');
-
--- Authenticated users can read all stats
-CREATE POLICY "Authenticated read access - about_stats" ON about_stats
-    FOR SELECT USING (auth.role() = 'authenticated');
-
--- Admin full access using Supabase Auth role
-CREATE POLICY "Admin full access - about_stats" ON about_stats
-    FOR ALL USING (
-        auth.jwt() ->> 'role' = 'admin' OR
-        auth.jwt() -> 'app_metadata' ->> 'role' = 'admin'
-    ) WITH CHECK (
-        auth.jwt() ->> 'role' = 'admin' OR
-        auth.jwt() -> 'app_metadata' ->> 'role' = 'admin'
-    );
+-- RLS policies will be applied separately via about_stats_policies.sql

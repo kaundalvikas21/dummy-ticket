@@ -27,21 +27,4 @@ CREATE INDEX idx_about_dummy_tickets_sort_order ON about_dummy_tickets(sort_orde
 -- Enable Row Level Security
 ALTER TABLE about_dummy_tickets ENABLE ROW LEVEL SECURITY;
 
--- RLS Policies using Supabase Auth patterns
--- Public read access for active tickets only
-CREATE POLICY "Public read access - about_dummy_tickets" ON about_dummy_tickets
-    FOR SELECT USING (status = 'active');
-
--- Authenticated users can read all tickets
-CREATE POLICY "Authenticated read access - about_dummy_tickets" ON about_dummy_tickets
-    FOR SELECT USING (auth.role() = 'authenticated');
-
--- Admin full access using Supabase Auth role
-CREATE POLICY "Admin full access - about_dummy_tickets" ON about_dummy_tickets
-    FOR ALL USING (
-        auth.jwt() ->> 'role' = 'admin' OR
-        auth.jwt() -> 'app_metadata' ->> 'role' = 'admin'
-    ) WITH CHECK (
-        auth.jwt() ->> 'role' = 'admin' OR
-        auth.jwt() -> 'app_metadata' ->> 'role' = 'admin'
-    );
+-- RLS policies will be applied separately via about_dummy_tickets_policies.sql

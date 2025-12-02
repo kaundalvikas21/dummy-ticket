@@ -1,21 +1,40 @@
-import { supabase } from '@/lib/supabase'
 import { NextResponse } from 'next/server'
+import {
+  requireAdmin,
+  createSupabaseClientWithAuth,
+  createAuthError,
+  validateInput
+} from "@/lib/auth-helper"
+import { createClient } from '@supabase/supabase-js'
 
 export async function PUT(request, { params }) {
   try {
+    // SECURITY: Require admin authentication
+    const supabase = createSupabaseClientWithAuth(request)
+    await requireAdmin(supabase)
+
     const { id } = await params
     const body = await request.json()
     const { icon, value, label, status, sort_order } = body
 
     // Validation
     if (!icon || !value || !label) {
-      return NextResponse.json(
-        { error: 'Icon, value, and label are required' },
-        { status: 400 }
-      )
+      return createAuthError('Icon, value, and label are required', 400)
     }
 
-    const { data: stat, error } = await supabase
+    // Use admin client for database operations to properly handle RLS
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+
+    const { data: stat, error } = await supabaseAdmin
       .from('about_stats')
       .update({
         icon,
@@ -31,34 +50,41 @@ export async function PUT(request, { params }) {
 
     if (error) {
       console.error('Error updating about stat:', error)
-      return NextResponse.json(
-        { error: 'Failed to update about stat' },
-        { status: 500 }
-      )
+      return createAuthError('Failed to update about stat', 500)
     }
 
     if (!stat) {
-      return NextResponse.json(
-        { error: 'About stat not found' },
-        { status: 404 }
-      )
+      return createAuthError('About stat not found', 404)
     }
 
     return NextResponse.json({ stat })
   } catch (error) {
     console.error('Error in PUT /api/about/stats/[id]:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return createAuthError('Internal server error', 500)
   }
 }
 
 export async function DELETE(request, { params }) {
   try {
+    // SECURITY: Require admin authentication
+    const supabase = createSupabaseClientWithAuth(request)
+    await requireAdmin(supabase)
+
     const { id } = await params
 
-    const { data: stat, error } = await supabase
+    // Use admin client for database operations to properly handle RLS
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+
+    const { data: stat, error } = await supabaseAdmin
       .from('about_stats')
       .delete()
       .eq('id', id)
@@ -67,25 +93,16 @@ export async function DELETE(request, { params }) {
 
     if (error) {
       console.error('Error deleting about stat:', error)
-      return NextResponse.json(
-        { error: 'Failed to delete about stat' },
-        { status: 500 }
-      )
+      return createAuthError('Failed to delete about stat', 500)
     }
 
     if (!stat) {
-      return NextResponse.json(
-        { error: 'About stat not found' },
-        { status: 404 }
-      )
+      return createAuthError('About stat not found', 404)
     }
 
     return NextResponse.json({ stat })
   } catch (error) {
     console.error('Error in DELETE /api/about/stats/[id]:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return createAuthError('Internal server error', 500)
   }
 }
