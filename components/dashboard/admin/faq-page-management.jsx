@@ -823,7 +823,22 @@ export function FAQPageManagement() {
                 </select>
               </div>
 
-              <div className="flex items-center space-x-2">
+              <div>
+                <Label htmlFor="section-sort-order">Sort Order</Label>
+                <Input
+                  id="section-sort-order"
+                  type="number"
+                  value={sectionFormData.sort_order || 0}
+                  onChange={(e) => setSectionFormData({
+                    ...sectionFormData,
+                    sort_order: parseInt(e.target.value) || 0
+                  })}
+                  placeholder={selectedSection ? "Current order" : `Auto: ${getNextSectionSortOrder()}`}
+                  className="mt-1"
+                />
+              </div>
+
+              <div className="flex items-center space-x-2 md:col-span-2">
                 <Switch
                   id="section-status"
                   checked={sectionFormData.status === 'active'}
@@ -906,24 +921,41 @@ export function FAQPageManagement() {
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleItemSubmit} className="space-y-6">
-            {/* Section Selection (only for new items) */}
-            {!selectedItem && (
+            {/* Section Selection and Sort Order */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {!selectedItem && (
+                <div>
+                  <Label htmlFor="item-section">Section</Label>
+                  <select
+                    id="item-section"
+                    value={itemFormData.section_id}
+                    onChange={(e) => setItemFormData({ ...itemFormData, section_id: e.target.value })}
+                    className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  >
+                    <option value="">Select a section</option>
+                    {sections.map(section => (
+                      <option key={section.id} value={section.id}>{section.title}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               <div>
-                <Label htmlFor="item-section">Section</Label>
-                <select
-                  id="item-section"
-                  value={itemFormData.section_id}
-                  onChange={(e) => setItemFormData({ ...itemFormData, section_id: e.target.value })}
-                  className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                >
-                  <option value="">Select a section</option>
-                  {sections.map(section => (
-                    <option key={section.id} value={section.id}>{section.title}</option>
-                  ))}
-                </select>
+                <Label htmlFor="item-sort-order">Sort Order</Label>
+                <Input
+                  id="item-sort-order"
+                  type="number"
+                  value={itemFormData.sort_order || 0}
+                  onChange={(e) => setItemFormData({
+                    ...itemFormData,
+                    sort_order: parseInt(e.target.value) || 0
+                  })}
+                  placeholder={selectedItem ? "Current order" : `Auto: ${itemFormData.section_id ? getNextItemSortOrder(itemFormData.section_id) : 0}`}
+                  className="mt-1"
+                />
               </div>
-            )}
+            </div>
 
             {/* Status Toggle */}
             <div className="flex items-center space-x-2">
