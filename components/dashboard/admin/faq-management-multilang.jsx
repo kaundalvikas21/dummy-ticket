@@ -48,6 +48,9 @@ export function FAQManagementMultiLang() {
     translations: {}
   })
 
+  // Track initial translations when editing
+  const [initialTranslations, setInitialTranslations] = useState(null)
+
   // Initialize translations object for all locales
   useEffect(() => {
     const initialTranslations = {}
@@ -69,7 +72,7 @@ export function FAQManagementMultiLang() {
       const result = await apiClient.get('/api/faqs/admin')
       setFaqs(result.faqs || [])
     } catch (error) {
-      console.error('Error fetching FAQs:', error.message)
+      // Error fetching FAQs
     } finally {
       setLoading(false)
     }
@@ -129,33 +132,62 @@ export function FAQManagementMultiLang() {
 
       const faqId = selectedFaq?.id || result.faq.id
 
-        // Handle translations
-        await Promise.all(Object.entries(formData.translations).map(async ([locale, translation]) => {
-          if (translation.question && translation.answer) {
-            // Check if translation exists
-            const existingTranslation = selectedFaq?.faq_translations?.find(
-              t => t.locale === locale
-            )
+        // Handle translations with create/update/delete logic
+        const translationPromises = []
 
-            if (existingTranslation) {
-              // Update existing translation
-              await apiClient.put(`/api/faq-translations/${existingTranslation.id}`, {
-                faq_id: faqId,
-                locale,
-                question: translation.question,
-                answer: translation.answer
-              })
+        Object.entries(formData.translations).forEach(([locale, translation]) => {
+          const hasContent = translation.question && translation.answer
+
+          if (selectedFaq && initialTranslations) {
+            // Edit mode - check for deletions
+            const existingTranslation = initialTranslations[locale]
+
+            if (hasContent) {
+              if (existingTranslation) {
+                // Update existing translation
+                translationPromises.push(
+                  apiClient.put(`/api/faq-translations/${existingTranslation.id}`, {
+                    faq_id: faqId,
+                    locale,
+                    question: translation.question,
+                    answer: translation.answer
+                  })
+                )
+              } else {
+                // Create new translation
+                translationPromises.push(
+                  apiClient.post('/api/faq-translations', {
+                    faq_id: faqId,
+                    locale,
+                    question: translation.question,
+                    answer: translation.answer
+                  })
+                )
+              }
             } else {
-              // Create new translation
-              await apiClient.post('/api/faq-translations', {
-                faq_id: faqId,
-                locale,
-                question: translation.question,
-                answer: translation.answer
-              })
+              // No content - delete existing translation if it exists
+              if (existingTranslation) {
+                translationPromises.push(
+                  apiClient.delete(`/api/faq-translations/${existingTranslation.id}`)
+                )
+              }
+            }
+          } else {
+            // Add mode - only create if has content
+            if (hasContent) {
+              translationPromises.push(
+                apiClient.post('/api/faq-translations', {
+                  faq_id: faqId,
+                  locale,
+                  question: translation.question,
+                  answer: translation.answer
+                })
+              )
             }
           }
-        }))
+        })
+
+        await Promise.all(translationPromises)
 
         await fetchFaqs()
         setShowAddDialog(false)
@@ -163,7 +195,7 @@ export function FAQManagementMultiLang() {
         resetForm()
         setSelectedFaq(null)
     } catch (error) {
-      console.error('Error saving FAQ:', error)
+      // Error saving FAQ
     }
   }
 
@@ -181,6 +213,7 @@ export function FAQManagementMultiLang() {
       sort_order: 0,
       translations: initialTranslations
     })
+    setInitialTranslations(null)
   }
 
   // Handle delete
@@ -188,10 +221,7 @@ export function FAQManagementMultiLang() {
     if (!selectedFaq) return
 
     try {
-      console.log(`Deleting FAQ: ${selectedFaq.id} - ${selectedFaq.question}`)
-
       await apiClient.delete(`/api/faqs/${selectedFaq.id}`)
-      console.log('Delete successful')
 
       await fetchFaqs()
       setShowDeleteDialog(false)
@@ -201,7 +231,6 @@ export function FAQManagementMultiLang() {
         description: "FAQ deleted successfully"
       })
     } catch (error) {
-      console.error('Error deleting FAQ:', error)
       toast({
         title: "Network Error",
         description: "Network error occurred while deleting FAQ. Please try again.",
@@ -220,7 +249,7 @@ export function FAQManagementMultiLang() {
 
       await fetchFaqs()
     } catch (error) {
-      console.error('Error toggling status:', error)
+      // Error toggling status
     }
   }
 
@@ -251,7 +280,6 @@ export function FAQManagementMultiLang() {
 
       await fetchFaqs()
     } catch (error) {
-      console.error('Error moving FAQ:', error)
       toast({
         title: "Move Failed",
         description: "Failed to move FAQ. Please try again.",
@@ -294,15 +322,11 @@ export function FAQManagementMultiLang() {
     let failedDeletions = []
 
     try {
-      console.log(`Starting bulk delete of ${totalToDelete} FAQs`)
-
       // Process deletions one by one for better error tracking
       for (let i = 0; i < selectedFaqIds.length; i++) {
         const faqId = selectedFaqIds[i]
         const faq = faqs.find(f => f.id === faqId)
         const translation = faq?.faq_translations?.find(t => t.locale === DEFAULT_LOCALE)
-
-        console.log(`Deleting FAQ ${i + 1}/${totalToDelete}: ${translation?.question || faq?.question}`)
 
         // Track which FAQ is currently being deleted
         setDeletingFaqIds(prev => new Set(prev).add(faqId))
@@ -310,14 +334,12 @@ export function FAQManagementMultiLang() {
         try {
           await apiClient.delete(`/api/faqs/${faqId}`)
           deletedCount++
-          console.log(`Successfully deleted FAQ: ${faqId}`)
         } catch (error) {
           failedDeletions.push({
             faqId,
             question: translation?.question || faq?.question || 'Unknown FAQ',
             error: error.message || 'Network error'
           })
-          console.error(`Error deleting FAQ ${faqId}:`, error)
         } finally {
           // Remove from currently deleting set
           setDeletingFaqIds(prev => {
@@ -342,13 +364,11 @@ export function FAQManagementMultiLang() {
         })
       } else if (deletedCount === 0) {
         // Complete failure
-        const failureDetails = failedDeletions.map(f => `• ${f.question}: ${f.error}`).join('\n')
         toast({
           title: "Bulk Delete Failed",
-          description: `Failed to delete any FAQs. Check console for details.`,
+          description: `Failed to delete any FAQs. Please try again.`,
           variant: "destructive"
         })
-        console.error('Bulk delete failures:', failureDetails)
       } else {
         // Partial success
         toast({
@@ -356,11 +376,9 @@ export function FAQManagementMultiLang() {
           description: `Successfully deleted ${deletedCount} FAQ${deletedCount !== 1 ? 's' : ''}, but ${failedDeletions.length} failed.`,
           variant: "default"
         })
-        console.error('Partial bulk delete failures:', failedDeletions.map(f => `• ${f.question}: ${f.error}`).join('\n'))
       }
 
     } catch (error) {
-      console.error('Critical error in bulk delete:', error)
       toast({
         title: "Critical Error",
         description: "Critical error occurred during bulk delete. Please refresh the page and try again.",
@@ -378,12 +396,15 @@ export function FAQManagementMultiLang() {
 
     // Initialize translations with existing data
     const translations = {}
+    const translationsSnapshot = {}
     Object.keys(LOCALES).forEach(locale => {
       const translation = faq.faq_translations?.find(t => t.locale === locale)
       translations[locale] = {
         question: translation?.question || (locale === DEFAULT_LOCALE ? faq.question : ""),
         answer: translation?.answer || (locale === DEFAULT_LOCALE ? faq.answer : "")
       }
+      // Store snapshot of existing translations
+      translationsSnapshot[locale] = translation || null
     })
 
     setFormData({
@@ -391,6 +412,7 @@ export function FAQManagementMultiLang() {
       sort_order: faq.sort_order,
       translations
     })
+    setInitialTranslations(translationsSnapshot)
     setShowEditDialog(true)
   }
 
