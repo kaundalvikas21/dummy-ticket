@@ -1,8 +1,30 @@
 import { supabase } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
+import {
+  requireAdmin,
+  createSupabaseClientWithAuth,
+  createAuthError
+} from "@/lib/auth-helper"
 import { NextResponse } from 'next/server'
 
 export async function GET(request) {
   try {
+    // SECURITY: Require admin authentication for read operations
+    const supabaseAuth = createSupabaseClientWithAuth(request)
+    await requireAdmin(supabaseAuth)
+
+    // Use admin client for database operations to properly handle RLS
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page')) || 1
     const limit = parseInt(searchParams.get('limit')) || 10
@@ -15,7 +37,7 @@ export async function GET(request) {
     const offset = (page - 1) * limit
 
     // Build query - simplified without complex admin join
-    let query = supabase
+    let query = supabaseAdmin
       .from('contact_submissions')
       .select('*', { count: 'exact' })
 
@@ -65,15 +87,28 @@ export async function GET(request) {
 
   } catch (error) {
     console.error('Error in GET /api/contact/submissions:', error)
-    return NextResponse.json(
-      { error: 'Internal server error', details: error.message },
-      { status: 500 }
-    )
+    return createAuthError('Internal server error: ' + error.message, 500)
   }
 }
 
 export async function PUT(request) {
   try {
+    // SECURITY: Require admin authentication for write operations
+    const supabaseAuth = createSupabaseClientWithAuth(request)
+    await requireAdmin(supabaseAuth)
+
+    // Use admin client for database operations to properly handle RLS
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+
     const { id, status, priority, admin_notes, admin_id } = await request.json()
 
     if (!id) {
@@ -111,7 +146,7 @@ export async function PUT(request) {
     if (admin_notes !== undefined) updateData.admin_notes = admin_notes
     if (admin_id !== undefined) updateData.admin_id = admin_id
 
-    const { data: submission, error } = await supabase
+    const { data: submission, error } = await supabaseAdmin
       .from('contact_submissions')
       .update(updateData)
       .eq('id', id)
@@ -133,15 +168,28 @@ export async function PUT(request) {
 
   } catch (error) {
     console.error('Error in PUT /api/contact/submissions:', error)
-    return NextResponse.json(
-      { error: 'Internal server error', details: error.message },
-      { status: 500 }
-    )
+    return createAuthError('Internal server error: ' + error.message, 500)
   }
 }
 
 export async function DELETE(request) {
   try {
+    // SECURITY: Require admin authentication for delete operations
+    const supabaseAuth = createSupabaseClientWithAuth(request)
+    await requireAdmin(supabaseAuth)
+
+    // Use admin client for database operations to properly handle RLS
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
 
@@ -152,7 +200,7 @@ export async function DELETE(request) {
       )
     }
 
-    const { data: deletedSubmission, error } = await supabase
+    const { data: deletedSubmission, error } = await supabaseAdmin
       .from('contact_submissions')
       .delete()
       .eq('id', id)
@@ -181,9 +229,6 @@ export async function DELETE(request) {
 
   } catch (error) {
     console.error('Error in DELETE /api/contact/submissions:', error)
-    return NextResponse.json(
-      { error: 'Internal server error', details: error.message },
-      { status: 500 }
-    )
+    return createAuthError('Internal server error: ' + error.message, 500)
   }
 }

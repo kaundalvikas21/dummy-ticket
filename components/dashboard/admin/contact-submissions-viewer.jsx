@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Search, Filter, Eye, Trash2, CheckCircle, Clock, AlertTriangle, User, Mail, Phone, Calendar, ChevronLeft, ChevronRight, Save, X, MessageSquare, RefreshCw } from "lucide-react"
+import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -31,6 +32,19 @@ import { SkeletonTable } from "@/components/ui/skeleton-table"
 
 export function ContactSubmissionsViewer() {
   const { toast } = useToast()
+  const supabase = createClient()
+
+  // Helper function to get auth headers
+  const getAuthHeaders = async () => {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session?.access_token) {
+      throw new Error('No authentication session found')
+    }
+    return {
+      'Authorization': `Bearer ${session.access_token}`,
+      'Content-Type': 'application/json'
+    }
+  }
   const [submissions, setSubmissions] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
@@ -88,7 +102,10 @@ export function ContactSubmissionsViewer() {
       if (priorityFilter && priorityFilter !== 'all') params.append('priority', priorityFilter)
       if (searchTerm) params.append('search', searchTerm)
 
-      const response = await fetch(`/api/contact/submissions?${params}`)
+      const headers = await getAuthHeaders()
+      const response = await fetch(`/api/contact/submissions?${params}`, {
+        headers
+      })
       const result = await response.json()
 
       if (response.ok) {
@@ -137,11 +154,10 @@ export function ContactSubmissionsViewer() {
 
     setIsUpdating(true)
     try {
+      const headers = await getAuthHeaders()
       const response = await fetch('/api/contact/submissions', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers,
         body: JSON.stringify({
           id: selectedSubmission.id,
           status: editFormData.status,
@@ -192,8 +208,10 @@ export function ContactSubmissionsViewer() {
     if (!selectedSubmission) return
 
     try {
+      const headers = await getAuthHeaders()
       const response = await fetch(`/api/contact/submissions?id=${selectedSubmission.id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers
       })
 
       const result = await response.json()

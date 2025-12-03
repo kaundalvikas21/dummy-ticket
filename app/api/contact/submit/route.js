@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase'
 import { NextResponse } from 'next/server'
 
 export async function POST(request) {
@@ -55,7 +55,7 @@ export async function POST(request) {
     }
 
     // Insert contact submission
-    const { data: submission, error } = await supabase
+    const { data: submission, error } = await supabaseAdmin
       .from('contact_submissions')
       .insert([
         {

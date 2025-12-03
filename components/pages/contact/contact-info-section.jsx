@@ -3,7 +3,7 @@
 import { motion } from "framer-motion"
 import { useInView } from "framer-motion"
 import { useRef } from "react"
-import { Clock, Phone } from "lucide-react"
+import { Clock, Phone, Globe } from "lucide-react"
 import { useTranslation } from "@/lib/translations"
 
 export function ContactInfoSection({ settings }) {
@@ -29,17 +29,8 @@ export function ContactInfoSection({ settings }) {
         return []
       }
     }
-    // Fallback to default data if no settings exist
-    return [
-      { day: "Monday", hours: "24 hours" },
-      { day: "Tuesday", hours: "24 hours" },
-      { day: "Wednesday", hours: "24 hours" },
-      { day: "Thursday", hours: "24 hours" },
-      { day: "Friday", hours: "18 hours" },
-      { day: "Saturday", hours: "15 hours" },
-      { day: "Sunday", hours: "15 hours" },
-      { day: "Holiday", hours: "10 hours" },
-    ]
+    // Return empty array if no database data exists
+    return []
   }
 
   // Parse country support from settings
@@ -52,15 +43,8 @@ export function ContactInfoSection({ settings }) {
         return []
       }
     }
-    // Fallback to default data if no settings exist
-    return [
-      { country: "USA", phone: "+1-308-888-6496" },
-      { country: "India", phone: "+91-8884777300" },
-      { country: "UAE", phone: "+971-54-776-1925" },
-      { country: "UK", phone: "+44-7445381114" },
-      { country: "Canada", phone: "+1-236-900-5521" },
-      { country: "Philippines", phone: "Coming soon" },
-    ]
+    // Return empty array if no database data exists
+    return []
   }
 
   const workingHoursData = parseWorkingHours()
@@ -113,7 +97,24 @@ export function ContactInfoSection({ settings }) {
                 {workingHoursDescription}
               </p>
 
-              <div className="grid grid-cols-2 gap-3 md:gap-4">
+              {workingHoursData.length === 0 ? (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-center py-12"
+                >
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-100 to-teal-100 flex items-center justify-center">
+                    <Clock className="w-8 h-8 text-blue-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Working Hours Information Coming Soon
+                  </h3>
+                  <p className="text-gray-600 text-sm max-w-md mx-auto">
+                    We're currently updating our working hours schedule. Please contact us directly for current availability.
+                  </p>
+                </motion.div>
+              ) : (
+                <div className="grid grid-cols-2 gap-3 md:gap-4">
                 {schedule.map((item, index) => (
                   <motion.div
                     key={item.day}
@@ -132,7 +133,8 @@ export function ContactInfoSection({ settings }) {
                     </div>
                   </motion.div>
                 ))}
-              </div>
+                </div>
+              )}
             </div>
           </motion.div>
 
@@ -154,7 +156,24 @@ export function ContactInfoSection({ settings }) {
                 {contactSupportDescription}
               </p>
 
-              <div className="grid grid-cols-2 gap-3 md:gap-4">
+              {countries.length === 0 ? (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-center py-12"
+                >
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-100 to-teal-100 flex items-center justify-center">
+                    <Globe className="w-8 h-8 text-blue-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Global Support Information Coming Soon
+                  </h3>
+                  <p className="text-gray-600 text-sm max-w-md mx-auto">
+                    We're expanding our global support network. Please use our general contact information for immediate assistance.
+                  </p>
+                </motion.div>
+              ) : (
+                <div className="grid grid-cols-2 gap-3 md:gap-4">
                 {countries.map((country, index) => (
                   <motion.div
                     key={country.name}
@@ -178,7 +197,8 @@ export function ContactInfoSection({ settings }) {
                     )}
                   </motion.div>
                 ))}
-              </div>
+                </div>
+              )}
             </div>
           </motion.div>
         </div>

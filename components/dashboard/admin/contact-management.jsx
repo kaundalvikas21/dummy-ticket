@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Search, Plus, Edit, Trash2, Phone, Mail, MapPin, Clock, Globe, Save, X, Flag, Users } from "lucide-react"
+import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -25,6 +26,19 @@ import { SkeletonCard, SkeletonCardContent } from "@/components/ui/skeleton-card
 
 export function ContactManagement() {
   const { toast } = useToast()
+  const supabase = createClient()
+
+  // Helper function to get auth headers
+  const getAuthHeaders = async () => {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session?.access_token) {
+      throw new Error('No authentication session found')
+    }
+    return {
+      'Authorization': `Bearer ${session.access_token}`,
+      'Content-Type': 'application/json'
+    }
+  }
   const [settings, setSettings] = useState({})
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
@@ -137,7 +151,10 @@ export function ContactManagement() {
   // Fetch contact settings
   const fetchSettings = async () => {
     try {
-      const response = await fetch('/api/contact/settings')
+      const headers = await getAuthHeaders()
+      const response = await fetch('/api/contact/settings', {
+        headers
+      })
       const result = await response.json()
 
       if (response.ok) {
@@ -210,11 +227,10 @@ export function ContactManagement() {
       const url = selectedSetting ? '/api/contact/settings' : '/api/contact/settings'
       const method = selectedSetting ? 'PUT' : 'POST'
 
+      const headers = await getAuthHeaders()
       const response = await fetch(url, {
         method,
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers,
         body: JSON.stringify(formData)
       })
 
@@ -254,8 +270,10 @@ export function ContactManagement() {
     if (!selectedSetting) return
 
     try {
+      const headers = await getAuthHeaders()
       const response = await fetch(`/api/contact/settings?key=${selectedSetting}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers
       })
 
       const result = await response.json()
@@ -402,9 +420,10 @@ export function ContactManagement() {
 
   const saveWorkingHoursToSettings = async (hoursData) => {
     try {
+      const headers = await getAuthHeaders()
       await fetch('/api/contact/settings', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           settings_key: 'working_hours',
           settings_value: JSON.stringify(hoursData),
@@ -515,9 +534,10 @@ export function ContactManagement() {
 
   const saveCountrySupportToSettings = async (supportData) => {
     try {
+      const headers = await getAuthHeaders()
       await fetch('/api/contact/settings', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           settings_key: 'country_support',
           settings_value: JSON.stringify(supportData),

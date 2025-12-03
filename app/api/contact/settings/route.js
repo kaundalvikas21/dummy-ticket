@@ -1,4 +1,10 @@
 import { supabase } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
+import {
+  requireAdmin,
+  createSupabaseClientWithAuth,
+  createAuthError
+} from "@/lib/auth-helper"
 import { NextResponse } from 'next/server'
 
 export async function GET(request) {
@@ -50,17 +56,30 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
+    // SECURITY: Require admin authentication for write operations
+    const supabaseAuth = createSupabaseClientWithAuth(request)
+    await requireAdmin(supabaseAuth)
+
+    // Use admin client for database operations to properly handle RLS
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+
     const { settings_key, settings_value, settings_type = 'text', description } = await request.json()
 
     if (!settings_key || settings_value === undefined || settings_value.trim() === '') {
-      return NextResponse.json(
-        { error: 'Settings key and value are required' },
-        { status: 400 }
-      )
+      return createAuthError('Settings key and value are required', 400)
     }
 
     // Check if setting already exists
-    const { data: existingSetting, error: checkError } = await supabase
+    const { data: existingSetting, error: checkError } = await supabaseAdmin
       .from('contact_settings')
       .select('*')
       .eq('settings_key', settings_key)
@@ -69,7 +88,7 @@ export async function POST(request) {
     let result
     if (checkError && checkError.code === 'PGRST116') {
       // Setting doesn't exist, create new one
-      const { data: setting, error: createError } = await supabase
+      const { data: setting, error: createError } = await supabaseAdmin
         .from('contact_settings')
         .insert([
           {
@@ -86,15 +105,12 @@ export async function POST(request) {
 
       if (createError) {
         console.error('Error creating contact setting:', createError)
-        return NextResponse.json(
-          { error: 'Failed to create contact setting', details: createError.message },
-          { status: 500 }
-        )
+        return createAuthError('Failed to create contact setting: ' + createError.message, 500)
       }
       result = { setting, action: 'created' }
     } else {
       // Setting exists, update it
-      const { data: updatedSetting, error: updateError } = await supabase
+      const { data: updatedSetting, error: updateError } = await supabaseAdmin
         .from('contact_settings')
         .update({
           settings_value: settings_value.trim(),
@@ -108,10 +124,7 @@ export async function POST(request) {
 
       if (updateError) {
         console.error('Error updating contact setting:', updateError)
-        return NextResponse.json(
-          { error: 'Failed to update contact setting', details: updateError.message },
-          { status: 500 }
-        )
+        return createAuthError('Failed to update contact setting: ' + updateError.message, 500)
       }
       result = { setting: updatedSetting, action: 'updated' }
     }
@@ -130,16 +143,29 @@ export async function POST(request) {
 
 export async function PUT(request) {
   try {
+    // SECURITY: Require admin authentication for write operations
+    const supabaseAuth = createSupabaseClientWithAuth(request)
+    await requireAdmin(supabaseAuth)
+
+    // Use admin client for database operations to properly handle RLS
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+
     const { settings_key, settings_value, settings_type = 'text', description } = await request.json()
 
     if (!settings_key || settings_value === undefined || settings_value.trim() === '') {
-      return NextResponse.json(
-        { error: 'Settings key and value are required' },
-        { status: 400 }
-      )
+      return createAuthError('Settings key and value are required', 400)
     }
 
-    const { data: updatedSetting, error } = await supabase
+    const { data: updatedSetting, error } = await supabaseAdmin
       .from('contact_settings')
       .update({
         settings_value: settings_value.trim(),
@@ -153,10 +179,7 @@ export async function PUT(request) {
 
     if (error) {
       console.error('Error updating contact setting:', error)
-      return NextResponse.json(
-        { error: 'Failed to update contact setting', details: error.message },
-        { status: 500 }
-      )
+      return createAuthError('Failed to update contact setting: ' + error.message, 500)
     }
 
     return NextResponse.json({
@@ -165,26 +188,36 @@ export async function PUT(request) {
     })
   } catch (error) {
     console.error('Error in PUT /api/contact/settings:', error)
-    return NextResponse.json(
-      { error: 'Internal server error', details: error.message },
-      { status: 500 }
-    )
+    return createAuthError('Internal server error: ' + error.message, 500)
   }
 }
 
 export async function DELETE(request) {
   try {
+    // SECURITY: Require admin authentication for write operations
+    const supabaseAuth = createSupabaseClientWithAuth(request)
+    await requireAdmin(supabaseAuth)
+
+    // Use admin client for database operations to properly handle RLS
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+
     const { searchParams } = new URL(request.url)
     const settings_key = searchParams.get('key')
 
     if (!settings_key) {
-      return NextResponse.json(
-        { error: 'Settings key is required for deletion' },
-        { status: 400 }
-      )
+      return createAuthError('Settings key is required for deletion', 400)
     }
 
-    const { data: deletedSetting, error } = await supabase
+    const { data: deletedSetting, error } = await supabaseAdmin
       .from('contact_settings')
       .delete()
       .eq('settings_key', settings_key)
@@ -193,17 +226,11 @@ export async function DELETE(request) {
 
     if (error) {
       console.error('Error deleting contact setting:', error)
-      return NextResponse.json(
-        { error: 'Failed to delete contact setting', details: error.message },
-        { status: 500 }
-      )
+      return createAuthError('Failed to delete contact setting: ' + error.message, 500)
     }
 
     if (!deletedSetting) {
-      return NextResponse.json(
-        { error: 'Contact setting not found' },
-        { status: 404 }
-      )
+      return createAuthError('Contact setting not found', 404)
     }
 
     return NextResponse.json({
@@ -212,9 +239,6 @@ export async function DELETE(request) {
     })
   } catch (error) {
     console.error('Error in DELETE /api/contact/settings:', error)
-    return NextResponse.json(
-      { error: 'Internal server error', details: error.message },
-      { status: 500 }
-    )
+    return createAuthError('Internal server error: ' + error.message, 500)
   }
 }
