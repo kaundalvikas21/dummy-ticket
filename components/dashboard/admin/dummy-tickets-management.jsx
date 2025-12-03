@@ -27,6 +27,50 @@ import { LOCALES, DEFAULT_LOCALE } from "@/lib/locales"
 import { FlagIcon } from "@/components/ui/flag-icon"
 import { apiClient } from "@/lib/api-client"
 
+// Fetch existing translations for a dummy ticket
+const fetchExistingTranslations = async (ticketId) => {
+  try {
+    const result = await apiClient.get(`/api/about/dummy-tickets/translations?ticket_id=${ticketId}`)
+    return result.translations || []
+  } catch (error) {
+    console.error('Error fetching existing translations:', error)
+    return []
+  }
+}
+
+// Get translations that need to be deleted (cleared in form)
+const getTranslationsToDelete = (existingTranslations, currentTranslations) => {
+  const currentLocaleTitles = {}
+  Object.entries(currentTranslations).forEach(([locale, translation]) => {
+    // Both title AND content must be present for dummy tickets
+    if (translation.title && translation.title.trim() &&
+        translation.content && translation.content.trim()) {
+      currentLocaleTitles[locale] = true
+    }
+  })
+
+  return existingTranslations.filter(translation =>
+    !currentLocaleTitles[translation.locale]
+  )
+}
+
+// Delete translations by their IDs
+const deleteTranslations = async (translationIds) => {
+  if (translationIds.length === 0) return []
+
+  const deletePromises = translationIds.map(async (id) => {
+    try {
+      await apiClient.delete(`/api/about/dummy-tickets/translations/${id}`)
+      return { success: true, id }
+    } catch (error) {
+      console.error(`Error deleting translation ${id}:`, error)
+      return { success: false, id, error: error.message }
+    }
+  })
+
+  return Promise.allSettled(deletePromises)
+}
+
 // Skeleton components (inline implementation)
 const SkeletonCard = ({ children, className }) => (
   <div className={`border rounded-xl p-6 bg-white ${className}`}>
@@ -299,15 +343,39 @@ export function DummyTicketsManagement() {
       if (result) {
         const ticketId = editingCard?.id || result.ticket.id
 
+        // NEW: Handle translation cleanup for cleared content
+        try {
+          // Fetch existing translations for this ticket
+          const existingTranslations = await fetchExistingTranslations(ticketId)
+
+          // Identify translations that need to be deleted (cleared in form)
+          const translationsToDelete = getTranslationsToDelete(existingTranslations, formData.translations)
+
+          if (translationsToDelete.length > 0) {
+            // Delete cleared translations from database
+            const deleteResults = await deleteTranslations(translationsToDelete.map(t => t.id))
+
+            const failedDeletions = deleteResults.filter(r => r.status === 'rejected' || !r.value?.success)
+            if (failedDeletions.length > 0) {
+              console.error('Some translations failed to delete:', failedDeletions)
+            }
+          }
+        } catch (error) {
+          console.error('Error during translation cleanup:', error)
+          // Continue with save process even if cleanup fails
+        }
+
         // Handle translations using the new batch endpoint
         const translationsToSave = Object.entries(formData.translations)
           .filter(([locale, translation]) =>
-            translation.title && translation.content
+            // Both title AND content must be present for dummy tickets
+            translation.title && translation.title.trim() &&
+            translation.content && translation.content.trim()
           )
           .map(([locale, translation]) => ({
             locale,
-            title: translation.title,
-            content: translation.content
+            title: translation.title.trim(),
+            content: translation.content.trim()
           }))
 
         if (translationsToSave.length > 0) {
@@ -792,7 +860,7 @@ export function DummyTicketsManagement() {
                       className="shrink-0"
                     />
                     <span className="hidden sm:inline text-xs font-medium">{locale.name}</span>
-                    {formData.translations[code]?.title && formData.translations[code]?.content && (
+                    {formData.translations[code]?.title?.trim() && formData.translations[code]?.content?.trim() && (
                       <Check className="w-3 h-3 text-green-500 flex-shrink-0" />
                     )}
                   </TabsTrigger>

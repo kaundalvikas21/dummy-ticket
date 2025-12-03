@@ -1,4 +1,10 @@
 import { supabase } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
+import {
+  requireAdmin,
+  createSupabaseClientWithAuth,
+  createAuthError
+} from "@/lib/auth-helper"
 import { NextResponse } from 'next/server'
 
 export async function POST(request) {
@@ -89,17 +95,30 @@ export async function POST(request) {
 
 export async function GET(request) {
   try {
+    // SECURITY: Require admin authentication
+    const supabaseAuth = createSupabaseClientWithAuth(request)
+    await requireAdmin(supabaseAuth)
+
     const { searchParams } = new URL(request.url)
     const ticket_id = searchParams.get('ticket_id')
 
     if (!ticket_id) {
-      return NextResponse.json(
-        { error: 'Ticket ID is required' },
-        { status: 400 }
-      )
+      return createAuthError('Ticket ID is required', 400)
     }
 
-    const { data: translations, error } = await supabase
+    // Use admin client for database operations to properly handle RLS
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+
+    const { data: translations, error } = await supabaseAdmin
       .from('about_dummy_tickets_translations')
       .select('*')
       .eq('ticket_id', ticket_id)
@@ -107,18 +126,12 @@ export async function GET(request) {
 
     if (error) {
       console.error('Error fetching translations:', error)
-      return NextResponse.json(
-        { error: 'Failed to fetch translations' },
-        { status: 500 }
-      )
+      return createAuthError('Failed to fetch translations', 500)
     }
 
     return NextResponse.json({ translations })
   } catch (error) {
     console.error('Error in GET /api/about/dummy-tickets/translations:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return createAuthError('Internal server error', 500)
   }
 }

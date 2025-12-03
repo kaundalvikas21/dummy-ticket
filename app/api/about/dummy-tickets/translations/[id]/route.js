@@ -1,4 +1,10 @@
 import { supabase } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
+import {
+  requireAdmin,
+  createSupabaseClientWithAuth,
+  createAuthError
+} from "@/lib/auth-helper"
 
 export async function GET(request, { params }) {
   try {
@@ -115,10 +121,26 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
+    // SECURITY: Require admin authentication
+    const supabaseAuth = createSupabaseClientWithAuth(request)
+    await requireAdmin(supabaseAuth)
+
     const { id } = await params
-    
+
+    // Use admin client for database operations to properly handle RLS
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+
     // Verify translation exists before deleting
-    const { data: existingTranslation, error: fetchError } = await supabase
+    const { data: existingTranslation, error: fetchError } = await supabaseAdmin
       .from('about_dummy_tickets_translations')
       .select('*')
       .eq('id', id)
@@ -126,16 +148,13 @@ export async function DELETE(request, { params }) {
 
     if (fetchError) {
       if (fetchError.code === 'PGRST116') {
-        return new Response(JSON.stringify({ error: 'Translation not found' }), {
-          status: 404,
-          headers: { 'Content-Type': 'application/json' }
-        })
+        return createAuthError('Translation not found', 404)
       }
       throw fetchError
     }
 
     // Delete translation
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
       .from('about_dummy_tickets_translations')
       .delete()
       .eq('id', id)
@@ -148,12 +167,6 @@ export async function DELETE(request, { params }) {
     })
   } catch (error) {
     console.error('Error in DELETE /api/about/dummy-tickets/translations/[id]:', error)
-    return new Response(JSON.stringify({
-      error: 'Failed to delete translation',
-      details: error.message
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    })
+    return createAuthError('Failed to delete translation', 500)
   }
 }
