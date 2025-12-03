@@ -557,6 +557,21 @@ export function AboutStatsManagement() {
                         <Badge variant="outline" className="text-xs">
                           {stat.icon}
                         </Badge>
+
+                        {/* Translation Progress Bar */}
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs text-gray-500">Translation:</span>
+                        <div className="w-16 bg-gray-200 rounded-full h-2">
+                          <div
+                            className={`h-2 rounded-full transition-all duration-300 ${
+                              getTranslationStatus(stat) === 100 ? 'bg-green-500' :
+                              getTranslationStatus(stat) >= 60 ? 'bg-yellow-500' : 'bg-red-500'
+                            }`}
+                            style={{ width: `${getTranslationStatus(stat)}%` }}
+                          ></div>
+                        </div>
+                        <span className="text-xs text-gray-600">{getTranslationStatus(stat)}%</span>
+                      </div>
                       </div>
                       <p className="text-gray-600 text-sm">{stat.label}</p>
                     </div>
