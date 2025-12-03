@@ -106,7 +106,19 @@ export async function GET(request) {
       )
     }
 
-    const { data: translations, error } = await supabase
+    // Use admin client for database operations to properly handle RLS
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+
+    const { data: translations, error } = await supabaseAdmin
       .from('about_stats_translations')
       .select('*')
       .eq('stat_id', stat_id)

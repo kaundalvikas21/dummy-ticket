@@ -1,21 +1,39 @@
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
+import {
+  requireAdmin,
+  createSupabaseClientWithAuth,
+  createAuthError
+} from "@/lib/auth-helper"
 import { NextResponse } from 'next/server'
 
 export async function PUT(request, { params }) {
   try {
+    // SECURITY: Require admin authentication
+    const supabaseAuth = createSupabaseClientWithAuth(request)
+    await requireAdmin(supabaseAuth)
+
     const { id } = await params
     const body = await request.json()
     const { label, value } = body
 
     // Validation
     if (!label) {
-      return NextResponse.json(
-        { error: 'Label is required' },
-        { status: 400 }
-      )
+      return createAuthError('Label is required', 400)
     }
 
-    const { data: translation, error } = await supabase
+    // Use admin client for database operations to properly handle RLS
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+
+    const { data: translation, error } = await supabaseAdmin
       .from('about_stats_translations')
       .update({
         label,
@@ -28,34 +46,41 @@ export async function PUT(request, { params }) {
 
     if (error) {
       console.error('Error updating translation:', error)
-      return NextResponse.json(
-        { error: 'Failed to update translation' },
-        { status: 500 }
-      )
+      return createAuthError('Failed to update translation', 500)
     }
 
     if (!translation) {
-      return NextResponse.json(
-        { error: 'Translation not found' },
-        { status: 404 }
-      )
+      return createAuthError('Translation not found', 404)
     }
 
     return NextResponse.json({ translation })
   } catch (error) {
     console.error('Error in PUT /api/about-stats-translations/[id]:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return createAuthError('Internal server error', 500)
   }
 }
 
 export async function DELETE(request, { params }) {
   try {
+    // SECURITY: Require admin authentication
+    const supabaseAuth = createSupabaseClientWithAuth(request)
+    await requireAdmin(supabaseAuth)
+
     const { id } = await params
 
-    const { data: translation, error } = await supabase
+    // Use admin client for database operations to properly handle RLS
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+
+    const { data: translation, error } = await supabaseAdmin
       .from('about_stats_translations')
       .delete()
       .eq('id', id)
@@ -64,25 +89,16 @@ export async function DELETE(request, { params }) {
 
     if (error) {
       console.error('Error deleting translation:', error)
-      return NextResponse.json(
-        { error: 'Failed to delete translation' },
-        { status: 500 }
-      )
+      return createAuthError('Failed to delete translation', 500)
     }
 
     if (!translation) {
-      return NextResponse.json(
-        { error: 'Translation not found' },
-        { status: 404 }
-      )
+      return createAuthError('Translation not found', 404)
     }
 
     return NextResponse.json({ translation })
   } catch (error) {
     console.error('Error in DELETE /api/about-stats-translations/[id]:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return createAuthError('Internal server error', 500)
   }
 }

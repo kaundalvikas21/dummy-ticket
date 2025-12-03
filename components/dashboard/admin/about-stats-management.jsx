@@ -53,6 +53,48 @@ import { Tabs, TabsList, TabsContent, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
 import { apiClient } from "@/lib/api-client"
 
+// Fetch existing translations for a stat
+const fetchExistingTranslations = async (statId) => {
+  try {
+    const result = await apiClient.get(`/api/about-stats-translations?stat_id=${statId}`)
+    return result.translations || []
+  } catch (error) {
+    console.error('Error fetching existing translations:', error)
+    return []
+  }
+}
+
+// Get translations that need to be deleted (cleared in form)
+const getTranslationsToDelete = (existingTranslations, currentTranslations) => {
+  const currentLocaleLabels = {}
+  Object.entries(currentTranslations).forEach(([locale, translation]) => {
+    if (translation.label && translation.label.trim()) {
+      currentLocaleLabels[locale] = true
+    }
+  })
+
+  return existingTranslations.filter(translation =>
+    !currentLocaleLabels[translation.locale]
+  )
+}
+
+// Delete translations by their IDs
+const deleteTranslations = async (translationIds) => {
+  if (translationIds.length === 0) return []
+
+  const deletePromises = translationIds.map(async (id) => {
+    try {
+      await apiClient.delete(`/api/about-stats-translations/${id}`)
+      return { success: true, id }
+    } catch (error) {
+      console.error(`Error deleting translation ${id}:`, error)
+      return { success: false, id, error: error.message }
+    }
+  })
+
+  return Promise.allSettled(deletePromises)
+}
+
 export function AboutStatsManagement() {
   const { toast } = useToast()
   const [stats, setStats] = useState([])
@@ -187,6 +229,28 @@ export function AboutStatsManagement() {
       // Check if the operation was successful
       if (result.stat) {
         const statId = selectedStat?.id || result.stat.id
+
+        // NEW: Handle translation cleanup for cleared content
+        try {
+          // Fetch existing translations for this stat
+          const existingTranslations = await fetchExistingTranslations(statId)
+
+          // Identify translations that need to be deleted (cleared in form)
+          const translationsToDelete = getTranslationsToDelete(existingTranslations, formData.translations)
+
+          if (translationsToDelete.length > 0) {
+            // Delete cleared translations from database
+            const deleteResults = await deleteTranslations(translationsToDelete.map(t => t.id))
+
+            const failedDeletions = deleteResults.filter(r => r.status === 'rejected' || !r.value?.success)
+            if (failedDeletions.length > 0) {
+              console.error('Some translations failed to delete:', failedDeletions)
+            }
+          }
+        } catch (error) {
+          console.error('Error during translation cleanup:', error)
+          // Continue with save process even if cleanup fails
+        }
 
         // Handle translations for all languages (excluding English value since it's stored in main table)
         const translationsToSave = Object.entries(formData.translations)
