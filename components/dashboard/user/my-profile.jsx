@@ -326,7 +326,6 @@ export function MyProfile() {
       }
 
       const result = await response.json()
-      console.log('Upload successful:', result)
 
       // Handle warning messages
       if (result.warning) {

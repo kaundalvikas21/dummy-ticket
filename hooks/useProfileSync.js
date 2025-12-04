@@ -30,11 +30,6 @@ export function useProfileSync() {
   // Automatic sync when profile version changes
   useEffect(() => {
     if (profileVersion !== lastProfileVersion.current) {
-      console.log('Profile version changed, syncing...', {
-        oldVersion: lastProfileVersion.current,
-        newVersion: profileVersion
-      })
-
       setSyncCount(prev => prev + 1)
       lastProfileVersion.current = profileVersion
 
