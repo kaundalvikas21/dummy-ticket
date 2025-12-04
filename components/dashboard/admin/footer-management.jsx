@@ -138,6 +138,7 @@ export function FooterManagement() {
     url: "",
     alt_text: "",
     company_name: "",
+    originalFileName: "",
   });
   const [description, setDescription] = useState("");
   const [address, setAddress] = useState("");
@@ -337,8 +338,12 @@ export function FooterManagement() {
       const result = await apiClient.post("/api/admin/storage/upload", formData);
       console.log("Storage upload successful:", result);
 
-      // Update logo data with the new URL (but don't save to database yet)
-      const updatedLogoData = { ...logoData, url: result.url };
+      // Update logo data with the new URL and original filename (but don't save to database yet)
+      const updatedLogoData = {
+        ...logoData,
+        url: result.data.url,
+        originalFileName: result.data.originalFileName
+      };
       setLogoData(updatedLogoData);
       setLogoFile(null);
 
@@ -1226,7 +1231,7 @@ export function FooterManagement() {
                             <p className="text-sm font-medium text-gray-700">
                               {pendingLogoRemoval
                                 ? "Logo marked for removal"
-                                : "Logo uploaded"}
+                                : logoData.originalFileName || "Logo uploaded"}
                             </p>
                             <p className="text-xs text-gray-500">
                               {pendingLogoRemoval

@@ -1,23 +1,15 @@
 import { NextResponse } from "next/server"
-import { 
-  requireAdmin, 
-  createSupabaseClientWithAuth, 
-  createAuthError, 
-  createSuccessResponse 
+import {
+  requireAdmin,
+  createSupabaseClientWithAuth,
+  createAuthError,
+  createSuccessResponse
 } from "@/lib/auth-helper"
-
-// Create Supabase admin client with service role key to bypass RLS
-import { createClient } from '@supabase/supabase-js'
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  }
-)
+import {
+  generateUniqueFileName,
+  validateAssetFile
+} from "@/lib/assets-utils"
+import { supabaseAdmin } from "@/lib/supabase"
 
 export async function POST(request) {
   try {
@@ -30,33 +22,18 @@ export async function POST(request) {
     const file = formData.get('file')
 
     if (!file) {
-      return NextResponse.json(
-        { error: 'No file provided' },
-        { status: 400 }
-      )
+      return createAuthError('No file provided', 400)
     }
 
-    // Validate file type
-    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/webp']
-    if (!allowedTypes.includes(file.type)) {
-      return NextResponse.json(
-        { error: 'Invalid file type. Please upload PNG, JPG, SVG, or WebP.' },
-        { status: 400 }
-      )
+    // Validate file using assets utilities
+    const validation = validateAssetFile(file)
+    if (!validation.isValid) {
+      return createAuthError(validation.error, 400)
     }
 
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      return NextResponse.json(
-        { error: 'File size must be less than 5MB.' },
-        { status: 400 }
-      )
-    }
-
-    // Generate unique file name
-    const fileExt = file.name.split('.').pop()
-    const fileName = `footer-logo-${Date.now()}.${fileExt}`
-    const filePath = `${fileName}`
+    // Generate unique filename using original name
+    const uniqueFileName = await generateUniqueFileName(file.name, supabaseAdmin)
+    const filePath = uniqueFileName
 
     // Convert file to buffer for Supabase upload
     const arrayBuffer = await file.arrayBuffer()
@@ -73,10 +50,7 @@ export async function POST(request) {
 
     if (error) {
       console.error('Supabase storage upload error:', error)
-      return NextResponse.json(
-        { error: `Failed to upload file: ${error.message}` },
-        { status: 500 }
-      )
+      return createAuthError(`Failed to upload file: ${error.message}`, 500)
     }
 
     // Get public URL
@@ -84,21 +58,19 @@ export async function POST(request) {
       .from('assets')
       .getPublicUrl(filePath)
 
-    return NextResponse.json({
+    return createSuccessResponse({
       success: true,
       url: publicUrl,
       path: filePath,
-      fileName: fileName,
+      fileName: uniqueFileName,           // Storage filename (unique)
+      originalFileName: file.name,        // Original user filename
       size: file.size,
       type: file.type
     })
 
   } catch (error) {
     console.error('Storage upload error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return createAuthError('Internal server error', 500)
   }
 }
 
@@ -112,10 +84,7 @@ export async function DELETE(request) {
     const path = searchParams.get('path')
 
     if (!path) {
-      return NextResponse.json(
-        { error: 'File path is required' },
-        { status: 400 }
-      )
+      return createAuthError('File path is required', 400)
     }
 
     // Delete file from Supabase storage using admin client
@@ -125,22 +94,16 @@ export async function DELETE(request) {
 
     if (error) {
       console.error('Supabase storage delete error:', error)
-      return NextResponse.json(
-        { error: `Failed to delete file: ${error.message}` },
-        { status: 500 }
-      )
+      return createAuthError(`Failed to delete file: ${error.message}`, 500)
     }
 
-    return NextResponse.json({
+    return createSuccessResponse({
       success: true,
       message: 'File deleted successfully'
     })
 
   } catch (error) {
     console.error('Storage delete error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return createAuthError('Internal server error', 500)
   }
 }
