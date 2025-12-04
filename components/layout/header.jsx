@@ -13,6 +13,7 @@ import { usePathname } from "next/navigation"
 import { LocaleSelector } from "@/components/ui/locale-selector"
 import { useAuth } from "@/contexts/auth-context"
 import { useToast } from "@/hooks/use-toast"
+import { useProfileSync } from "@/hooks/useProfileSync"
 import { getAvatarDisplayUrl, getUserInitials } from "@/lib/utils"
 import {
   DropdownMenu,
@@ -29,7 +30,8 @@ export function Header() {
   const { scrollY } = useScroll()
   const pathname = usePathname()
   const mounted = useMounted()
-  const { user, profile, logout, loading, isAuthenticated, isAdmin, isVendor, isUser } = useAuth()
+  const { user, logout, isAuthenticated, isAdmin, isVendor, isUser } = useAuth()
+const { profile: syncedProfile, loading: profileLoading } = useProfileSync()
   const { toast } = useToast()
 
   useEffect(() => {
@@ -75,28 +77,28 @@ export function Header() {
 
   // Get user display name (prefer profile name over email, but don't use email fallback)
   const getUserDisplayName = () => {
-    if (profile?.first_name) {
-      return `${profile.first_name} ${profile.last_name || ''}`.trim()
+    if (syncedProfile?.first_name) {
+      return `${syncedProfile.first_name} ${syncedProfile.last_name || ''}`.trim()
     }
     return 'User' // Don't use email fallback - return 'User' instead
   }
 
   // Get user initials for avatar (only name-based, never email)
   const getUserInitials = () => {
-    if (profile?.first_name && profile?.last_name) {
-      return `${profile.first_name.charAt(0)}${profile.last_name.charAt(0)}`.toUpperCase()
+    if (syncedProfile?.first_name && syncedProfile?.last_name) {
+      return `${syncedProfile.first_name.charAt(0)}${syncedProfile.last_name.charAt(0)}`.toUpperCase()
     }
-    if (profile?.first_name && profile.first_name.length >= 2) {
-      return profile.first_name.substring(0, 2).toUpperCase()
+    if (syncedProfile?.first_name && syncedProfile.first_name.length >= 2) {
+      return syncedProfile.first_name.substring(0, 2).toUpperCase()
     }
-    if (profile?.first_name) {
-      return profile.first_name.charAt(0).toUpperCase()
+    if (syncedProfile?.first_name) {
+      return syncedProfile.first_name.charAt(0).toUpperCase()
     }
-    if (profile?.last_name && profile.last_name.length >= 2) {
-      return profile.last_name.substring(0, 2).toUpperCase()
+    if (syncedProfile?.last_name && syncedProfile.last_name.length >= 2) {
+      return syncedProfile.last_name.substring(0, 2).toUpperCase()
     }
-    if (profile?.last_name) {
-      return profile.last_name.charAt(0).toUpperCase()
+    if (syncedProfile?.last_name) {
+      return syncedProfile.last_name.charAt(0).toUpperCase()
     }
     return 'U' // Final fallback
   }
@@ -145,21 +147,21 @@ export function Header() {
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" className="flex items-center gap-2 hover:bg-gray-100 transition-colors cursor-pointer">
-                        {loading || !profile ? (
+                        {profileLoading || !syncedProfile ? (
                           <div className="w-8 h-8 bg-gray-200/30 animate-pulse rounded-full"></div>
                         ) : (
                           <div className="flex w-9 h-9 items-center justify-center rounded-full bg-gradient-to-br from-[#0066FF] to-[#00D4AA] ring-2 ring-white shadow-sm">
-                            {profile?.avatar_url ? (
+                            {syncedProfile?.avatar_url ? (
                               <Avatar className="w-8 h-8">
                                 <AvatarImage
-                                  src={getAvatarDisplayUrl(profile?.avatar_url)}
+                                  src={getAvatarDisplayUrl(syncedProfile?.avatar_url)}
                                   alt="Profile picture"
                                 />
                               </Avatar>
-                            ) : profile?.first_name || profile?.last_name ? (
+                            ) : syncedProfile?.first_name || syncedProfile?.last_name ? (
                               <Avatar className="w-8 h-8">
                                 <AvatarFallback className="bg-gradient-to-br from-[#0066FF] to-[#00D4AA] text-white text-xs">
-                                  {getUserInitials(profile?.first_name, profile?.last_name, profile?.email)}
+                                  {getUserInitials(syncedProfile?.first_name, syncedProfile?.last_name, user?.email)}
                                 </AvatarFallback>
                               </Avatar>
                             ) : (
@@ -168,14 +170,14 @@ export function Header() {
                           </div>
                         )}
                         <span className="hidden sm:inline">
-                          {loading || !profile ? <Skeleton className="w-32 h-4" /> : getUserDisplayName()}
+                          {profileLoading || !syncedProfile ? <Skeleton className="w-32 h-4" /> : getUserDisplayName()}
                         </span>
                         <ChevronDown className="w-4 h-4 text-gray-500 hidden sm:inline" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="bg-white/95 backdrop-blur-sm p-1">
                       <DropdownMenuItem asChild>
-                        <Link href={`/${profile?.role || user?.role}`} className="flex items-center gap-2">
+                        <Link href={`/${syncedProfile?.role || user?.role || user?.role}`} className="flex items-center gap-2">
                           <User className="w-4 h-4" />
                           Dashboard
                         </Link>
@@ -273,17 +275,17 @@ export function Header() {
                         <div className="w-9 h-9 bg-gray-200/30 animate-pulse rounded-full"></div>
                       ) : (
                         <div className="flex w-9 h-9 items-center justify-center rounded-full bg-gradient-to-br from-[#0066FF] to-[#00D4AA] ring-2 ring-white shadow-sm">
-                          {profile?.avatar_url ? (
+                          {syncedProfile?.avatar_url ? (
                             <Avatar className="w-8 h-8">
                               <AvatarImage
-                                src={getAvatarDisplayUrl(profile?.avatar_url)}
+                                src={getAvatarDisplayUrl(syncedProfile?.avatar_url)}
                                 alt="Profile picture"
                               />
                             </Avatar>
-                          ) : profile?.first_name || profile?.last_name ? (
+                          ) : syncedProfile?.first_name || syncedProfile?.last_name ? (
                             <Avatar className="w-8 h-8">
                               <AvatarFallback className="bg-gradient-to-br from-[#0066FF] to-[#00D4AA] text-white text-xs">
-                                {getUserInitials(profile?.first_name, profile?.last_name, profile?.email)}
+                                {getUserInitials(syncedProfile?.first_name, syncedProfile?.last_name, user?.email)}
                               </AvatarFallback>
                             </Avatar>
                           ) : (
@@ -293,14 +295,14 @@ export function Header() {
                       )}
                       <div className="flex-1">
                         <div className="text-sm font-medium text-gray-700">
-                          {loading || !profile ? <Skeleton className="w-32 h-4" /> : getUserDisplayName()}
+                          {profileLoading || !syncedProfile ? <Skeleton className="w-32 h-4" /> : getUserDisplayName()}
                         </div>
                         <div className="text-xs text-gray-500 capitalize">
-                          {profile?.role || user?.role} Account
+                          {syncedProfile?.role || user?.role || user?.role} Account
                         </div>
                       </div>
                     </div>
-                    <Link href={`/${profile?.role || user?.role}`} className="block py-2 text-gray-700 hover:text-[#0066FF] font-medium">
+                    <Link href={`/${syncedProfile?.role || user?.role || user?.role}`} className="block py-2 text-gray-700 hover:text-[#0066FF] font-medium">
                       Dashboard
                     </Link>
                     <button

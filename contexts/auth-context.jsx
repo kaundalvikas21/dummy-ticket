@@ -8,10 +8,13 @@ const AuthContext = createContext({
   user: null,
   profile: null,
   loading: true,
+  profileVersion: 0,
   signIn: async () => {},
   signUp: async () => {},
   signOut: async () => {},
   updateProfile: async () => {},
+  refreshProfile: async () => {},
+  notifyProfileUpdate: () => {},
   getRedirectUrl: () => '/',
   isAuthenticated: false,
   isAdmin: false,
@@ -22,6 +25,7 @@ const AuthContext = createContext({
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [profile, setProfile] = useState(null)
+  const [profileVersion, setProfileVersion] = useState(0)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
   const supabase = createClient()
@@ -155,6 +159,57 @@ export function AuthProvider({ children }) {
   const register = signUp
   const logout = signOut
 
+  // Refresh profile from database
+  const refreshProfile = async () => {
+    try {
+      if (!user?.id) {
+        console.warn('Cannot refresh profile: user not authenticated')
+        return { success: false, error: 'User not authenticated' }
+      }
+
+      // Get current session
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) {
+        return { success: false, error: 'No valid authentication session' }
+      }
+
+      const response = await fetch('/api/auth/profile', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to refresh profile')
+      }
+
+      const result = await response.json()
+      if (result.success) {
+        const refreshedProfile = {
+          ...result.profile,
+          email: user.email,
+          role: user.role,
+          status: user.status
+        }
+        setProfile(refreshedProfile)
+        setProfileVersion(prev => prev + 1)
+
+        return { success: true, data: refreshedProfile }
+      } else {
+        return { success: false, error: result.error }
+      }
+    } catch (error) {
+      console.error('Profile refresh error:', error)
+      return { success: false, error: error.message }
+    }
+  }
+
+  // Notify all components of profile update
+  const notifyProfileUpdate = () => {
+    setProfileVersion(prev => prev + 1)
+  }
+
   const updateProfile = async (profileData) => {
     try {
       if (!user?.id) {
@@ -190,19 +245,10 @@ export function AuthProvider({ children }) {
       const result = await response.json()
 
       if (result.success) {
-        const updatedProfile = {
-          ...result.profile,
-          email: user.email,
-          role: user.role,
-          status: user.status
-        }
+        // Refresh profile from database to ensure we have the latest data
+        const refreshResult = await refreshProfile()
 
-        setProfile(updatedProfile)
-
-        // Profile data is now managed purely through Supabase sessions
-        // No localStorage needed - Supabase handles session persistence
-
-        return { success: true, data: result }
+        return { success: true, data: result, refreshResult }
       } else {
         return { success: false, error: result.error }
       }
@@ -224,11 +270,14 @@ export function AuthProvider({ children }) {
     user,
     profile,
     loading,
+    profileVersion,
     // Supabase Auth methods
     signIn,
     signUp,
     signOut,
     updateProfile,
+    refreshProfile,
+    notifyProfileUpdate,
     getRedirectUrl,
     // Legacy methods for backward compatibility
     login,

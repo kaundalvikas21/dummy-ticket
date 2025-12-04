@@ -16,12 +16,14 @@ import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/contexts/auth-context"
 import { getAvatarDisplayUrl, getUserInitials } from "@/lib/utils"
+import { useProfileSync } from "@/hooks/useProfileSync"
 import { useState, useEffect } from "react"
 
 export function UserHeader({ onMenuClick, sidebarOpen }) {
   const router = useRouter()
   const { toast } = useToast()
-  const { logout, profile, loading } = useAuth()
+  const { logout } = useAuth()
+  const { profile, loading } = useProfileSync()
   const [isLoggingOut, setIsLoggingOut] = useState(false)
 
   const [mounted, setMounted] = useState(false);

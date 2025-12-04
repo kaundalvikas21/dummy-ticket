@@ -16,6 +16,7 @@ import { DatePicker } from "@/components/ui/input/DatePicker"
 import { SelectInput } from "@/components/ui/input/SelectInput"
 import { getUserInitials, getAvatarDisplayUrl } from "@/lib/utils"
 import { formatFileSize, truncateFilename } from "@/lib/avatar-utils"
+import { useProfileSync } from "@/hooks/useProfileSync"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -68,6 +69,13 @@ const languageOptions = [
 export function MyProfile() {
   const { toast } = useToast()
   const { user, profile: authProfile, updateProfile } = useAuth()
+  const {
+    profile: syncedProfile,
+    loading,
+    profileVersion,
+    isProfileFresh,
+    manualRefresh
+  } = useProfileSync()
   const fileInputRef = useRef(null)
   const supabase = createClient()
 
@@ -98,40 +106,32 @@ export function MyProfile() {
   const [isRemoving, setIsRemoving] = useState(false)
   const [avatarFileName, setAvatarFileName] = useState("")
   const [avatarFileSize, setAvatarFileSize] = useState(null)
-  const [profile, setProfile] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    address: "",
-    dateOfBirth: "",
-    nationality: "",
-    passportNumber: "",
-    city: "",
-    postalCode: "",
-    countryCode: "",
-    preferredLanguage: "en",
-  })
+  const [firstName, setFirstName] = useState("")
+  const [lastName, setLastName] = useState("")
+  const [phone, setPhone] = useState("")
+  const [address, setAddress] = useState("")
+  const [dateOfBirth, setDateOfBirth] = useState("")
+  const [nationality, setNationality] = useState("")
+  const [passportNumber, setPassportNumber] = useState("")
+  const [city, setCity] = useState("")
+  const [postalCode, setPostalCode] = useState("")
+  const [countryCode, setCountryCode] = useState("")
+  const [preferredLanguage, setPreferredLanguage] = useState("en")
 
   // Initialize profile data from AuthContext
   useEffect(() => {
     if (authProfile) {
-      const newProfileData = {
-        firstName: authProfile.first_name || "",
-        lastName: authProfile.last_name || "",
-        email: user?.email || "",
-        phone: authProfile.phone_number || "",
-        address: authProfile.address || "",
-        dateOfBirth: authProfile.date_of_birth || "",
-        nationality: authProfile.nationality || "",
-        passportNumber: authProfile.passport_number || "",
-        city: authProfile.city || "",
-        postalCode: authProfile.postal_code || "",
-        countryCode: authProfile.country_code || "",
-        preferredLanguage: authProfile.preferred_language || "en",
-      }
-
-      setProfile(newProfileData)
+      setFirstName(authProfile.first_name || "")
+      setLastName(authProfile.last_name || "")
+      setPhone(authProfile.phone_number || "")
+      setAddress(authProfile.address || "")
+      setDateOfBirth(authProfile.date_of_birth || "")
+      setNationality(authProfile.nationality || "")
+      setPassportNumber(authProfile.passport_number || "")
+      setCity(authProfile.city || "")
+      setPostalCode(authProfile.postal_code || "")
+      setCountryCode(authProfile.country_code || "")
+      setPreferredLanguage(authProfile.preferred_language || "en")
 
       // Set profile image and filename from database
       setProfileImage(getAvatarDisplayUrl(authProfile.avatar_url))
@@ -143,20 +143,17 @@ export function MyProfile() {
   const handleCancel = () => {
     // Reset the form to original values from authProfile
     if (authProfile) {
-      setProfile({
-        firstName: authProfile.first_name || "",
-        lastName: authProfile.last_name || "",
-        email: user?.email || "",
-        phone: authProfile.phone_number || "",
-        address: authProfile.address || "",
-        dateOfBirth: authProfile.date_of_birth || "",
-        nationality: authProfile.nationality || "",
-        passportNumber: authProfile.passport_number || "",
-        city: authProfile.city || "",
-        postalCode: authProfile.postal_code || "",
-        countryCode: authProfile.country_code || "",
-        preferredLanguage: authProfile.preferred_language || "en",
-      })
+      setFirstName(authProfile.first_name || "")
+      setLastName(authProfile.last_name || "")
+      setPhone(authProfile.phone_number || "")
+      setAddress(authProfile.address || "")
+      setDateOfBirth(authProfile.date_of_birth || "")
+      setNationality(authProfile.nationality || "")
+      setPassportNumber(authProfile.passport_number || "")
+      setCity(authProfile.city || "")
+      setPostalCode(authProfile.postal_code || "")
+      setCountryCode(authProfile.country_code || "")
+      setPreferredLanguage(authProfile.preferred_language || "en")
     }
     // Clear any selected file
     setSelectedFile(null)
@@ -181,7 +178,7 @@ export function MyProfile() {
 
   
       // Validate required fields
-      if (!profile.firstName?.trim() || !profile.lastName?.trim()) {
+      if (!firstName?.trim() || !lastName?.trim()) {
         toast({
           variant: "destructive",
           title: "Validation Error",
@@ -218,44 +215,40 @@ export function MyProfile() {
       // Note: Email is excluded as it cannot be changed for security reasons
       const profileData = {
         // Required fields - never send null/undefined to database
-        first_name: profile.firstName?.trim() || authProfile?.firstName || '',
-        last_name: profile.lastName?.trim() || authProfile?.lastName || '',
+        first_name: firstName?.trim() || authProfile?.first_name || '',
+        last_name: lastName?.trim() || authProfile?.last_name || '',
 
         // Optional fields - can be null/empty
-        phone_number: profile.phone?.trim() || null,
-        address: profile.address?.trim() || null,
-        date_of_birth: profile.dateOfBirth || null,
-        nationality: profile.nationality?.trim() || null,
-        passport_number: profile.passportNumber?.trim() || null,
-        city: profile.city?.trim() || null,
-        postal_code: profile.postalCode?.trim() || null,
-        country_code: profile.countryCode?.trim() || null,
-        preferred_language: profile.preferredLanguage || 'en',
+        phone_number: phone?.trim() || null,
+        address: address?.trim() || null,
+        date_of_birth: dateOfBirth || null,
+        nationality: nationality?.trim() || null,
+        passport_number: passportNumber?.trim() || null,
+        city: city?.trim() || null,
+        postal_code: postalCode?.trim() || null,
+        country_code: countryCode?.trim() || null,
+        preferred_language: preferredLanguage || 'en',
 
         // Include uploaded image URL, or keep existing one if no new image uploaded
         avatar_url: avatarUrl || authProfile?.avatar_url || null
       }
 
-      
-      // Call updateProfile function from AuthContext
+
+      // Call updateProfile function from AuthContext (now enhanced with auto-refresh)
       const result = await updateProfile(profileData)
 
       if (result.success) {
         toast({
           title: "Profile Updated Successfully!",
           description: avatarUrl
-            ? "Your profile and profile picture have been saved."
-            : "Your profile changes have been saved.",
+            ? "Your profile and profile picture have been saved and synchronized."
+            : "Your profile changes have been saved and synchronized across all pages.",
         })
         setIsEditing(false)
         setSelectedFile(null) // Clear selected file after successful save
 
-        // Update local profile image state if avatar was uploaded
-        if (avatarUrl) {
-          setProfileImage(avatarUrl)
-          setAvatarFileName(uploadedFileName || "")
-          setAvatarFileSize(uploadedFileSize || null)
-        }
+        // Note: No need to manually update local state - AuthContext handles it
+        // The profile sync system ensures all components get the fresh data
       } else {
         // Provide more specific error messages
         let errorMessage = result.error || "Failed to update profile. Please try again."
@@ -504,8 +497,8 @@ export function MyProfile() {
               <AvatarFallback className="text-3xl font-bold bg-gradient-to-br from-blue-500 to-purple-600 text-white">
                 {imageLoading ? (
                   <div className="h-6 w-6 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                ) : profile.firstName || profile.lastName ? (
-                  getUserInitials(profile.firstName, profile.lastName, profile.email)
+                ) : firstName || lastName ? (
+                  getUserInitials(firstName, lastName, user?.email)
                 ) : (
                   // Show skeleton avatar when no name is provided
                   <div className="w-full h-full bg-gray-200/20 animate-pulse rounded-full"></div>
@@ -580,9 +573,9 @@ export function MyProfile() {
               {authProfile ? (
                 <>
                   <p className="font-semibold text-lg">
-                    {profile.firstName} {profile.lastName}
+                    {firstName} {lastName}
                   </p>
-                  <p className="text-sm text-gray-600">{profile.email}</p>
+                  <p className="text-sm text-gray-600">{user?.email}</p>
                   <p className="text-sm text-gray-600">{getMemberSinceText()}</p>
                 </>
               ) : (
@@ -619,8 +612,8 @@ export function MyProfile() {
                 <Label htmlFor="firstName">First Name</Label>
                 <Input
                   id="firstName"
-                  value={profile.firstName}
-                  onChange={(e) => setProfile({ ...profile, firstName: e.target.value })}
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
                   disabled={!isEditing}
                 />
               </div>
@@ -628,8 +621,8 @@ export function MyProfile() {
                 <Label htmlFor="lastName">Last Name</Label>
                 <Input
                   id="lastName"
-                  value={profile.lastName}
-                  onChange={(e) => setProfile({ ...profile, lastName: e.target.value })}
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
                   disabled={!isEditing}
                 />
               </div>
@@ -639,7 +632,7 @@ export function MyProfile() {
                   <Input
                     id="email"
                     type="email"
-                    value={profile.email}
+                    value={user?.email || ""}
                     disabled
                     className="bg-gray-50 cursor-not-allowed"
                     readOnly
@@ -656,8 +649,8 @@ export function MyProfile() {
                 <Label htmlFor="phone">Phone</Label>
                 <Input
                   id="phone"
-                  value={profile.phone}
-                  onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
                   disabled={!isEditing}
                 />
               </div>
@@ -665,17 +658,17 @@ export function MyProfile() {
                 <Label htmlFor="address">Address</Label>
                 <Textarea
                   id="address"
-                  value={profile.address}
-                  onChange={(e) => setProfile({ ...profile, address: e.target.value })}
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
                   disabled={!isEditing}
                   rows={2}
                 />
               </div>
               <div className="space-y-2">
                 <DatePicker
-                  key={`${isEditing ? 'editing' : 'view'}-${profile.dateOfBirth || 'empty'}`}
-                  value={profile.dateOfBirth}
-                  onChange={(date) => setProfile({ ...profile, dateOfBirth: date })}
+                  key={`${isEditing ? 'editing' : 'view'}-${dateOfBirth || 'empty'}`}
+                  value={dateOfBirth}
+                  onChange={(date) => setDateOfBirth(date)}
                   label="Date of Birth"
                   placeholder="Select your date of birth"
                   disabled={!isEditing}
@@ -703,8 +696,8 @@ export function MyProfile() {
                 <Label htmlFor="passportNumber">Passport Number</Label>
                 <Input
                   id="passportNumber"
-                  value={profile.passportNumber}
-                  onChange={(e) => setProfile({ ...profile, passportNumber: e.target.value })}
+                  value={passportNumber}
+                  onChange={(e) => setPassportNumber(e.target.value)}
                   disabled={!isEditing}
                   placeholder="Enter your passport number"
                 />
@@ -713,8 +706,8 @@ export function MyProfile() {
                 <Label htmlFor="city">City</Label>
                 <Input
                   id="city"
-                  value={profile.city}
-                  onChange={(e) => setProfile({ ...profile, city: e.target.value })}
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
                   disabled={!isEditing}
                   placeholder="Enter your city"
                 />
@@ -723,8 +716,8 @@ export function MyProfile() {
                 <Label htmlFor="postalCode">Postal Code</Label>
                 <Input
                   id="postalCode"
-                  value={profile.postalCode}
-                  onChange={(e) => setProfile({ ...profile, postalCode: e.target.value })}
+                  value={postalCode}
+                  onChange={(e) => setPostalCode(e.target.value)}
                   disabled={!isEditing}
                   placeholder="Enter your postal code"
                 />
@@ -732,8 +725,8 @@ export function MyProfile() {
               <div className="space-y-2">
                 <SelectInput
                   label="Nationality"
-                  value={profile.nationality}
-                  onChange={(value) => setProfile({ ...profile, nationality: value })}
+                  value={nationality}
+                  onChange={(value) => setNationality(value)}
                   options={nationalityOptions}
                   placeholder="Select nationality"
                   disabled={!isEditing}
@@ -742,8 +735,8 @@ export function MyProfile() {
               <div className="space-y-2">
                 <SelectInput
                   label="Preferred Language"
-                  value={profile.preferredLanguage}
-                  onChange={(value) => setProfile({ ...profile, preferredLanguage: value })}
+                  value={preferredLanguage}
+                  onChange={(value) => setPreferredLanguage(value)}
                   options={languageOptions}
                   placeholder="Select preferred language"
                   disabled={!isEditing}

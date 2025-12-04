@@ -347,12 +347,10 @@ export function FooterManagement() {
       setLogoData(updatedLogoData);
       setLogoFile(null);
 
-      console.log("Logo uploaded to storage, ready for save button");
-
       toast({
         title: "Logo Uploaded",
         description:
-          "Logo uploaded to storage. Click 'Save All Footer Information' to save to database.",
+          "Logo uploaded. Click 'Save All Footer Information.",
       });
     } catch (error) {
       console.error("Upload error:", error);
