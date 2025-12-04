@@ -1,23 +1,11 @@
 import { NextResponse } from "next/server"
-import { 
-  requireAdmin, 
-  createSupabaseClientWithAuth, 
-  createAuthError, 
-  createSuccessResponse 
+import {
+  requireAdmin,
+  createSupabaseClientWithAuth,
+  createAuthError,
+  createSuccessResponse
 } from "@/lib/auth-helper"
-
-// Create Supabase admin client with service role key to bypass RLS
-import { createClient } from '@supabase/supabase-js'
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  }
-)
+import { supabaseAdmin } from "@/lib/supabase"
 
 
 
@@ -38,10 +26,7 @@ export async function GET(request) {
   
     if (error) {
       console.error('Footer fetch error:', error)
-      return NextResponse.json(
-        { error: `Failed to fetch footer data: ${error.message}` },
-        { status: 500 }
-      )
+      return createAuthError(`Failed to fetch footer data: ${error.message}`, 500)
     }
 
     // Organize data by sections
@@ -118,10 +103,7 @@ export async function GET(request) {
 })
   } catch (error) {
     console.error('Footer API error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return createAuthError('Internal server error', 500)
   }
 }
 
@@ -139,48 +121,27 @@ export async function POST(request) {
       // Server-side validation for new items
       if (section === 'links') {
         if (!data.title || !data.title.trim()) {
-          return NextResponse.json(
-            { error: 'Link title is required' },
-            { status: 400 }
-          )
+          return createAuthError('Link title is required', 400)
         }
         if (!data.href || !data.href.trim()) {
-          return NextResponse.json(
-            { error: 'Link URL is required' },
-            { status: 400 }
-          )
+          return createAuthError('Link URL is required', 400)
         }
       } else if (section === 'contact') {
         if (!data.title || !data.title.trim()) {
-          return NextResponse.json(
-            { error: 'Contact title is required' },
-            { status: 400 }
-          )
+          return createAuthError('Contact title is required', 400)
         }
         if (!data.content || !data.content.trim()) {
-          return NextResponse.json(
-            { error: 'Contact information is required' },
-            { status: 400 }
-          )
+          return createAuthError('Contact information is required', 400)
         }
       } else if (section === 'social') {
         if (!data.name || !data.name.trim()) {
-          return NextResponse.json(
-            { error: 'Social media name is required' },
-            { status: 400 }
-          )
+          return createAuthError('Social media name is required', 400)
         }
         if (!data.url || !data.url.trim()) {
-          return NextResponse.json(
-            { error: 'Social media URL is required' },
-            { status: 400 }
-          )
+          return createAuthError('Social media URL is required', 400)
         }
         if (!data.icon_name) {
-          return NextResponse.json(
-            { error: 'Social media icon is required' },
-            { status: 400 }
-          )
+          return createAuthError('Social media icon is required', 400)
         }
       }
 
@@ -217,10 +178,7 @@ export async function POST(request) {
 
         if (createError) {
           console.error('Error creating initial section:', createError)
-          return NextResponse.json(
-            { error: `Failed to create ${section} section: ${createError.message}` },
-            { status: 500 }
-          )
+          return createAuthError(`Failed to create ${section} section: ${createError.message}`, 500)
         }
 
         // Use the newly created record's content
@@ -259,13 +217,10 @@ export async function POST(request) {
 
       if (error) {
         console.error('Footer array add error:', error)
-        return NextResponse.json(
-          { error: `Failed to add item to ${section}` },
-          { status: 500 }
-        )
+        return createAuthError(`Failed to add item to ${section}`, 500)
       }
 
-      return NextResponse.json({ success: true, item: newItem })
+      return createSuccessResponse({ success: true, item: newItem })
     } else if (operation === 'update_primary') {
       // Update primary info section
       const { data: existingRecord } = await supabaseAdmin
@@ -289,13 +244,10 @@ export async function POST(request) {
 
         if (error) {
           console.error('Footer primary info create error:', error)
-          return NextResponse.json(
-            { error: `Failed to create primary info: ${error.message}` },
-            { status: 500 }
-          )
+          return createAuthError(`Failed to create primary info: ${error.message}`, 500)
         }
 
-        return NextResponse.json(newRecord)
+        return createSuccessResponse(newRecord)
       } else {
         // Update existing primary info record
         const updatedContent = { ...existingRecord.content, ...data }
@@ -309,26 +261,17 @@ export async function POST(request) {
 
         if (error) {
           console.error('Footer primary info update error:', error)
-          return NextResponse.json(
-            { error: `Failed to update primary info: ${error.message}` },
-            { status: 500 }
-          )
+          return createAuthError(`Failed to update primary info: ${error.message}`, 500)
         }
 
-        return NextResponse.json(updatedRecord)
+        return createSuccessResponse(updatedRecord)
       }
     } else {
-      return NextResponse.json(
-        { error: 'Invalid operation' },
-        { status: 400 }
-      )
+      return createAuthError('Invalid operation', 400)
     }
   } catch (error) {
     console.error('Footer POST error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return createAuthError('Internal server error', 500)
   }
 }
 
@@ -419,25 +362,16 @@ export async function PUT(request) {
         .single()
 
       if (error) {
-        return NextResponse.json(
-          { error: `Failed to update item in ${section}` },
-          { status: 500 }
-        )
+        return createAuthError(`Failed to update item in ${section}`, 500)
       }
 
-      return NextResponse.json({ success: true })
+      return createSuccessResponse({ success: true })
     } else {
-      return NextResponse.json(
-        { error: 'Invalid operation' },
-        { status: 400 }
-      )
+      return createAuthError('Invalid operation', 400)
     }
   } catch (error) {
     console.error('Footer PUT error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return createAuthError('Internal server error', 500)
   }
 }
 
@@ -453,10 +387,7 @@ export async function DELETE(request) {
 
     
     if (!section || !itemId) {
-      return NextResponse.json(
-        { error: 'Section and itemId are required' },
-        { status: 400 }
-      )
+      return createAuthError('Section and itemId are required', 400)
     }
 
     // Get current record
@@ -470,7 +401,7 @@ export async function DELETE(request) {
     if (fetchError || !existingRecord) {
       // If record doesn't exist, just return success since item is already "deleted"
       console.log(`Section ${section} not found, item ${itemId} already deleted`)
-      return NextResponse.json({ success: true })
+      return createSuccessResponse({ success: true })
     }
 
     // Remove item from array
@@ -498,19 +429,13 @@ export async function DELETE(request) {
 
     if (updateError) {
       console.error('Footer array deletion error:', updateError)
-      return NextResponse.json(
-        { error: 'Failed to delete item from array' },
-        { status: 500 }
-      )
+      return createAuthError('Failed to delete item from array', 500)
     }
 
-    return NextResponse.json({ success: true })
+    return createSuccessResponse({ success: true })
   } catch (error) {
     console.error('Footer DELETE error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return createAuthError('Internal server error', 500)
   }
 }
 
@@ -526,10 +451,7 @@ export async function PATCH(request) {
 
     // Validate required items array
     if (!items || !Array.isArray(items)) {
-      return NextResponse.json(
-        { error: 'Items array is required' },
-        { status: 400 }
-      )
+      return createAuthError('Items array is required', 400)
     }
 
     // Update multiple items (for bulk reorder or status changes)
@@ -548,12 +470,9 @@ export async function PATCH(request) {
 
     await Promise.all(updatePromises)
 
-    return NextResponse.json({ success: true })
+    return createSuccessResponse({ success: true })
   } catch (error) {
     console.error('Footer PATCH error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return createAuthError('Internal server error', 500)
   }
 }
