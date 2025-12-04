@@ -362,23 +362,23 @@ export function ContactSubmissionsViewer() {
 
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card className="shadow-sm">
+        <Card className="shadow-sm transition-all duration-300 hover:shadow-lg hover:bg-gray-50">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Total Submissions</p>
+                <p className="text-lg text-gray-600">Total Submissions</p>
                 <p className="text-2xl font-bold text-gray-900">{totalCount}</p>
               </div>
-              <MessageSquare className="w-8 h-8 text-blue-600" />
+              <MessageSquare className="w-8 h-8 text-black-600" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="shadow-sm">
+        <Card className="shadow-sm transition-all duration-300 hover:shadow-lg hover:bg-yellow-50">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Pending</p>
+                <p className="text-lg text-gray-600">Pending</p>
                 <p className="text-2xl font-bold text-yellow-600">
                   {submissions.filter(s => s.status === 'pending').length}
                 </p>
@@ -388,11 +388,11 @@ export function ContactSubmissionsViewer() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-sm">
+        <Card className="shadow-sm transition-all duration-300 hover:shadow-lg hover:bg-blue-50">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">In Progress</p>
+                <p className="text-lg text-gray-600">In Progress</p>
                 <p className="text-2xl font-bold text-blue-600">
                   {submissions.filter(s => s.status === 'in_progress').length}
                 </p>
@@ -402,11 +402,11 @@ export function ContactSubmissionsViewer() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-sm">
+        <Card className="shadow-sm transition-all duration-300 hover:shadow-lg hover:bg-red-50">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Urgent</p>
+                <p className="text-lg text-gray-600">Urgent</p>
                 <p className="text-2xl font-bold text-red-600">
                   {submissions.filter(s => s.priority === 'urgent').length}
                 </p>

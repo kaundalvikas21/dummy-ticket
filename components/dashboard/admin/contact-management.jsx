@@ -792,7 +792,7 @@ export function ContactManagement() {
                 const Icon = settingTemplate.icon
 
                 return (
-                  <Card key={settingTemplate.key} className="border border-gray-200">
+                  <Card key={settingTemplate.key} className="border border-gray-200 transition-all duration-200 hover:shadow-lg">
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-2 mb-2">
@@ -915,7 +915,7 @@ export function ContactManagement() {
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               {searchResults.filteredWorkingHours.map((item, index) => (
-                <Card key={index} className="border border-gray-200">
+                <Card key={index} className="border border-gray-200 transition-all duration-200 hover:shadow-lg">
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-2">
                       <h4 className="font-medium text-gray-900">{item.day}</h4>
@@ -985,7 +985,7 @@ export function ContactManagement() {
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {searchResults.filteredCountrySupport.map((item, index) => (
-                <Card key={index} className="border border-gray-200">
+                <Card key={index} className="border border-gray-200 transition-all duration-200 hover:shadow-lg">
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-2">
                       <h4 className="font-medium text-gray-900 flex items-center gap-2">
