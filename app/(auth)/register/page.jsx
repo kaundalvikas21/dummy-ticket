@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { AuthLayout } from '@/components/auth/AuthLayout'
 import { FormField } from '@/components/auth/FormField'
 import { AuthButton } from '@/components/auth/AuthButton'
+import { PhoneInputWithCountry } from '@/components/ui/input/PhoneInputWithCountry'
 import { User, Mail, Lock, Phone } from 'lucide-react'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/auth-context'
@@ -42,7 +43,8 @@ const registerSchema = z.object({
   firstName: z.string().min(2, 'First name must be at least 2 characters'),
   lastName: z.string().min(2, 'Last name must be at least 2 characters'),
   email: z.string().email('Invalid email address'),
-  phoneNumber: z.string().optional(),
+  country_code: z.string().min(1, 'Select country code'),
+  phone_number: z.string().min(5, 'Phone number too short').regex(/^\d+$/, 'Digits only'),
   nationality: z.string().optional(),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   confirmPassword: z.string().min(6, 'Please confirm your password'),
@@ -90,7 +92,8 @@ export default function RegisterPage() {
         // Profile data - directly from form fields
         firstName: data.firstName.trim(),
         lastName: data.lastName.trim(),
-        phoneNumber: data.phoneNumber?.trim() || '',
+        phoneNumber: data.phone_number || '',
+        countryCode: data.country_code || '+1',
         nationality: data.nationality || '',
         // Other profile fields will be filled from dashboard profile
       }
@@ -204,16 +207,19 @@ export default function RegisterPage() {
               {...registerForm('email')}
               error={registerErrors.email?.message}
             />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              <FormField
-                id="phoneNumber"
+            <div className="space-y-2">
+              <PhoneInputWithCountry
                 label="Phone Number"
-                type="tel"
-                placeholder="Enter your phone number"
-                icon={Phone}
-                {...registerForm('phoneNumber')}
-                error={registerErrors.phoneNumber?.message}
+                countryCodeValue={watch('country_code') || '+1'}
+                phoneValue={watch('phone_number') || ''}
+                onCountryCodeChange={(value) => setValue('country_code', value)}
+                onPhoneChange={(value) => setValue('phone_number', value)}
+                countryError={registerErrors.country_code?.message}
+                phoneError={registerErrors.phone_number?.message}
+                placeholder="Enter phone number"
               />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               <SelectInput
                 label="Nationality"
                 value={watch('nationality') || ''}
