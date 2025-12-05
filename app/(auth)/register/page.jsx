@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { AuthLayout } from '@/components/auth/AuthLayout'
 import { FormField } from '@/components/auth/FormField'
 import { AuthButton } from '@/components/auth/AuthButton'
-import { PhoneInputWithCountry } from '@/components/ui/input/PhoneInputWithCountry'
+import { PhoneInputSingle } from '@/components/ui/input/PhoneInputSingle'
 import { User, Mail, Lock, Phone } from 'lucide-react'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/auth-context'
@@ -69,6 +69,10 @@ export default function RegisterPage() {
     setValue,
   } = useForm({
     resolver: zodResolver(registerSchema),
+    defaultValues: {
+      country_code: '+1',
+      phone_number: ''
+    }
   })
 
   const onRegister = async (data) => {
@@ -208,15 +212,19 @@ export default function RegisterPage() {
               error={registerErrors.email?.message}
             />
             <div className="space-y-2">
-              <PhoneInputWithCountry
+              <PhoneInputSingle
+                value={{
+                  countryCode: watch('country_code'),
+                  phoneNumber: watch('phone_number')
+                }}
+                onChange={(value) => {
+                  setValue('country_code', value.countryCode)
+                  setValue('phone_number', value.phoneNumber)
+                }}
                 label="Phone Number"
-                countryCodeValue={watch('country_code') || '+1'}
-                phoneValue={watch('phone_number') || ''}
-                onCountryCodeChange={(value) => setValue('country_code', value)}
-                onPhoneChange={(value) => setValue('phone_number', value)}
-                countryError={registerErrors.country_code?.message}
-                phoneError={registerErrors.phone_number?.message}
-                placeholder="Enter phone number"
+                required
+                placeholder="+1234567890"
+                error={registerErrors.country_code?.message || registerErrors.phone_number?.message}
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
