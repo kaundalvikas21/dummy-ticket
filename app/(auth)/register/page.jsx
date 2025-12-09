@@ -160,25 +160,25 @@ export default function RegisterPage() {
       title="Create Account"
       description="Sign up to get started with VisaFly"
     >
-      <form onSubmit={handleRegisterSubmit(onRegister)} className="space-y-3">
+      <form onSubmit={handleRegisterSubmit(onRegister)} className="space-y-4">
         {error && (
-          <Alert variant="destructive" className="mb-3">
+          <Alert variant="destructive" className="mb-2">
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
 
-        {/* Personal Information Section */}
-        <div className="space-y-2 p-3 bg-gray-50/30 rounded-lg border border-gray-100">
-          <h3 className="text-xs font-medium text-gray-600 flex items-center gap-1.5 mb-1">
-            <User className="h-3.5 w-3.5 text-gray-500" />
-            Personal Information
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        {/* Personal Information - Compact inline header with 2-col grid */}
+        <div>
+          <span className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide flex items-center gap-1 mb-2">
+            <User className="h-3 w-3" />
+            Personal Info
+          </span>
+          <div className="grid grid-cols-2 gap-3">
             <FormField
               id="firstName"
               label="First Name"
               type="text"
-              placeholder="Enter your first name"
+              placeholder="First name"
               icon={User}
               {...registerForm('firstName')}
               error={registerErrors.firstName?.message}
@@ -187,7 +187,7 @@ export default function RegisterPage() {
               id="lastName"
               label="Last Name"
               type="text"
-              placeholder="Enter your last name"
+              placeholder="Last name"
               icon={User}
               {...registerForm('lastName')}
               error={registerErrors.lastName?.message}
@@ -195,63 +195,63 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        {/* Contact Details Section */}
-        <div className="space-y-2 p-3 bg-gray-50/30 rounded-lg border border-gray-100">
-          <h3 className="text-xs font-medium text-gray-600 flex items-center gap-1.5 mb-1">
-            <Mail className="h-3.5 w-3.5 text-gray-500" />
-            Contact Details
-          </h3>
-          <div className="space-y-2">
+        {/* Contact Details - Optimized layout for phone input visibility */}
+        <div>
+          <span className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide flex items-center gap-1 mb-2">
+            <Mail className="h-3 w-3" />
+            Contact
+          </span>
+          {/* Email and Nationality in 2-column grid (simple single inputs) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <FormField
               id="registerEmail"
               label="Email Address"
               type="email"
-              placeholder="Enter your email"
+              placeholder="you@example.com"
               icon={Mail}
               {...registerForm('email')}
               error={registerErrors.email?.message}
             />
-            <div className="space-y-2">
-              <PhoneInputSingle
-                value={{
-                  countryCode: watch('country_code'),
-                  phoneNumber: watch('phone_number')
-                }}
-                onChange={(value) => {
-                  setValue('country_code', value.countryCode)
-                  setValue('phone_number', value.phoneNumber)
-                }}
-                label="Phone Number"
-                required
-                placeholder="+1234567890"
-                error={registerErrors.country_code?.message || registerErrors.phone_number?.message}
-              />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              <SelectInput
-                label="Nationality"
-                value={watch('nationality') || ''}
-                onValueChange={(value) => setValue('nationality', value)}
-                options={nationalityOptions}
-                placeholder="Select nationality"
-                error={registerErrors.nationality?.message}
-              />
-            </div>
+            <SelectInput
+              label="Nationality"
+              value={watch('nationality') || ''}
+              onValueChange={(value) => setValue('nationality', value)}
+              options={nationalityOptions}
+              placeholder="Select nationality"
+              error={registerErrors.nationality?.message}
+            />
+          </div>
+          {/* Phone gets full width - has country code dropdown + input */}
+          <div className="mt-3">
+            <PhoneInputSingle
+              value={{
+                countryCode: watch('country_code'),
+                phoneNumber: watch('phone_number')
+              }}
+              onChange={(value) => {
+                setValue('country_code', value.countryCode)
+                setValue('phone_number', value.phoneNumber)
+              }}
+              label="Phone Number"
+              required
+              placeholder="Phone number"
+              error={registerErrors.country_code?.message || registerErrors.phone_number?.message}
+            />
           </div>
         </div>
 
-        {/* Account Security Section */}
-        <div className="space-y-2 p-3 bg-gray-50/30 rounded-lg border border-gray-100">
-          <h3 className="text-xs font-medium text-gray-600 flex items-center gap-1.5 mb-1">
-            <Lock className="h-3.5 w-3.5 text-gray-500" />
-            Account Security
-          </h3>
-          <div className="space-y-2">
+        {/* Account Security - Password fields side by side on larger screens */}
+        <div>
+          <span className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide flex items-center gap-1 mb-2">
+            <Lock className="h-3 w-3" />
+            Security
+          </span>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <FormField
               id="registerPassword"
               label="Password"
               type="password"
-              placeholder="Create a password"
+              placeholder="Min. 6 characters"
               icon={Lock}
               showPasswordToggle={true}
               {...registerForm('password')}
@@ -261,7 +261,7 @@ export default function RegisterPage() {
               id="confirmPassword"
               label="Confirm Password"
               type="password"
-              placeholder="Confirm your password"
+              placeholder="Confirm password"
               icon={Lock}
               showPasswordToggle={true}
               {...registerForm('confirmPassword')}
@@ -270,20 +270,18 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        <div className="pt-1">
-          <AuthButton
-            type="submit"
-            isLoading={isLoading}
-            loadingText="Creating Account..."
-          >
-            Create Account
-          </AuthButton>
-        </div>
+        <AuthButton
+          type="submit"
+          isLoading={isLoading}
+          loadingText="Creating Account..."
+        >
+          Create Account
+        </AuthButton>
       </form>
 
       {/* Login Link */}
-      <div className="text-center mt-6">
-        <p className="text-gray-600">
+      <div className="text-center mt-4">
+        <p className="text-sm text-gray-600">
           Already have an account?{' '}
           <Link
             href="/login"

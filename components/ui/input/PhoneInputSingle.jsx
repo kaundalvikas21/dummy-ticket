@@ -121,24 +121,24 @@ export function PhoneInputSingle({
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-1.5">
       {label && (
-        <Label className="text-xs md:text-sm font-semibold text-gray-700">
+        <Label className="text-sm font-medium text-gray-700">
           {label}
         </Label>
       )}
 
       {/* Country Code Dropdown and Phone Input Container */}
       <div className="flex gap-2">
-        {/* Country Code Dropdown */}
-        <div className="relative">
+        {/* Country Code Dropdown - Compact width */}
+        <div className="relative shrink-0">
           <Select
             value={selectedCountryCode}
             onValueChange={handleCountryCodeChange}
             open={isDropdownOpen}
             onOpenChange={setIsDropdownOpen}
           >
-            <SelectTrigger className={`${error ? "border-red-500" : ""} w-32`}>
+            <SelectTrigger className={`${error ? "border-red-500" : ""} w-[90px]`}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -151,8 +151,8 @@ export function PhoneInputSingle({
           </Select>
         </div>
 
-        {/* Phone Number Input */}
-        <div className="flex-1 relative">
+        {/* Phone Number Input - Takes remaining space */}
+        <div className="flex-1 relative min-w-0">
           <Input
             type="tel"
             value={value?.phoneNumber || ''}
@@ -160,7 +160,7 @@ export function PhoneInputSingle({
             placeholder="Enter phone number"
             inputMode="numeric"
             pattern="[0-9]*"
-            className={`text-sm md:text-base ${error ? "border-red-500" : ""}`}
+            className={`text-sm md:text-base w-full ${error ? "border-red-500" : ""}`}
           />
           {selectedCountryCode && (
             <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
@@ -176,13 +176,8 @@ export function PhoneInputSingle({
 
       {/* Error Message */}
       {error && (
-        <p className="text-xs text-red-500 mt-1">{error}</p>
+        <p className="text-xs text-red-500">{error}</p>
       )}
-
-      {/* Helper Text */}
-      <p className="text-xs text-gray-500">
-        Select country code and enter your phone number
-      </p>
     </div>
   )
 }

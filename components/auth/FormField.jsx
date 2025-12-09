@@ -20,10 +20,10 @@ export function FormField({
   const isPasswordType = type === 'password'
 
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-1.5">
       <Label
         htmlFor={id}
-        className="text-gray-700 font-medium"
+        className="text-sm text-gray-700 font-medium"
       >
         {label}
       </Label>
@@ -39,9 +39,8 @@ export function FormField({
           id={id}
           type={isPasswordType && showPassword ? 'text' : type}
           placeholder={placeholder}
-          className={`pl-10 ${isPasswordType ? 'pr-12' : ''} ${
-            error ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-blue-600'
-          }`}
+          className={`pl-10 ${isPasswordType ? 'pr-12' : ''} ${error ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-blue-600'
+            }`}
           {...props}
         />
 
