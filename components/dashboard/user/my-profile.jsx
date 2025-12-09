@@ -14,6 +14,7 @@ import { useAuth } from "@/contexts/auth-context"
 import { createClient } from "@/lib/supabase/client"
 import { DatePicker } from "@/components/ui/input/DatePicker"
 import { SelectInput } from "@/components/ui/input/SelectInput"
+import { PhoneInputSingle } from "@/components/ui/input/PhoneInputSingle"
 import { getUserInitials, getAvatarDisplayUrl } from "@/lib/utils"
 import { formatFileSize, truncateFilename } from "@/lib/avatar-utils"
 import { useProfileSync } from "@/hooks/useProfileSync"
@@ -661,11 +662,17 @@ export function MyProfile() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone</Label>
-                  <Input
-                    id="phone"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
+                  <PhoneInputSingle
+                    label="Phone Number"
+                    value={{
+                      countryCode: countryCode,
+                      phoneNumber: phone
+                    }}
+                    onChange={(newValue) => {
+                      setCountryCode(newValue.countryCode)
+                      setPhone(newValue.phoneNumber)
+                    }}
+                    placeholder="Enter phone number"
                     disabled={!isEditing}
                   />
                 </div>

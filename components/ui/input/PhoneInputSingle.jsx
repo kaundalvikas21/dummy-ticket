@@ -19,6 +19,7 @@ export function PhoneInputSingle({
   label,
   required = false,
   placeholder = "+1234567890",
+  disabled = false,
   error
 }) {
   const [displayValue, setDisplayValue] = useState('')
@@ -137,6 +138,7 @@ export function PhoneInputSingle({
             onValueChange={handleCountryCodeChange}
             open={isDropdownOpen}
             onOpenChange={setIsDropdownOpen}
+            disabled={disabled}
           >
             <SelectTrigger className={`${error ? "border-red-500" : ""} w-[90px]`}>
               <SelectValue />
@@ -161,6 +163,7 @@ export function PhoneInputSingle({
             inputMode="numeric"
             pattern="[0-9]*"
             className={`text-sm md:text-base w-full ${error ? "border-red-500" : ""}`}
+            disabled={disabled}
           />
           {selectedCountryCode && (
             <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
