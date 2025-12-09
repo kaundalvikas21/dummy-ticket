@@ -176,7 +176,7 @@ export function MyProfile() {
         return
       }
 
-  
+
       // Validate required fields
       if (!firstName?.trim() || !lastName?.trim()) {
         toast({
@@ -405,6 +405,11 @@ export function MyProfile() {
         })
 
         setIsRemoveDialogOpen(false)
+
+        // Refresh page to update header with initials
+        if (result.code !== 'NO_AVATAR') {
+          setTimeout(() => window.location.reload(), 500)
+        }
       } else {
         throw new Error(result.error || 'Failed to remove avatar')
       }
@@ -606,142 +611,142 @@ export function MyProfile() {
                 ))}
               </div>
             ) : (
-            <div className="grid gap-6 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="firstName">First Name</Label>
-                <Input
-                  id="firstName"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  disabled={!isEditing}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name</Label>
-                <Input
-                  id="lastName"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  disabled={!isEditing}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <div className="group relative">
+              <div className="grid gap-6 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">First Name</Label>
                   <Input
-                    id="email"
-                    type="email"
-                    value={user?.email || ""}
-                    disabled
-                    className="bg-gray-50 cursor-not-allowed"
-                    readOnly
+                    id="firstName"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    disabled={!isEditing}
                   />
-                  <div className="absolute bottom-full left-0 mb-2 w-48 p-2 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
-                    <p>Email cannot be changed for security reasons.</p>
-                    <div className="absolute bottom-0 left-4 transform translate-y-full">
-                      <div className="border-4 border-transparent border-t-gray-800"></div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Last Name</Label>
+                  <Input
+                    id="lastName"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    disabled={!isEditing}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <div className="group relative">
+                    <Input
+                      id="email"
+                      type="email"
+                      value={user?.email || ""}
+                      disabled
+                      className="bg-gray-50 cursor-not-allowed"
+                      readOnly
+                    />
+                    <div className="absolute bottom-full left-0 mb-2 w-48 p-2 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+                      <p>Email cannot be changed for security reasons.</p>
+                      <div className="absolute bottom-0 left-4 transform translate-y-full">
+                        <div className="border-4 border-transparent border-t-gray-800"></div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone</Label>
-                <Input
-                  id="phone"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  disabled={!isEditing}
-                />
-              </div>
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="address">Address</Label>
-                <Textarea
-                  id="address"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  disabled={!isEditing}
-                  rows={2}
-                />
-              </div>
-              <div className="space-y-2">
-                <DatePicker
-                  key={`${isEditing ? 'editing' : 'view'}-${dateOfBirth || 'empty'}`}
-                  value={dateOfBirth}
-                  onChange={(date) => setDateOfBirth(date)}
-                  label="Date of Birth"
-                  placeholder="Select your date of birth"
-                  disabled={!isEditing}
-                  disabledDate={(date) => {
-                    const today = new Date()
-                    const birthDate = new Date(date)
-                    let age = today.getFullYear() - birthDate.getFullYear()
-                    const monthDiff = today.getMonth() - birthDate.getMonth()
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone</Label>
+                  <Input
+                    id="phone"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    disabled={!isEditing}
+                  />
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="address">Address</Label>
+                  <Textarea
+                    id="address"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    disabled={!isEditing}
+                    rows={2}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <DatePicker
+                    key={`${isEditing ? 'editing' : 'view'}-${dateOfBirth || 'empty'}`}
+                    value={dateOfBirth}
+                    onChange={(date) => setDateOfBirth(date)}
+                    label="Date of Birth"
+                    placeholder="Select your date of birth"
+                    disabled={!isEditing}
+                    disabledDate={(date) => {
+                      const today = new Date()
+                      const birthDate = new Date(date)
+                      let age = today.getFullYear() - birthDate.getFullYear()
+                      const monthDiff = today.getMonth() - birthDate.getMonth()
 
-                    // Adjust age if birthday hasn't occurred yet this year
-                    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-                      age--
-                    }
+                      // Adjust age if birthday hasn't occurred yet this year
+                      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                        age--
+                      }
 
-                    return age < 18 // Must be 18 years or older
-                  }}
-                  captionLayout="dropdown"
-                  fromYear={1920}
-                  toYear={new Date().getFullYear() - 18}
-                  defaultMonth={new Date(2000, 0)}
-                  required
-                />
+                      return age < 18 // Must be 18 years or older
+                    }}
+                    captionLayout="dropdown"
+                    fromYear={1920}
+                    toYear={new Date().getFullYear() - 18}
+                    defaultMonth={new Date(2000, 0)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="passportNumber">Passport Number</Label>
+                  <Input
+                    id="passportNumber"
+                    value={passportNumber}
+                    onChange={(e) => setPassportNumber(e.target.value)}
+                    disabled={!isEditing}
+                    placeholder="Enter your passport number"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="city">City</Label>
+                  <Input
+                    id="city"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    disabled={!isEditing}
+                    placeholder="Enter your city"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="postalCode">Postal Code</Label>
+                  <Input
+                    id="postalCode"
+                    value={postalCode}
+                    onChange={(e) => setPostalCode(e.target.value)}
+                    disabled={!isEditing}
+                    placeholder="Enter your postal code"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <SelectInput
+                    label="Nationality"
+                    value={nationality}
+                    onChange={(value) => setNationality(value)}
+                    options={nationalityOptions}
+                    placeholder="Select nationality"
+                    disabled={!isEditing}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <SelectInput
+                    label="Preferred Language"
+                    value={preferredLanguage}
+                    onChange={(value) => setPreferredLanguage(value)}
+                    options={languageOptions}
+                    placeholder="Select preferred language"
+                    disabled={!isEditing}
+                  />
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="passportNumber">Passport Number</Label>
-                <Input
-                  id="passportNumber"
-                  value={passportNumber}
-                  onChange={(e) => setPassportNumber(e.target.value)}
-                  disabled={!isEditing}
-                  placeholder="Enter your passport number"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="city">City</Label>
-                <Input
-                  id="city"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  disabled={!isEditing}
-                  placeholder="Enter your city"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="postalCode">Postal Code</Label>
-                <Input
-                  id="postalCode"
-                  value={postalCode}
-                  onChange={(e) => setPostalCode(e.target.value)}
-                  disabled={!isEditing}
-                  placeholder="Enter your postal code"
-                />
-              </div>
-              <div className="space-y-2">
-                <SelectInput
-                  label="Nationality"
-                  value={nationality}
-                  onChange={(value) => setNationality(value)}
-                  options={nationalityOptions}
-                  placeholder="Select nationality"
-                  disabled={!isEditing}
-                />
-              </div>
-              <div className="space-y-2">
-                <SelectInput
-                  label="Preferred Language"
-                  value={preferredLanguage}
-                  onChange={(value) => setPreferredLanguage(value)}
-                  options={languageOptions}
-                  placeholder="Select preferred language"
-                  disabled={!isEditing}
-                />
-              </div>
-            </div>
             )}
           </CardContent>
         </Card>

@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 
 export async function POST(request) {
   try {
-    const { email, password, role, firstName, lastName, phoneNumber, nationality } = await request.json()
+    const { email, password, role, firstName, lastName, phoneNumber, countryCode, nationality } = await request.json()
 
     // Validate required fields with specific error messages
     const missingFields = []
@@ -42,16 +42,21 @@ export async function POST(request) {
 
     const supabase = await createClient()
 
-    // Create user with Supabase Auth - let database handle profile creation via triggers
+    // Format phone number with country code (E.164 format for Supabase)
+    const formattedPhone = phoneNumber ? (countryCode || '') + phoneNumber : null
+
+    // Create user with Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
+      phone: formattedPhone, // Top-level phone field for auth.users Phone column
       options: {
         data: {
           first_name: firstName,
           last_name: lastName,
           role: role || 'user',
           phone_number: phoneNumber || null,
+          country_code: countryCode || null,
           nationality: nationality || null,
           preferred_language: 'en'
         }

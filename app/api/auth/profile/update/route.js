@@ -145,6 +145,31 @@ export async function PUT(request) {
       updatedProfile = newProfile
     }
 
+    // Sync to Supabase Auth (auth.users table)
+    // Note: 'phone' must be top-level field, others go in user_metadata
+    const authUpdate = { user_metadata: {} }
+
+    // Phone is a top-level field in auth.users
+    if (profileUpdatePayload.phone_number) {
+      // Format phone with country code for Supabase (expects E.164 format)
+      const countryCode = profileUpdatePayload.country_code || updatedProfile.country_code || ''
+      authUpdate.phone = countryCode + profileUpdatePayload.phone_number
+    }
+
+    // Other fields go in user_metadata
+    if (profileUpdatePayload.first_name) authUpdate.user_metadata.first_name = profileUpdatePayload.first_name
+    if (profileUpdatePayload.last_name) authUpdate.user_metadata.last_name = profileUpdatePayload.last_name
+    if (profileUpdatePayload.nationality !== undefined) authUpdate.user_metadata.nationality = profileUpdatePayload.nationality
+    if (profileUpdatePayload.preferred_language !== undefined) authUpdate.user_metadata.preferred_language = profileUpdatePayload.preferred_language
+
+    // Update auth.users if we have data to sync
+    if (authUpdate.phone || Object.keys(authUpdate.user_metadata).length > 0) {
+      const { error: authUpdateError } = await supabaseAdmin.auth.admin.updateUserById(userId, authUpdate)
+      if (authUpdateError) {
+        console.warn('Failed to sync to auth.users:', authUpdateError.message)
+      }
+    }
+
     // Return updated profile data with consistent format
     return NextResponse.json({
       success: true,
