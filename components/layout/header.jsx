@@ -31,7 +31,7 @@ export function Header() {
   const pathname = usePathname()
   const mounted = useMounted()
   const { user, logout, isAuthenticated, isAdmin, isVendor, isUser } = useAuth()
-const { profile: syncedProfile, loading: profileLoading } = useProfileSync()
+  const { profile: syncedProfile, loading: profileLoading } = useProfileSync()
   const { toast } = useToast()
 
   useEffect(() => {
@@ -146,7 +146,7 @@ const { profile: syncedProfile, loading: profileLoading } = useProfileSync()
                 {isAuthenticated ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="flex items-center gap-2 hover:bg-gray-100 transition-colors cursor-pointer">
+                      <Button variant="ghost" className="flex items-center gap-3 border border-gray-300 rounded-full hover:bg-transparent transition-all cursor-pointer pl-1 pr-3 py-1.5 h-auto focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none focus:ring-0 active:scale-95 bg-gray-200">
                         {profileLoading || !syncedProfile ? (
                           <div className="w-8 h-8 bg-gray-200/30 animate-pulse rounded-full"></div>
                         ) : (
@@ -169,13 +169,25 @@ const { profile: syncedProfile, loading: profileLoading } = useProfileSync()
                             )}
                           </div>
                         )}
-                        <span className="hidden sm:inline">
-                          {profileLoading || !syncedProfile ? <Skeleton className="w-32 h-4" /> : getUserDisplayName()}
-                        </span>
+
                         <ChevronDown className="w-4 h-4 text-gray-500 hidden sm:inline" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="bg-white/95 backdrop-blur-sm p-1">
+                    <DropdownMenuContent align="end" className="bg-white/95 backdrop-blur-sm p-1 min-w-[200px]">
+                      <div className="flex flex-col space-y-1 p-2">
+                        {profileLoading || !syncedProfile ? (
+                          <>
+                            <Skeleton className="w-24 h-4" />
+                            <Skeleton className="w-32 h-3" />
+                          </>
+                        ) : (
+                          <>
+                            <p className="text-sm font-medium leading-none">{getUserDisplayName()}</p>
+                            <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
+                          </>
+                        )}
+                      </div>
+                      <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
                         <Link href={`/${syncedProfile?.role || user?.role || user?.role}`} className="flex items-center gap-2">
                           <User className="w-4 h-4" />
@@ -271,7 +283,7 @@ const { profile: syncedProfile, loading: profileLoading } = useProfileSync()
                 {isAuthenticated ? (
                   <>
                     <div className="py-2 border-t border-gray-200 mt-2 flex items-center gap-2">
-                      {loading || !profile ? (
+                      {profileLoading || !syncedProfile ? (
                         <div className="w-9 h-9 bg-gray-200/30 animate-pulse rounded-full"></div>
                       ) : (
                         <div className="flex w-9 h-9 items-center justify-center rounded-full bg-gradient-to-br from-[#0066FF] to-[#00D4AA] ring-2 ring-white shadow-sm">

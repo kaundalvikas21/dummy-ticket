@@ -9,6 +9,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -86,7 +87,8 @@
   --primary-teal: #00d4aa;
   --accent-orange: #ff6b35;
 
-  --radius: 0.625rem; /* shadcn/ui base radius */
+  --radius: 0.625rem;
+  /* shadcn/ui base radius */
 
   /* shadcn/ui core colors (light mode) */
   --background: oklch(1 0 0);
@@ -125,6 +127,7 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
 }
+
 /* ---break---*/
 
 /* shadcn/ui dark mode theme variables */
@@ -166,6 +169,7 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
 }
+
 /* ---break---*/
 
 /* Default Tailwind base layer customization */
@@ -173,6 +177,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -182,6 +187,7 @@
 .common_heading {
   color: blue;
 }
+
 .container {
   width: 100%;
   margin-left: auto;
@@ -240,7 +246,7 @@
 }
 
 /* RTL Accordion Styles */
-.rtl-content [data-state="open"] > svg {
+.rtl-content [data-state="open"]>svg {
   /* Keep chevron rotation the same for RTL */
   transform: rotate(180deg);
 }
@@ -254,7 +260,10 @@
 }
 
 /* Ensure layout elements remain LTR */
-header, nav, footer, .container {
+header,
+nav,
+footer,
+.container {
   direction: ltr !important;
 }
 
@@ -270,7 +279,10 @@ header, nav, footer, .container {
 
 /* Touch-friendly targets for mobile devices */
 @media (hover: none) and (pointer: coarse) {
-  button, [role="button"], a {
+
+  button,
+  [role="button"],
+  a {
     min-height: 44px;
     min-width: 44px;
   }
@@ -287,7 +299,9 @@ header, nav, footer, .container {
   }
 
   /* Ensure dropdown items are touch-friendly */
-  [role="menuitem"], [role="menuitemradio"], [role="menuitemcheckbox"] {
+  [role="menuitem"],
+  [role="menuitemradio"],
+  [role="menuitemcheckbox"] {
     min-height: 44px;
     padding: 12px 16px;
   }
@@ -329,6 +343,7 @@ header, nav, footer, .container {
 
 /* Dashboard-specific mobile optimizations */
 @media (max-width: 768px) {
+
   /* Improved scrollbar for mobile */
   .custom-scrollbar::-webkit-scrollbar {
     width: 4px;
@@ -354,8 +369,7 @@ button:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
 select:focus-visible {
-  outline: 2px solid #0066FF;
-  outline-offset: 2px;
+  outline: none;
 }
 
 /* Prevent horizontal scroll on mobile */
