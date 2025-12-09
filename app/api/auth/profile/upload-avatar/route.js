@@ -62,7 +62,7 @@ export async function POST(request) {
             first_name: authUser.user_metadata?.first_name || 'User',
             last_name: authUser.user_metadata?.last_name || 'Name',
             phone_number: authUser.user_metadata?.phone_number || null,
-            nationality: authUser.user_metadata?.nationality || 'US',
+            nationality: authUser.user_metadata?.nationality || 'United States',
             preferred_language: authUser.user_metadata?.preferred_language || 'en',
             role: authUser.user_metadata?.role || 'user',
             created_at: new Date().toISOString(),

@@ -17,26 +17,26 @@ import { useToast } from '@/hooks/use-toast'
 import { SelectInput } from '@/components/ui/input/SelectInput'
 
 const nationalityOptions = [
-  { value: "US", label: "United States" },
-  { value: "UK", label: "United Kingdom" },
-  { value: "CA", label: "Canada" },
-  { value: "AU", label: "Australia" },
-  { value: "IN", label: "India" },
-  { value: "DE", label: "Germany" },
-  { value: "FR", label: "France" },
-  { value: "IT", label: "Italy" },
-  { value: "ES", label: "Spain" },
-  { value: "JP", label: "Japan" },
-  { value: "CN", label: "China" },
-  { value: "SG", label: "Singapore" },
-  { value: "AE", label: "United Arab Emirates" },
-  { value: "SA", label: "Saudi Arabia" },
-  { value: "NZ", label: "New Zealand" },
-  { value: "KR", label: "South Korea" },
-  { value: "BR", label: "Brazil" },
-  { value: "ZA", label: "South Africa" },
-  { value: "MX", label: "Mexico" },
-  { value: "TH", label: "Thailand" },
+  { value: "United States", label: "United States" },
+  { value: "United Kingdom", label: "United Kingdom" },
+  { value: "Canada", label: "Canada" },
+  { value: "Australia", label: "Australia" },
+  { value: "India", label: "India" },
+  { value: "Germany", label: "Germany" },
+  { value: "France", label: "France" },
+  { value: "Italy", label: "Italy" },
+  { value: "Spain", label: "Spain" },
+  { value: "Japan", label: "Japan" },
+  { value: "China", label: "China" },
+  { value: "Singapore", label: "Singapore" },
+  { value: "United Arab Emirates", label: "United Arab Emirates" },
+  { value: "Saudi Arabia", label: "Saudi Arabia" },
+  { value: "New Zealand", label: "New Zealand" },
+  { value: "South Korea", label: "South Korea" },
+  { value: "Brazil", label: "Brazil" },
+  { value: "South Africa", label: "South Africa" },
+  { value: "Mexico", label: "Mexico" },
+  { value: "Thailand", label: "Thailand" },
 ]
 
 const registerSchema = z.object({
@@ -45,7 +45,7 @@ const registerSchema = z.object({
   email: z.string().email('Invalid email address'),
   country_code: z.string().min(1, 'Select country code'),
   phone_number: z.string().min(5, 'Phone number too short').regex(/^\d+$/, 'Digits only'),
-  nationality: z.string().optional(),
+  nationality: z.string().min(1, 'Nationality is required'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   confirmPassword: z.string().min(6, 'Please confirm your password'),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -219,6 +219,7 @@ export default function RegisterPage() {
               options={nationalityOptions}
               placeholder="Select nationality"
               error={registerErrors.nationality?.message}
+              required
             />
           </div>
           {/* Phone gets full width - has country code dropdown + input */}

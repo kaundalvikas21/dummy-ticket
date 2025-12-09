@@ -3,16 +3,16 @@
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
-export function TextInput({ 
-  label, 
-  icon: Icon, 
-  type = "text", 
-  value, 
-  onChange, 
-  placeholder, 
+export function TextInput({
+  label,
+  icon: Icon,
+  type = "text",
+  value,
+  onChange,
+  placeholder,
   required = false,
   error,
-  ...props 
+  ...props
 }) {
   return (
     <div className="space-y-2">
@@ -21,12 +21,12 @@ export function TextInput({
           {label} {required && <span className="text-red-500">*</span>}
         </Label>
       )}
-      
+
       <div className="relative">
         {Icon && (
           <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-gray-400 z-10" />
         )}
-        
+
         <Input
           type={type}
           value={value}
@@ -37,9 +37,9 @@ export function TextInput({
           {...props}
         />
       </div>
-      
+
       {error && (
-        <p className="text-xs text-red-500 mt-1">{error}</p>
+        <p className="text-[14px] text-red-500 mt-1">{error}</p>
       )}
     </div>
   )

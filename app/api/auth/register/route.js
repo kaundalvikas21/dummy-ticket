@@ -11,6 +11,7 @@ export async function POST(request) {
     if (!password) missingFields.push('password')
     if (!firstName || firstName.trim().length === 0) missingFields.push('first name')
     if (!lastName || lastName.trim().length === 0) missingFields.push('last name')
+    if (!nationality || nationality.trim().length === 0) missingFields.push('nationality')
 
     if (missingFields.length > 0) {
       return NextResponse.json(

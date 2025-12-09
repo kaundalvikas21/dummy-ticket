@@ -29,26 +29,26 @@ import {
 } from "@/components/ui/alert-dialog"
 
 const nationalityOptions = [
-  { value: "US", label: "United States" },
-  { value: "UK", label: "United Kingdom" },
-  { value: "CA", label: "Canada" },
-  { value: "AU", label: "Australia" },
-  { value: "IN", label: "India" },
-  { value: "DE", label: "Germany" },
-  { value: "FR", label: "France" },
-  { value: "IT", label: "Italy" },
-  { value: "ES", label: "Spain" },
-  { value: "JP", label: "Japan" },
-  { value: "CN", label: "China" },
-  { value: "SG", label: "Singapore" },
-  { value: "AE", label: "United Arab Emirates" },
-  { value: "SA", label: "Saudi Arabia" },
-  { value: "NZ", label: "New Zealand" },
-  { value: "KR", label: "South Korea" },
-  { value: "BR", label: "Brazil" },
-  { value: "ZA", label: "South Africa" },
-  { value: "MX", label: "Mexico" },
-  { value: "TH", label: "Thailand" },
+  { value: "United States", label: "United States" },
+  { value: "United Kingdom", label: "United Kingdom" },
+  { value: "Canada", label: "Canada" },
+  { value: "Australia", label: "Australia" },
+  { value: "India", label: "India" },
+  { value: "Germany", label: "Germany" },
+  { value: "France", label: "France" },
+  { value: "Italy", label: "Italy" },
+  { value: "Spain", label: "Spain" },
+  { value: "Japan", label: "Japan" },
+  { value: "China", label: "China" },
+  { value: "Singapore", label: "Singapore" },
+  { value: "United Arab Emirates", label: "United Arab Emirates" },
+  { value: "Saudi Arabia", label: "Saudi Arabia" },
+  { value: "New Zealand", label: "New Zealand" },
+  { value: "South Korea", label: "South Korea" },
+  { value: "Brazil", label: "Brazil" },
+  { value: "South Africa", label: "South Africa" },
+  { value: "Mexico", label: "Mexico" },
+  { value: "Thailand", label: "Thailand" },
 ];
 
 const languageOptions = [
@@ -188,6 +188,17 @@ export function MyProfile() {
         return
       }
 
+      // Validate nationality
+      if (!nationality) {
+        toast({
+          variant: "destructive",
+          title: "Validation Error",
+          description: "Nationality is required.",
+        })
+        setIsSaving(false)
+        return
+      }
+
       // Upload image if selected
       let avatarUrl = null
       let uploadedFileName = null
@@ -217,12 +228,12 @@ export function MyProfile() {
         // Required fields - never send null/undefined to database
         first_name: firstName?.trim() || authProfile?.first_name || '',
         last_name: lastName?.trim() || authProfile?.last_name || '',
+        nationality: nationality || null,
 
         // Optional fields - can be null/empty
         phone_number: phone?.trim() || null,
         address: address?.trim() || null,
         date_of_birth: dateOfBirth || null,
-        nationality: nationality?.trim() || null,
         passport_number: passportNumber?.trim() || null,
         city: city?.trim() || null,
         postal_code: postalCode?.trim() || null,
@@ -734,6 +745,7 @@ export function MyProfile() {
                     options={nationalityOptions}
                     placeholder="Select nationality"
                     disabled={!isEditing}
+                    required
                   />
                 </div>
                 <div className="space-y-2">

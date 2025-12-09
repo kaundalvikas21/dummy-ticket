@@ -62,7 +62,7 @@ export function FormField({
       </div>
 
       {error && (
-        <p className="text-sm text-red-500 mt-1.5 flex items-center gap-1">
+        <p className="text-[14px] text-red-500 mt-1.5 flex items-center gap-1">
           <AlertCircle className="w-4 h-4" />
           {error}
         </p>

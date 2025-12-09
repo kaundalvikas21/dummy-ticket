@@ -30,6 +30,11 @@ export async function PUT(request) {
       return createAuthError('Last name cannot be empty', 400)
     }
 
+    // Validate nationality if it's being updated or if it's a new profile
+    if ((profileData.nationality !== undefined && !profileData.nationality) || (profileData.nationality && profileData.nationality.trim().length === 0)) {
+      return createAuthError('Nationality is required', 400)
+    }
+
     // Validate that email is not being updated (security measure)
     if (profileData.email) {
       return createAuthError(
