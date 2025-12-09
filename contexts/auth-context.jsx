@@ -9,12 +9,12 @@ const AuthContext = createContext({
   profile: null,
   loading: true,
   profileVersion: 0,
-  signIn: async () => {},
-  signUp: async () => {},
-  signOut: async () => {},
-  updateProfile: async () => {},
-  refreshProfile: async () => {},
-  notifyProfileUpdate: () => {},
+  signIn: async () => { },
+  signUp: async () => { },
+  signOut: async () => { },
+  updateProfile: async () => { },
+  refreshProfile: async () => { },
+  notifyProfileUpdate: () => { },
   getRedirectUrl: () => '/',
   isAuthenticated: false,
   isAdmin: false,
@@ -129,6 +129,32 @@ export function AuthProvider({ children }) {
 
       if (!response.ok) {
         throw new Error(result.error || 'Registration failed')
+      }
+
+      // After successful registration, update state with user data
+      if (result.success && result.user) {
+        setUser(result.user)
+
+        // Fetch profile data for the new user
+        // Get current session (should now have the new user's token)
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session?.access_token) {
+          try {
+            const profileResponse = await fetch('/api/auth/profile', {
+              headers: {
+                'Authorization': `Bearer ${session.access_token}`
+              }
+            })
+            if (profileResponse.ok) {
+              const profileResult = await profileResponse.json()
+              if (profileResult.success) {
+                setProfile(profileResult.profile)
+              }
+            }
+          } catch (profileError) {
+            console.error('Failed to fetch profile after registration:', profileError)
+          }
+        }
       }
 
       return { success: true, data: result }
