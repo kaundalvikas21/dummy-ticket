@@ -17,6 +17,7 @@ export function PhoneInputSingle({
   value,
   onChange,
   label,
+  icon: Icon,
   required = false,
   placeholder = "+1234567890",
   disabled = false,
@@ -140,7 +141,7 @@ export function PhoneInputSingle({
             onOpenChange={setIsDropdownOpen}
             disabled={disabled}
           >
-            <SelectTrigger className={`${error ? "border-red-500" : ""} w-[90px]`}>
+            <SelectTrigger className={`${error ? "border-red-500" : ""} w-[112px]`}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -155,6 +156,9 @@ export function PhoneInputSingle({
 
         {/* Phone Number Input - Takes remaining space */}
         <div className="flex-1 relative min-w-0">
+          {Icon && (
+            <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 z-10 pointer-events-none" />
+          )}
           <Input
             type="tel"
             value={value?.phoneNumber || ''}
@@ -162,7 +166,7 @@ export function PhoneInputSingle({
             placeholder="Enter phone number"
             inputMode="numeric"
             pattern="[0-9]*"
-            className={`text-sm md:text-base w-full ${error ? "border-red-500" : ""}`}
+            className={`text-sm md:text-base w-full ${error ? "border-red-500" : ""} ${Icon ? "pl-10" : ""}`}
             disabled={disabled}
           />
           {selectedCountryCode && (

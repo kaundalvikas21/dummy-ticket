@@ -123,21 +123,6 @@ export default function LoginPage() {
         </div>
       </form>
 
-      {/* Demo Credentials */}
-      <div className="bg-gradient-to-r from-blue-50 to-teal-50 p-4 rounded-xl border border-blue-100 mt-6">
-        <div className="text-sm font-semibold text-gray-700 mb-2">Demo Credentials:</div>
-        <div className="text-xs text-gray-600 space-y-1">
-          <div className="flex items-center gap-2">
-            <Mail className="w-3 h-3 text-gray-400" />
-            <span>admin@example.com</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Lock className="w-3 h-3 text-gray-400" />
-            <span>admin123</span>
-          </div>
-        </div>
-      </div>
-
       {/* Register Link */}
       <div className="text-center mt-6">
         <p className="text-gray-600">
