@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { Save, Lock, Camera, User, Upload, Check, X } from "lucide-react"
+import { Save, Lock, Camera, User, Upload, Check, X, Eye, EyeOff } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,26 +9,35 @@ import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
+import { useAuth } from "@/contexts/auth-context"
+import { createClient } from "@/lib/supabase/client"
 
 export function AdminProfile() {
   const { toast } = useToast()
+  const { user, profile: authProfile, updateProfile } = useAuth()
   const fileInputRef = useRef(null)
+  const supabase = createClient()
 
+  // State for form fields
+  const [firstName, setFirstName] = useState("")
+  const [lastName, setLastName] = useState("")
+  const [email, setEmail] = useState("")
+  const [phone, setPhone] = useState("")
+  const [role, setRole] = useState("")
+
+  // State for avatar
   const [profilePhoto, setProfilePhoto] = useState("")
-  const [initialProfilePhoto] = useState("")
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false)
+
+  // State for operations
   const [isSavingProfile, setIsSavingProfile] = useState(false)
   const [isChangingPassword, setIsChangingPassword] = useState(false)
-
-  const initialProfile = {
-    name: "Admin User",
-    email: "admin@visafly.com",
-    phone: "+1 234 567 8900",
-    role: "Super Administrator",
-  }
-
-  const [profileSettings, setProfileSettings] = useState(initialProfile)
   const [profileChanged, setProfileChanged] = useState(false)
+
+  // Password Visibility State
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const [passwordSettings, setPasswordSettings] = useState({
     currentPassword: "",
@@ -38,11 +47,29 @@ export function AdminProfile() {
 
   const [passwordStrength, setPasswordStrength] = useState(0)
 
+  // Initialize data from authProfile
   useEffect(() => {
-    const dataChanged = JSON.stringify(profileSettings) !== JSON.stringify(initialProfile)
-    const photoChanged = profilePhoto !== initialProfilePhoto
-    setProfileChanged(dataChanged || photoChanged)
-  }, [profileSettings, profilePhoto, initialProfilePhoto])
+    if (authProfile) {
+      setFirstName(authProfile.first_name || "")
+      setLastName(authProfile.last_name || "")
+      setEmail(user?.email || "") // Email from auth user object is most reliable source
+      setPhone(authProfile.phone_number || "")
+      setRole(authProfile.role || "Admin")
+      setProfilePhoto(authProfile.avatar_url || "")
+    }
+  }, [authProfile, user])
+
+  // Check for changes
+  useEffect(() => {
+    if (!authProfile) return
+
+    const hasChanged =
+      firstName !== (authProfile.first_name || "") ||
+      lastName !== (authProfile.last_name || "") ||
+      phone !== (authProfile.phone_number || "")
+
+    setProfileChanged(hasChanged)
+  }, [firstName, lastName, phone, authProfile])
 
   useEffect(() => {
     const password = passwordSettings.newPassword
@@ -61,7 +88,7 @@ export function AdminProfile() {
     setPasswordStrength(Math.min(strength, 100))
   }, [passwordSettings.newPassword])
 
-  const handlePhotoUpload = (event) => {
+  const handlePhotoUpload = async (event) => {
     const file = event.target.files?.[0]
     if (!file) return
 
@@ -85,50 +112,104 @@ export function AdminProfile() {
 
     setIsUploadingPhoto(true)
 
-    const reader = new FileReader()
-    reader.onloadend = () => {
-      setTimeout(() => {
-        setProfilePhoto(reader.result)
-        setIsUploadingPhoto(false)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      // Get session for auth header
+      const { data: { session } } = await supabase.auth.getSession()
+
+      const response = await fetch('/api/auth/profile/upload-avatar', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session?.access_token || ''}`
+        },
+        body: formData,
+      })
+
+      if (!response.ok) {
+        throw new Error('Upload failed')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        setProfilePhoto(result.avatarUrl)
+
         toast({
-          title: "Photo Uploaded",
-          description: "Your profile photo has been updated. Don't forget to save!",
+          title: "Photo Updated",
+          description: "Your profile photo has been successfully updated.",
         })
-      }, 500)
+
+        // Trigger profile refresh in context
+        if (updateProfile) {
+          await updateProfile({ avatar_url: result.avatarUrl })
+        }
+      }
+    } catch (error) {
+      console.error('Upload error:', error)
+      toast({
+        title: "Upload Failed",
+        description: "Failed to upload profile photo. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsUploadingPhoto(false)
     }
-    reader.readAsDataURL(file)
   }
 
   const triggerFileInput = () => {
     fileInputRef.current?.click()
   }
 
-  const handleSaveProfile = () => {
+  const handleSaveProfile = async () => {
     setIsSavingProfile(true)
 
-    setTimeout(() => {
-      setIsSavingProfile(false)
-      toast({
-        title: "Profile Updated",
-        description: "Your profile information has been saved successfully.",
+    try {
+      const result = await updateProfile({
+        first_name: firstName,
+        last_name: lastName,
+        phone_number: phone
       })
-      setProfileChanged(false)
-    }, 1000)
+
+      if (result.success) {
+        toast({
+          title: "Profile Updated",
+          description: "Your profile information has been saved successfully.",
+        })
+        setProfileChanged(false)
+      } else {
+        throw new Error(result.error || "Failed to update profile")
+      }
+    } catch (error) {
+      toast({
+        title: "Update Failed",
+        description: error.message || "Failed to save profile changes.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSavingProfile(false)
+    }
   }
 
   const handleResetProfile = () => {
-    setProfileSettings(initialProfile)
-    setProfilePhoto(initialProfilePhoto)
-    toast({
-      title: "Changes Discarded",
-      description: "Your profile has been reset to the last saved state.",
-    })
+    if (authProfile) {
+      setFirstName(authProfile.first_name || "")
+      setLastName(authProfile.last_name || "")
+      setPhone(authProfile.phone_number || "")
+      setProfileChanged(false)
+      toast({
+        title: "Changes Discarded",
+        description: "Your profile has been reset to the last saved state.",
+      })
+    }
   }
 
-  const handleChangePassword = () => {
+  const handleChangePassword = async () => {
+    // Basic validation
     if (!passwordSettings.currentPassword || !passwordSettings.newPassword || !passwordSettings.confirmPassword) {
       toast({
-        title: "Error",
+        title: "Validation Error",
         description: "Please fill in all password fields.",
         variant: "destructive",
       })
@@ -137,7 +218,7 @@ export function AdminProfile() {
 
     if (passwordSettings.newPassword !== passwordSettings.confirmPassword) {
       toast({
-        title: "Error",
+        title: "Mismatch Error",
         description: "New passwords do not match.",
         variant: "destructive",
       })
@@ -146,7 +227,7 @@ export function AdminProfile() {
 
     if (passwordSettings.newPassword.length < 8) {
       toast({
-        title: "Error",
+        title: "Security Warning",
         description: "Password must be at least 8 characters long.",
         variant: "destructive",
       })
@@ -155,18 +236,48 @@ export function AdminProfile() {
 
     setIsChangingPassword(true)
 
-    setTimeout(() => {
-      setIsChangingPassword(false)
+    try {
+      // Verify current password by attempting to sign in
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: passwordSettings.currentPassword,
+      })
+
+      if (signInError) {
+        throw new Error("Current password is incorrect.")
+      }
+
+      const { error } = await supabase.auth.updateUser({
+        password: passwordSettings.newPassword
+      })
+
+      if (error) throw error
+
       toast({
         title: "Password Changed",
         description: "Your password has been updated successfully.",
       })
+
+      // Reset form
       setPasswordSettings({
         currentPassword: "",
         newPassword: "",
         confirmPassword: "",
       })
-    }, 1000)
+      // Reset visibility states
+      setShowCurrentPassword(false)
+      setShowNewPassword(false)
+      setShowConfirmPassword(false)
+
+    } catch (error) {
+      toast({
+        title: "Update Failed",
+        description: error.message || "Failed to update password. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsChangingPassword(false)
+    }
   }
 
   const isPasswordFormValid = () => {
@@ -218,13 +329,11 @@ export function AdminProfile() {
             <div className="relative">
               <Avatar className="h-24 w-24 ring-4 ring-gray-100">
                 {profilePhoto ? (
-                  <AvatarImage src={profilePhoto || "/placeholder.svg"} alt={profileSettings.name} />
+                  <AvatarImage src={profilePhoto} alt={`${firstName} ${lastName}`} />
                 ) : (
                   <AvatarFallback className="bg-gradient-to-br from-[#0066FF] to-[#00D4AA] text-white text-2xl">
-                    {profileSettings.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
+                    {(firstName || "A")[0]}
+                    {(lastName || "U")[0]}
                   </AvatarFallback>
                 )}
               </Avatar>
@@ -243,8 +352,8 @@ export function AdminProfile() {
               <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-gray-900">{profileSettings.name}</h3>
-              <p className="text-sm text-gray-600">{profileSettings.role}</p>
+              <h3 className="font-semibold text-gray-900">{firstName} {lastName}</h3>
+              <p className="text-sm text-gray-600 capitalize">{role}</p>
               <Button
                 variant="outline"
                 size="sm"
@@ -261,12 +370,21 @@ export function AdminProfile() {
 
           <div className="grid md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="profileName">Full Name</Label>
+              <Label htmlFor="firstName">First Name</Label>
               <Input
-                id="profileName"
-                value={profileSettings.name}
-                onChange={(e) => setProfileSettings({ ...profileSettings, name: e.target.value })}
-                placeholder="Enter your full name"
+                id="firstName"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                placeholder="Enter your first name"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lastName">Last Name</Label>
+              <Input
+                id="lastName"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                placeholder="Enter your last name"
               />
             </div>
             <div className="space-y-2">
@@ -274,23 +392,23 @@ export function AdminProfile() {
               <Input
                 id="profileEmail"
                 type="email"
-                value={profileSettings.email}
-                onChange={(e) => setProfileSettings({ ...profileSettings, email: e.target.value })}
-                placeholder="Enter your email"
+                value={email}
+                disabled
+                className="bg-gray-50 cursor-not-allowed"
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="profilePhone">Phone Number</Label>
               <Input
                 id="profilePhone"
-                value={profileSettings.phone}
-                onChange={(e) => setProfileSettings({ ...profileSettings, phone: e.target.value })}
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
                 placeholder="Enter your phone number"
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="profileRole">Role</Label>
-              <Input id="profileRole" value={profileSettings.role} disabled className="bg-gray-50" />
+              <Input id="profileRole" value={role} disabled className="bg-gray-50 capitalize" />
             </div>
           </div>
 
@@ -312,6 +430,15 @@ export function AdminProfile() {
                 </>
               )}
             </Button>
+            {profileChanged && (
+              <Button
+                variant="outline"
+                onClick={handleResetProfile}
+                disabled={isSavingProfile}
+              >
+                Cancel
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -325,25 +452,62 @@ export function AdminProfile() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid md:grid-cols-1 gap-4 max-w-md">
+
             <div className="space-y-2">
               <Label htmlFor="currentPassword">Current Password</Label>
-              <Input
-                id="currentPassword"
-                type="password"
-                value={passwordSettings.currentPassword}
-                onChange={(e) => setPasswordSettings({ ...passwordSettings, currentPassword: e.target.value })}
-                placeholder="Enter current password"
-              />
+              <div className="relative">
+                <Input
+                  id="currentPassword"
+                  type={showCurrentPassword ? "text" : "password"}
+                  value={passwordSettings.currentPassword}
+                  onChange={(e) => setPasswordSettings({ ...passwordSettings, currentPassword: e.target.value })}
+                  placeholder="Enter current password"
+                  className="pr-10"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                >
+                  {showCurrentPassword ? (
+                    <EyeOff className="h-4 w-4 text-gray-500" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-gray-500" />
+                  )}
+                  <span className="sr-only">Toggle password visibility</span>
+                </Button>
+              </div>
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="newPassword">New Password</Label>
-              <Input
-                id="newPassword"
-                type="password"
-                value={passwordSettings.newPassword}
-                onChange={(e) => setPasswordSettings({ ...passwordSettings, newPassword: e.target.value })}
-                placeholder="Enter new password"
-              />
+              <div className="relative">
+                <Input
+                  id="newPassword"
+                  type={showNewPassword ? "text" : "password"}
+                  value={passwordSettings.newPassword}
+                  onChange={(e) => setPasswordSettings({ ...passwordSettings, newPassword: e.target.value })}
+                  placeholder="Enter new password"
+                  className="pr-10"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                >
+                  {showNewPassword ? (
+                    <EyeOff className="h-4 w-4 text-gray-500" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-gray-500" />
+                  )}
+                  <span className="sr-only">Toggle password visibility</span>
+                </Button>
+              </div>
+
               {passwordSettings.newPassword && (
                 <div className="space-y-2 mt-2">
                   <div className="flex items-center justify-between text-xs">
@@ -366,13 +530,29 @@ export function AdminProfile() {
               <div className="relative">
                 <Input
                   id="confirmPassword"
-                  type="password"
+                  type={showConfirmPassword ? "text" : "password"}
                   value={passwordSettings.confirmPassword}
                   onChange={(e) => setPasswordSettings({ ...passwordSettings, confirmPassword: e.target.value })}
                   placeholder="Confirm new password"
+                  className="pr-10"
                 />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-4 w-4 text-gray-500" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-gray-500" />
+                  )}
+                  <span className="sr-only">Toggle password visibility</span>
+                </Button>
+
                 {passwordSettings.confirmPassword && (
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <div className="absolute right-10 top-1/2 -translate-y-1/2 mr-2">
                     {passwordSettings.newPassword === passwordSettings.confirmPassword ? (
                       <Check className="w-5 h-5 text-green-500" />
                     ) : (
