@@ -215,7 +215,7 @@ export function AuthProvider({ children }) {
         const refreshedProfile = {
           ...result.profile,
           email: user.email,
-          role: user.role,
+          // role: user.role, // Do not overwrite role from profile
           status: user.status
         }
         setProfile(refreshedProfile)

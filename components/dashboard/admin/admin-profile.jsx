@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { Save, Lock, Camera, User, Upload, Check, X, Eye, EyeOff } from "lucide-react"
+import { Save, Lock, Camera, User, Upload, Check, X, Eye, EyeOff, Trash2, Mail, Phone, Shield } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -28,11 +28,13 @@ export function AdminProfile() {
   // State for avatar
   const [profilePhoto, setProfilePhoto] = useState("")
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false)
+  const [isRemovingPhoto, setIsRemovingPhoto] = useState(false)
 
   // State for operations
   const [isSavingProfile, setIsSavingProfile] = useState(false)
   const [isChangingPassword, setIsChangingPassword] = useState(false)
   const [profileChanged, setProfileChanged] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
 
   // Password Visibility State
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
@@ -158,6 +160,53 @@ export function AdminProfile() {
     }
   }
 
+
+  const handleRemovePhoto = async () => {
+    setIsRemovingPhoto(true)
+    try {
+      // Get session for auth header
+      const { data: { session } } = await supabase.auth.getSession()
+
+      const response = await fetch('/api/auth/profile/remove-avatar', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session?.access_token || ''}`
+        }
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to remove avatar')
+      }
+
+      const result = await response.json()
+
+      if (result.success) {
+        setProfilePhoto("")
+        toast({
+          title: "Photo Removed",
+          description: "Your profile photo has been removed.",
+        })
+
+        // Update context if available
+        if (updateProfile) {
+          await updateProfile({ avatar_url: null })
+        }
+
+        // Force reload as requested
+        window.location.reload()
+      }
+    } catch (error) {
+      console.error('Remove avatar error:', error)
+      toast({
+        title: "Action Failed",
+        description: "Failed to remove profile photo. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsRemovingPhoto(false)
+    }
+  }
+
   const triggerFileInput = () => {
     fileInputRef.current?.click()
   }
@@ -178,6 +227,7 @@ export function AdminProfile() {
           description: "Your profile information has been saved successfully.",
         })
         setProfileChanged(false)
+        setIsEditing(false)
       } else {
         throw new Error(result.error || "Failed to update profile")
       }
@@ -198,6 +248,7 @@ export function AdminProfile() {
       setLastName(authProfile.last_name || "")
       setPhone(authProfile.phone_number || "")
       setProfileChanged(false)
+      setIsEditing(false)
       toast({
         title: "Changes Discarded",
         description: "Your profile has been reset to the last saved state.",
@@ -316,11 +367,14 @@ export function AdminProfile() {
               <User className="w-5 h-5 text-gray-600" />
               <CardTitle>Profile Information</CardTitle>
             </div>
-            {profileChanged && (
-              <span className="text-sm text-orange-600 font-medium flex items-center gap-1">
-                <div className="w-2 h-2 bg-orange-600 rounded-full animate-pulse" />
-                Unsaved changes
-              </span>
+            {!isEditing && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsEditing(true)}
+              >
+                Edit Profile
+              </Button>
             )}
           </div>
         </CardHeader>
@@ -354,16 +408,34 @@ export function AdminProfile() {
             <div className="flex-1">
               <h3 className="font-semibold text-gray-900">{firstName} {lastName}</h3>
               <p className="text-sm text-gray-600 capitalize">{role}</p>
-              <Button
-                variant="outline"
-                size="sm"
-                className="mt-3 bg-transparent"
-                onClick={triggerFileInput}
-                disabled={isUploadingPhoto}
-              >
-                <Upload className="w-4 h-4 mr-2" />
-                {isUploadingPhoto ? "Uploading..." : "Change Photo"}
-              </Button>
+              <div className="flex gap-2 mt-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="bg-transparent"
+                  onClick={triggerFileInput}
+                  disabled={isUploadingPhoto || isRemovingPhoto}
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  {isUploadingPhoto ? "Uploading..." : "Change Photo"}
+                </Button>
+                {profilePhoto && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="bg-transparent text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 hover:border-red-300"
+                    onClick={handleRemovePhoto}
+                    disabled={isUploadingPhoto || isRemovingPhoto}
+                  >
+                    {isRemovingPhoto ? (
+                      <div className="h-4 w-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin mr-2" />
+                    ) : (
+                      <Trash2 className="w-4 h-4 mr-2" />
+                    )}
+                    {isRemovingPhoto ? "Removing..." : "Remove"}
+                  </Button>
+                )}
+              </div>
               <p className="text-xs text-gray-500 mt-2">JPG, PNG or GIF. Max size 5MB.</p>
             </div>
           </div>
@@ -371,66 +443,92 @@ export function AdminProfile() {
           <div className="grid md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="firstName">First Name</Label>
-              <Input
-                id="firstName"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                placeholder="Enter your first name"
-              />
+              <div className="relative">
+                <Input
+                  id="firstName"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  placeholder="Enter your first name"
+                  disabled={!isEditing}
+                  className="pl-10"
+                />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="lastName">Last Name</Label>
-              <Input
-                id="lastName"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                placeholder="Enter your last name"
-              />
+              <div className="relative">
+                <Input
+                  id="lastName"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  placeholder="Enter your last name"
+                  disabled={!isEditing}
+                  className="pl-10"
+                />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="profileEmail">Email Address</Label>
-              <Input
-                id="profileEmail"
-                type="email"
-                value={email}
-                disabled
-                className="bg-gray-50 cursor-not-allowed"
-              />
+              <div className="relative">
+                <Input
+                  id="profileEmail"
+                  type="email"
+                  value={email}
+                  disabled
+                  className="bg-gray-50 cursor-not-allowed pl-10"
+                />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="profilePhone">Phone Number</Label>
-              <Input
-                id="profilePhone"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="Enter your phone number"
-              />
+              <div className="relative">
+                <Input
+                  id="profilePhone"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="Enter your phone number"
+                  disabled={!isEditing}
+                  className="pl-10"
+                />
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="profileRole">Role</Label>
-              <Input id="profileRole" value={role} disabled className="bg-gray-50 capitalize" />
+              <div className="relative">
+                <Input
+                  id="profileRole"
+                  value={role}
+                  disabled
+                  className="bg-gray-50 capitalize pl-10"
+                />
+                <Shield className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              </div>
             </div>
           </div>
 
-          <div className="flex gap-3">
-            <Button
-              className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white cursor-pointer"
-              onClick={handleSaveProfile}
-              disabled={!profileChanged || isSavingProfile}
-            >
-              {isSavingProfile ? (
-                <>
-                  <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="w-4 h-4 mr-2" />
-                  Save Profile
-                </>
-              )}
-            </Button>
-            {profileChanged && (
+          {isEditing && (
+            <div className="flex gap-3">
+              <Button
+                className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white cursor-pointer"
+                onClick={handleSaveProfile}
+                disabled={!profileChanged || isSavingProfile}
+              >
+                {isSavingProfile ? (
+                  <>
+                    <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    Save Profile
+                  </>
+                )}
+              </Button>
               <Button
                 variant="outline"
                 onClick={handleResetProfile}
@@ -438,8 +536,8 @@ export function AdminProfile() {
               >
                 Cancel
               </Button>
-            )}
-          </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -462,8 +560,9 @@ export function AdminProfile() {
                   value={passwordSettings.currentPassword}
                   onChange={(e) => setPasswordSettings({ ...passwordSettings, currentPassword: e.target.value })}
                   placeholder="Enter current password"
-                  className="pr-10"
+                  className="pr-10 pl-10"
                 />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
                 <Button
                   type="button"
                   variant="ghost"
@@ -490,8 +589,9 @@ export function AdminProfile() {
                   value={passwordSettings.newPassword}
                   onChange={(e) => setPasswordSettings({ ...passwordSettings, newPassword: e.target.value })}
                   placeholder="Enter new password"
-                  className="pr-10"
+                  className="pr-10 pl-10"
                 />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
                 <Button
                   type="button"
                   variant="ghost"
@@ -534,8 +634,9 @@ export function AdminProfile() {
                   value={passwordSettings.confirmPassword}
                   onChange={(e) => setPasswordSettings({ ...passwordSettings, confirmPassword: e.target.value })}
                   placeholder="Confirm new password"
-                  className="pr-10"
+                  className="pr-10 pl-10"
                 />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
                 <Button
                   type="button"
                   variant="ghost"
