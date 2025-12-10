@@ -180,6 +180,33 @@ export function AuthProvider({ children }) {
     }
   }
 
+  const resetPassword = async (email) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: `${window.location.origin}/update-password`,
+      })
+      if (error) throw error
+      return { success: true }
+    } catch (error) {
+      console.error('Reset password error:', error)
+      return { success: false, error: error.message }
+    }
+  }
+
+  const updateUserPassword = async (newPassword) => {
+    try {
+      const { data, error } = await supabase.auth.updateUser({
+        password: newPassword
+      })
+
+      if (error) throw error
+      return { success: true, data }
+    } catch (error) {
+      console.error('Update password error:', error)
+      return { success: false, error: error.message }
+    }
+  }
+
   // Legacy methods for backward compatibility
   const login = signIn
   const register = signUp
@@ -301,6 +328,10 @@ export function AuthProvider({ children }) {
     signIn,
     signUp,
     signOut,
+    signUp,
+    signOut,
+    resetPassword,
+    updateUserPassword,
     updateProfile,
     refreshProfile,
     notifyProfileUpdate,

@@ -5,11 +5,11 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { useRouter } from 'next/navigation'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import { AuthLayout } from '@/components/auth/AuthLayout'
 import { FormField } from '@/components/auth/FormField'
 import { AuthButton } from '@/components/auth/AuthButton'
 import { useAuth } from '@/contexts/auth-context'
+import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 import { Mail, Lock } from 'lucide-react'
 
@@ -21,8 +21,7 @@ const loginSchema = z.object({
 export default function LoginPage() {
   const router = useRouter()
   const { login, getRedirectUrl } = useAuth()  // Temporarily revert to login method
-  const [error, setError] = useState('')
-  const [errorType, setErrorType] = useState('')
+  const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
 
   const {
@@ -35,8 +34,6 @@ export default function LoginPage() {
 
   const onSubmit = async (data) => {
     setIsLoading(true)
-    setError('')
-    setErrorType('')
 
     try {
       const result = await login(data.email, data.password)
@@ -50,18 +47,41 @@ export default function LoginPage() {
         const errorMessage = result.error || 'Login failed'
 
         if (errorMessage.includes('create an account')) {
-          setError('You have to create an account')
-          setErrorType('EMAIL_NOT_FOUND')
+          toast({
+            variant: "destructive",
+            title: "Account Not Found",
+            description: (
+              <div className="flex flex-col gap-2">
+                <p>You have to create an account first</p>
+                <Link
+                  href="/register"
+                  className="underline hover:no-underline font-medium"
+                >
+                  Create Account →
+                </Link>
+              </div>
+            ),
+          })
         } else if (errorMessage.includes('not active')) {
-          setError('Your account is not active. Please contact support.')
-          setErrorType('ACCOUNT_INACTIVE')
+          toast({
+            variant: "destructive",
+            title: "Account Inactive",
+            description: "Your account is not active. Please contact support.",
+          })
         } else {
-          setError(errorMessage) // Generic message for wrong password
-          setErrorType('INVALID_PASSWORD')
+          toast({
+            variant: "destructive",
+            title: "Login Failed",
+            description: errorMessage,
+          })
         }
       }
     } catch (error) {
-      setError('An unexpected error occurred')
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "An unexpected error occurred",
+      })
     } finally {
       setIsLoading(false)
     }
@@ -73,23 +93,6 @@ export default function LoginPage() {
       description="Sign in to your account"
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {error && (
-          <Alert variant="destructive" className="mb-6">
-            <AlertDescription>
-              {error}
-              {errorType === 'EMAIL_NOT_FOUND' && (
-                <div className="mt-2">
-                  <Link
-                    href="/register"
-                    className="text-white underline hover:no-underline font-medium"
-                  >
-                    Create Account →
-                  </Link>
-                </div>
-              )}
-            </AlertDescription>
-          </Alert>
-        )}
 
         <FormField
           id="email"
@@ -111,6 +114,15 @@ export default function LoginPage() {
           {...register('password')}
           error={errors.password?.message}
         />
+
+        <div className="flex justify-end -mt-4 mb-4">
+          <Link
+            href="/forgot-password"
+            className="text-sm text-blue-600 hover:text-blue-800"
+          >
+            Forgot Password?
+          </Link>
+        </div>
 
         <div className="pt-4">
           <AuthButton
