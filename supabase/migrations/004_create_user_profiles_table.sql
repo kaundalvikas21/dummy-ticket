@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS user_profiles (
   first_name TEXT NOT NULL,
   last_name TEXT NOT NULL,
   phone_number TEXT,
+  email TEXT,
   country_code TEXT,
   date_of_birth DATE,
   nationality TEXT,
@@ -26,6 +27,7 @@ CREATE TABLE IF NOT EXISTS user_profiles (
 -- Create indexes for faster lookups
 CREATE INDEX IF NOT EXISTS idx_user_profiles_user_id ON user_profiles(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_profiles_country_code ON user_profiles(country_code);
+CREATE INDEX IF NOT EXISTS idx_user_profiles_email ON user_profiles(email);
 CREATE INDEX IF NOT EXISTS idx_user_profiles_nationality ON user_profiles(nationality);
 
 -- Function to automatically update updated_at timestamp
