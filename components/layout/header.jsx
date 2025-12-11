@@ -34,8 +34,15 @@ export function Header() {
   const { profile: syncedProfile, loading: profileLoading } = useProfileSync()
   const { toast } = useToast()
 
-  // Check if we are on the password reset page
+  // Check if we are on the password reset page or in password reset flow
   const isPasswordResetPage = pathname === "/update-password" || pathname?.startsWith("/update-password")
+
+  // Check for password reset tokens in URL globally (affects all tabs)
+  const isPasswordResetFlow = typeof window !== 'undefined' &&
+    (window.location.search.includes('access_token') ||
+     window.location.search.includes('refresh_token') ||
+     window.location.search.includes('token_hash') ||
+     window.location.search.includes('type=recovery'))
 
   useEffect(() => {
     return scrollY.on("change", (latest) => {
@@ -146,7 +153,7 @@ export function Header() {
             {/* Auth Section */}
             {mounted && (
               <>
-                {isAuthenticated && !isPasswordResetPage ? (
+                {isAuthenticated && !isPasswordResetPage && !isPasswordResetFlow ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" className="flex items-center gap-3 border border-gray-300 rounded-full hover:bg-transparent transition-all cursor-pointer pl-1 pr-3 py-1.5 h-auto focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none focus:ring-0 active:scale-95 bg-gray-200">
@@ -283,7 +290,7 @@ export function Header() {
             {/* Mobile Auth Section */}
             {mounted && (
               <>
-                {isAuthenticated && !isPasswordResetPage ? (
+                {isAuthenticated && !isPasswordResetPage && !isPasswordResetFlow ? (
                   <>
                     <div className="py-2 border-t border-gray-200 mt-2 flex items-center gap-2">
                       {profileLoading || !syncedProfile ? (
