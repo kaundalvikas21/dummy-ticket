@@ -36,6 +36,40 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
+      // First check if the email exists in our system
+      // We use the check-email endpoint to verify if the user exists in user_profiles
+      // This is safer than checking auth directly on client side
+      // The endpoint is already implemented in /api/auth/check-email
+      const checkResponse = await fetch('/api/auth/check-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: data.email })
+      })
+
+      const checkResult = await checkResponse.json()
+
+      // If user doesn't exist, stop here and prompt to register
+      if (!checkResult.exists) {
+        toast({
+          variant: "destructive",
+          title: "Account Not Found",
+          description: (
+            <div className="flex flex-col gap-2">
+              <p>No account found with this email address.</p>
+              <Link
+                href={`/register?email=${encodeURIComponent(data.email)}`}
+                className="underline hover:no-underline font-medium"
+              >
+                Create Account →
+              </Link>
+            </div>
+          ),
+        })
+        setIsLoading(false)
+        return
+      }
+
+      // If user exists, proceed with login
       const result = await login(data.email, data.password)
 
       if (result.success) {
@@ -44,43 +78,32 @@ export default function LoginPage() {
         router.push(redirectUrl)
       } else {
         // Handle specific error messages
-        const errorMessage = result.error || 'Login failed'
+        // Since we already know the account exists, any login failure is likely a password issue
+        // or account status issue (locked/inactive)
 
-        if (errorMessage.includes('create an account')) {
-          toast({
-            variant: "destructive",
-            title: "Account Not Found",
-            description: (
-              <div className="flex flex-col gap-2">
-                <p>You have to create an account first</p>
-                <Link
-                  href="/register"
-                  className="underline hover:no-underline font-medium"
-                >
-                  Create Account →
-                </Link>
-              </div>
-            ),
-          })
-        } else if (errorMessage.includes('not active')) {
-          toast({
-            variant: "destructive",
-            title: "Account Inactive",
-            description: "Your account is not active. Please contact support.",
-          })
-        } else {
-          toast({
-            variant: "destructive",
-            title: "Login Failed",
-            description: errorMessage,
-          })
+        let title = "Login Failed"
+        let description = result.error || 'Invalid credentials'
+
+        if (description.toLowerCase().includes('password') || description.toLowerCase().includes('credential')) {
+          title = "Incorrect Password"
+          description = "The password you entered is incorrect. Please try again or forgot your password."
+        } else if (description.toLowerCase().includes('confirmed') || description.toLowerCase().includes('verify')) {
+          title = "Email Not Verified"
+          description = "Please verify your email address before logging in."
         }
+
+        toast({
+          variant: "destructive",
+          title: title,
+          description: description,
+        })
       }
     } catch (error) {
+      console.error('Login error:', error)
       toast({
         variant: "destructive",
         title: "Error",
-        description: "An unexpected error occurred",
+        description: "An unexpected error occurred. Please try again.",
       })
     } finally {
       setIsLoading(false)
