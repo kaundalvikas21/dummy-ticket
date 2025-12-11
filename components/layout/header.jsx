@@ -34,6 +34,9 @@ export function Header() {
   const { profile: syncedProfile, loading: profileLoading } = useProfileSync()
   const { toast } = useToast()
 
+  // Check if we are on the password reset page
+  const isPasswordResetPage = pathname === "/update-password" || pathname?.startsWith("/update-password")
+
   useEffect(() => {
     return scrollY.on("change", (latest) => {
       setIsScrolled(latest > 50)
@@ -143,7 +146,7 @@ export function Header() {
             {/* Auth Section */}
             {mounted && (
               <>
-                {isAuthenticated ? (
+                {isAuthenticated && !isPasswordResetPage ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" className="flex items-center gap-3 border border-gray-300 rounded-full hover:bg-transparent transition-all cursor-pointer pl-1 pr-3 py-1.5 h-auto focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none focus:ring-0 active:scale-95 bg-gray-200">
@@ -280,7 +283,7 @@ export function Header() {
             {/* Mobile Auth Section */}
             {mounted && (
               <>
-                {isAuthenticated ? (
+                {isAuthenticated && !isPasswordResetPage ? (
                   <>
                     <div className="py-2 border-t border-gray-200 mt-2 flex items-center gap-2">
                       {profileLoading || !syncedProfile ? (

@@ -22,7 +22,7 @@ const updatePasswordSchema = z.object({
 
 export default function UpdatePasswordPage() {
     const router = useRouter()
-    const { updateUserPassword } = useAuth()
+    const { updateUserPassword, logout } = useAuth()
     const { toast } = useToast()
     const [isLoading, setIsLoading] = useState(false)
 
@@ -41,9 +41,13 @@ export default function UpdatePasswordPage() {
             const result = await updateUserPassword(data.password)
 
             if (result.success) {
+                // Force logout after password update
+                await logout()
+
                 toast({
                     title: "Password Updated",
-                    description: "Your password has been successfully updated. Redirecting to login...",
+                    description: "Your password has been successfully updated. Please login with your new password.",
+                    variant: "success",
                 })
                 // Optional: Wait a bit before redirecting so user sees toast
                 setTimeout(() => {
