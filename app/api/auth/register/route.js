@@ -43,14 +43,23 @@ export async function POST(request) {
 
     const supabase = await createClient()
 
-    // Format phone number with country code (E.164 format for Supabase)
-    const formattedPhone = phoneNumber ? (countryCode || '') + phoneNumber : null
+  
+    // Format phone number for Supabase auth (E.164 format required)
+    let formattedPhone = null
+    if (phoneNumber && phoneNumber.trim()) {
+      // Ensure country code starts with +
+      const cleanCountryCode = countryCode ? (countryCode.startsWith('+') ? countryCode : `+${countryCode}`) : '+1'
+      // Remove any non-digit characters from phone number
+      const cleanPhone = phoneNumber.replace(/\D/g, '')
+      // Combine to E.164 format
+      formattedPhone = cleanCountryCode + cleanPhone
+    }
 
-    // Create user with Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.signUp({
+    
+    // Prepare signup options (phone will be synced via admin API after signup)
+    const signUpOptions = {
       email,
       password,
-      phone: formattedPhone, // Top-level phone field for auth.users Phone column
       options: {
         data: {
           first_name: firstName,
@@ -62,8 +71,12 @@ export async function POST(request) {
           preferred_language: 'en'
         }
       }
-    })
+    }
 
+    // Create user with Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.signUp(signUpOptions)
+
+    
     if (authError) {
       console.error('Supabase auth error:', authError)
 
@@ -88,6 +101,38 @@ export async function POST(request) {
         { success: false, error: 'Failed to create user account' },
         { status: 500 }
       )
+    }
+
+  // If phone number was provided, sync it to auth.users after signup
+    // This ensures the phone is stored correctly with country code prefix
+    if (formattedPhone && authData.user?.id) {
+      try {
+        const { createClient } = await import('@supabase/supabase-js')
+        const supabaseAdmin = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL,
+          process.env.SUPABASE_SERVICE_ROLE_KEY,
+          {
+            auth: {
+              autoRefreshToken: false,
+              persistSession: false
+            }
+          }
+        )
+
+        // Update auth.users phone field using admin API
+        const { error: phoneUpdateError } = await supabaseAdmin.auth.admin.updateUserById(
+          authData.user.id,
+          { phone: formattedPhone }
+        )
+
+        if (phoneUpdateError) {
+          console.warn('Failed to sync phone to auth.users after signup:', phoneUpdateError.message)
+        } else {
+          console.log('Successfully synced phone to auth.users:', formattedPhone)
+        }
+      } catch (error) {
+        console.warn('Error syncing phone to auth.users:', error.message)
+      }
     }
 
     // Return success - profile will be created automatically by database triggers
