@@ -3,7 +3,9 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { Home, Ticket, User, CreditCard, FileText, HelpCircle, Settings, Plane, X } from "lucide-react"
+import { Home, Ticket, User, CreditCard, FileText, HelpCircle, Settings, X } from "lucide-react"
+import { Logo } from "@/components/ui/logo"
+import { useLogo } from "@/hooks/useLogo"
 
 const menuItems = [
   { id: "dashboard", href: "/user", label: "Dashboard", icon: Home },
@@ -15,8 +17,9 @@ const menuItems = [
   { id: "settings", href: "/user/settings", label: "Settings", icon: Settings },
 ]
 
-export default function UserSidebar({ mobileMode = false, onClose = () => {} }) {
+export default function UserSidebar({ mobileMode = false, onClose = () => { } }) {
   const pathname = usePathname()
+  const { logo, loading } = useLogo()
 
   const handleLinkClick = () => {
     if (mobileMode) {
@@ -45,13 +48,13 @@ export default function UserSidebar({ mobileMode = false, onClose = () => {} }) 
 
         {/* Logo Section */}
         <div className="border-b border-white/10 p-6">
-          <Link href="/" className="flex items-center gap-3" onClick={handleLinkClick}>
-            <div className="bg-gradient-to-br from-[#0066FF] to-[#00D4AA] p-2.5 rounded-xl">
-              <Plane className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <span className="text-xl font-bold text-white">VisaFly</span>
-            </div>
+          <Link href="/" className="flex items-center" onClick={handleLinkClick}>
+            <Logo
+              size="md"
+              logo={logo}
+              loading={loading}
+              className="text-white"
+            />
           </Link>
         </div>
 

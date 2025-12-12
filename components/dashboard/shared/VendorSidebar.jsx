@@ -1,11 +1,14 @@
 "use client"
 
-import { LayoutDashboard, Package, ShoppingCart, DollarSign, UserCircle, Settings, Plane } from "lucide-react"
+import { LayoutDashboard, Package, ShoppingCart, DollarSign, UserCircle, Settings } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { Logo } from "@/components/ui/logo"
+import { useLogo } from "@/hooks/useLogo"
 
 export function VendorSidebar() {
   const pathname = usePathname()
+  const { logo, loading } = useLogo()
 
   const menuItems = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/vendor" },
@@ -26,14 +29,14 @@ export function VendorSidebar() {
     >
       {/* Logo */}
       <div className="p-6 border-b border-white/10">
-      <Link href="/" className="flex items-center gap-3">
-        <div className="bg-gradient-to-br from-[#0066FF] to-[#00D4AA] p-2.5 rounded-xl">
-          <Plane className="w-6 h-6 text-white" />
-        </div>
-        <div>
-          <span className="text-xl font-bold text-white">VisaFly</span>
-        </div>
-      </Link>
+        <Link href="/" className="flex items-center">
+          <Logo
+            size="md"
+            logo={logo}
+            loading={loading}
+            className="text-white"
+          />
+        </Link>
       </div>
 
       {/* Navigation */}
@@ -52,11 +55,10 @@ export function VendorSidebar() {
               <li key={item.id}>
                 <Link
                   href={item.href}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                    isActive
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${isActive
                       ? "bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white shadow-lg"
                       : "text-white/70 hover:bg-white/10 hover:text-white"
-                  }`}
+                    }`}
                 >
                   <Icon className="w-5 h-5" />
                   <span className="font-medium">{item.label}</span>

@@ -13,7 +13,6 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
-  Plane,
   UserCircle,
   FileCheck,
   FileText,
@@ -27,6 +26,8 @@ import {
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useState } from "react"
+import { Logo } from "@/components/ui/logo"
+import { useLogo } from "@/hooks/useLogo"
 
 const menuItems = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/admin" },
@@ -38,7 +39,8 @@ const menuItems = [
   { id: "vendors", label: "Vendors", icon: Building2, href: "/admin/vendors" },
   { id: "support", label: "Support", icon: MessageSquare, href: "/admin/support" },
   { id: "analytics", label: "Analytics", icon: BarChart3, href: "/admin/analytics" },
-  { id: "pages", label: "Pages", icon: FileText, href: "/admin/pages", hasSubmenu: true,
+  {
+    id: "pages", label: "Pages", icon: FileText, href: "/admin/pages", hasSubmenu: true,
     submenu: [
       { id: "home", label: "Home", icon: Home, href: "/admin/pages/home" },
       { id: "contact", label: "Contact Us", icon: Phone, href: "/admin/pages/contact" },
@@ -47,12 +49,14 @@ const menuItems = [
       { id: "footer", label: "Footer", icon: FileText, href: "/admin/pages/footer" }
     ]
   },
-  { id: "logs", label: "Logs", icon: Inbox, href: "/admin/logs", hasSubmenu: true,
+  {
+    id: "logs", label: "Logs", icon: Inbox, href: "/admin/logs", hasSubmenu: true,
     submenu: [
       { id: "contact-submissions", label: "Contact Submissions", icon: MessageSquare, href: "/admin/logs/contact-submissions" }
     ]
   },
-  { id: "components", label: "Components", icon: Code, href: "/admin/components", hasSubmenu: true,
+  {
+    id: "components", label: "Components", icon: Code, href: "/admin/components", hasSubmenu: true,
     submenu: [
       { id: "faq", label: "FAQ", icon: HelpCircle, href: "/admin/components/faq" }
     ]
@@ -63,6 +67,7 @@ const menuItems = [
 export function AdminSidebar({ sidebarOpen, setSidebarOpen }) {
   const pathname = usePathname()
   const [openSubmenu, setOpenSubmenu] = useState(null)
+  const { logo, loading } = useLogo()
 
   return (
     <motion.aside
@@ -73,24 +78,13 @@ export function AdminSidebar({ sidebarOpen, setSidebarOpen }) {
       <div className="flex flex-col h-full">
         {/* Logo */}
         <div className="p-6 border-b border-white/10">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="bg-gradient-to-br from-[#0066FF] to-[#00D4AA] p-2.5 rounded-xl">
-              <Plane className="w-6 h-6 text-white" />
-            </div>
-            <AnimatePresence>
-              {sidebarOpen && (
-                <motion.div
-                  initial={{ opacity: 0, width: 0 }}
-                  animate={{ opacity: 1, width: "auto" }}
-                  exit={{ opacity: 0, width: 0 }}
-                  className="overflow-hidden"
-                >
-                  <span className="text-xl font-bold text-white whitespace-nowrap">
-                    VisaFly
-                  </span>
-                </motion.div>
-              )}
-            </AnimatePresence>
+          <Link href="/" className="flex items-center">
+            <Logo
+              size="md"
+              logo={logo}
+              loading={loading}
+              className="text-white"
+            />
           </Link>
         </div>
 
@@ -114,11 +108,10 @@ export function AdminSidebar({ sidebarOpen, setSidebarOpen }) {
                   <li key={item.id}>
                     <button
                       onClick={() => setOpenSubmenu(openSubmenu === item.id ? null : item.id)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                        isSubmenuActive
-                          ? "bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white shadow-lg"
-                          : "text-white/70 hover:bg-white/10 hover:text-white"
-                      }`}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${isSubmenuActive
+                        ? "bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white shadow-lg"
+                        : "text-white/70 hover:bg-white/10 hover:text-white"
+                        }`}
                     >
                       <Icon className="w-5 h-5 flex-shrink-0" />
                       <AnimatePresence>
@@ -162,11 +155,10 @@ export function AdminSidebar({ sidebarOpen, setSidebarOpen }) {
                               <li key={subItem.id}>
                                 <Link
                                   href={subItem.href}
-                                  className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-all ${
-                                    isSubActive
-                                      ? "bg-white/20 text-white"
-                                      : "text-white/60 hover:bg-white/10 hover:text-white"
-                                  }`}
+                                  className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-all ${isSubActive
+                                    ? "bg-white/20 text-white"
+                                    : "text-white/60 hover:bg-white/10 hover:text-white"
+                                    }`}
                                 >
                                   <SubIcon className="w-4 h-4 flex-shrink-0" />
                                   <AnimatePresence>
@@ -194,11 +186,10 @@ export function AdminSidebar({ sidebarOpen, setSidebarOpen }) {
                 <li key={item.id}>
                   <Link
                     href={item.href}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                      isActive
-                        ? "bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white shadow-lg"
-                        : "text-white/70 hover:bg-white/10 hover:text-white"
-                    }`}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${isActive
+                      ? "bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white shadow-lg"
+                      : "text-white/70 hover:bg-white/10 hover:text-white"
+                      }`}
                   >
                     <Icon className="w-5 h-5 flex-shrink-0" />
                     <AnimatePresence>
