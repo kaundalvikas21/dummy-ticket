@@ -354,38 +354,39 @@ export function AdminProfile() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">My Profile</h1>
-        <p className="text-gray-600 mt-1">Manage your personal information and password</p>
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">My Profile</h1>
+        <p className="text-sm sm:text-base text-gray-600 mt-1">Manage your personal information and password</p>
       </div>
 
       <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
+        <CardHeader className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <User className="w-5 h-5 text-gray-600" />
-              <CardTitle>Profile Information</CardTitle>
+              <User className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
+              <CardTitle className="text-lg sm:text-xl">Profile Information</CardTitle>
             </div>
             {!isEditing && (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setIsEditing(true)}
+                className="w-full sm:w-auto min-h-[40px]"
               >
                 Edit Profile
               </Button>
             )}
           </div>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex items-center gap-6">
-            <div className="relative">
-              <Avatar className="h-24 w-24 ring-4 ring-gray-100">
+        <CardContent className="space-y-4 sm:space-y-6 p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+            <div className="relative shrink-0">
+              <Avatar className="h-20 w-20 sm:h-24 sm:w-24 ring-4 ring-gray-100">
                 {profilePhoto ? (
                   <AvatarImage src={profilePhoto} alt={`${firstName} ${lastName}`} />
                 ) : (
-                  <AvatarFallback className="bg-gradient-to-br from-[#0066FF] to-[#00D4AA] text-white text-2xl">
+                  <AvatarFallback className="bg-gradient-to-br from-[#0066FF] to-[#00D4AA] text-white text-xl sm:text-2xl">
                     {(firstName || "A")[0]}
                     {(lastName || "U")[0]}
                   </AvatarFallback>
@@ -393,26 +394,26 @@ export function AdminProfile() {
               </Avatar>
               <Button
                 size="icon"
-                className="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-gradient-to-r from-[#0066FF] to-[#00D4AA] shadow-lg"
+                className="absolute bottom-0 right-0 h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-gradient-to-r from-[#0066FF] to-[#00D4AA] shadow-lg"
                 onClick={triggerFileInput}
                 disabled={isUploadingPhoto}
               >
                 {isUploadingPhoto ? (
-                  <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <div className="h-3 w-3 sm:h-4 sm:w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
-                  <Camera className="h-4 w-4" />
+                  <Camera className="h-3 w-3 sm:h-4 sm:w-4" />
                 )}
               </Button>
               <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
             </div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-gray-900">{firstName} {lastName}</h3>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-base sm:text-lg text-gray-900">{firstName} {lastName}</h3>
               <p className="text-sm text-gray-600 capitalize">{role}</p>
-              <div className="flex gap-2 mt-3">
+              <div className="flex flex-col sm:flex-row gap-2 mt-3">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="bg-transparent"
+                  className="bg-transparent min-h-[40px]"
                   onClick={triggerFileInput}
                   disabled={isUploadingPhoto || isRemovingPhoto}
                 >
@@ -423,7 +424,7 @@ export function AdminProfile() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="bg-transparent text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 hover:border-red-300"
+                    className="bg-transparent text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 hover:border-red-300 min-h-[40px]"
                     onClick={handleRemovePhoto}
                     disabled={isUploadingPhoto || isRemovingPhoto}
                   >
@@ -440,7 +441,7 @@ export function AdminProfile() {
             </div>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="firstName">First Name</Label>
               <div className="relative">
@@ -511,9 +512,9 @@ export function AdminProfile() {
           </div>
 
           {isEditing && (
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <Button
-                className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white cursor-pointer"
+                className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white cursor-pointer w-full sm:w-auto min-h-[44px]"
                 onClick={handleSaveProfile}
                 disabled={!profileChanged || isSavingProfile}
               >
@@ -533,6 +534,7 @@ export function AdminProfile() {
                 variant="outline"
                 onClick={handleResetProfile}
                 disabled={isSavingProfile}
+                className="w-full sm:w-auto min-h-[44px]"
               >
                 Cancel
               </Button>
@@ -542,14 +544,14 @@ export function AdminProfile() {
       </Card>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="p-4 sm:p-6">
           <div className="flex items-center gap-2">
-            <Lock className="w-5 h-5 text-gray-600" />
-            <CardTitle>Change Password</CardTitle>
+            <Lock className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
+            <CardTitle className="text-lg sm:text-xl">Change Password</CardTitle>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid md:grid-cols-1 gap-4 max-w-md">
+        <CardContent className="space-y-4 p-4 sm:p-6">
+          <div className="grid gap-4 max-w-md w-full">
 
             <div className="space-y-2">
               <Label htmlFor="currentPassword">Current Password</Label>
@@ -665,7 +667,7 @@ export function AdminProfile() {
             </div>
           </div>
           <Button
-            className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white cursor-pointer"
+            className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white cursor-pointer w-full sm:w-auto min-h-[44px]"
             onClick={handleChangePassword}
             disabled={!isPasswordFormValid() || isChangingPassword}
           >

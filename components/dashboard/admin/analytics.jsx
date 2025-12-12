@@ -41,15 +41,15 @@ export function Analytics() {
   ]
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Analytics & Reports</h1>
-        <p className="text-gray-600 mt-1">Track performance and business insights</p>
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Analytics & Reports</h1>
+        <p className="text-sm sm:text-base text-gray-600 mt-1">Track performance and business insights</p>
       </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
@@ -176,13 +176,13 @@ export function Analytics() {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 xl:grid-cols-2">
         <Card>
-          <CardHeader>
-            <CardTitle>Top Performing Services</CardTitle>
-            <CardDescription>Revenue comparison by service type</CardDescription>
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-lg sm:text-xl">Top Performing Services</CardTitle>
+            <CardDescription className="text-sm">Revenue comparison by service type</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 sm:p-6 pt-0">
             <ChartContainer
               config={{
                 revenue: {
@@ -190,13 +190,20 @@ export function Analytics() {
                   color: "#0066FF",
                 },
               }}
-              className="h-[300px]"
+              className="h-[250px] sm:h-[300px]"
             >
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={topServices} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                <BarChart data={topServices} margin={{ top: 5, right: 30, left: 20, bottom: 60 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis dataKey="name" stroke="#6b7280" />
-                  <YAxis stroke="#6b7280" />
+                  <XAxis
+                    dataKey="name"
+                    stroke="#6b7280"
+                    angle={-45}
+                    textAnchor="end"
+                    height={80}
+                    tick={{ fontSize: 12 }}
+                  />
+                  <YAxis stroke="#6b7280" tick={{ fontSize: 12 }} />
                   <ChartTooltip content={<ChartTooltipContent />} />
                   <Bar dataKey="revenue" fill="#0066FF" radius={[8, 8, 0, 0]} name="Revenue ($)" />
                 </BarChart>
@@ -206,18 +213,18 @@ export function Analytics() {
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Service Distribution</CardTitle>
-            <CardDescription>Sales breakdown by service type</CardDescription>
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-lg sm:text-xl">Service Distribution</CardTitle>
+            <CardDescription className="text-sm">Sales breakdown by service type</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 sm:p-6 pt-0">
             <ChartContainer
               config={{
                 value: {
                   label: "Sales",
                 },
               }}
-              className="h-[300px]"
+              className="h-[250px] sm:h-[300px]"
             >
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -226,8 +233,12 @@ export function Analytics() {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={80}
+                    label={({ name, percent }) => {
+                      // Hide labels on very small screens
+                      if (typeof window !== 'undefined' && window.innerWidth < 640) return '';
+                      return `${name}: ${(percent * 100).toFixed(0)}%`;
+                    }}
+                    outerRadius={60}
                     fill="#8884d8"
                     dataKey="value"
                   >
@@ -236,6 +247,11 @@ export function Analytics() {
                     ))}
                   </Pie>
                   <ChartTooltip content={<ChartTooltipContent />} />
+                  <Legend
+                    verticalAlign="bottom"
+                    height={36}
+                    formatter={(value) => <span className="text-xs">{value}</span>}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </ChartContainer>
@@ -244,25 +260,25 @@ export function Analytics() {
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Detailed Service Performance</CardTitle>
-          <CardDescription>Complete breakdown of all services</CardDescription>
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="text-lg sm:text-xl">Detailed Service Performance</CardTitle>
+          <CardDescription className="text-sm">Complete breakdown of all services</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
+        <CardContent className="p-4 sm:p-6 pt-0">
+          <div className="space-y-3">
             {topServices.map((service, index) => (
-              <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <div className="flex items-center gap-4">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#0066FF] to-[#00D4AA] flex items-center justify-center text-white font-bold">
+              <div key={index} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#0066FF] to-[#00D4AA] flex items-center justify-center text-white font-bold text-sm">
                     {index + 1}
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900">{service.name}</h4>
-                    <p className="text-sm text-gray-600">{service.sales} sales</p>
+                    <h4 className="font-semibold text-gray-900 text-sm sm:text-base">{service.name}</h4>
+                    <p className="text-xs sm:text-sm text-gray-600">{service.sales} sales</p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="font-bold text-gray-900">${service.revenue.toLocaleString()}</p>
+                <div className="text-right sm:text-left">
+                  <p className="font-bold text-gray-900 text-sm sm:text-base">${service.revenue.toLocaleString()}</p>
                   <p className="text-xs text-gray-600">Total Revenue</p>
                 </div>
               </div>

@@ -125,15 +125,15 @@ export function SupportTickets() {
   const resolvedTickets = tickets.filter((t) => t.status === "resolved").length
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Support Tickets</h1>
-        <p className="text-gray-600 mt-1">Manage customer support requests and inquiries</p>
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Support Tickets</h1>
+        <p className="text-sm sm:text-base text-gray-600 mt-1">Manage customer support requests and inquiries</p>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-3">
@@ -198,12 +198,12 @@ export function SupportTickets() {
             {tickets.map((ticket) => (
               <div
                 key={ticket.id}
-                className="p-4 border border-gray-200 rounded-lg hover:border-[#0066FF] transition-colors"
+                className="p-3 sm:p-4 border border-gray-200 rounded-lg hover:border-[#0066FF] transition-colors"
               >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className="text-sm font-semibold text-gray-900">{ticket.id}</span>
+                <div className="flex flex-col gap-3">
+                  <div className="flex flex-col gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-xs sm:text-sm font-semibold text-gray-900">{ticket.id}</span>
                       <Badge
                         variant="outline"
                         className={
@@ -229,23 +229,31 @@ export function SupportTickets() {
                         {ticket.priority}
                       </Badge>
                     </div>
-                    <h3 className="text-base font-semibold text-gray-900 mb-1">{ticket.subject}</h3>
-                    <p className="text-sm text-gray-600 mb-2">{ticket.message}</p>
-                    <div className="flex items-center gap-4 text-xs text-gray-500">
+                    <h3 className="text-sm sm:text-base font-semibold text-gray-900 line-clamp-1">{ticket.subject}</h3>
+                    <p className="text-xs sm:text-sm text-gray-600 line-clamp-2">{ticket.message}</p>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
                       <span>Customer: {ticket.customer}</span>
-                      <span>•</span>
+                      <span className="hidden sm:inline">•</span>
                       <span>{ticket.date}</span>
                       {ticket.responses.length > 0 && (
                         <>
-                          <span>•</span>
+                          <span className="hidden sm:inline">•</span>
                           <span>{ticket.responses.length} response(s)</span>
                         </>
                       )}
                     </div>
+                    <Button
+                      className="cursor-pointer w-full sm:w-auto min-h-[40px]"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleViewDetails(ticket)}
+                    >
+                      View Details
+                    </Button>
                   </div>
-                  <Button className="cursor-pointer" variant="outline" size="sm" onClick={() => handleViewDetails(ticket)}>
-                    View Details
-                  </Button>
                 </div>
               </div>
             ))}
@@ -254,14 +262,14 @@ export function SupportTickets() {
       </Card>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Ticket Details - {selectedTicket?.id}</DialogTitle>
+        <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="px-4 sm:px-6 pt-6">
+            <DialogTitle className="text-lg sm:text-xl">Ticket Details - {selectedTicket?.id}</DialogTitle>
           </DialogHeader>
           {selectedTicket && (
-            <div className="space-y-6 py-4">
+            <div className="space-y-4 sm:space-y-6 px-4 sm:px-6 pb-6">
               {/* Ticket Info */}
-              <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+              <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 p-3 sm:p-4 bg-gray-50 rounded-lg">
                 <div>
                   <Label className="text-gray-600">Customer</Label>
                   <p className="font-semibold">{selectedTicket.customer}</p>
@@ -303,8 +311,8 @@ export function SupportTickets() {
               {/* Original Message */}
               <div>
                 <Label className="text-gray-600 mb-2 block">Subject</Label>
-                <h3 className="text-lg font-semibold mb-2">{selectedTicket.subject}</h3>
-                <div className="p-4 bg-blue-50 rounded-lg">
+                <h3 className="text-base sm:text-lg font-semibold mb-2">{selectedTicket.subject}</h3>
+                <div className="p-3 sm:p-4 bg-blue-50 rounded-lg">
                   <p className="text-sm text-gray-700">{selectedTicket.message}</p>
                   <p className="text-xs text-gray-500 mt-2">{selectedTicket.date}</p>
                 </div>
@@ -316,8 +324,8 @@ export function SupportTickets() {
                   <Label className="text-gray-600 mb-2 block">Responses</Label>
                   <div className="space-y-3">
                     {selectedTicket.responses.map((response, index) => (
-                      <div key={index} className="p-4 bg-green-50 rounded-lg">
-                        <div className="flex items-center justify-between mb-2">
+                      <div key={index} className="p-3 sm:p-4 bg-green-50 rounded-lg">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-2">
                           <span className="text-sm font-semibold text-gray-900">{response.from}</span>
                           <span className="text-xs text-gray-500">{response.date}</span>
                         </div>
@@ -339,10 +347,10 @@ export function SupportTickets() {
                   onChange={(e) => setResponseMessage(e.target.value)}
                   placeholder="Type your response here..."
                   rows={4}
-                  className="mb-2"
+                  className="mb-3"
                 />
                 <Button
-                  className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white cursor-pointer"
+                  className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white cursor-pointer w-full sm:w-auto min-h-[44px]"
                   onClick={handleSendResponse}
                 >
                   <Send className="w-4 h-4 mr-2" />

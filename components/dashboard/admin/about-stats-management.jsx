@@ -443,16 +443,16 @@ export function AboutStatsManagement() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">About Us Stats Management</h1>
-          <p className="text-gray-600">Manage statistics displayed on the About Us page</p>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">About Us Stats Management</h1>
+          <p className="text-sm sm:text-base text-gray-600">Manage statistics displayed on the About Us page</p>
         </div>
         <Button
           onClick={handleOpenAddDialog}
-          className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white"
+          className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white w-full sm:w-auto min-h-[40px]"
         >
           <Plus className="w-4 h-4 mr-2" />
           Add Stat
@@ -466,7 +466,7 @@ export function AboutStatsManagement() {
           placeholder="Search stats..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
+          className="pl-10 h-[44px]"
         />
       </div>
 

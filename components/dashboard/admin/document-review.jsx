@@ -203,19 +203,19 @@ export function DocumentReview() {
 
   const EmptyState = () => (
     <Card className="border-dashed">
-      <CardContent className="p-16 text-center">
-        <div className="mx-auto w-fit p-4 bg-gray-100 rounded-full mb-6">
-          <FileX className="h-12 w-12 text-gray-400" />
+      <CardContent className="p-8 sm:p-12 lg:p-16 text-center">
+        <div className="mx-auto w-fit p-3 sm:p-4 bg-gray-100 rounded-full mb-4 sm:mb-6">
+          <FileX className="h-10 w-10 sm:h-12 sm:w-12 text-gray-400" />
         </div>
-        <h3 className="text-xl font-semibold mb-2 text-gray-800">No Documents Found</h3>
-        <p className="text-gray-600 mb-6 max-w-md mx-auto">
-          {hasActiveFilters 
+        <h3 className="text-lg sm:text-xl font-semibold mb-2 text-gray-800">No Documents Found</h3>
+        <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6 max-w-md mx-auto">
+          {hasActiveFilters
             ? `No results for "${searchTerm}" ${statusFilter !== 'all' ? `with status "${statusFilter}"` : ''}`
             : "There are no documents available for review."
           }
         </p>
         {hasActiveFilters && (
-          <Button variant="outline" onClick={clearAllFilters}>
+          <Button variant="outline" onClick={clearAllFilters} className="min-h-[44px]">
             <XCircle className="mr-2 h-4 w-4" />
             Clear Filters
           </Button>
@@ -225,15 +225,15 @@ export function DocumentReview() {
   )
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-3xl font-bold">Document Review</h2>
-        <p className="text-gray-600 mt-1">Review and verify user identity documents</p>
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Document Review</h1>
+        <p className="text-sm sm:text-base text-gray-600 mt-1">Review and verify user identity documents</p>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard title="Total Documents" value={stats.total} icon={FileText} color="text-blue-600" />
         <StatCard title="Pending Review" value={stats.pending} icon={Clock} color="text-yellow-600" />
         <StatCard title="Approved" value={stats.approved} icon={CheckCircle} color="text-green-600" />
@@ -242,15 +242,15 @@ export function DocumentReview() {
 
       {/* Search and Filter Bar */}
       <Card>
-        <CardContent className="p-4">
-          <div className="flex gap-4 flex-wrap">
-            <div className="flex-1 min-w-[300px] relative">
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex-1 min-w-[200px] relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 placeholder="Search by name, email, or document type..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-10"
+                className="pl-10 pr-10 h-[44px]"
               />
               {searchTerm && (
                 <button
@@ -263,7 +263,7 @@ export function DocumentReview() {
               )}
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full sm:w-[180px] h-[44px]">
                 <Filter className="mr-2 h-4 w-4" />
                 <SelectValue />
               </SelectTrigger>
@@ -280,22 +280,22 @@ export function DocumentReview() {
 
       {/* Documents List */}
       {filteredDocuments.length > 0 ? (
-        <div className="grid gap-4">
+        <div className="grid gap-3 sm:gap-4">
           {filteredDocuments.map((doc) => (
             <Card key={doc.id}>
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-4 flex-1">
-                    <div className="bg-blue-100 p-3 rounded-lg">
-                      <FileText className="h-6 w-6 text-blue-600" />
+              <CardContent className="p-3 sm:p-6">
+                <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+                  <div className="flex items-start gap-3 sm:gap-4 flex-1">
+                    <div className="bg-blue-100 p-2 sm:p-3 rounded-lg">
+                      <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold">{doc.type}</h3>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+                        <h3 className="font-semibold text-base sm:text-lg">{doc.type}</h3>
                         <StatusBadge status={doc.status} />
                       </div>
-                      <p className="text-sm text-gray-600 mb-2">{doc.fileName}</p>
-                      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-gray-600">
+                      <p className="text-xs sm:text-sm text-gray-600 mb-2 truncate">{doc.fileName}</p>
+                      <div className="grid gap-x-4 gap-y-1 text-xs sm:text-sm text-gray-600 grid-cols-1 sm:grid-cols-2">
                         <p><strong>User:</strong> {doc.userName}</p>
                         <p><strong>Email:</strong> {doc.userEmail}</p>
                         <p className="flex items-center gap-1">
@@ -313,17 +313,18 @@ export function DocumentReview() {
                         )}
                       </div>
                       {doc.rejectionReason && (
-                        <div className="mt-2 p-2 bg-red-50 rounded text-sm text-red-700">
+                        <div className="mt-2 p-2 bg-red-50 rounded text-xs sm:text-sm text-red-700">
                           <strong>Rejection Reason:</strong> {doc.rejectionReason}
                         </div>
                       )}
                     </div>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 lg:flex-col">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleReviewDocument(doc, "preview")}
+                      className="min-h-[40px] px-3"
                     >
                       <Eye className="h-4 w-4" />
                     </Button>
@@ -331,19 +332,22 @@ export function DocumentReview() {
                       <>
                         <Button
                           size="sm"
-                          className="bg-green-600 hover:bg-green-700"
+                          className="bg-green-600 hover:bg-green-700 min-h-[40px] px-3"
                           onClick={() => handleReviewDocument(doc, STATUS_TYPES.APPROVED)}
                         >
                           <CheckCircle className="mr-2 h-4 w-4" />
-                          Approve
+                          <span className="hidden sm:inline">Approve</span>
+                          <span className="sm:hidden">✓</span>
                         </Button>
-                        <Button 
-                          size="sm" 
-                          variant="destructive" 
+                        <Button
+                          size="sm"
+                          variant="destructive"
                           onClick={() => handleReviewDocument(doc, STATUS_TYPES.REJECTED)}
+                          className="min-h-[40px] px-3"
                         >
                           <XCircle className="mr-2 h-4 w-4" />
-                          Reject
+                          <span className="hidden sm:inline">Reject</span>
+                          <span className="sm:hidden">✗</span>
                         </Button>
                       </>
                     )}
@@ -359,7 +363,7 @@ export function DocumentReview() {
 
       {/* Review Dialog */}
       <Dialog open={isReviewDialogOpen} onOpenChange={setIsReviewDialogOpen}>
-        <DialogContent className="max-w-5xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="max-w-[95vw] sm:max-w-5xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {reviewAction === "preview" ? "Document Preview" : `${reviewAction} Document`}
@@ -367,8 +371,8 @@ export function DocumentReview() {
           </DialogHeader>
           {selectedDocument && (
             <div className="space-y-4">
-              <div className="rounded-lg bg-blue-50 p-4">
-                <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="rounded-lg bg-blue-50 p-3 sm:p-4">
+                <div className="grid gap-3 sm:gap-4 text-sm grid-cols-1 sm:grid-cols-2">
                   {[
                     ["User Name", selectedDocument.userName],
                     ["Email", selectedDocument.userEmail],

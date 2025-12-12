@@ -467,18 +467,18 @@ export function HomepageNewsBlogManagement() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header with selection mode toggle */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold">Homepage News & Blog Management</h1>
-          <p className="text-gray-600">Manage news and blog items displayed on the homepage</p>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Homepage News & Blog Management</h1>
+          <p className="text-sm sm:text-base text-gray-600">Manage news and blog items displayed on the homepage</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
           <Button
             variant={selectionMode ? "default" : "outline"}
             onClick={toggleSelectionMode}
-            className={selectionMode ? "bg-blue-600 text-white" : ""}
+            className={selectionMode ? "bg-blue-600 text-white" : "min-h-[40px]"}
           >
             {selectionMode ? (
               <X className="w-4 h-4 mr-2" />
@@ -492,6 +492,7 @@ export function HomepageNewsBlogManagement() {
               resetForm();
               setIsDialogOpen(true)
             }}
+            className="min-h-[40px]"
           >
             <Plus className="w-4 h-4 mr-2" />
             Add Item
@@ -501,35 +502,38 @@ export function HomepageNewsBlogManagement() {
 
       {/* Bulk Action Bar */}
       {selectionMode && getSelectedItemCount() > 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <span className="text-sm font-medium text-blue-900">
-              {getSelectedItemCount()} item{getSelectedItemCount() !== 1 ? 's' : ''} selected
-            </span>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={isAllSelected() ? clearSelection : selectAllItems}
-              >
-                <CheckSquare className="w-4 h-4 mr-2" />
-                {isAllSelected() ? "Deselect All" : "Select All"}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={clearSelection}
-              >
-                Clear Selection
-              </Button>
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+              <span className="text-sm font-medium text-blue-900">
+                {getSelectedItemCount()} item{getSelectedItemCount() !== 1 ? 's' : ''} selected
+              </span>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={isAllSelected() ? clearSelection : selectAllItems}
+                  className="min-h-[36px]"
+                >
+                  <CheckSquare className="w-4 h-4 mr-2" />
+                  {isAllSelected() ? "Deselect All" : "Select All"}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearSelection}
+                  className="min-h-[36px]"
+                >
+                  Clear Selection
+                </Button>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center gap-2">
             <Button
               variant="destructive"
               size="sm"
               onClick={() => setShowBulkDeleteDialog(true)}
               disabled={isBulkDeleting}
+              className="w-full sm:w-auto min-h-[36px]"
             >
               <Trash2 className="w-4 h-4 mr-2" />
               {isBulkDeleting ? "Deleting..." : `Delete ${getSelectedItemCount()} Item${getSelectedItemCount() !== 1 ? 's' : ''}`}
@@ -538,7 +542,7 @@ export function HomepageNewsBlogManagement() {
         </div>
       )}
 
-      <div className="grid lg:grid-cols-2 gap-6">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 xl:grid-cols-2">
         {/* Latest Travel News */}
         <div className="space-y-4">
           <div className="flex items-center gap-2">
@@ -592,15 +596,15 @@ export function HomepageNewsBlogManagement() {
 
       {/* Add/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="!max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
+        <DialogContent className="!max-w-[95vw] sm:!max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="px-4 sm:px-6 pt-6">
+            <DialogTitle className="text-lg sm:text-xl">
               {editingItem ? "Edit Item" : "Add New Item"}
             </DialogTitle>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 px-4 sm:px-6 pb-6">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="content_type">Content Type</Label>
                 <Select

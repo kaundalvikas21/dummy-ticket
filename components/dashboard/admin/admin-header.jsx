@@ -1,6 +1,6 @@
 "use client"
 
-import { Bell, User, ChevronDown, UserCircle, Settings, LogOut, Loader2 } from "lucide-react"
+import { Bell, User, ChevronDown, UserCircle, Settings, LogOut, Loader2, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { AvatarSkeleton, AvatarFallbackSkeleton } from "@/components/ui/avatar-skeleton"
@@ -19,7 +19,7 @@ import { useRouter } from "next/navigation"
 import { useAuth } from "@/contexts/auth-context"
 import { getAvatarDisplayUrl, getUserInitials } from "@/lib/utils"
 
-export function AdminHeader() {
+export function AdminHeader({ onMenuClick, sidebarOpen }) {
   const { toast } = useToast()
   const router = useRouter()
   const { logout, profile, loading } = useAuth()
@@ -112,22 +112,33 @@ export function AdminHeader() {
 
   return (
     <header className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
-      <div className="flex items-center justify-between p-6">
-        {/* Left Section - Admin Dashboard Info */}
-        <div className="flex flex-col">
-          <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="text-sm text-gray-600">Manage your platform effectively</p>
+      <div className="flex items-center justify-between p-4 lg:p-6">
+        {/* Left Section - Mobile Menu Button & Admin Dashboard Info */}
+        <div className="flex items-center gap-4">
+          {/* Mobile Menu Button */}
+          <button
+            onClick={onMenuClick}
+            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+
+          <div className="flex flex-col">
+            <h1 className="text-xl lg:text-2xl font-bold text-gray-900">Admin Dashboard</h1>
+            <p className="text-xs lg:text-sm text-gray-600">Manage your platform effectively</p>
+          </div>
         </div>
 
         {/* Right Section */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 lg:gap-3">
           {/* Notifications */}
           <DropdownMenu open={notificationDropdownOpen} onOpenChange={setNotificationDropdownOpen}>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="relative">
-                <Bell className="w-5 h-5" />
+              <Button variant="ghost" size="icon" className="relative h-9 w-9 lg:h-10 lg:w-10">
+                <Bell className="w-4 h-4 lg:w-5 lg:h-5" />
                 {unreadCount > 0 && (
-                  <Badge className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center p-0 bg-red-500 text-white text-xs">
+                  <Badge className="absolute -top-1 -right-1 w-4 h-4 lg:w-5 lg:h-5 flex items-center justify-center p-0 bg-red-500 text-white text-xs">
                     {unreadCount}
                   </Badge>
                 )}
@@ -169,13 +180,13 @@ export function AdminHeader() {
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                className="flex items-center gap-2 px-3 py-2 h-auto hover:bg-gray-100 transition-colors rounded-lg"
+                className="flex items-center gap-2 px-2 lg:px-3 py-2 h-auto hover:bg-gray-100 transition-colors rounded-lg"
               >
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#0066FF] to-[#00D4AA] ring-2 ring-white shadow-sm">
+                <div className="flex h-8 w-8 lg:h-9 lg:w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#0066FF] to-[#00D4AA] ring-2 ring-white shadow-sm">
                   {loading || !profile ? (
-                    <div className="h-5 w-5 bg-gray-200/30 animate-pulse rounded-full"></div>
+                    <div className="h-4 w-4 lg:h-5 lg:w-5 bg-gray-200/30 animate-pulse rounded-full"></div>
                   ) : (
-                    <Avatar className="h-8 w-8">
+                    <Avatar className="h-7 w-7 lg:h-8 lg:w-8">
                       <AvatarImage
                         src={getAvatarDisplayUrl(profile?.avatar_url)}
                         alt="Profile picture"
@@ -189,12 +200,12 @@ export function AdminHeader() {
                     </Avatar>
                   )}
                 </div>
-                <div className="flex flex-col items-start">
+                <div className="hidden lg:flex flex-col items-start">
                   <span className="text-sm font-medium text-gray-900">
                     {loading || !profile ? <Skeleton className="w-32 h-4" /> : getUserDisplayName()}
                   </span>
                 </div>
-                <ChevronDown className="h-4 w-4 text-gray-500" />
+                <ChevronDown className="h-3 w-3 lg:h-4 lg:w-4 text-gray-500" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
