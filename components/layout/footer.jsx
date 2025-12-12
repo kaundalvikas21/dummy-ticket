@@ -3,6 +3,7 @@
 import { Plane, Mail, Phone, MapPin } from "lucide-react"
 import Link from "next/link"
 import { useState, useEffect } from "react"
+import { FooterSkeleton } from "@/components/ui/footer-skeleton"
 
 export function Footer() {
   const [footerData, setFooterData] = useState({})
@@ -26,6 +27,11 @@ export function Footer() {
 
     fetchFooterData()
   }, [])
+
+  // Show skeleton while loading
+  if (loading) {
+    return <FooterSkeleton />
+  }
 
   // Minimal fallback data in case API fails - only essential branding
   const fallbackData = {
