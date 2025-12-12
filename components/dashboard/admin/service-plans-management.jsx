@@ -1,7 +1,26 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, Edit, Trash2, Search } from "lucide-react"
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Search,
+  Plane,
+  FileText,
+  Ticket,
+  Globe,
+  ArrowRightLeft,
+  Calendar,
+  Shield,
+  Star,
+  User,
+  Home,
+  Settings,
+  CheckCircle,
+  Clock,
+  Upload,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -26,6 +45,13 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
   Table,
   TableBody,
   TableCell,
@@ -35,12 +61,48 @@ import {
 } from "@/components/ui/table"
 import { Card, CardContent } from "@/components/ui/card"
 
+// Icon mapping for dynamic rendering
+const ICON_MAP = {
+  plane: Plane,
+  file: FileText,
+  ticket: Ticket,
+  global: Globe,
+  exchange: ArrowRightLeft,
+  calendar: Calendar,
+  shield: Shield,
+  star: Star,
+  user: User,
+  home: Home,
+  settings: Settings,
+  check: CheckCircle,
+  clock: Clock,
+}
+
+const ICON_OPTIONS = [
+  { value: "plane", label: "Plane" },
+  { value: "file", label: "File" },
+  { value: "ticket", label: "Ticket" },
+  { value: "global", label: "Global" },
+  { value: "exchange", label: "Exchange" },
+  { value: "calendar", label: "Calendar" },
+  { value: "shield", label: "Shield" },
+  { value: "star", label: "Star" },
+  { value: "user", label: "User" },
+  { value: "home", label: "Home" },
+  { value: "settings", label: "Settings" },
+  { value: "check", label: "Check" },
+  { value: "clock", label: "Clock" },
+]
+
 export function ServicePlansManagement() {
   const [servicePlans, setServicePlans] = useState([
     {
       id: 1,
       name: "DUMMY TICKET FOR VISA",
       price: 19,
+      description: "Perfect for visa applications requiring proof of onward travel.",
+      image: "https://placehold.co/100?text=Ticket",
+      icon: "ticket",
       features: [
         "Flight reservation/ itinerary",
         "Verifiable on airline website",
@@ -56,6 +118,9 @@ export function ServicePlansManagement() {
       id: 2,
       name: "DUMMY TICKET & HOTEL",
       price: 35,
+      description: "Complete package including flight and hotel checks.",
+      image: "https://placehold.co/100?text=Hotel",
+      icon: "calendar",
       features: [
         "Actual reservation from airline/hotel",
         "Verifiable on airline/hotel website",
@@ -72,6 +137,9 @@ export function ServicePlansManagement() {
       id: 3,
       name: "DUMMY RETURN TICKET",
       price: 15,
+      description: "Simple return ticket for immigration purposes.",
+      image: "https://placehold.co/100?text=Return",
+      icon: "exchange",
       features: [
         "Return ticket for showing in immigration",
         "Verifiable flight reservation with PNR",
@@ -92,6 +160,9 @@ export function ServicePlansManagement() {
   const [formData, setFormData] = useState({
     name: "",
     price: "",
+    description: "",
+    image: "",
+    icon: "",
     features: "",
     active: true,
     featured: false,
@@ -103,6 +174,9 @@ export function ServicePlansManagement() {
     const emptyForm = {
       name: "",
       price: "",
+      description: "",
+      image: "",
+      icon: "",
       features: "",
       active: true,
       featured: false,
@@ -118,6 +192,9 @@ export function ServicePlansManagement() {
     const editForm = {
       name: plan.name,
       price: plan.price.toString(),
+      description: plan.description || "",
+      image: plan.image || "",
+      icon: plan.icon || "",
       features: plan.features.join("\n"),
       active: plan.active,
       featured: plan.featured,
@@ -142,6 +219,14 @@ export function ServicePlansManagement() {
     }
   }
 
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      const imageUrl = URL.createObjectURL(file)
+      setFormData({ ...formData, image: imageUrl })
+    }
+  }
+
   const handleSave = () => {
     if (!formData.name || !formData.price) {
       alert("Please fill in all required fields")
@@ -159,6 +244,9 @@ export function ServicePlansManagement() {
               ...plan,
               name: formData.name,
               price: Number.parseFloat(formData.price),
+              description: formData.description,
+              image: formData.image,
+              icon: formData.icon,
               features: featuresArray,
               active: formData.active,
               featured: formData.featured,
@@ -173,6 +261,9 @@ export function ServicePlansManagement() {
         id: Math.max(...servicePlans.map((p) => p.id)) + 1,
         name: formData.name,
         price: Number.parseFloat(formData.price),
+        description: formData.description,
+        image: formData.image,
+        icon: formData.icon,
         features: featuresArray,
         active: formData.active,
         featured: formData.featured,
@@ -191,6 +282,9 @@ export function ServicePlansManagement() {
     return (
       formData.name !== initialFormData.name ||
       formData.price !== initialFormData.price ||
+      formData.description !== initialFormData.description ||
+      formData.image !== initialFormData.image ||
+      formData.icon !== initialFormData.icon ||
       formData.features !== initialFormData.features ||
       formData.active !== initialFormData.active ||
       formData.featured !== initialFormData.featured ||
@@ -211,6 +305,11 @@ export function ServicePlansManagement() {
   const filteredPlans = servicePlans.filter((plan) =>
     plan.name.toLowerCase().includes(searchQuery.toLowerCase()),
   )
+
+  const renderIcon = (iconKey) => {
+    const IconComponent = ICON_MAP[iconKey] || Plane
+    return <IconComponent className="w-5 h-5 text-gray-500" />
+  }
 
   return (
     <div className="space-y-6">
@@ -250,9 +349,13 @@ export function ServicePlansManagement() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[60px]">S.No</TableHead>
                 <TableHead>Plan Name</TableHead>
+                <TableHead>Description</TableHead>
                 <TableHead>Price</TableHead>
                 <TableHead>Features</TableHead>
+                <TableHead className="w-[80px]">Image</TableHead>
+                <TableHead className="w-[60px]">Icon</TableHead>
                 <TableHead>Total Sales</TableHead>
                 <TableHead>Featured</TableHead>
                 <TableHead>Label</TableHead>
@@ -264,16 +367,27 @@ export function ServicePlansManagement() {
               {filteredPlans.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={8}
+                    colSpan={12}
                     className="text-center py-8 text-gray-500"
                   >
                     No plans found
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredPlans.map((plan) => (
+                filteredPlans.map((plan, index) => (
                   <TableRow key={plan.id}>
+                    <TableCell className="font-medium text-gray-500">
+                      {String(index + 1).padStart(2, "0")}
+                    </TableCell>
                     <TableCell className="font-medium">{plan.name}</TableCell>
+                    <TableCell className="max-w-[200px]">
+                      <p
+                        className="truncate text-sm text-gray-500"
+                        title={plan.description}
+                      >
+                        {plan.description}
+                      </p>
+                    </TableCell>
                     <TableCell>${plan.price}</TableCell>
                     <TableCell>
                       <div className="flex flex-col gap-1 max-w-[300px]">
@@ -285,6 +399,22 @@ export function ServicePlansManagement() {
                             +{plan.features.length - 1} more features
                           </span>
                         )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {plan.image && (
+                        <div className="w-10 h-10 rounded-md overflow-hidden border">
+                          <img
+                            src={plan.image}
+                            alt={plan.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex justify-center">
+                        {renderIcon(plan.icon)}
                       </div>
                     </TableCell>
                     <TableCell>{plan.totalSales}</TableCell>
@@ -400,6 +530,66 @@ export function ServicePlansManagement() {
                 }
                 placeholder="19"
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
+                placeholder="Brief description of the plan..."
+                rows={3}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="image">Featured Image</Label>
+                <div className="flex items-center gap-4">
+                  {formData.image && (
+                    <img
+                      src={formData.image}
+                      alt="Preview"
+                      className="w-12 h-12 rounded-md object-cover border"
+                    />
+                  )}
+                  <div className="flex-1">
+                    <Input
+                      id="image"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="cursor-pointer"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="icon">Plan Icon</Label>
+                <Select
+                  value={formData.icon}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, icon: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select an icon" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ICON_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        <div className="flex items-center gap-2">
+                          {renderIcon(option.value)}
+                          <span>{option.label}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
