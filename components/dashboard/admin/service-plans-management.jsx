@@ -48,6 +48,8 @@ export function ServicePlansManagement() {
         "Use for visa application/ proof of return",
       ],
       active: true,
+      featured: true,
+      popularLabel: "Best Value",
       totalSales: 1234,
     },
     {
@@ -62,6 +64,8 @@ export function ServicePlansManagement() {
         "Use for visa application/ proof of return",
       ],
       active: true,
+      featured: false,
+      popularLabel: "Most Popular",
       totalSales: 856,
     },
     {
@@ -74,6 +78,8 @@ export function ServicePlansManagement() {
         "Can be used to show as proof of return or onward travel in most countries",
       ],
       active: true,
+      featured: false,
+      popularLabel: "",
       totalSales: 567,
     },
   ])
@@ -88,6 +94,8 @@ export function ServicePlansManagement() {
     price: "",
     features: "",
     active: true,
+    featured: false,
+    popularLabel: "",
   })
   const [initialFormData, setInitialFormData] = useState(null)
 
@@ -97,6 +105,8 @@ export function ServicePlansManagement() {
       price: "",
       features: "",
       active: true,
+      featured: false,
+      popularLabel: "",
     }
     setEditingPlan(null)
     setFormData(emptyForm)
@@ -110,6 +120,8 @@ export function ServicePlansManagement() {
       price: plan.price.toString(),
       features: plan.features.join("\n"),
       active: plan.active,
+      featured: plan.featured,
+      popularLabel: plan.popularLabel || "",
     }
     setEditingPlan(plan)
     setFormData(editForm)
@@ -149,6 +161,8 @@ export function ServicePlansManagement() {
               price: Number.parseFloat(formData.price),
               features: featuresArray,
               active: formData.active,
+              featured: formData.featured,
+              popularLabel: formData.popularLabel,
             }
             : plan,
         ),
@@ -161,6 +175,8 @@ export function ServicePlansManagement() {
         price: Number.parseFloat(formData.price),
         features: featuresArray,
         active: formData.active,
+        featured: formData.featured,
+        popularLabel: formData.popularLabel,
         totalSales: 0,
       }
       setServicePlans([...servicePlans, newPlan])
@@ -176,11 +192,21 @@ export function ServicePlansManagement() {
       formData.name !== initialFormData.name ||
       formData.price !== initialFormData.price ||
       formData.features !== initialFormData.features ||
-      formData.active !== initialFormData.active
+      formData.active !== initialFormData.active ||
+      formData.featured !== initialFormData.featured ||
+      formData.popularLabel !== initialFormData.popularLabel
     )
   }
 
   const isSaveDisabled = !isFormChanged() || !formData.name || !formData.price
+
+  const toggleFeatured = (id) => {
+    setServicePlans(
+      servicePlans.map((plan) =>
+        plan.id === id ? { ...plan, featured: !plan.featured } : plan,
+      ),
+    )
+  }
 
   const filteredPlans = servicePlans.filter((plan) =>
     plan.name.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -228,6 +254,8 @@ export function ServicePlansManagement() {
                 <TableHead>Price</TableHead>
                 <TableHead>Features</TableHead>
                 <TableHead>Total Sales</TableHead>
+                <TableHead>Featured</TableHead>
+                <TableHead>Label</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -236,7 +264,7 @@ export function ServicePlansManagement() {
               {filteredPlans.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={6}
+                    colSpan={8}
                     className="text-center py-8 text-gray-500"
                   >
                     No plans found
@@ -260,6 +288,24 @@ export function ServicePlansManagement() {
                       </div>
                     </TableCell>
                     <TableCell>{plan.totalSales}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center">
+                        <Switch
+                          checked={plan.featured}
+                          onCheckedChange={() => toggleFeatured(plan.id)}
+                        />
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {plan.popularLabel && (
+                        <Badge
+                          variant="secondary"
+                          className="bg-indigo-100 text-indigo-700 hover:bg-indigo-100"
+                        >
+                          {plan.popularLabel}
+                        </Badge>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <Badge
                         variant={plan.active ? "default" : "outline"}
@@ -355,6 +401,33 @@ export function ServicePlansManagement() {
                 placeholder="19"
               />
             </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="popularLabel">Popular Label (Badge)</Label>
+                <Input
+                  id="popularLabel"
+                  value={formData.popularLabel}
+                  onChange={(e) =>
+                    setFormData({ ...formData, popularLabel: e.target.value })
+                  }
+                  placeholder="e.g., Best Value"
+                />
+              </div>
+              <div className="space-y-2 flex flex-col justify-end pb-2">
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="featured"
+                    checked={formData.featured}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, featured: checked })
+                    }
+                  />
+                  <Label htmlFor="featured">Featured Plan</Label>
+                </div>
+              </div>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="features">Features (one per line)</Label>
               <Textarea
