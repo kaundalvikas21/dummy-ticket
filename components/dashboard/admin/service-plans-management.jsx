@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   Plus,
   Edit,
@@ -19,7 +19,7 @@ import {
   Settings,
   CheckCircle,
   Clock,
-  Upload,
+  Loader2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -60,6 +60,8 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Card, CardContent } from "@/components/ui/card"
+import { createClient } from "@/lib/supabase/client"
+import { toast } from "@/hooks/use-toast"
 
 // Icon mapping for dynamic rendering
 const ICON_MAP = {
@@ -95,63 +97,8 @@ const ICON_OPTIONS = [
 ]
 
 export function ServicePlansManagement() {
-  const [servicePlans, setServicePlans] = useState([
-    {
-      id: 1,
-      name: "DUMMY TICKET FOR VISA",
-      price: 19,
-      description: "Perfect for visa applications requiring proof of onward travel.",
-      image: "https://placehold.co/100?text=Ticket",
-      icon: "ticket",
-      features: [
-        "Flight reservation/ itinerary",
-        "Verifiable on airline website",
-        "Up to 4 changes allowed",
-        "Use for visa application/ proof of return",
-      ],
-      active: true,
-      featured: true,
-      popularLabel: "Best Value",
-      totalSales: 1234,
-    },
-    {
-      id: 2,
-      name: "DUMMY TICKET & HOTEL",
-      price: 35,
-      description: "Complete package including flight and hotel checks.",
-      image: "https://placehold.co/100?text=Hotel",
-      icon: "calendar",
-      features: [
-        "Actual reservation from airline/hotel",
-        "Verifiable on airline/hotel website",
-        "Accommodation up to one month",
-        "Up to 4 changes allowed",
-        "Use for visa application/ proof of return",
-      ],
-      active: true,
-      featured: false,
-      popularLabel: "Most Popular",
-      totalSales: 856,
-    },
-    {
-      id: 3,
-      name: "DUMMY RETURN TICKET",
-      price: 15,
-      description: "Simple return ticket for immigration purposes.",
-      image: "https://placehold.co/100?text=Return",
-      icon: "exchange",
-      features: [
-        "Return ticket for showing in immigration",
-        "Verifiable flight reservation with PNR",
-        "Can be used to show as proof of return or onward travel in most countries",
-      ],
-      active: true,
-      featured: false,
-      popularLabel: "",
-      totalSales: 567,
-    },
-  ])
-
+  const [servicePlans, setServicePlans] = useState([])
+  const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false)
@@ -169,6 +116,33 @@ export function ServicePlansManagement() {
     popularLabel: "",
   })
   const [initialFormData, setInitialFormData] = useState(null)
+  const [isUploading, setIsUploading] = useState(false)
+
+  const supabase = createClient()
+
+  useEffect(() => {
+    fetchServicePlans()
+  }, [])
+
+  const fetchServicePlans = async () => {
+    setLoading(true)
+    const { data, error } = await supabase
+      .from("service_plans")
+      .select("*")
+      .order("id", { ascending: true })
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch service plans.",
+        variant: "destructive",
+      })
+      console.error("Error fetching plans:", error)
+    } else {
+      setServicePlans(data || [])
+    }
+    setLoading(false)
+  }
 
   const handleAddNew = () => {
     const emptyForm = {
@@ -176,7 +150,7 @@ export function ServicePlansManagement() {
       price: "",
       description: "",
       image: "",
-      icon: "",
+      icon: "plane",
       features: "",
       active: true,
       featured: false,
@@ -194,11 +168,11 @@ export function ServicePlansManagement() {
       price: plan.price.toString(),
       description: plan.description || "",
       image: plan.image || "",
-      icon: plan.icon || "",
-      features: plan.features.join("\n"),
+      icon: plan.icon || "plane",
+      features: (plan.features || []).join("\n"),
       active: plan.active,
       featured: plan.featured,
-      popularLabel: plan.popularLabel || "",
+      popularLabel: plan.popular_label || "",
     }
     setEditingPlan(plan)
     setFormData(editForm)
@@ -211,69 +185,117 @@ export function ServicePlansManagement() {
     setIsDeleteAlertOpen(true)
   }
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (planToDelete !== null) {
-      setServicePlans(servicePlans.filter((plan) => plan.id !== planToDelete))
+      const { error } = await supabase
+        .from("service_plans")
+        .delete()
+        .eq("id", planToDelete)
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to delete service plan.",
+          variant: "destructive",
+        })
+      } else {
+        toast({
+          title: "Success",
+          description: "Service plan deleted successfully.",
+        })
+        fetchServicePlans()
+      }
       setIsDeleteAlertOpen(false)
       setPlanToDelete(null)
     }
   }
 
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0]
-    if (file) {
-      const imageUrl = URL.createObjectURL(file)
-      setFormData({ ...formData, image: imageUrl })
+    if (!file) return
+
+    setIsUploading(true)
+    const fileExt = file.name.split(".").pop()
+    const fileName = `${Math.random()}.${fileExt}`
+    const filePath = `service_plans/feature_images/${fileName}`
+
+    const { error: uploadError } = await supabase.storage
+      .from("assets")
+      .upload(filePath, file)
+
+    if (uploadError) {
+      toast({
+        title: "Error",
+        description: "Failed to upload image.",
+        variant: "destructive",
+      })
+      console.error("Upload error:", uploadError)
+      setIsUploading(false)
+      return
     }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from("assets")
+      .getPublicUrl(filePath)
+
+    setFormData({ ...formData, image: publicUrl })
+    setIsUploading(false)
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formData.name || !formData.price) {
-      alert("Please fill in all required fields")
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      })
       return
     }
 
     const featuresArray = formData.features.split("\n").filter((f) => f.trim())
-
-    if (editingPlan) {
-      // Update existing plan
-      setServicePlans(
-        servicePlans.map((plan) =>
-          plan.id === editingPlan.id
-            ? {
-              ...plan,
-              name: formData.name,
-              price: Number.parseFloat(formData.price),
-              description: formData.description,
-              image: formData.image,
-              icon: formData.icon,
-              features: featuresArray,
-              active: formData.active,
-              featured: formData.featured,
-              popularLabel: formData.popularLabel,
-            }
-            : plan,
-        ),
-      )
-    } else {
-      // Add new plan
-      const newPlan = {
-        id: Math.max(...servicePlans.map((p) => p.id)) + 1,
-        name: formData.name,
-        price: Number.parseFloat(formData.price),
-        description: formData.description,
-        image: formData.image,
-        icon: formData.icon,
-        features: featuresArray,
-        active: formData.active,
-        featured: formData.featured,
-        popularLabel: formData.popularLabel,
-        totalSales: 0,
-      }
-      setServicePlans([...servicePlans, newPlan])
+    const planData = {
+      name: formData.name,
+      price: Number.parseFloat(formData.price),
+      description: formData.description,
+      image: formData.image,
+      icon: formData.icon,
+      features: featuresArray,
+      active: formData.active,
+      featured: formData.featured,
+      popular_label: formData.popularLabel,
     }
 
-    setIsDialogOpen(false)
+    let error
+
+    if (editingPlan) {
+      const { error: updateError } = await supabase
+        .from("service_plans")
+        .update(planData)
+        .eq("id", editingPlan.id)
+      error = updateError
+    } else {
+      const { error: insertError } = await supabase
+        .from("service_plans")
+        .insert([planData])
+      error = insertError
+    }
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save service plan.",
+        variant: "destructive",
+      })
+      console.error("Save error:", error)
+    } else {
+      toast({
+        title: "Success",
+        description: `Service plan ${editingPlan ? "updated" : "created"
+          } successfully.`,
+      })
+      fetchServicePlans()
+      setIsDialogOpen(false)
+    }
   }
 
   // 🔍 Detect if form changed compared to initialFormData
@@ -292,14 +314,31 @@ export function ServicePlansManagement() {
     )
   }
 
-  const isSaveDisabled = !isFormChanged() || !formData.name || !formData.price
+  const isSaveDisabled =
+    !isFormChanged() || !formData.name || !formData.price || isUploading
 
-  const toggleFeatured = (id) => {
+  const toggleFeatured = async (plan) => {
+    // Optimistic update
     setServicePlans(
-      servicePlans.map((plan) =>
-        plan.id === id ? { ...plan, featured: !plan.featured } : plan,
+      servicePlans.map((p) =>
+        p.id === plan.id ? { ...p, featured: !p.featured } : p,
       ),
     )
+
+    const { error } = await supabase
+      .from("service_plans")
+      .update({ featured: !plan.featured })
+      .eq("id", plan.id)
+
+    if (error) {
+      // Revert on error
+      fetchServicePlans()
+      toast({
+        title: "Error",
+        description: "Failed to update featured status.",
+        variant: "destructive",
+      })
+    }
   }
 
   const filteredPlans = servicePlans.filter((plan) =>
@@ -309,6 +348,14 @@ export function ServicePlansManagement() {
   const renderIcon = (iconKey) => {
     const IconComponent = ICON_MAP[iconKey] || Plane
     return <IconComponent className="w-5 h-5 text-gray-500" />
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
   }
 
   return (
@@ -392,11 +439,11 @@ export function ServicePlansManagement() {
                     <TableCell>
                       <div className="flex flex-col gap-1 max-w-[300px]">
                         <span className="text-sm truncate">
-                          {plan.features[0]}
+                          {(plan.features || [])[0]}
                         </span>
-                        {plan.features.length > 1 && (
+                        {(plan.features || []).length > 1 && (
                           <span className="text-xs text-muted-foreground">
-                            +{plan.features.length - 1} more features
+                            +{(plan.features || []).length - 1} more features
                           </span>
                         )}
                       </div>
@@ -405,7 +452,7 @@ export function ServicePlansManagement() {
                       {plan.image && (
                         <div className="w-10 h-10 rounded-md overflow-hidden border">
                           <img
-                            src={plan.image}
+                            src={plan.image || "/placeholder.svg"}
                             alt={plan.name}
                             className="w-full h-full object-cover"
                           />
@@ -417,22 +464,22 @@ export function ServicePlansManagement() {
                         {renderIcon(plan.icon)}
                       </div>
                     </TableCell>
-                    <TableCell>{plan.totalSales}</TableCell>
+                    <TableCell>{plan.total_sales || 0}</TableCell>
                     <TableCell>
                       <div className="flex items-center">
                         <Switch
                           checked={plan.featured}
-                          onCheckedChange={() => toggleFeatured(plan.id)}
+                          onCheckedChange={() => toggleFeatured(plan)}
                         />
                       </div>
                     </TableCell>
                     <TableCell>
-                      {plan.popularLabel && (
+                      {plan.popular_label && (
                         <Badge
                           variant="secondary"
                           className="bg-indigo-100 text-indigo-700 hover:bg-indigo-100"
                         >
-                          {plan.popularLabel}
+                          {plan.popular_label}
                         </Badge>
                       )}
                     </TableCell>
@@ -557,13 +604,17 @@ export function ServicePlansManagement() {
                     />
                   )}
                   <div className="flex-1">
-                    <Input
-                      id="image"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="cursor-pointer"
-                    />
+                    <div className="flex gap-2 items-center">
+                      <Input
+                        id="image"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="cursor-pointer"
+                        disabled={isUploading}
+                      />
+                      {isUploading && <Loader2 className="h-4 w-4 animate-spin" />}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -626,7 +677,7 @@ export function ServicePlansManagement() {
                 onChange={(e) =>
                   setFormData({ ...formData, features: e.target.value })
                 }
-                placeholder="Flight reservation/ itinerary&#10;Verifiable on airline website&#10;Up to 4 changes allowed"
+                placeholder="Flight reservation/ itinerary\nVerifiable on airline website\nUp to 4 changes allowed"
                 rows={6}
               />
             </div>
@@ -657,7 +708,16 @@ export function ServicePlansManagement() {
                 }`}
               onClick={handleSave}
             >
-              {editingPlan ? "Update Plan" : "Add Plan"}
+              {isUploading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Uploading...
+                </>
+              ) : editingPlan ? (
+                "Update Plan"
+              ) : (
+                "Add Plan"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
