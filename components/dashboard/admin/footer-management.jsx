@@ -21,6 +21,7 @@ import {
   Image as ImageIcon,
   Eye,
   EyeOff,
+  Info,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -1187,6 +1188,23 @@ export function FooterManagement() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Logo Display Information */}
+                <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <div className="flex items-start gap-2">
+                    <div className="w-5 h-5 text-blue-500 mt-0.5">
+                      <Info className="w-full h-full" />
+                    </div>
+                    <div className="text-sm">
+                      <p className="text-blue-800 dark:text-blue-200 font-medium mb-1">
+                        Logo Display Information
+                      </p>
+                      <p className="text-blue-700 dark:text-blue-300 text-xs leading-relaxed">
+                        The logo uploaded here will appear in both the <span className="font-semibold">header</span> and <span className="font-semibold">footer</span> of your website.
+                        Recommended size: 200x60px. Supports PNG, JPG, SVG, and WebP formats (max 5MB).
+                      </p>
+                    </div>
+                  </div>
+                </div>
                 <div>
                   <Label>Company Name *</Label>
                   <Input

@@ -7,7 +7,9 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { AvatarSkeleton } from "@/components/ui/avatar-skeleton"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Menu, X, Plane, User, ChevronDown, LogOut, Loader2 } from "lucide-react"
+import { Logo } from "@/components/ui/logo"
+import { useLogo } from "@/hooks/useLogo"
+import { Menu, X, User, ChevronDown, LogOut, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { LocaleSelector } from "@/components/ui/locale-selector"
@@ -33,6 +35,7 @@ export function Header() {
   const { user, logout, isAuthenticated, isAdmin, isVendor, isUser } = useAuth()
   const { profile: syncedProfile, loading: profileLoading } = useProfileSync()
   const { toast } = useToast()
+  const { logo: logoData, loading: logoLoading } = useLogo()
 
   // Check if we are on the password reset page or in password reset flow
   const isPasswordResetPage = pathname === "/update-password" || pathname?.startsWith("/update-password")
@@ -129,13 +132,12 @@ export function Header() {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Link href="/" className="flex items-center gap-2 text-2xl font-bold transition-colors text-[#0066FF]">
-              <div className="bg-gradient-to-br from-[#0066FF] to-[#00D4AA] p-2 rounded-xl">
-                <Plane className="w-6 h-6 text-white" />
-              </div>
-              <span className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] bg-clip-text text-transparent">
-                VisaFly
-              </span>
+            <Link href="/" className="flex items-center transition-colors">
+              <Logo
+                size="md"
+                logo={logoData}
+                loading={logoLoading}
+              />
             </Link>
           </motion.div>
 

@@ -1,15 +1,18 @@
 "use client"
 
-import { Plane, Mail, Phone, MapPin } from "lucide-react"
+import { Mail, Phone, MapPin } from "lucide-react"
 import Link from "next/link"
 import { useState, useEffect } from "react"
 import { FooterSkeleton } from "@/components/ui/footer-skeleton"
+import { Logo } from "@/components/ui/logo"
+import { useLogo } from "@/hooks/useLogo"
 
 export function Footer() {
   const [footerData, setFooterData] = useState({})
   const [loading, setLoading] = useState(true)
+  const { logo: logoData, loading: logoLoading } = useLogo()
 
-  // Fetch footer data
+  // Fetch footer data (excluding logo which is handled by useLogo hook)
   useEffect(() => {
     const fetchFooterData = async () => {
       try {
@@ -29,7 +32,7 @@ export function Footer() {
   }, [])
 
   // Show skeleton while loading
-  if (loading) {
+  if (loading || logoLoading) {
     return <FooterSkeleton />
   }
 
@@ -96,19 +99,13 @@ export function Footer() {
 
       <div className="relative container mx-auto px-4 py-8 md:py-16">
         <div className="mb-8 md:mb-12">
-          <Link href="/" className="flex w-fit items-center gap-4 text-2xl md:text-3xl font-bold mb-4 md:mb-6">
-  {data.logo?.url ? (
-    <img
-      src={data.logo.url}
-      alt={data.logo.alt_text || "VisaFly Logo"}
-      className="h-10 md:h-14 lg:h-16 w-auto object-contain flex-shrink-0"
-    />
-  ) : (
-    <span className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] bg-clip-text text-transparent">
-      {data.logo?.company_name || "VisaFly"}
-    </span>
-  )}
-</Link>
+          <Link href="/" className="flex w-fit items-center mb-4 md:mb-6">
+            <Logo
+              size="lg"
+              logo={logoData}
+              loading={logoLoading}
+            />
+          </Link>
 
           {data.description && (
             <p className="text-gray-300 mb-6 md:mb-8 leading-relaxed max-w-3xl text-base md:text-lg">
@@ -230,7 +227,7 @@ export function Footer() {
         <div className="border-t border-white/10 pt-6 md:pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 md:gap-6">
             <p className="text-gray-400 text-sm">
-              © 2025 <span className="text-[#00D4AA] font-semibold">{data.logo?.company_name || "VisaFly"}</span>. All rights reserved.
+              © 2025 <span className="text-[#00D4AA] font-semibold">{logoData?.company_name || "VisaFly"}</span>. All rights reserved.
             </p>
             <div className="flex gap-6 md:gap-8">
               <Link href="#" className="text-gray-400 hover:text-[#00D4AA] transition-colors text-sm relative group">
