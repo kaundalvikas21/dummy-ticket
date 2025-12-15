@@ -5,7 +5,7 @@ import { useInView } from "framer-motion"
 import { useRef } from "react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { CheckCircle2, Plane, Hotel, ArrowLeftRight, FileText, Calendar, Globe2 } from "lucide-react"
+import { CheckCircle, ArrowLeftRight, FileText, Calendar, Globe2, Ticket, Shield, Star, User, Home, Settings, Clock, CheckCircle2, Plane, Hotel } from "lucide-react"
 import { useTranslation } from "@/lib/translations"
 
 export default function MainServices({ servicePlans }) {
@@ -19,10 +19,17 @@ export default function MainServices({ servicePlans }) {
       case "plane": return Plane;
       case "hotel": return Hotel;
       case "file": return FileText;
-      case "ticket": return Plane;
+      case "ticket": return Ticket
       case "calendar": return Calendar;
       case "global": return Globe2;
       case "exchange": return ArrowLeftRight;
+      case "shield": return Shield;
+      case "star": return Star;
+      case "user": return User;
+      case "home": return Home;
+      case "settings": return Settings;
+      case "check": return CheckCircle;
+      case "clock": return Clock;
       default: return Plane;
     }
   }
@@ -95,8 +102,8 @@ export default function MainServices({ servicePlans }) {
 
                 <div
                   className={`relative bg-white rounded-2xl overflow-hidden transition-all duration-500 h-full flex flex-col ${service.popular_label
-                      ? "shadow-xl hover:shadow-2xl border-2 border-transparent bg-gradient-to-br from-white via-white to-blue-50/30"
-                      : "shadow-md hover:shadow-xl border border-gray-100 hover:border-gray-200"
+                    ? "shadow-xl hover:shadow-2xl border-2 border-transparent bg-gradient-to-br from-white via-white to-blue-50/30"
+                    : "shadow-md hover:shadow-xl border border-gray-100 hover:border-gray-200"
                     }`}
                 >
                   <div className="relative h-48 md:h-56 overflow-hidden">
@@ -111,8 +118,8 @@ export default function MainServices({ servicePlans }) {
                     <div className="absolute bottom-3 left-3 z-20">
                       <div
                         className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg backdrop-blur-sm ${service.popular_label
-                            ? "bg-gradient-to-br from-[#0066FF] to-[#00D4AA]"
-                            : "bg-white/90 group-hover:bg-white"
+                          ? "bg-gradient-to-br from-[#0066FF] to-[#00D4AA]"
+                          : "bg-white/90 group-hover:bg-white"
                           }`}
                       >
                         {ServiceIcon && (<ServiceIcon
@@ -150,8 +157,8 @@ export default function MainServices({ servicePlans }) {
                         <div className="flex items-baseline gap-1">
                           <span
                             className={`text-3xl font-bold ${service.popular_label
-                                ? "bg-gradient-to-r from-[#0066FF] to-[#00D4AA] bg-clip-text text-transparent"
-                                : "text-gray-900"
+                              ? "bg-gradient-to-r from-[#0066FF] to-[#00D4AA] bg-clip-text text-transparent"
+                              : "text-gray-900"
                               }`}
                           >
                             ${service.price}
@@ -168,8 +175,8 @@ export default function MainServices({ servicePlans }) {
                       >
                         <Button
                           className={`w-full py-5 md:py-6 rounded-xl font-semibold text-sm md:text-base transition-all duration-300 cursor-pointer ${service.popular_label
-                              ? "bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white hover:shadow-lg hover:-translate-y-0.5 border-0"
-                              : "bg-white border-2 border-gray-200 text-gray-900 hover:border-[#0066FF] hover:text-[#0066FF] hover:bg-gray-50"
+                            ? "bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white hover:shadow-lg hover:-translate-y-0.5 border-0"
+                            : "bg-white border-2 border-gray-200 text-gray-900 hover:border-[#0066FF] hover:text-[#0066FF] hover:bg-gray-50"
                             }`}
                         >
                           Book Now

@@ -22,7 +22,7 @@ export function Pricing() {
         .select("*")
         .eq("active", true)
         .eq("featured", true)
-        .order("id", { ascending: true })
+        .order("display_order", { ascending: true })
         .limit(3)
 
       if (error) {

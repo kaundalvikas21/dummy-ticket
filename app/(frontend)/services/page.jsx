@@ -14,7 +14,7 @@ export default async function ServicesPage() {
         .from("service_plans")
         .select("*")
         .eq("active", true)
-        .order("id", { ascending: true })
+        .order("display_order", { ascending: true })
 
     return (
         <>

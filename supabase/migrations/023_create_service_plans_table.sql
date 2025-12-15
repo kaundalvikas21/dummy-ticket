@@ -11,6 +11,7 @@ create table if not exists public.service_plans (
     active boolean default true,
     featured boolean default false,
     popular_label text,
+    display_order integer default 0,
     total_sales integer default 0
 );
 

@@ -20,6 +20,7 @@ import {
   CheckCircle,
   Clock,
   Loader2,
+  Hotel,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -66,6 +67,7 @@ import { toast } from "@/hooks/use-toast"
 // Icon mapping for dynamic rendering
 const ICON_MAP = {
   plane: Plane,
+  hotel: Hotel,
   file: FileText,
   ticket: Ticket,
   global: Globe,
@@ -82,6 +84,7 @@ const ICON_MAP = {
 
 const ICON_OPTIONS = [
   { value: "plane", label: "Plane" },
+  { value: "hotel", label: "Hotel" },
   { value: "file", label: "File" },
   { value: "ticket", label: "Ticket" },
   { value: "global", label: "Global" },
@@ -114,6 +117,7 @@ export function ServicePlansManagement() {
     active: true,
     featured: false,
     popularLabel: "",
+    displayOrder: "0",
   })
   const [initialFormData, setInitialFormData] = useState(null)
   const [isUploading, setIsUploading] = useState(false)
@@ -145,6 +149,13 @@ export function ServicePlansManagement() {
   }
 
   const handleAddNew = () => {
+    // Calculate next order
+    const maxOrder = servicePlans.length > 0
+      ? Math.max(...servicePlans.map(p => p.display_order || 0))
+      : 0
+
+    const nextOrder = maxOrder + 1
+
     const emptyForm = {
       name: "",
       price: "",
@@ -155,6 +166,7 @@ export function ServicePlansManagement() {
       active: true,
       featured: false,
       popularLabel: "",
+      displayOrder: nextOrder.toString(),
     }
     setEditingPlan(null)
     setFormData(emptyForm)
@@ -173,6 +185,7 @@ export function ServicePlansManagement() {
       active: plan.active,
       featured: plan.featured,
       popularLabel: plan.popular_label || "",
+      displayOrder: plan.display_order || "0",
     }
     setEditingPlan(plan)
     setFormData(editForm)
@@ -263,6 +276,7 @@ export function ServicePlansManagement() {
       active: formData.active,
       featured: formData.featured,
       popular_label: formData.popularLabel,
+      display_order: Number(formData.displayOrder) || 0,
     }
 
     let error
@@ -310,7 +324,8 @@ export function ServicePlansManagement() {
       formData.features !== initialFormData.features ||
       formData.active !== initialFormData.active ||
       formData.featured !== initialFormData.featured ||
-      formData.popularLabel !== initialFormData.popularLabel
+      formData.popularLabel !== initialFormData.popularLabel ||
+      formData.displayOrder !== initialFormData.displayOrder
     )
   }
 
@@ -337,6 +352,11 @@ export function ServicePlansManagement() {
         title: "Error",
         description: "Failed to update featured status.",
         variant: "destructive",
+      })
+    } else {
+      toast({
+        title: "Success",
+        description: `Plan ${!plan.featured ? "marked as featured" : "removed from featured"}.`,
       })
     }
   }
@@ -407,6 +427,7 @@ export function ServicePlansManagement() {
                 <TableHead>Featured</TableHead>
                 <TableHead>Label</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Order</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -414,7 +435,7 @@ export function ServicePlansManagement() {
               {filteredPlans.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={12}
+                    colSpan={13}
                     className="text-center py-8 text-gray-500"
                   >
                     No plans found
@@ -491,6 +512,11 @@ export function ServicePlansManagement() {
                         }
                       >
                         {plan.active ? "Active" : "Inactive"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="font-mono">
+                        {plan.display_order || 0}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
@@ -640,6 +666,21 @@ export function ServicePlansManagement() {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="displayOrder">Display Order</Label>
+                <Input
+                  id="displayOrder"
+                  type="number"
+                  value={formData.displayOrder}
+                  onChange={(e) =>
+                    setFormData({ ...formData, displayOrder: e.target.value })
+                  }
+                  placeholder="0"
+                />
               </div>
             </div>
 
