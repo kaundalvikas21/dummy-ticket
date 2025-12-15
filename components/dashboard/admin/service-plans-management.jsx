@@ -21,6 +21,7 @@ import {
   Clock,
   Loader2,
   Hotel,
+  RefreshCw,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -103,6 +104,7 @@ const ICON_OPTIONS = [
 export function ServicePlansManagement() {
   const [servicePlans, setServicePlans] = useState([])
   const [loading, setLoading] = useState(true)
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false)
@@ -132,12 +134,12 @@ export function ServicePlansManagement() {
     fetchServicePlans()
   }, [])
 
-  const fetchServicePlans = async () => {
-    setLoading(true)
+  const fetchServicePlans = async (showLoader = true) => {
+    if (showLoader) setLoading(true)
     const { data, error } = await supabase
       .from("service_plans")
       .select("*")
-      .order("id", { ascending: true })
+      .order("display_order", { ascending: true })
 
     if (error) {
       toast({
@@ -150,6 +152,16 @@ export function ServicePlansManagement() {
       setServicePlans(data || [])
     }
     setLoading(false)
+  }
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true)
+    // Clean, readable parallel execution for minimum spin time
+    await Promise.all([
+      fetchServicePlans(false),
+      new Promise(resolve => setTimeout(resolve, 800))
+    ])
+    setIsRefreshing(false)
   }
 
   const resetForm = () => {
@@ -226,6 +238,25 @@ export function ServicePlansManagement() {
 
   const confirmDelete = async () => {
     if (planToDelete !== null) {
+      // Find the plan to get the image path
+      const plan = servicePlans.find(p => p.id === planToDelete)
+
+      // Delete image from storage if it exists
+      if (plan && plan.image) {
+        try {
+          // Extract path from URL (assuming standard Supabase URL structure)
+          // URL: .../assets/service_plans/feature_images/filename
+          const pathIndex = plan.image.indexOf("service_plans")
+          if (pathIndex !== -1) {
+            const imagePath = plan.image.substring(pathIndex)
+            await supabase.storage.from("assets").remove([imagePath])
+          }
+        } catch (err) {
+          console.error("Error deleting image:", err)
+          // Continue with db deletion even if image delete fails
+        }
+      }
+
       const { error } = await supabase
         .from("service_plans")
         .delete()
@@ -510,230 +541,242 @@ export function ServicePlansManagement() {
         <h1 className="text-2xl font-bold bg-gradient-to-r from-[#0066FF] to-[#00D4AA] bg-clip-text text-transparent">
           Service Plans Management
         </h1>
-        <Dialog open={isDialogOpen} onOpenChange={(open) => {
-          if (!open) handleCloseDialog()
-          else setIsDialogOpen(true)
-        }}>
+        <div className="flex gap-2">
           <Button
-            className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white cursor-pointer"
-            onClick={handleAddNew}
+            variant="outline"
+            onClick={handleRefresh}
+            title="Refresh"
+            className="cursor-pointer gap-2"
           >
-            <Plus className="w-4 h-4 mr-2" />
-            Add New Plan
+            <RefreshCw className={`h-4 w-4 ${loading || isRefreshing ? 'animate-spin' : ''}`} />
+            Refresh
           </Button>
-          <DialogContent className="max-w-[90vw] md:max-w-2xl max-h-[90vh] overflow-y-auto mx-auto rounded-lg">
-            <DialogHeader>
-              <DialogTitle>
-                {editingPlan ? "Edit Service Plan" : "Add New Service Plan"}
-              </DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Plan Name *</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  placeholder="e.g., DUMMY TICKET FOR VISA"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="price">Price (USD) *</Label>
-                <Input
-                  id="price"
-                  type="number"
-                  value={formData.price}
-                  onChange={(e) =>
-                    setFormData({ ...formData, price: e.target.value })
-                  }
-                  placeholder="19"
-                />
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
-                  placeholder="Brief description of the plan..."
-                  rows={3}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Dialog open={isDialogOpen} onOpenChange={(open) => {
+            if (!open) handleCloseDialog()
+            else setIsDialogOpen(true)
+          }}>
+            <Button
+              className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white cursor-pointer"
+              onClick={handleAddNew}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add New Plan
+            </Button>
+            <DialogContent className="max-w-[90vw] md:max-w-2xl max-h-[90vh] overflow-y-auto mx-auto rounded-lg">
+              <DialogHeader>
+                <DialogTitle>
+                  {editingPlan ? "Edit Service Plan" : "Add New Service Plan"}
+                </DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <Label htmlFor="image">Featured Image</Label>
-                  <div className="flex flex-col gap-4">
-                    {formData.image && (
-                      <img
-                        src={formData.image}
-                        alt="Preview"
-                        className="w-12 h-12 rounded-md object-cover border"
-                      />
-                    )}
-                    <div className="flex-1">
-                      <div className="flex flex-col gap-2">
-                        <div className="flex items-center gap-2">
-                          <Input
-                            id="image"
-                            type="file"
-                            accept="image/*.jpg,.jpeg,.png,.webp"
-                            onChange={handleImageUpload}
-                            className="hidden"
-                            disabled={isUploading}
-                            ref={fileInputRef}
-                          />
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => fileInputRef.current?.click()}
-                            disabled={isUploading}
-                          >
-                            {isUploading ? "Uploading..." : "Choose File"}
-                          </Button>
-                          <span className="text-xs text-muted-foreground">
-                            Formats: PNG, JPG (Max 2MB)
-                          </span>
+                  <Label htmlFor="name">Plan Name *</Label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    placeholder="e.g., DUMMY TICKET FOR VISA"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="price">Price (USD) *</Label>
+                  <Input
+                    id="price"
+                    type="number"
+                    value={formData.price}
+                    onChange={(e) =>
+                      setFormData({ ...formData, price: e.target.value })
+                    }
+                    placeholder="19"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    value={formData.description}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
+                    placeholder="Brief description of the plan..."
+                    rows={3}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="image">Featured Image</Label>
+                    <div className="flex flex-col gap-4">
+                      {formData.image && (
+                        <img
+                          src={formData.image}
+                          alt="Preview"
+                          className="w-12 h-12 rounded-md object-cover border"
+                        />
+                      )}
+                      <div className="flex-1">
+                        <div className="flex flex-col gap-2">
+                          <div className="flex items-center gap-2">
+                            <Input
+                              id="image"
+                              type="file"
+                              accept="image/*.jpg,.jpeg,.png,.webp"
+                              onChange={handleImageUpload}
+                              className="hidden"
+                              disabled={isUploading}
+                              ref={fileInputRef}
+                            />
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => fileInputRef.current?.click()}
+                              disabled={isUploading}
+                            >
+                              {isUploading ? "Uploading..." : "Choose File"}
+                            </Button>
+                            <span className="text-xs text-muted-foreground">
+                              Formats: PNG, JPG (Max 2MB)
+                            </span>
+                          </div>
+                          {isUploading && <Loader2 className="h-4 w-4 animate-spin" />}
                         </div>
-                        {isUploading && <Loader2 className="h-4 w-4 animate-spin" />}
                       </div>
                     </div>
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="icon">Plan Icon</Label>
-                  <Select
-                    value={formData.icon}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, icon: value })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select an icon" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {ICON_OPTIONS.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          <div className="flex items-center gap-2">
-                            {renderIcon(option.value)}
-                            <span>{option.label}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="displayOrder">Display Order</Label>
-                  <Input
-                    id="displayOrder"
-                    type="number"
-                    value={formData.displayOrder}
-                    onChange={(e) =>
-                      setFormData({ ...formData, displayOrder: e.target.value })
-                    }
-                    placeholder="0"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="popularLabel">Popular Label (Badge)</Label>
-                  <Input
-                    id="popularLabel"
-                    value={formData.popularLabel}
-                    onChange={(e) =>
-                      setFormData({ ...formData, popularLabel: e.target.value })
-                    }
-                    placeholder="e.g., Best Value"
-                  />
-                </div>
-
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="features">Features (one per line)</Label>
-                <Textarea
-                  id="features"
-                  value={formData.features}
-                  onChange={(e) =>
-                    setFormData({ ...formData, features: e.target.value })
-                  }
-                  placeholder="Flight reservation/ itinerary\nVerifiable on airline website\nUp to 4 changes allowed"
-                  rows={6}
-                />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-4 rounded-lg">
-                <div className="flex items-center justify-between space-x-2">
-                  <div className="flex flex-col gap-1">
-                    <Label htmlFor="active" className="cursor-pointer">Active Status</Label>
-                    <span className="text-xs text-muted-foreground">Visible to users (main services)</span>
+                  <div className="space-y-2">
+                    <Label htmlFor="icon">Plan Icon</Label>
+                    <Select
+                      value={formData.icon}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, icon: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select an icon" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {ICON_OPTIONS.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            <div className="flex items-center gap-2">
+                              {renderIcon(option.value)}
+                              <span>{option.label}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <Switch
-                    id="active"
-                    checked={formData.active}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, active: checked })
-                    }
-                    className="data-[state=checked]:bg-green-500 scale-110 active:scale-95 md:scale-100 md:active:scale-100 transition-all data-[state=unchecked]:bg-slate-200"
-                  />
                 </div>
 
-                <div className="flex items-center justify-between space-x-2">
-                  <div className="flex flex-col gap-1">
-                    <Label htmlFor="featured" className="cursor-pointer">Featured Plan</Label>
-                    <span className="text-xs text-muted-foreground">Highlighted on home</span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="displayOrder">Display Order</Label>
+                    <Input
+                      id="displayOrder"
+                      type="number"
+                      value={formData.displayOrder}
+                      onChange={(e) =>
+                        setFormData({ ...formData, displayOrder: e.target.value })
+                      }
+                      placeholder="0"
+                    />
                   </div>
-                  <Switch
-                    id="featured"
-                    checked={formData.featured}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, featured: checked })
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="popularLabel">Popular Label (Badge)</Label>
+                    <Input
+                      id="popularLabel"
+                      value={formData.popularLabel}
+                      onChange={(e) =>
+                        setFormData({ ...formData, popularLabel: e.target.value })
+                      }
+                      placeholder="e.g., Best Value"
+                    />
+                  </div>
+
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="features">Features (one per line)</Label>
+                  <Textarea
+                    id="features"
+                    value={formData.features}
+                    onChange={(e) =>
+                      setFormData({ ...formData, features: e.target.value })
                     }
-                    className="data-[state=checked]:bg-blue-600 scale-110 active:scale-95 md:scale-100 md:active:scale-100 transition-all data-[state=unchecked]:bg-slate-200"
+                    placeholder="Flight reservation/ itinerary\nVerifiable on airline website\nUp to 4 changes allowed"
+                    rows={6}
                   />
                 </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-4 rounded-lg">
+                  <div className="flex items-center justify-between space-x-2">
+                    <div className="flex flex-col gap-1">
+                      <Label htmlFor="active" className="cursor-pointer">Active Status</Label>
+                      <span className="text-xs text-muted-foreground">Visible to users (main services)</span>
+                    </div>
+                    <Switch
+                      id="active"
+                      checked={formData.active}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, active: checked })
+                      }
+                      className="data-[state=checked]:bg-green-500 scale-110 active:scale-95 md:scale-100 md:active:scale-100 transition-all data-[state=unchecked]:bg-slate-200"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between space-x-2">
+                    <div className="flex flex-col gap-1">
+                      <Label htmlFor="featured" className="cursor-pointer">Featured Plan</Label>
+                      <span className="text-xs text-muted-foreground">Highlighted on home</span>
+                    </div>
+                    <Switch
+                      id="featured"
+                      checked={formData.featured}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, featured: checked })
+                      }
+                      className="data-[state=checked]:bg-blue-600 scale-110 active:scale-95 md:scale-100 md:active:scale-100 transition-all data-[state=unchecked]:bg-slate-200"
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
-            <DialogFooter>
-              <Button
-                className="cursor-pointer"
-                variant="outline"
-                onClick={() => handleCloseDialog()}
-              >
-                Cancel
-              </Button>
-              <Button
-                disabled={isSaveDisabled}
-                className={`cursor-pointer ${isSaveDisabled
-                  ? "opacity-50 cursor-not-allowed"
-                  : "bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white"
-                  }`}
-                onClick={handleSave}
-              >
-                {isUploading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Uploading...
-                  </>
-                ) : editingPlan ? (
-                  "Update Plan"
-                ) : (
-                  "Add Plan"
-                )}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+              <DialogFooter>
+                <Button
+                  className="cursor-pointer"
+                  variant="outline"
+                  onClick={() => handleCloseDialog()}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  disabled={isSaveDisabled}
+                  className={`cursor-pointer ${isSaveDisabled
+                    ? "opacity-50 cursor-not-allowed"
+                    : "bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white"
+                    }`}
+                  onClick={handleSave}
+                >
+                  {isUploading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Uploading...
+                    </>
+                  ) : editingPlan ? (
+                    "Update Plan"
+                  ) : (
+                    "Add Plan"
+                  )}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       {/* Search and Table */}
