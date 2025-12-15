@@ -63,6 +63,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "@/hooks/use-toast"
+import { compressImage } from "@/lib/utils"
 
 // Icon mapping for dynamic rendering
 const ICON_MAP = {
@@ -249,29 +250,92 @@ export function ServicePlansManagement() {
   }
 
   const handleImageUpload = async (e) => {
-    const file = e.target.files[0]
+    let file = e.target.files[0]
     if (!file) return
 
     setIsUploading(true)
-    const normalizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_").toLowerCase()
-    const fileName = normalizedName
-    const filePath = `service_plans/feature_images/${fileName}`
 
-    const { error: uploadError } = await supabase.storage
-      .from("assets")
-      .upload(filePath, file, {
-        upsert: true // Allow overwriting if user wants "original name only" behavior
+    // Check size and compress if needed
+    if (file.size > 2 * 1024 * 1024) {
+      toast({
+        title: "Optimizing Image",
+        description: "Compressing image while maintaining quality...",
       })
 
+      try {
+        file = await compressImage(file, 2)
+      } catch (error) {
+        console.error("Compression failed:", error)
+        toast({
+          title: "Error",
+          description: "Failed to compress image.",
+          variant: "destructive",
+        })
+        setIsUploading(false)
+        return
+      }
+    }
 
+    const originalName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_").toLowerCase()
+    const nameWithoutExt = originalName.substring(0, originalName.lastIndexOf('.')) || originalName
+    const ext = originalName.substring(originalName.lastIndexOf('.'))
 
-    if (uploadError) {
+    let fileName = originalName
+    let counter = 0
+    let uploadSuccess = false
+    let finalPath = ""
+    let publicUrl = ""
+
+    // Retry loop for duplicate names (up to 20 attempts)
+    while (!uploadSuccess && counter < 20) {
+      if (counter > 0) {
+        fileName = `${nameWithoutExt}_${counter}${ext}`
+      }
+
+      const filePath = `service_plans/feature_images/${fileName}`
+
+      const { data, error } = await supabase.storage
+        .from("assets")
+        .upload(filePath, file, {
+          upsert: false // Do not overwrite
+        })
+
+      if (error) {
+        // Check if it's a duplicate error
+        // Supabase error for duplicates usually mentions "Duplicate" or "already exists"
+        if (error.message && (error.message.includes("Duplicate") || error.message.includes("already exists"))) {
+          counter++
+          continue
+        } else {
+          // Genuine error
+          console.error("Upload error:", error)
+          toast({
+            title: "Error",
+            description: "Failed to upload image.",
+            variant: "destructive",
+          })
+          setIsUploading(false)
+          return
+        }
+      }
+
+      // Success
+      uploadSuccess = true
+      finalPath = filePath
+
+      const { data: publicUrlData } = supabase.storage
+        .from("assets")
+        .getPublicUrl(filePath)
+
+      publicUrl = publicUrlData.publicUrl
+    }
+
+    if (!uploadSuccess) {
       toast({
         title: "Error",
-        description: "Failed to upload image.",
+        description: "Could not upload image: too many duplicate filenames.",
         variant: "destructive",
       })
-      console.error("Upload error:", uploadError)
       setIsUploading(false)
       return
     }
@@ -281,13 +345,14 @@ export function ServicePlansManagement() {
       await supabase.storage.from("assets").remove([tempImage])
     }
 
-    const { data: { publicUrl } } = supabase.storage
-      .from("assets")
-      .getPublicUrl(filePath)
-
     setFormData({ ...formData, image: publicUrl })
-    setTempImage(filePath) // Track for cleanup
+    setTempImage(finalPath) // Track for cleanup
     setIsUploading(false)
+
+    toast({
+      title: "Success",
+      description: "Image uploaded successfully",
+    })
   }
 
   const handleCloseDialog = async () => {
