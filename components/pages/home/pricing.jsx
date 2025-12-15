@@ -10,8 +10,6 @@ import { useTranslation } from "@/lib/translations"
 import { createClient } from "@/lib/supabase/client"
 
 export function Pricing() {
-  const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, margin: "-100px" })
   const { t } = useTranslation()
   const [plans, setPlans] = useState([])
   const [loading, setLoading] = useState(true)
@@ -27,11 +25,9 @@ export function Pricing() {
         .order("id", { ascending: true })
         .limit(3)
 
-      console.log("Pricing Component - Fetching Plans...")
       if (error) {
         console.error("Pricing Component - Error:", error)
       } else {
-        console.log("Pricing Component - Data:", data)
         setPlans(data || [])
       }
       setLoading(false)
@@ -48,7 +44,26 @@ export function Pricing() {
             <div className="h-8 bg-gray-200 rounded max-w-sm mx-auto"></div>
             <div className="grid md:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-96 bg-gray-200 rounded-3xl"></div>
+                <div key={i} className="bg-white rounded-3xl p-5 md:p-8 border border-gray-200 h-96 flex flex-col">
+                  {/* Header Skeleton */}
+                  <div className="flex flex-col items-center mb-8">
+                    <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
+                    <div className="h-12 bg-gray-200 rounded w-1/2"></div>
+                  </div>
+
+                  {/* Features Skeleton */}
+                  <div className="space-y-4 mb-8 flex-1">
+                    {[1, 2, 3, 4, 5].map((j) => (
+                      <div key={j} className="flex gap-3">
+                        <div className="w-5 h-5 rounded-full bg-gray-200 flex-shrink-0"></div>
+                        <div className="h-4 bg-gray-200 rounded w-full"></div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Button Skeleton */}
+                  <div className="h-14 bg-gray-200 rounded-xl w-full"></div>
+                </div>
               ))}
             </div>
           </div>
@@ -57,12 +72,36 @@ export function Pricing() {
     )
   }
 
+  // Fallback for empty plans
+  if (plans.length === 0) {
+    return (
+      <section id="pricing" className="py-12 md:py-24 bg-gradient-to-b from-blue-50 to-white">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-12"
+          >
+            <p className="text-sm md:text-lg font-semibold text-[#0066FF] mb-2 uppercase tracking-wide">{t('homepage.pricing.label')}</p>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 text-balance">{t('homepage.pricing.title')}</h2>
+            <div className="p-12 bg-white rounded-3xl border border-dashed border-gray-300 max-w-lg mx-auto mt-8">
+              <p className="text-gray-500">No pricing plans are currently available.</p>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+    )
+  }
+
   return (
-    <section id="pricing" ref={ref} className="py-12 md:py-24 bg-gradient-to-b from-blue-50 to-white">
+    <section id="pricing" className="py-12 md:py-24 bg-gradient-to-b from-blue-50 to-white">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
           transition={{ duration: 0.6 }}
           className="text-center mb-8 md:mb-16"
         >
@@ -75,7 +114,8 @@ export function Pricing() {
             <motion.div
               key={plan.id}
               initial={{ opacity: 0, y: 30 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
               whileHover={{ y: -8 }}
               className="relative"
