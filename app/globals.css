@@ -287,11 +287,6 @@ footer,
     min-width: 44px;
   }
 
-  /* Enhanced touch feedback */
-  *:active {
-    transform: scale(0.98);
-    transition: transform 0.1s ease;
-  }
 
   /* Improved button spacing for touch */
   .touch-manipulation {

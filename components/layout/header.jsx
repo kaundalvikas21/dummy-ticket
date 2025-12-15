@@ -43,9 +43,9 @@ export function Header() {
   // Check for password reset tokens in URL globally (affects all tabs)
   const isPasswordResetFlow = typeof window !== 'undefined' &&
     (window.location.search.includes('access_token') ||
-     window.location.search.includes('refresh_token') ||
-     window.location.search.includes('token_hash') ||
-     window.location.search.includes('type=recovery'))
+      window.location.search.includes('refresh_token') ||
+      window.location.search.includes('token_hash') ||
+      window.location.search.includes('type=recovery'))
 
   useEffect(() => {
     return scrollY.on("change", (latest) => {

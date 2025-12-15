@@ -65,6 +65,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { createClient } from "@/lib/supabase/client"
 import { toast } from "@/hooks/use-toast"
 import { compressImage } from "@/lib/utils"
+import { Skeleton } from "@/components/ui/skeleton"
 
 // Icon mapping for dynamic rendering
 const ICON_MAP = {
@@ -526,22 +527,14 @@ export function ServicePlansManagement() {
     return <IconComponent className="w-5 h-5 text-gray-500" />
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    )
-  }
-
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm">
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 rounded-lg shadow-sm">
         <h1 className="text-2xl font-bold bg-gradient-to-r from-[#0066FF] to-[#00D4AA] bg-clip-text text-transparent">
           Service Plans Management
         </h1>
-        <div className="flex gap-2">
+        <div className="flex gap-2 w-full md:w-auto">
           <Button
             variant="outline"
             onClick={handleRefresh}
@@ -813,7 +806,25 @@ export function ServicePlansManagement() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredPlans.length === 0 ? (
+                {loading || isRefreshing ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell><Skeleton className="h-4 w-8" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-48" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                      <TableCell><Skeleton className="h-10 w-full" /></TableCell>
+                      <TableCell><Skeleton className="h-10 w-10 rounded-md" /></TableCell>
+                      <TableCell><Skeleton className="h-5 w-5" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-12" /></TableCell>
+                      <TableCell><Skeleton className="h-6 w-12 rounded-full" /></TableCell>
+                      <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+                      <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                      <TableCell><Skeleton className="h-5 w-8" /></TableCell>
+                      <TableCell><Skeleton className="h-8 w-16 ml-auto" /></TableCell>
+                    </TableRow>
+                  ))
+                ) : filteredPlans.length === 0 ? (
                   <TableRow>
                     <TableCell
                       colSpan={13}
