@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import {
   Plus,
   Edit,
@@ -121,6 +121,8 @@ export function ServicePlansManagement() {
   })
   const [initialFormData, setInitialFormData] = useState(null)
   const [isUploading, setIsUploading] = useState(false)
+  const [tempImage, setTempImage] = useState(null)
+  const fileInputRef = useRef(null)
 
   const supabase = createClient()
 
@@ -146,6 +148,27 @@ export function ServicePlansManagement() {
       setServicePlans(data || [])
     }
     setLoading(false)
+  }
+
+  const resetForm = () => {
+    setTempImage(null) // Commit image
+    setFormData({
+      name: "",
+      price: "",
+      description: "",
+      image: "",
+      icon: "plane",
+      features: "",
+      active: true,
+      featured: false,
+      popularLabel: "",
+      displayOrder: "0",
+    })
+    setEditingPlan(null)
+    setInitialFormData(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
   }
 
   const handleAddNew = () => {
@@ -228,13 +251,17 @@ export function ServicePlansManagement() {
     if (!file) return
 
     setIsUploading(true)
-    const fileExt = file.name.split(".").pop()
-    const fileName = `${Math.random()}.${fileExt}`
+    const normalizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_").toLowerCase()
+    const fileName = normalizedName
     const filePath = `service_plans/feature_images/${fileName}`
 
     const { error: uploadError } = await supabase.storage
       .from("assets")
-      .upload(filePath, file)
+      .upload(filePath, file, {
+        upsert: true // Allow overwriting if user wants "original name only" behavior
+      })
+
+
 
     if (uploadError) {
       toast({
@@ -247,12 +274,28 @@ export function ServicePlansManagement() {
       return
     }
 
+    // If there was a previous temp image in this session, delete it to avoid accumulation
+    if (tempImage) {
+      await supabase.storage.from("assets").remove([tempImage])
+    }
+
     const { data: { publicUrl } } = supabase.storage
       .from("assets")
       .getPublicUrl(filePath)
 
     setFormData({ ...formData, image: publicUrl })
+    setTempImage(filePath) // Track for cleanup
     setIsUploading(false)
+  }
+
+  const handleCloseDialog = async () => {
+    // Cleanup orphan image if not saved - unconditional delete if tempImage exists
+    if (tempImage) {
+      await supabase.storage.from("assets").remove([tempImage])
+    }
+    setTempImage(null)
+    setIsDialogOpen(false)
+    resetForm()
   }
 
   const handleSave = async () => {
@@ -307,8 +350,9 @@ export function ServicePlansManagement() {
         description: `Service plan ${editingPlan ? "updated" : "created"
           } successfully.`,
       })
-      fetchServicePlans()
+      setTempImage(null) // Clear temp image on successful save (committed)
       setIsDialogOpen(false)
+      fetchServicePlans()
     }
   }
 
@@ -381,22 +425,234 @@ export function ServicePlansManagement() {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            Service Plans Management
-          </h1>
-          <p className="text-gray-600 mt-1">
-            Manage pricing and features for your services
-          </p>
-        </div>
-        <Button
-          className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white cursor-pointer"
-          onClick={handleAddNew}
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add New Plan
-        </Button>
+      <div className="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm">
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-[#0066FF] to-[#00D4AA] bg-clip-text text-transparent">
+          Service Plans Management
+        </h1>
+        <Dialog open={isDialogOpen} onOpenChange={(open) => {
+          if (!open) handleCloseDialog()
+          else setIsDialogOpen(true)
+        }}>
+          <Button
+            className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white cursor-pointer"
+            onClick={handleAddNew}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add New Plan
+          </Button>
+          <DialogContent className="max-w-[90vw] md:max-w-2xl max-h-[90vh] overflow-y-auto mx-auto rounded-lg">
+            <DialogHeader>
+              <DialogTitle>
+                {editingPlan ? "Edit Service Plan" : "Add New Service Plan"}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Plan Name *</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                  placeholder="e.g., DUMMY TICKET FOR VISA"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="price">Price (USD) *</Label>
+                <Input
+                  id="price"
+                  type="number"
+                  value={formData.price}
+                  onChange={(e) =>
+                    setFormData({ ...formData, price: e.target.value })
+                  }
+                  placeholder="19"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
+                  placeholder="Brief description of the plan..."
+                  rows={3}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="image">Featured Image</Label>
+                  <div className="flex flex-col gap-4">
+                    {formData.image && (
+                      <img
+                        src={formData.image}
+                        alt="Preview"
+                        className="w-12 h-12 rounded-md object-cover border"
+                      />
+                    )}
+                    <div className="flex-1">
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center gap-2">
+                          <Input
+                            id="image"
+                            type="file"
+                            accept="image/*.jpg,.jpeg,.png,.webp"
+                            onChange={handleImageUpload}
+                            className="hidden"
+                            disabled={isUploading}
+                            ref={fileInputRef}
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={isUploading}
+                          >
+                            {isUploading ? "Uploading..." : "Choose File"}
+                          </Button>
+                          <span className="text-xs text-muted-foreground">
+                            Formats: PNG, JPG (Max 2MB)
+                          </span>
+                        </div>
+                        {isUploading && <Loader2 className="h-4 w-4 animate-spin" />}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="icon">Plan Icon</Label>
+                  <Select
+                    value={formData.icon}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, icon: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select an icon" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ICON_OPTIONS.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          <div className="flex items-center gap-2">
+                            {renderIcon(option.value)}
+                            <span>{option.label}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="displayOrder">Display Order</Label>
+                  <Input
+                    id="displayOrder"
+                    type="number"
+                    value={formData.displayOrder}
+                    onChange={(e) =>
+                      setFormData({ ...formData, displayOrder: e.target.value })
+                    }
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="popularLabel">Popular Label (Badge)</Label>
+                  <Input
+                    id="popularLabel"
+                    value={formData.popularLabel}
+                    onChange={(e) =>
+                      setFormData({ ...formData, popularLabel: e.target.value })
+                    }
+                    placeholder="e.g., Best Value"
+                  />
+                </div>
+
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="features">Features (one per line)</Label>
+                <Textarea
+                  id="features"
+                  value={formData.features}
+                  onChange={(e) =>
+                    setFormData({ ...formData, features: e.target.value })
+                  }
+                  placeholder="Flight reservation/ itinerary\nVerifiable on airline website\nUp to 4 changes allowed"
+                  rows={6}
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-4 rounded-lg">
+                <div className="flex items-center justify-between space-x-2">
+                  <div className="flex flex-col gap-1">
+                    <Label htmlFor="active" className="cursor-pointer">Active Status</Label>
+                    <span className="text-xs text-muted-foreground">Visible to users (main services)</span>
+                  </div>
+                  <Switch
+                    id="active"
+                    checked={formData.active}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, active: checked })
+                    }
+                    className="data-[state=checked]:bg-green-500 scale-110 md:scale-100 transition-all data-[state=unchecked]:bg-slate-200"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between space-x-2">
+                  <div className="flex flex-col gap-1">
+                    <Label htmlFor="featured" className="cursor-pointer">Featured Plan</Label>
+                    <span className="text-xs text-muted-foreground">Highlighted on home</span>
+                  </div>
+                  <Switch
+                    id="featured"
+                    checked={formData.featured}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, featured: checked })
+                    }
+                    className="data-[state=checked]:bg-blue-600 scale-110 md:scale-100 transition-all data-[state=unchecked]:bg-slate-200"
+                  />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                className="cursor-pointer"
+                variant="outline"
+                onClick={() => handleCloseDialog()}
+              >
+                Cancel
+              </Button>
+              <Button
+                disabled={isSaveDisabled}
+                className={`cursor-pointer ${isSaveDisabled
+                  ? "opacity-50 cursor-not-allowed"
+                  : "bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white"
+                  }`}
+                onClick={handleSave}
+              >
+                {isUploading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Uploading...
+                  </>
+                ) : editingPlan ? (
+                  "Update Plan"
+                ) : (
+                  "Add Plan"
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Search and Table */}
@@ -413,138 +669,141 @@ export function ServicePlansManagement() {
               />
             </div>
           </div>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[60px]">S.No</TableHead>
-                <TableHead>Plan Name</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Features</TableHead>
-                <TableHead className="w-[80px]">Image</TableHead>
-                <TableHead className="w-[60px]">Icon</TableHead>
-                <TableHead>Total Sales</TableHead>
-                <TableHead>Featured</TableHead>
-                <TableHead>Label</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Order</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredPlans.length === 0 ? (
+          <div className="w-full overflow-x-auto pb-4 [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-track]:bg-transparent">
+            <Table className="min-w-[800px]">
+              <TableHeader>
                 <TableRow>
-                  <TableCell
-                    colSpan={13}
-                    className="text-center py-8 text-gray-500"
-                  >
-                    No plans found
-                  </TableCell>
+                  <TableHead className="w-[60px]">S.No</TableHead>
+                  <TableHead>Plan Name</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Price</TableHead>
+                  <TableHead>Features</TableHead>
+                  <TableHead className="w-[80px]">Image</TableHead>
+                  <TableHead className="w-[60px]">Icon</TableHead>
+                  <TableHead>Total Sales</TableHead>
+                  <TableHead>Featured</TableHead>
+                  <TableHead>Label</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Order</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              ) : (
-                filteredPlans.map((plan, index) => (
-                  <TableRow key={plan.id}>
-                    <TableCell className="font-medium text-gray-500">
-                      {String(index + 1).padStart(2, "0")}
-                    </TableCell>
-                    <TableCell className="font-medium">{plan.name}</TableCell>
-                    <TableCell className="max-w-[200px]">
-                      <p
-                        className="truncate text-sm text-gray-500"
-                        title={plan.description}
-                      >
-                        {plan.description}
-                      </p>
-                    </TableCell>
-                    <TableCell>${plan.price}</TableCell>
-                    <TableCell>
-                      <div className="flex flex-col gap-1 max-w-[300px]">
-                        <span className="text-sm truncate">
-                          {(plan.features || [])[0]}
-                        </span>
-                        {(plan.features || []).length > 1 && (
-                          <span className="text-xs text-muted-foreground">
-                            +{(plan.features || []).length - 1} more features
-                          </span>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {plan.image && (
-                        <div className="w-10 h-10 rounded-md overflow-hidden border">
-                          <img
-                            src={plan.image || "/placeholder.svg"}
-                            alt={plan.name}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex justify-center">
-                        {renderIcon(plan.icon)}
-                      </div>
-                    </TableCell>
-                    <TableCell>{plan.total_sales || 0}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center">
-                        <Switch
-                          checked={plan.featured}
-                          onCheckedChange={() => toggleFeatured(plan)}
-                        />
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {plan.popular_label && (
-                        <Badge
-                          variant="secondary"
-                          className="bg-indigo-100 text-indigo-700 hover:bg-indigo-100"
-                        >
-                          {plan.popular_label}
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={plan.active ? "default" : "outline"}
-                        className={
-                          plan.active ? "bg-green-100 text-green-700" : ""
-                        }
-                      >
-                        {plan.active ? "Active" : "Inactive"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="font-mono">
-                        {plan.display_order || 0}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleEdit(plan)}
-                          title="Edit"
-                        >
-                          <Edit className="w-4 h-4 text-blue-600" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="hover:text-red-600 hover:bg-red-50"
-                          onClick={() => handleDelete(plan.id)}
-                          title="Delete"
-                        >
-                          <Trash2 className="w-4 h-4 text-red-600" />
-                        </Button>
-                      </div>
+              </TableHeader>
+              <TableBody>
+                {filteredPlans.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={13}
+                      className="text-center py-8 text-gray-500"
+                    >
+                      No plans found
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                ) : (
+                  filteredPlans.map((plan, index) => (
+                    <TableRow key={plan.id}>
+                      <TableCell className="font-medium text-gray-500">
+                        {String(index + 1).padStart(2, "0")}
+                      </TableCell>
+                      <TableCell className="font-medium">{plan.name}</TableCell>
+                      <TableCell className="max-w-[200px]">
+                        <p
+                          className="truncate text-sm text-gray-500"
+                          title={plan.description}
+                        >
+                          {plan.description}
+                        </p>
+                      </TableCell>
+                      <TableCell>${plan.price}</TableCell>
+                      <TableCell>
+                        <div className="flex flex-col gap-1 max-w-[300px]">
+                          <span className="text-sm truncate">
+                            {(plan.features || [])[0]}
+                          </span>
+                          {(plan.features || []).length > 1 && (
+                            <span className="text-xs text-muted-foreground">
+                              +{(plan.features || []).length - 1} more features
+                            </span>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {plan.image && (
+                          <div className="w-10 h-10 rounded-md overflow-hidden border">
+                            <img
+                              src={plan.image || "/placeholder.svg"}
+                              alt={plan.name}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex justify-center">
+                          {renderIcon(plan.icon)}
+                        </div>
+                      </TableCell>
+                      <TableCell>{plan.total_sales || 0}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center">
+                          <Switch
+                            checked={plan.featured}
+                            onCheckedChange={() => toggleFeatured(plan)}
+                            className="data-[state=checked]:bg-green-500"
+                          />
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {plan.popular_label && (
+                          <Badge
+                            variant="secondary"
+                            className="bg-indigo-100 text-indigo-700 hover:bg-indigo-100"
+                          >
+                            {plan.popular_label}
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={plan.active ? "default" : "outline"}
+                          className={
+                            plan.active ? "bg-green-100 text-green-700" : ""
+                          }
+                        >
+                          {plan.active ? "Active" : "Inactive"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="font-mono">
+                          {plan.display_order || 0}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleEdit(plan)}
+                            title="Edit"
+                          >
+                            <Edit className="w-4 h-4 text-blue-600" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="hover:text-red-600 hover:bg-red-50"
+                            onClick={() => handleDelete(plan.id)}
+                            title="Delete"
+                          >
+                            <Trash2 className="w-4 h-4 text-red-600" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
 
@@ -571,198 +830,7 @@ export function ServicePlansManagement() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* Add/Edit Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              {editingPlan ? "Edit Service Plan" : "Add New Service Plan"}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Plan Name *</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                placeholder="e.g., DUMMY TICKET FOR VISA"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="price">Price (USD) *</Label>
-              <Input
-                id="price"
-                type="number"
-                value={formData.price}
-                onChange={(e) =>
-                  setFormData({ ...formData, price: e.target.value })
-                }
-                placeholder="19"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
-                placeholder="Brief description of the plan..."
-                rows={3}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="image">Featured Image</Label>
-                <div className="flex items-center gap-4">
-                  {formData.image && (
-                    <img
-                      src={formData.image}
-                      alt="Preview"
-                      className="w-12 h-12 rounded-md object-cover border"
-                    />
-                  )}
-                  <div className="flex-1">
-                    <div className="flex gap-2 items-center">
-                      <Input
-                        id="image"
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        className="cursor-pointer"
-                        disabled={isUploading}
-                      />
-                      {isUploading && <Loader2 className="h-4 w-4 animate-spin" />}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="icon">Plan Icon</Label>
-                <Select
-                  value={formData.icon}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, icon: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select an icon" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ICON_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        <div className="flex items-center gap-2">
-                          {renderIcon(option.value)}
-                          <span>{option.label}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="displayOrder">Display Order</Label>
-                <Input
-                  id="displayOrder"
-                  type="number"
-                  value={formData.displayOrder}
-                  onChange={(e) =>
-                    setFormData({ ...formData, displayOrder: e.target.value })
-                  }
-                  placeholder="0"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="popularLabel">Popular Label (Badge)</Label>
-                <Input
-                  id="popularLabel"
-                  value={formData.popularLabel}
-                  onChange={(e) =>
-                    setFormData({ ...formData, popularLabel: e.target.value })
-                  }
-                  placeholder="e.g., Best Value"
-                />
-              </div>
-              <div className="space-y-2 flex flex-col justify-end pb-2">
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="featured"
-                    checked={formData.featured}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, featured: checked })
-                    }
-                  />
-                  <Label htmlFor="featured">Featured Plan</Label>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="features">Features (one per line)</Label>
-              <Textarea
-                id="features"
-                value={formData.features}
-                onChange={(e) =>
-                  setFormData({ ...formData, features: e.target.value })
-                }
-                placeholder="Flight reservation/ itinerary\nVerifiable on airline website\nUp to 4 changes allowed"
-                rows={6}
-              />
-            </div>
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="active"
-                checked={formData.active}
-                onCheckedChange={(checked) =>
-                  setFormData({ ...formData, active: checked })
-                }
-              />
-              <Label htmlFor="active">Active Plan</Label>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              className="cursor-pointer"
-              variant="outline"
-              onClick={() => setIsDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              disabled={isSaveDisabled}
-              className={`cursor-pointer ${isSaveDisabled
-                ? "opacity-50 cursor-not-allowed"
-                : "bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white"
-                }`}
-              onClick={handleSave}
-            >
-              {isUploading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Uploading...
-                </>
-              ) : editingPlan ? (
-                "Update Plan"
-              ) : (
-                "Add Plan"
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }
+
