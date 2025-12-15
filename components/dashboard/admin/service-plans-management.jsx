@@ -501,7 +501,7 @@ export function ServicePlansManagement() {
                           onClick={() => handleEdit(plan)}
                           title="Edit"
                         >
-                          <Edit className="w-4 h-4 text-gray-600" />
+                          <Edit className="w-4 h-4 text-blue-600" />
                         </Button>
                         <Button
                           variant="ghost"
@@ -510,7 +510,7 @@ export function ServicePlansManagement() {
                           onClick={() => handleDelete(plan.id)}
                           title="Delete"
                         >
-                          <Trash2 className="w-4 h-4 text-gray-400" />
+                          <Trash2 className="w-4 h-4 text-red-600" />
                         </Button>
                       </div>
                     </TableCell>
@@ -703,8 +703,8 @@ export function ServicePlansManagement() {
             <Button
               disabled={isSaveDisabled}
               className={`cursor-pointer ${isSaveDisabled
-                  ? "opacity-50 cursor-not-allowed"
-                  : "bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white"
+                ? "opacity-50 cursor-not-allowed"
+                : "bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white"
                 }`}
               onClick={handleSave}
             >
