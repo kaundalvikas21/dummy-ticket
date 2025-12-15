@@ -123,6 +123,7 @@ export function ServicePlansManagement() {
   const [isUploading, setIsUploading] = useState(false)
   const [tempImage, setTempImage] = useState(null)
   const fileInputRef = useRef(null)
+  const isSavingRef = useRef(false)
 
   const supabase = createClient()
 
@@ -151,6 +152,7 @@ export function ServicePlansManagement() {
   }
 
   const resetForm = () => {
+    isSavingRef.current = false
     setTempImage(null) // Commit image
     setFormData({
       name: "",
@@ -289,8 +291,9 @@ export function ServicePlansManagement() {
   }
 
   const handleCloseDialog = async () => {
-    // Cleanup orphan image if not saved - unconditional delete if tempImage exists
-    if (tempImage) {
+    // Cleanup orphan image if not saved and not currently saving
+    // unconditional delete if tempImage exists AND we are not in the middle of saving
+    if (tempImage && !isSavingRef.current) {
       await supabase.storage.from("assets").remove([tempImage])
     }
     setTempImage(null)
@@ -299,6 +302,7 @@ export function ServicePlansManagement() {
   }
 
   const handleSave = async () => {
+    isSavingRef.current = true
     if (!formData.name || !formData.price) {
       toast({
         title: "Validation Error",
@@ -329,6 +333,17 @@ export function ServicePlansManagement() {
         .from("service_plans")
         .update(planData)
         .eq("id", editingPlan.id)
+
+      // Delete old image if replaced
+      if (!updateError && editingPlan.image && editingPlan.image !== formData.image) {
+        // Extract path from URL (assuming standard Supabase URL structure)
+        // URL: .../assets/service_plans/feature_images/filename
+        const oldPath = editingPlan.image.substring(editingPlan.image.indexOf("service_plans"))
+        if (oldPath) {
+          await supabase.storage.from("assets").remove([oldPath])
+        }
+      }
+
       error = updateError
     } else {
       const { error: insertError } = await supabase
@@ -354,6 +369,7 @@ export function ServicePlansManagement() {
       setIsDialogOpen(false)
       fetchServicePlans()
     }
+    isSavingRef.current = false
   }
 
   // 🔍 Detect if form changed compared to initialFormData
@@ -603,7 +619,7 @@ export function ServicePlansManagement() {
                     onCheckedChange={(checked) =>
                       setFormData({ ...formData, active: checked })
                     }
-                    className="data-[state=checked]:bg-green-500 scale-110 md:scale-100 transition-all data-[state=unchecked]:bg-slate-200"
+                    className="data-[state=checked]:bg-green-500 scale-110 active:scale-95 md:scale-100 md:active:scale-100 transition-all data-[state=unchecked]:bg-slate-200"
                   />
                 </div>
 
@@ -618,7 +634,7 @@ export function ServicePlansManagement() {
                     onCheckedChange={(checked) =>
                       setFormData({ ...formData, featured: checked })
                     }
-                    className="data-[state=checked]:bg-blue-600 scale-110 md:scale-100 transition-all data-[state=unchecked]:bg-slate-200"
+                    className="data-[state=checked]:bg-blue-600 scale-110 active:scale-95 md:scale-100 md:active:scale-100 transition-all data-[state=unchecked]:bg-slate-200"
                   />
                 </div>
               </div>
