@@ -6,6 +6,7 @@ import { useSearchParams, useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { getExchangeRates, formatConvertedPrices } from '@/lib/exchange-rate'
 import { Check, Shield, Loader2, ArrowRight, ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react"
+import { loadStripe } from "@stripe/stripe-js"
 
 import { HeroSection } from "@/components/pages/buy-ticket/HeroSection"
 import { ProgressSteps } from "@/components/pages/buy-ticket/ProgressSteps"
@@ -123,12 +124,49 @@ export default function BuyTicketPage() {
     }
   }
 
+  // ... existing code ...
+
   const prevStep = () => {
     if (currentStep > 1) {
-      // If we are at step 2 and a plan was pre-selected, warn or allow?
-      // Standard behavior: allow going back to change plan
       setCurrentStep(currentStep - 1)
       window.scrollTo({ top: 0, behavior: "smooth" })
+    }
+  }
+
+  const handlePayment = async () => {
+    setLoading(true) // Re-use loading state or create a specific processing state
+    try {
+      const selectedPlanData = availablePlans.find(p => p.id === formData.selectedPlan)
+
+      const response = await fetch("/api/checkout_sessions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          planId: formData.selectedPlan,
+          formData, // Pass the full form data
+          amount: selectedPlanData?.price,
+          currency: "USD",
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || "Payment initiation failed")
+      }
+
+      // Redirect to Stripe Checkout using the returned URL
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        throw new Error("No checkout URL returned")
+      }
+    } catch (error) {
+      console.error("Payment Error:", error)
+      alert("Payment failed: " + error.message)
+      setLoading(false)
     }
   }
 
@@ -289,6 +327,8 @@ export default function BuyTicketPage() {
                   isStepValid={isStepValid()}
                   onNext={nextStep}
                   onPrevious={prevStep}
+                  onComplete={handlePayment}
+                  loading={loading}
                 />
               </motion.div>
             </div>

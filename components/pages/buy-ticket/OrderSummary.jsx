@@ -1,6 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
+import { loadStripe } from "@stripe/stripe-js"
 import { Check, Shield } from "lucide-react"
 import { useTranslation } from "@/lib/translations"
 
@@ -11,6 +12,45 @@ export function OrderSummary({ formData, servicePlans }) {
   const basePrice = selectedPlan?.price || 0
   const deliveryFee = formData.deliveryMethod === "whatsapp" ? 5 : 0
   const total = basePrice + deliveryFee
+
+  const handlePayment = async () => {
+    setIsProcessing(true)
+    try {
+      const response = await fetch("/api/checkout_sessions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          planId: selectedPlan.id,
+          formData, // Pass the full form data to be stored in bookings
+          amount: selectedPlan.price, // Or calculate total locally if needed
+          currency: "USD", // Or dynamic if supported
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || "Payment initiation failed")
+      }
+
+      // Redirect to Stripe Checkout using the returned session ID
+      const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
+      const { error } = await stripe.redirectToCheckout({
+        sessionId: data.sessionId,
+      })
+
+      if (error) {
+        throw error
+      }
+    } catch (error) {
+      console.error("Payment Error:", error)
+      alert("Payment failed: " + error.message)
+    } finally {
+      setIsProcessing(false)
+    }
+  }
 
   const benefits = t('buyTicket.orderSummary.features')
 
@@ -23,10 +63,10 @@ export function OrderSummary({ formData, servicePlans }) {
       >
         {/* Background Pattern */}
         <div className="absolute inset-0 z-0 opacity-5">
-          <img 
-            src="/airline-ticket-boarding-pass-template.jpg" 
-            alt="" 
-            className="w-full h-full object-cover" 
+          <img
+            src="/airline-ticket-boarding-pass-template.jpg"
+            alt=""
+            className="w-full h-full object-cover"
           />
         </div>
 
@@ -47,7 +87,7 @@ export function OrderSummary({ formData, servicePlans }) {
                     {selectedPlan.currencies}
                   </div>
                 </div>
-                
+
                 <div className="flex justify-between text-xs md:text-sm">
                   <span className="text-gray-600">Service Plan</span>
                   <span className="font-semibold">${selectedPlan.price}</span>
