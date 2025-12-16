@@ -8,9 +8,9 @@ import { useTranslation } from "@/lib/translations"
 export function ServicePlanSelection({ formData, updateFormData, servicePlans }) {
   const { t } = useTranslation()
   return (
-    <motion.div 
-      initial={{ opacity: 0 }} 
-      animate={{ opacity: 1 }} 
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
       className="space-y-4 md:space-y-6"
     >
       <div>
@@ -51,16 +51,15 @@ function PlanCard({ plan, isSelected, onSelect }) {
       onClick={onSelect}
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      className={`relative p-4 md:p-6 rounded-xl md:rounded-2xl border-2 transition-all text-left ${
-        isSelected
+      className={`relative p-4 md:p-6 rounded-xl md:rounded-2xl border-2 transition-all text-left ${isSelected
           ? "border-[#0066FF] bg-blue-50 shadow-lg shadow-blue-500/20"
           : "border-gray-200 hover:border-gray-300 bg-white"
-      }`}
+        }`}
     >
-      {plan.popular && (
+      {plan.popular_label && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-          <span className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white px-4 py-1 rounded-full text-xs font-semibold">
-            MOST POPULAR
+          <span className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white px-4 py-1 rounded-full text-xs font-semibold uppercase">
+            {plan.popular_label}
           </span>
         </div>
       )}
@@ -81,9 +80,8 @@ function PlanCard({ plan, isSelected, onSelect }) {
         </div>
 
         <div
-          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-            isSelected ? "border-[#0066FF] bg-[#0066FF]" : "border-gray-300 bg-white"
-          }`}
+          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${isSelected ? "border-[#0066FF] bg-[#0066FF]" : "border-gray-300 bg-white"
+            }`}
         >
           {isSelected && <Check className="w-4 h-4 text-white" />}
         </div>

@@ -176,7 +176,7 @@ export function Pricing() {
                   </div>
                 )}
 
-                <Link href="/buy-ticket">
+                <Link href={`/buy-ticket?planId=${plan.id}`}>
                   <Button
                     className={`w-full py-4 md:py-6 rounded-xl font-semibold transition-all text-sm md:text-base cursor-pointer ${plan.popular_label
                       ? "bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white hover:shadow-xl hover:shadow-[#0066FF]/30"

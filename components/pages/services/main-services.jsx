@@ -170,7 +170,7 @@ export default function MainServices({ servicePlans }) {
                       <Link
                         href={{
                           pathname: "/buy-ticket",
-                          query: { serviceId: service.id },
+                          query: { planId: service.id },
                         }}
                       >
                         <Button
