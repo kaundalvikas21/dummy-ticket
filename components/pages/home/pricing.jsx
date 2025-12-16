@@ -1,4 +1,5 @@
 "use client"
+import { getExchangeRates, formatConvertedPrices } from '@/lib/exchange-rate'
 
 import { motion } from "framer-motion"
 import { useInView } from "framer-motion"
@@ -13,27 +14,40 @@ export function Pricing() {
   const { t } = useTranslation()
   const [plans, setPlans] = useState([])
   const [loading, setLoading] = useState(true)
+  const [exchangeRates, setExchangeRates] = useState(null)
 
   useEffect(() => {
-    async function fetchPlans() {
+    async function fetchData() {
       const supabase = createClient()
-      const { data, error } = await supabase
-        .from("service_plans")
-        .select("*")
-        .eq("active", true)
-        .eq("featured", true)
-        .order("display_order", { ascending: true })
-        .limit(3)
+
+      // Fetch plans and rates in parallel
+      const [plansResponse, rates] = await Promise.all([
+        supabase
+          .from("service_plans")
+          .select("*")
+          .eq("active", true)
+          .eq("featured", true)
+          .order("display_order", { ascending: true })
+          .limit(3),
+        getExchangeRates('USD')
+      ])
+
+      const { data, error } = plansResponse
 
       if (error) {
         console.error("Pricing Component - Error:", error)
       } else {
         setPlans(data || [])
       }
+
+      if (rates) {
+        setExchangeRates(rates)
+      }
+
       setLoading(false)
     }
 
-    fetchPlans()
+    fetchData()
   }, [])
 
   if (loading) {
@@ -134,12 +148,14 @@ export function Pricing() {
               >
                 <div className="text-center mb-6 md:mb-8">
                   <h3 className="text-base md:text-xl font-bold text-gray-900 mb-3 md:mb-4 uppercase">{plan.name}</h3>
-                  <div className="flex items-baseline justify-center gap-0.5 mb-2">
-                    <span className="text-3xl md:text-4xl font-bold text-gray-700">$</span>
-                    <span className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-[#0066FF] to-[#00D4AA] bg-clip-text text-transparent">
-                      {plan.price}
-                    </span>
-                    <span className="text-sm md:text-base text-gray-500 ml-1">/ person</span>
+                  <div className="flex flex-col items-center">
+                    <div className="flex items-baseline justify-center gap-0.5 mb-2">
+                      <span className="text-3xl md:text-4xl font-bold text-gray-700">$</span>
+                      <span className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-[#0066FF] to-[#00D4AA] bg-clip-text text-transparent">
+                        {plan.price}
+                      </span>
+                      <span className="text-sm md:text-base text-gray-500 ml-1">/ person</span>
+                    </div>
                   </div>
                 </div>
 
@@ -153,6 +169,12 @@ export function Pricing() {
                     </li>
                   ))}
                 </ul>
+
+                {exchangeRates && (
+                  <div className="bg-blue-50 px-3 py-2 rounded-lg text-xs md:text-[10px] lg:text-xs font-medium text-gray-500 uppercase tracking-wide border border-gray-100 mb-8">
+                    {plan.price} USD | {formatConvertedPrices(plan.price, exchangeRates)}
+                  </div>
+                )}
 
                 <Link href="/buy-ticket">
                   <Button
