@@ -40,6 +40,7 @@ const initialFormData = {
   tripType: "round-trip",
   deliveryMethod: "email",
   deliveryEmail: "",
+  whatsappNumber: "",
   billingName: "",
   billingAddress: "",
   billingCity: "",
@@ -75,14 +76,42 @@ export default function BuyTicketPage() {
       const supabase = createClient()
 
       try {
-        const [plansResponse, rates] = await Promise.all([
+        const [plansResponse, rates, { data: { user } }] = await Promise.all([
           supabase
             .from("service_plans")
             .select("*")
             .eq("active", true)
             .order("display_order", { ascending: true }),
-          getExchangeRates('USD')
+          getExchangeRates('USD'),
+          supabase.auth.getUser()
         ])
+
+        if (user) {
+          const { data: profile } = await supabase
+            .from('user_profiles')
+            .select('*')
+            .eq('user_id', user.id)
+            .single()
+
+          if (profile) {
+            setFormData(prev => ({
+              ...prev,
+              firstName: profile.first_name || prev.firstName,
+              lastName: profile.last_name || prev.lastName,
+              email: profile.email || prev.email,
+              phone: profile.phone_number || prev.phone,
+              passportNumber: profile.passport_number || prev.passportNumber,
+              dateOfBirth: profile.date_of_birth || prev.dateOfBirth,
+              nationality: profile.nationality || prev.nationality,
+              // Map address fields to Billing if available
+              billingName: `${profile.first_name} ${profile.last_name}`.trim() || prev.billingName,
+              billingAddress: profile.address || prev.billingAddress,
+              billingCity: profile.city || prev.billingCity,
+              billingZip: profile.postal_code || prev.billingZip,
+              billingCountry: profile.nationality || prev.billingCountry // Assuming nationality matches country for billing default
+            }))
+          }
+        }
 
         if (rates) setExchangeRates(rates)
 

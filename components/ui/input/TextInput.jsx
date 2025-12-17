@@ -12,6 +12,7 @@ export function TextInput({
   placeholder,
   required = false,
   error,
+  iconClassName,
   ...props
 }) {
   return (
@@ -24,7 +25,7 @@ export function TextInput({
 
       <div className="relative">
         {Icon && (
-          <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-gray-400 z-10" />
+          <Icon className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-gray-400 z-10 ${iconClassName || ""}`} />
         )}
 
         <Input

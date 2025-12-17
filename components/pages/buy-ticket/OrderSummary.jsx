@@ -10,7 +10,7 @@ export function OrderSummary({ formData, servicePlans }) {
 
   const selectedPlan = servicePlans.find((plan) => plan.id === formData.selectedPlan)
   const basePrice = selectedPlan?.price || 0
-  const deliveryFee = formData.deliveryMethod === "whatsapp" ? 5 : 0
+  const deliveryFee = 0 // User request: remove charge for WhatsApp delivery
   const total = basePrice + deliveryFee
 
   const handlePayment = async () => {

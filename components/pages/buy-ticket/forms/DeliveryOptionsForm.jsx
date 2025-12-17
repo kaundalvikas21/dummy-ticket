@@ -9,9 +9,9 @@ import { useTranslation } from "@/lib/translations"
 export function DeliveryOptionsForm({ formData, updateFormData }) {
   const { t } = useTranslation()
   return (
-    <motion.div 
-      initial={{ opacity: 0 }} 
-      animate={{ opacity: 1 }} 
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
       className="space-y-4 md:space-y-6"
     >
       <div>
@@ -43,7 +43,7 @@ export function DeliveryOptionsForm({ formData, updateFormData }) {
               method="whatsapp"
               icon={Phone}
               title={t('buyTicket.deliveryOptions.fields.whatsappDelivery')}
-              subtitle={t('buyTicket.deliveryOptions.fields.whatsappDeliveryDesc')}
+              subtitle="Instant Delivery"
               iconColor="text-[#00D4AA]"
               isSelected={formData.deliveryMethod === "whatsapp"}
               onSelect={() => updateFormData("deliveryMethod", "whatsapp")}
@@ -56,12 +56,12 @@ export function DeliveryOptionsForm({ formData, updateFormData }) {
           label={formData.deliveryMethod === "email" ? t('buyTicket.deliveryOptions.fields.deliveryEmail') : t('buyTicket.deliveryOptions.fields.whatsappNumber')}
           icon={formData.deliveryMethod === "email" ? Mail : Phone}
           type={formData.deliveryMethod === "email" ? "email" : "tel"}
-          value={formData.deliveryEmail}
-          onChange={(value) => updateFormData("deliveryEmail", value)}
+          value={formData.deliveryMethod === "email" ? formData.deliveryEmail : formData.whatsappNumber}
+          onChange={(value) => updateFormData(formData.deliveryMethod === "email" ? "deliveryEmail" : "whatsappNumber", value)}
           placeholder={
             formData.deliveryMethod === "email"
               ? t('buyTicket.deliveryOptions.placeholders.deliveryEmail')
-              : t('buyTicket.deliveryOptions.placeholders.whatsappNumber')
+              : "Enter WhatsApp Number"
           }
           required
         />
@@ -82,11 +82,10 @@ function DeliveryMethodButton({ method, icon: Icon, title, subtitle, iconColor, 
     <button
       type="button"
       onClick={onSelect}
-      className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
-        isSelected
-          ? "border-[#0066FF] bg-blue-50"
-          : "border-gray-200 hover:border-gray-300"
-      }`}
+      className={`w-full p-4 rounded-xl border-2 transition-all text-left ${isSelected
+        ? "border-[#0066FF] bg-blue-50"
+        : "border-gray-200 hover:border-gray-300"
+        }`}
     >
       <div className="flex items-center gap-3">
         <Icon className={`w-5 h-5 ${iconColor}`} />

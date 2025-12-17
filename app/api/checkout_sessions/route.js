@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { createAdminClient } from "@/lib/supabase/admin"; // Use admin client
 
+import { createClient } from "@/lib/supabase/server"
+
 export async function POST(req) {
     try {
         const { planId, formData, amount, currency } = await req.json();
@@ -10,23 +12,17 @@ export async function POST(req) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
         }
 
-        const supabase = createAdminClient();
+        // Get user session using server client
+        const supabaseServer = await createClient();
+        const { data: { user } } = await supabaseServer.auth.getUser();
 
-        // Get user session (optional) - we can't easily get it here with admin client if relying on cookies
-        // But the original code fetched user from supabase.auth.getUser() which used cookies via server client
-        // If we want to link user_id, we should passed it in body or use standard client just for auth.
-        // Actually, we can just let user_id be null for guest, or if client passes it.
-        // Let's stick to admin client for DB ops to ensure we can write/update.
-        // If we need user_id, we might need to rely on client sending it or trust the session if we kept the other client.
-        // For now, let's proceed with admin client to fix the permission issue.
-        // A better approach: use standard client for getting user, admin client for DB.
+        const supabase = createAdminClient();
 
         // 1. Create a Booking Record in Supabase (Pending)
         const { data: booking, error: dbError } = await supabase
             .from("bookings")
             .insert({
-                user_id: null, // For guest checkout we can leave it null. If we want to support logged in users, we need to extract ID.
-                // Let's keep it simple for now as the user is testing guest flow primarily or we accept it might be null.
+                user_id: user?.id || null,
                 plan_id: planId,
                 amount: amount,
                 currency: currency,
