@@ -47,7 +47,7 @@ export async function middleware(request) {
   )
 
   // Check if current path is an auth route
-  const isAuthRoute = authRoutes.some(route => pathname.startsWith(route))
+  const isAuthRoute = authRoutes.some(route => pathname === route || pathname.startsWith(`${route}/`))
 
   // If accessing protected route without authentication, redirect to login
   if (isProtectedRoute && !user) {
