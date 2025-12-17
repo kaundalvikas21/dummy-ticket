@@ -35,7 +35,8 @@ export async function middleware(request) {
   const protectedRoutes = {
     '/admin': 'admin',
     '/vendor': 'vendor',
-    '/user': 'user'
+    '/user': 'user',
+    '/buy-ticket': 'any' // Special case: any authenticated user can access
   }
 
   // Define auth routes (redirect if already authenticated)
@@ -66,7 +67,7 @@ export async function middleware(request) {
   if (isProtectedRoute && user && userRole) {
     // Check if the route matches the user's role
     for (const [route, requiredRole] of Object.entries(protectedRoutes)) {
-      if (pathname.startsWith(route) && userRole !== requiredRole) {
+      if (pathname.startsWith(route) && requiredRole !== 'any' && userRole !== requiredRole) {
         // User doesn't have permission for this route
         // Redirect to their correct dashboard
         const correctDashboard = new URL(`/${userRole}`, request.url)
