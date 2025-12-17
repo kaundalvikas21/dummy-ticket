@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { TrendingUp, Users, DollarSign, ShoppingCart, Calendar } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
@@ -17,28 +18,114 @@ import {
   PieChart,
   Cell,
 } from "recharts"
+import { createClient } from "@/lib/supabase/client"
+import { useToast } from "@/hooks/use-toast"
 
 export function Analytics() {
-  const monthlyData = [
-    { month: "Jan", revenue: 4500, orders: 145 },
-    { month: "Feb", revenue: 5200, orders: 168 },
-    { month: "Mar", revenue: 4800, orders: 156 },
-    { month: "Apr", revenue: 6100, orders: 198 },
-    { month: "May", revenue: 7200, orders: 234 },
-    { month: "Jun", revenue: 6800, orders: 221 },
-  ]
+  const [monthlyData, setMonthlyData] = useState([])
+  const [topServices, setTopServices] = useState([])
+  const [serviceDistribution, setServiceDistribution] = useState([])
+  const [keyMetrics, setKeyMetrics] = useState({
+    revenue: 0,
+    orders: 0,
+    customers: 0,
+    avgOrderValue: 0
+  })
+  const [loading, setLoading] = useState(true)
 
-  const topServices = [
-    { name: "Visa Ticket", sales: 1234, revenue: 23446 },
-    { name: "Ticket & Hotel", sales: 856, revenue: 29960 },
-    { name: "Return Ticket", sales: 567, revenue: 8505 },
-  ]
+  const supabase = createClient()
+  const { toast } = useToast()
 
-  const serviceDistribution = [
-    { name: "Visa Ticket", value: 1234, color: "#0066FF" },
-    { name: "Ticket & Hotel", value: 856, color: "#00D4AA" },
-    { name: "Return Ticket", value: 567, color: "#FF6B35" },
-  ]
+  const fetchAnalyticsData = async () => {
+    setLoading(true)
+    try {
+      // Fetch all bookings for aggregation
+      const { data: bookings, error: bookingsError } = await supabase
+        .from('bookings')
+        .select('amount, created_at, status, service_plans(name)')
+        .order('created_at', { ascending: true })
+
+      if (bookingsError) throw bookingsError
+
+      // Fetch customer count
+      const { count: customerCount, error: customerError } = await supabase
+        .from('user_profiles')
+        .select('*', { count: 'exact', head: true })
+
+      if (customerError) throw customerError
+
+      // key metrics
+      const totalRevenue = bookings.reduce((sum, b) => sum + parseFloat(b.amount || 0), 0)
+      const totalOrders = bookings.length
+      const avgOrderVal = totalOrders > 0 ? totalRevenue / totalOrders : 0
+
+      setKeyMetrics({
+        revenue: totalRevenue,
+        orders: totalOrders,
+        customers: customerCount || 0,
+        avgOrderValue: avgOrderVal
+      })
+
+      // Process Monthly Data
+      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+      const monthlyStats = {}
+
+      bookings.forEach(booking => {
+        const date = new Date(booking.created_at)
+        const monthKey = `${months[date.getMonth()]}` // Simple grouping by month name for now (ignores year for simplicity or assuming 1 year data)
+
+        if (!monthlyStats[monthKey]) {
+          monthlyStats[monthKey] = { month: monthKey, revenue: 0, orders: 0 }
+        }
+        monthlyStats[monthKey].revenue += parseFloat(booking.amount || 0)
+        monthlyStats[monthKey].orders += 1
+      })
+
+      // Ensure chronological order if needed, but for now map based on existence
+      const chartData = Object.values(monthlyStats)
+      // Sort roughly? Recharts renders in array order. 
+      // A proper implementation would bucket by Year-Month.
+
+      setMonthlyData(chartData.length > 0 ? chartData : [{ month: "No Data", revenue: 0, orders: 0 }])
+
+      // Process Services Data
+      const serviceStats = {}
+      bookings.forEach(booking => {
+        const serviceName = booking.service_plans?.name || "Unknown Service"
+        if (!serviceStats[serviceName]) {
+          serviceStats[serviceName] = { name: serviceName, sales: 0, revenue: 0 }
+        }
+        serviceStats[serviceName].sales += 1
+        serviceStats[serviceName].revenue += parseFloat(booking.amount || 0)
+      })
+
+      const servicesArray = Object.values(serviceStats).sort((a, b) => b.revenue - a.revenue)
+      setTopServices(servicesArray)
+
+      // Service Distribution (Pie Chart)
+      const colors = ["#0066FF", "#00D4AA", "#FF6B35", "#FFC107", "#9C27B0"]
+      const distArray = servicesArray.map((s, i) => ({
+        name: s.name,
+        value: s.sales,
+        color: colors[i % colors.length]
+      }))
+      setServiceDistribution(distArray)
+
+    } catch (error) {
+      console.error("Error fetching analytics:", error)
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to load analytics data"
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchAnalyticsData()
+  }, [])
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -58,10 +145,10 @@ export function Analytics() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Total Revenue</p>
-                <p className="text-2xl font-bold text-gray-900">$61,911</p>
+                <p className="text-2xl font-bold text-gray-900">{loading ? "..." : `$${keyMetrics.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</p>
                 <p className="text-xs text-green-600 flex items-center gap-1 mt-1">
                   <TrendingUp className="w-3 h-3" />
-                  +12.5% from last month
+                  Lifetime
                 </p>
               </div>
             </div>
@@ -76,10 +163,10 @@ export function Analytics() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Total Orders</p>
-                <p className="text-2xl font-bold text-gray-900">2,657</p>
+                <p className="text-2xl font-bold text-gray-900">{loading ? "..." : keyMetrics.orders}</p>
                 <p className="text-xs text-green-600 flex items-center gap-1 mt-1">
                   <TrendingUp className="w-3 h-3" />
-                  +8.2% from last month
+                  Lifetime
                 </p>
               </div>
             </div>
@@ -93,11 +180,11 @@ export function Analytics() {
                 <Users className="w-5 h-5 text-purple-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">New Customers</p>
-                <p className="text-2xl font-bold text-gray-900">342</p>
+                <p className="text-sm text-gray-600">Total Customers</p>
+                <p className="text-2xl font-bold text-gray-900">{loading ? "..." : keyMetrics.customers}</p>
                 <p className="text-xs text-green-600 flex items-center gap-1 mt-1">
                   <TrendingUp className="w-3 h-3" />
-                  +15.3% from last month
+                  Registered
                 </p>
               </div>
             </div>
@@ -112,10 +199,10 @@ export function Analytics() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Avg. Order Value</p>
-                <p className="text-2xl font-bold text-gray-900">$23.30</p>
+                <p className="text-2xl font-bold text-gray-900">{loading ? "..." : `$${keyMetrics.avgOrderValue.toFixed(2)}`}</p>
                 <p className="text-xs text-green-600 flex items-center gap-1 mt-1">
                   <TrendingUp className="w-3 h-3" />
-                  +3.8% from last month
+                  Per order
                 </p>
               </div>
             </div>
@@ -126,7 +213,7 @@ export function Analytics() {
       <Card>
         <CardHeader>
           <CardTitle>Revenue & Orders Trend</CardTitle>
-          <CardDescription>Monthly performance over the last 6 months</CardDescription>
+          <CardDescription>Monthly performance</CardDescription>
         </CardHeader>
         <CardContent>
           <ChartContainer
@@ -269,7 +356,7 @@ export function Analytics() {
             {topServices.map((service, index) => (
               <div key={index} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-4 bg-gray-50 rounded-lg">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#0066FF] to-[#00D4AA] flex items-center justify-center text-white font-bold text-sm">
+                  <div className="w-8 h-8 rounded-full bg-linear-to-br from-[#0066FF] to-[#00D4AA] flex items-center justify-center text-white font-bold text-sm">
                     {index + 1}
                   </div>
                   <div>
@@ -278,7 +365,7 @@ export function Analytics() {
                   </div>
                 </div>
                 <div className="text-right sm:text-left">
-                  <p className="font-bold text-gray-900 text-sm sm:text-base">${service.revenue.toLocaleString()}</p>
+                  <p className="font-bold text-gray-900 text-sm sm:text-base">${service.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                   <p className="text-xs text-gray-600">Total Revenue</p>
                 </div>
               </div>

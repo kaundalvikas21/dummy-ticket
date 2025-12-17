@@ -1,13 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search, Download, Eye, Edit, Trash2 } from "lucide-react"
+import { Search, Download, Eye, Edit, Trash2, RefreshCw, MoreHorizontal, Filter, ChevronDown, Pencil } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,105 +18,131 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  DropdownMenuCheckboxItem,
+} from "@/components/ui/dropdown-menu"
 import { Label } from "@/components/ui/label"
 import { SkeletonTable } from "@/components/ui/skeleton-table"
+import { createClient } from "@/lib/supabase/client"
+import { useToast } from "@/hooks/use-toast"
 
 export function OrdersManagement() {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
-  const [mockOrders, setMockOrders] = useState([
-    {
-      id: "ORD-12345",
-      customer: "John Doe",
-      email: "john@example.com",
-      service: "Dummy Ticket for Visa",
-      amount: "$19.00",
-      status: "completed",
-      date: "2025-01-15",
-      departure: "New York (JFK)",
-      arrival: "London (LHR)",
-      phone: "+1 234 567 8900",
-      pnr: "ABC123",
-    },
-    {
-      id: "ORD-12344",
-      customer: "Jane Smith",
-      email: "jane@example.com",
-      service: "Dummy Ticket & Hotel",
-      amount: "$35.00",
-      status: "processing",
-      date: "2025-01-15",
-      departure: "Los Angeles (LAX)",
-      arrival: "Paris (CDG)",
-      phone: "+1 234 567 8901",
-      pnr: "DEF456",
-    },
-    {
-      id: "ORD-12343",
-      customer: "Mike Johnson",
-      email: "mike@example.com",
-      service: "Dummy Return Ticket",
-      amount: "$15.00",
-      status: "completed",
-      date: "2025-01-14",
-      departure: "Chicago (ORD)",
-      arrival: "Tokyo (NRT)",
-      phone: "+1 234 567 8902",
-      pnr: "GHI789",
-    },
-    {
-      id: "ORD-12342",
-      customer: "Sarah Williams",
-      email: "sarah@example.com",
-      service: "Dummy Ticket for Visa",
-      amount: "$19.00",
-      status: "pending",
-      date: "2025-01-14",
-      departure: "Miami (MIA)",
-      arrival: "Dubai (DXB)",
-      phone: "+1 234 567 8903",
-      pnr: "JKL012",
-    },
-    {
-      id: "ORD-12341",
-      customer: "David Brown",
-      email: "david@example.com",
-      service: "Dummy Ticket & Hotel",
-      amount: "$35.00",
-      status: "completed",
-      date: "2025-01-13",
-      departure: "San Francisco (SFO)",
-      arrival: "Sydney (SYD)",
-      phone: "+1 234 567 8904",
-      pnr: "MNO345",
-    },
-  ])
-
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
+  const [filterStatus, setFilterStatus] = useState("all") // Changed from statusFilter
   const [selectedOrder, setSelectedOrder] = useState(null)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [orderToDelete, setOrderToDelete] = useState(null)
+  const { toast } = useToast()
+  const supabase = createClient()
 
-  // Simulate API call
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1500))
-        // Set the mock data
-        setOrders(mockOrders)
-      } catch (error) {
-        console.error('Error fetching orders:', error)
-      } finally {
-        setLoading(false)
-      }
+  const fetchOrders = async (showLoader = true) => {
+    if (showLoader) setLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('bookings')
+        .select('*, service_plans(name)')
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+
+      const formattedOrders = data.map(booking => {
+        let passengerName = "Guest"
+        let passengerEmail = "N/A"
+        let passengerPhone = "N/A"
+        let fromCity = "N/A"
+        let toCity = "N/A"
+
+        // Check structure
+        // console.log('Raw Booking Data:', booking)
+
+        try {
+          if (booking.passenger_details) {
+            const details = typeof booking.passenger_details === 'string'
+              ? JSON.parse(booking.passenger_details)
+              : booking.passenger_details
+
+            // console.log('Parsed Details:', details)
+
+            // Handling Array (List of passengers) vs Object (Contact + Passengers)
+            if (Array.isArray(details) && details.length > 0) {
+              // It's an array of passengers
+              const p = details[0]
+              passengerName = `${p.firstName || ''} ${p.lastName || ''}`.trim()
+              passengerEmail = p.email || p.contactEmail || "N/A"
+              passengerPhone = p.phone || p.contactPhone || "N/A"
+
+              fromCity = p.fromCity || p.departureCity || "N/A"
+              toCity = p.toCity || p.arrivalCity || "N/A"
+
+            } else {
+              // It's an object (likely { contactEmail, passengers: [...] } or single passenger)
+              if (details.firstName) {
+                passengerName = `${details.firstName} ${details.lastName}`.trim()
+              }
+              passengerEmail = details.contactEmail || details.email || "N/A"
+              passengerPhone = details.contactPhone || details.phone || "N/A"
+
+              fromCity = details.departureCity || details.fromCity || "N/A"
+              toCity = details.arrivalCity || details.toCity || "N/A"
+            }
+          }
+        } catch (e) { console.error("Error parsing details", e) }
+
+        return {
+          id: booking.id, // ID should never be N/A if row exists
+          customer: passengerName || 'Guest',
+          email: passengerEmail,
+          service: booking.service_plans?.name || 'Unknown Service',
+          amount: parseFloat(booking.amount || 0),
+          currency: booking.currency || 'USD',
+          status: booking.status,
+          date: new Date(booking.created_at).toLocaleDateString(),
+          departure: fromCity,
+          arrival: toCity,
+          phone: passengerPhone,
+          pnr: booking.pnr || 'N/A',
+          payment_intent_id: booking.payment_intent_id || 'N/A',
+          details: { ...booking }
+        }
+      })
+      setOrders(formattedOrders)
+    } catch (error) {
+      console.error('Error fetching orders:', error)
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to fetch orders."
+      })
+    } finally {
+      if (showLoader) setLoading(false)
     }
+  }
 
+  useEffect(() => {
     fetchOrders()
-  }, [mockOrders])
+  }, [])
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true)
+    setLoading(true) // Show skeleton
+    await Promise.all([
+      fetchOrders(false), // Fetch data without toggling loader off
+      new Promise(resolve => setTimeout(resolve, 800))
+    ])
+    setLoading(false) // Hide skeleton only after delay
+    setIsRefreshing(false)
+  }
 
   const filteredOrders = orders.filter((order) => {
     const matchesSearch =
@@ -124,7 +150,7 @@ export function OrdersManagement() {
       order.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
       order.email.toLowerCase().includes(searchQuery.toLowerCase())
 
-    const matchesStatus = statusFilter === "all" || order.status === statusFilter
+    const matchesStatus = filterStatus === "all" || order.status === filterStatus
 
     return matchesSearch && matchesStatus
   })
@@ -139,34 +165,77 @@ export function OrdersManagement() {
     setIsEditDialogOpen(true)
   }
 
-  const handleUpdateStatus = (newStatus) => {
-    setOrders(orders.map((order) => (order.id === selectedOrder.id ? { ...order, status: newStatus } : order)))
-    setIsEditDialogOpen(false)
+  const handleUpdateStatus = async (newStatus) => {
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .update({ status: newStatus })
+        .eq('id', selectedOrder.id)
+
+      if (error) throw error
+
+      toast({
+        title: "Status Updated",
+        description: `Order ${selectedOrder.id} status changed to ${newStatus}`
+      })
+      fetchOrders() // Refresh list
+      setIsEditDialogOpen(false)
+    } catch (error) {
+      console.error('Error updating status:', error)
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update order status."
+      })
+    }
   }
 
-  const handleDeleteClick = (id) => {
-    setOrderToDelete(id)
+  const handleDeleteClick = (order) => {
+    setOrderToDelete(order)
     setIsDeleteDialogOpen(true)
   }
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (orderToDelete) {
-      setOrders(orders.filter((order) => order.id !== orderToDelete))
-      setIsDeleteDialogOpen(false)
-      setOrderToDelete(null)
+      try {
+        const { error } = await supabase
+          .from('bookings')
+          .delete()
+          .eq('id', orderToDelete.id)
+
+        if (error) throw error
+
+        toast({
+          title: "Order Deleted",
+          description: "Order has been permanently removed"
+        })
+        setOrders(orders.filter((order) => order.id !== orderToDelete.id))
+        setIsDeleteDialogOpen(false)
+      } catch (error) {
+        console.error('Error deleting order:', error)
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to delete order."
+        })
+      } finally {
+        setIsDeleteDialogOpen(false)
+        setOrderToDelete(null)
+      }
     }
   }
 
   const handleExport = () => {
     const csv = [
-      ["Order ID", "Customer", "Email", "Service", "Amount", "Status", "Date", "Departure", "Arrival"].join(","),
+      ["Order ID", "Transaction ID", "Customer", "Email", "Service", "Amount", "Status", "Date", "Departure", "Arrival"].join(","),
       ...filteredOrders.map((order) =>
         [
           order.id,
+          order.payment_intent_id,
           order.customer,
           order.email,
           order.service,
-          order.amount,
+          `${order.currency} ${order.amount.toFixed(2)}`,
           order.status,
           order.date,
           order.departure,
@@ -191,10 +260,21 @@ export function OrdersManagement() {
           <h1 className="text-3xl font-bold text-gray-900">Orders Management</h1>
           <p className="text-gray-600 mt-1">Manage and track all customer bookings</p>
         </div>
-        <Button className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white cursor-pointer" onClick={handleExport} disabled={filteredOrders.length === 0}>
-          <Download className="w-4 h-4 mr-2" />
-          Export Orders
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={handleRefresh}
+            title="Refresh"
+            className="cursor-pointer gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${loading || isRefreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+          <Button className="bg-linear-to-r from-[#0066FF] to-[#00D4AA] text-white cursor-pointer" onClick={handleExport} disabled={filteredOrders.length === 0}>
+            <Download className="w-4 h-4 mr-2" />
+            Export Orders
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -211,18 +291,29 @@ export function OrdersManagement() {
                 className="pl-10"
               />
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full md:w-48">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="processing">Processing</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
-              </SelectContent>
-            </Select>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="w-full md:w-48">
+                  <Filter className="w-4 h-4 mr-2" />
+                  Filter by Status
+                  <ChevronDown className="w-4 h-4 ml-auto" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>Status</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {['all', 'pending', 'paid', 'processing', 'completed', 'cancelled'].map((status) => (
+                  <DropdownMenuCheckboxItem
+                    key={status}
+                    checked={filterStatus === status}
+                    onCheckedChange={() => setFilterStatus(status)}
+                    className="capitalize"
+                  >
+                    {status}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </CardContent>
       </Card>
@@ -230,7 +321,7 @@ export function OrdersManagement() {
       {/* Orders Table */}
       <Card>
         <CardHeader>
-          <CardTitle>All Orders</CardTitle>
+          <CardTitle>All Orders {loading ? '' : `(${filteredOrders.length})`}</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -241,6 +332,7 @@ export function OrdersManagement() {
                 <thead>
                   <tr className="border-b border-gray-200">
                     <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Order ID</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Transaction ID</th>
                     <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Customer</th>
                     <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Service</th>
                     <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Route</th>
@@ -250,108 +342,118 @@ export function OrdersManagement() {
                     <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Actions</th>
                   </tr>
                 </thead>
-              <tbody>
-                {filteredOrders.length > 0 ? (
-                  filteredOrders.map((order) => (
-                    <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                      <td className="py-3 px-4 text-sm font-medium text-gray-900">{order.id}</td>
-                      <td className="py-3 px-4">
-                        <div className="flex flex-col">
-                          <span className="text-sm font-medium text-gray-900">{order.customer}</span>
-                          <span className="text-xs text-gray-500">{order.email}</span>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 text-sm text-gray-700">{order.service}</td>
-                      <td className="py-3 px-4">
-                        <div className="flex flex-col">
-                          <span className="text-xs text-gray-600">{order.departure}</span>
-                          <span className="text-xs text-gray-400">→</span>
-                          <span className="text-xs text-gray-600">{order.arrival}</span>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 text-sm font-semibold text-gray-900">{order.amount}</td>
-                      <td className="py-3 px-4">
-                        <Badge
-                          variant={
-                            order.status === "completed"
-                              ? "default"
-                              : order.status === "processing"
-                                ? "secondary"
-                                : "outline"
-                          }
-                          className={
-                            order.status === "completed"
-                              ? "bg-green-100 text-green-700 hover:bg-green-100"
-                              : order.status === "processing"
-                                ? "bg-blue-100 text-blue-700 hover:bg-blue-100"
-                                : "bg-yellow-100 text-yellow-700 hover:bg-yellow-100"
-                          }
-                        >
-                          {order.status}
-                        </Badge>
-                      </td>
-                      <td className="py-3 px-4 text-sm text-gray-600">{order.date}</td>
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm" onClick={() => handleView(order)}>
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm" onClick={() => handleEdit(order)}>
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-red-600 hover:text-red-700"
-                            onClick={() => handleDeleteClick(order.id)}
+                <tbody>
+                  {filteredOrders.length > 0 ? (
+                    filteredOrders.map((order) => (
+                      <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                        <td className="py-3 px-4 text-sm font-medium text-gray-900 break-all" title={order.id}>{order.id}</td>
+                        <td className="py-3 px-4 text-sm font-medium text-gray-900 break-all" title={order.payment_intent_id}>{order.payment_intent_id}</td>
+                        <td className="py-3 px-4">
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium text-gray-900">{order.customer}</span>
+                            <span className="text-xs text-gray-500">{order.email}</span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 text-sm text-gray-700">{order.service}</td>
+                        <td className="py-3 px-4">
+                          <div className="flex flex-col">
+                            <span className="text-xs text-gray-600">{order.departure}</span>
+                            <span className="text-xs text-gray-400">→</span>
+                            <span className="text-xs text-gray-600">{order.arrival}</span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 text-sm font-semibold text-gray-900">${order.amount.toFixed(2)}</td>
+                        <td className="py-3 px-4">
+                          <Badge
+                            variant={
+                              order.status === "completed" || order.status === "paid"
+                                ? "default"
+                                : order.status === "processing"
+                                  ? "secondary"
+                                  : "outline"
+                            }
+                            className={
+                              order.status === "completed" || order.status === "paid"
+                                ? "bg-green-100 text-green-700 hover:bg-green-100"
+                                : order.status === "processing"
+                                  ? "bg-blue-100 text-blue-700 hover:bg-blue-100"
+                                  : "bg-yellow-100 text-yellow-700 hover:bg-yellow-100"
+                            }
                           >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
+                            {order.status}
+                          </Badge>
+                        </td>
+                        <td className="py-3 px-4 text-sm text-gray-600">{order.date}</td>
+                        <td className="py-3 px-4">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreHorizontal className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleView(order)}>
+                                <Eye className="w-4 h-4 mr-2" />
+                                View Details
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleEdit(order)}>
+                                <Pencil className="w-4 h-4 mr-2" />
+                                Update Status
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                className="text-red-600 focus:text-red-600"
+                                onClick={() => handleDeleteClick(order)}
+                              >
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Delete Order
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={9} className="py-12 text-center">
+                        <div className="flex flex-col items-center justify-center space-y-3">
+                          <div className="w-20 h-20 bg-linear-to-br from-blue-50 to-teal-50 rounded-full flex items-center justify-center">
+                            <Search className="w-10 h-10 text-gray-400" />
+                          </div>
+                          <div className="space-y-1">
+                            <h3 className="text-lg font-semibold text-gray-900">No orders found</h3>
+                            <p className="text-sm text-gray-500 max-w-sm mx-auto">
+                              {searchQuery || filterStatus !== "all" ? (
+                                <>
+                                  We couldn't find any orders matching your search criteria.
+                                  <br />
+                                  Try adjusting your filters or search terms.
+                                </>
+                              ) : (
+                                "No orders have been placed yet."
+                              )}
+                            </p>
+                          </div>
+                          {(searchQuery || filterStatus !== "all") && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSearchQuery("")
+                                setFilterStatus("all")
+                              }}
+                              className="mt-2"
+                            >
+                              Clear filters
+                            </Button>
+                          )}
                         </div>
                       </td>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={8} className="py-12 text-center">
-                      <div className="flex flex-col items-center justify-center space-y-3">
-                        <div className="w-20 h-20 bg-gradient-to-br from-blue-50 to-teal-50 rounded-full flex items-center justify-center">
-                          <Search className="w-10 h-10 text-gray-400" />
-                        </div>
-                        <div className="space-y-1">
-                          <h3 className="text-lg font-semibold text-gray-900">No orders found</h3>
-                          <p className="text-sm text-gray-500 max-w-sm mx-auto">
-                            {searchQuery || statusFilter !== "all" ? (
-                              <>
-                                We couldn't find any orders matching your search criteria.
-                                <br />
-                                Try adjusting your filters or search terms.
-                              </>
-                            ) : (
-                              "No orders have been placed yet."
-                            )}
-                          </p>
-                        </div>
-                        {(searchQuery || statusFilter !== "all") && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setSearchQuery("")
-                              setStatusFilter("all")
-                            }}
-                            className="mt-2"
-                          >
-                            Clear filters
-                          </Button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                  )}
+                </tbody>
+              </table>
+            </div>
           )}
         </CardContent>
       </Card>
@@ -360,7 +462,10 @@ export function OrdersManagement() {
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Order Details - {selectedOrder?.id}</DialogTitle>
+            <DialogTitle>Order Details</DialogTitle>
+            <DialogDescription>
+              Full details for order <span className="font-mono text-xs">{selectedOrder?.id}</span>
+            </DialogDescription>
           </DialogHeader>
           {selectedOrder && (
             <div className="space-y-4 py-4">
@@ -395,13 +500,13 @@ export function OrdersManagement() {
                 </div>
                 <div>
                   <Label className="text-gray-600">Amount</Label>
-                  <p className="font-semibold">{selectedOrder.amount}</p>
+                  <p className="font-semibold">${selectedOrder.amount.toFixed(2)}</p>
                 </div>
                 <div>
                   <Label className="text-gray-600">Status</Label>
                   <Badge
                     className={
-                      selectedOrder.status === "completed"
+                      selectedOrder.status === "completed" || selectedOrder.status === "paid"
                         ? "bg-green-100 text-green-700"
                         : selectedOrder.status === "processing"
                           ? "bg-blue-100 text-blue-700"
@@ -415,6 +520,10 @@ export function OrdersManagement() {
                   <Label className="text-gray-600">Date</Label>
                   <p className="font-semibold">{selectedOrder.date}</p>
                 </div>
+                <div className="col-span-2">
+                  <Label className="text-gray-600">Transaction ID</Label>
+                  <p className="font-mono text-xs text-gray-700 break-all">{selectedOrder.payment_intent_id}</p>
+                </div>
               </div>
             </div>
           )}
@@ -425,7 +534,8 @@ export function OrdersManagement() {
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Update Order Status - {selectedOrder?.id}</DialogTitle>
+            <DialogTitle>Update Order Status</DialogTitle>
+            <DialogDescription>Change the status of order <span className="font-mono">{selectedOrder?.id}</span></DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
@@ -443,6 +553,13 @@ export function OrdersManagement() {
                   onClick={() => handleUpdateStatus("pending")}
                 >
                   Pending
+                </Button>
+                <Button
+                  variant="outline"
+                  className="justify-start bg-transparent"
+                  onClick={() => handleUpdateStatus("paid")}
+                >
+                  Paid
                 </Button>
                 <Button
                   variant="outline"
@@ -477,7 +594,7 @@ export function OrdersManagement() {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the order and remove the data from the system.
+              This action cannot be undone. This will permanently delete the order from the database.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

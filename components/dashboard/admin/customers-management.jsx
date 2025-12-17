@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search, Download, Eye, Mail, Phone, Filter, ChevronDown } from "lucide-react"
+import { Search, Download, Eye, Mail, Phone, Filter, ChevronDown, RefreshCw } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -19,144 +19,141 @@ import {
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu"
 import { SkeletonTable } from "@/components/ui/skeleton-table"
+import { createClient } from "@/lib/supabase/client"
+import { useToast } from "@/hooks/use-toast"
 
 export function CustomersManagement() {
   const [customers, setCustomers] = useState([])
   const [loading, setLoading] = useState(true)
-  const [mockCustomers, setMockCustomers] = useState([
-    {
-      id: "CUST-001",
-      name: "John Doe",
-      email: "john@example.com",
-      phone: "+1 234 567 8900",
-      totalOrders: 5,
-      totalSpent: "$95.00",
-      status: "active",
-      joinDate: "2024-12-01",
-      address: "123 Main St, New York, NY 10001",
-      lastOrder: "2025-01-15",
-    },
-    {
-      id: "CUST-002",
-      name: "Jane Smith",
-      email: "jane@example.com",
-      phone: "+1 234 567 8901",
-      totalOrders: 3,
-      totalSpent: "$105.00",
-      status: "active",
-      joinDate: "2024-12-15",
-      address: "456 Oak Ave, Los Angeles, CA 90001",
-      lastOrder: "2025-01-15",
-    },
-    {
-      id: "CUST-003",
-      name: "Mike Johnson",
-      email: "mike@example.com",
-      phone: "+1 234 567 8902",
-      totalOrders: 2,
-      totalSpent: "$30.00",
-      status: "active",
-      joinDate: "2025-01-05",
-      address: "789 Pine Rd, Chicago, IL 60601",
-      lastOrder: "2025-01-14",
-    },
-    {
-      id: "CUST-004",
-      name: "Sarah Williams",
-      email: "sarah@example.com",
-      phone: "+1 234 567 8903",
-      totalOrders: 1,
-      totalSpent: "$19.00",
-      status: "inactive",
-      joinDate: "2025-01-10",
-      address: "321 Elm St, Miami, FL 33101",
-      lastOrder: "2025-01-14",
-    },
-    {
-      id: "CUST-005",
-      name: "David Brown",
-      email: "david@example.com",
-      phone: "+1 234 567 8904",
-      totalOrders: 4,
-      totalSpent: "$140.00",
-      status: "active",
-      joinDate: "2024-11-20",
-      address: "654 Maple Dr, San Francisco, CA 94101",
-      lastOrder: "2025-01-13",
-    },
-  ])
-
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCustomer, setSelectedCustomer] = useState(null)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
+
   // Filter states
   const [filterStatus, setFilterStatus] = useState("all")
   const [filterOrderRange, setFilterOrderRange] = useState("all")
   const [sortBy, setSortBy] = useState("name")
 
-  // Simulate API call
-  useEffect(() => {
-    const fetchCustomers = async () => {
-      try {
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1200))
-        // Set the mock data
-        setCustomers(mockCustomers)
-      } catch (error) {
-        console.error('Error fetching customers:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
+  const { toast } = useToast()
+  const supabase = createClient()
 
+  const fetchCustomers = async (showLoader = true) => {
+    if (showLoader) setLoading(true)
+    try {
+      // Fetch user profiles
+      const { data: profiles, error: profilesError } = await supabase
+        .from('user_profiles')
+        .select('*')
+
+      if (profilesError) throw profilesError
+
+      // Fetch all bookings to aggregate stats
+      const { data: bookings, error: bookingsError } = await supabase
+        .from('bookings')
+        .select('user_id, amount, passenger_details, created_at') // Added passenger_details
+
+      if (bookingsError) throw bookingsError
+
+      // Helper to extract email from passenger_details
+      const getEmailFromDetails = (details) => {
+        if (!details) return null
+        try {
+          const d = typeof details === 'string' ? JSON.parse(details) : details
+          if (Array.isArray(d) && d.length > 0) return d[0].email || d[0].contactEmail
+          return d.contactEmail || d.email
+        } catch (e) { return null }
+      }
+
+      const formattedCustomers = profiles.map(profile => {
+        // Aggregate booking stats per user
+        // Match by user_id OR email
+        const customerBookings = bookings.filter(b => {
+          const matchesId = b.user_id === profile.user_id || b.user_id === profile.id
+          if (matchesId) return true
+
+          // Fallback: match by email if user_id is missing
+          const bookingEmail = getEmailFromDetails(b.passenger_details)
+          return bookingEmail && bookingEmail.toLowerCase() === profile.email?.toLowerCase()
+        })
+
+        const count = customerBookings.length
+        const spent = customerBookings.reduce((sum, b) => sum + parseFloat(b.amount || 0), 0)
+
+        const name = profile.first_name ? `${profile.first_name} ${profile.last_name || ''}` : 'Guest User'
+
+        return {
+          id: (profile.user_id || profile.id || '').toString(), // Use user_id as primary, fallback to record id
+          name: name.trim(),
+          email: profile.email || 'N/A',
+          phone: profile.phone_number || 'N/A',
+          location: `${profile.city || ''}, ${profile.country || ''}`.replace(/^, $/, 'N/A'),
+          orders: count,
+          spent: spent,
+          status: "active", // Defaulting to active as we don't have a status field
+          joinDate: new Date(profile.created_at || Date.now()).toLocaleDateString(),
+        }
+      })
+
+      setCustomers(formattedCustomers)
+    } catch (error) {
+      console.error('Error fetching customers:', error)
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to fetch customers."
+      })
+    } finally {
+      if (showLoader) setLoading(false)
+    }
+  }
+
+  useEffect(() => {
     fetchCustomers()
-  }, [mockCustomers])
+  }, [])
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true)
+    setLoading(true) // Show skeleton
+    await Promise.all([
+      fetchCustomers(false), // Fetch data without toggling loader off
+      new Promise(resolve => setTimeout(resolve, 1500)) // Extended duration for smooth feel
+    ])
+    setLoading(false) // Hide skeleton only after delay
+    setIsRefreshing(false)
+  }
 
   // Apply filters and search
   const filteredCustomers = customers
     .filter(
       (customer) =>
         (customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        customer.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        customer.phone.includes(searchQuery)) &&
-        (filterStatus === "all" || customer.status === filterStatus) &&
-        (filterOrderRange === "all" || 
-          (filterOrderRange === "0-2" && customer.totalOrders <= 2) ||
-          (filterOrderRange === "3-5" && customer.totalOrders >= 3 && customer.totalOrders <= 5) ||
-          (filterOrderRange === "5+" && customer.totalOrders > 5))
+          customer.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          customer.phone.includes(searchQuery)) &&
+        (filterStatus === "all" || customer.status === filterStatus)
     )
     .sort((a, b) => {
-      switch(sortBy) {
-        case "name":
-          return a.name.localeCompare(b.name)
-        case "orders":
-          return b.totalOrders - a.totalOrders
-        case "spent":
-          return parseFloat(b.totalSpent.replace("$", "")) - parseFloat(a.totalSpent.replace("$", ""))
-        case "date":
-          return new Date(b.joinDate) - new Date(a.joinDate)
-        default:
-          return 0
-      }
+      // Default sort by name
+      return a.name.localeCompare(b.name)
     })
 
   const handleView = (customer) => {
     setSelectedCustomer(customer)
-    setIsDialogOpen(true)
+    setIsViewDialogOpen(true)
   }
 
   const handleExport = () => {
     const csv = [
-      ["Customer ID", "Name", "Email", "Phone", "Total Orders", "Total Spent", "Status", "Join Date"].join(","),
+      ["Customer ID", "Name", "Email", "Phone", "Location", "Orders", "Total Spent", "Status", "Join Date"].join(","),
       ...filteredCustomers.map((customer) =>
         [
           customer.id,
           customer.name,
           customer.email,
           customer.phone,
-          customer.totalOrders,
-          customer.totalSpent,
+          `"${customer.location}"`, // Quote location to handle commas
+          customer.orders,
+          customer.spent,
           customer.status,
           customer.joinDate,
         ].join(","),
@@ -180,8 +177,6 @@ export function CustomersManagement() {
 
   const activeFiltersCount = [
     filterStatus !== "all",
-    filterOrderRange !== "all",
-    sortBy !== "name"
   ].filter(Boolean).length
 
   // No Results Component
@@ -197,16 +192,16 @@ export function CustomersManagement() {
               {searchQuery || activeFiltersCount > 0 ? "No customers found" : "No customers yet"}
             </p>
             <p className="text-sm text-gray-500 mt-1">
-              {searchQuery 
+              {searchQuery
                 ? `No results for "${searchQuery}". Try different search terms.`
                 : activeFiltersCount > 0
-                ? "Try adjusting your filters"
-                : "Add your first customer to get started"}
+                  ? "Try adjusting your filters"
+                  : "Add your first customer to get started"}
             </p>
           </div>
           {(searchQuery || activeFiltersCount > 0) && (
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               size="sm"
               onClick={clearFilters}
               className="mt-2"
@@ -227,14 +222,25 @@ export function CustomersManagement() {
           <h1 className="text-3xl font-bold text-gray-900">Customers Management</h1>
           <p className="text-gray-600 mt-1">View and manage customer information</p>
         </div>
-        <Button 
-          className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white cursor-pointer" 
-          onClick={handleExport}
-          disabled={filteredCustomers.length === 0}
-        >
-          <Download className="w-4 h-4 mr-2" />
-          Export Customers
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={fetchCustomers}
+            title="Refresh"
+            className="cursor-pointer gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${loading || isRefreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+          <Button
+            className="bg-linear-to-r from-[#0066FF] to-[#00D4AA] text-white cursor-pointer"
+            onClick={handleExport}
+            disabled={filteredCustomers.length === 0}
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Export Customers
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -251,7 +257,7 @@ export function CustomersManagement() {
                 className="pl-10"
               />
             </div>
-            
+
             {/* Filter Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -259,7 +265,7 @@ export function CustomersManagement() {
                   <Filter className="w-4 h-4 mr-2" />
                   Filters
                   {activeFiltersCount > 0 && (
-                    <Badge className="ml-2 px-1.5 py-0 h-5 bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white">
+                    <Badge className="ml-2 px-1.5 py-0 h-5 bg-linear-to-r from-[#0066FF] to-[#00D4AA] text-white">
                       {activeFiltersCount}
                     </Badge>
                   )}
@@ -267,6 +273,7 @@ export function CustomersManagement() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuSeparator />
                 <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuCheckboxItem
@@ -287,55 +294,11 @@ export function CustomersManagement() {
                 >
                   Inactive Only
                 </DropdownMenuCheckboxItem>
-                
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel>Order Count</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuCheckboxItem
-                  checked={filterOrderRange === "all"}
-                  onCheckedChange={() => setFilterOrderRange("all")}
-                >
-                  All Orders
-                </DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem
-                  checked={filterOrderRange === "0-2"}
-                  onCheckedChange={() => setFilterOrderRange("0-2")}
-                >
-                  0-2 Orders
-                </DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem
-                  checked={filterOrderRange === "3-5"}
-                  onCheckedChange={() => setFilterOrderRange("3-5")}
-                >
-                  3-5 Orders
-                </DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem
-                  checked={filterOrderRange === "5+"}
-                  onCheckedChange={() => setFilterOrderRange("5+")}
-                >
-                  5+ Orders
-                </DropdownMenuCheckboxItem>
-                
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel>Sort By</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setSortBy("name")}>
-                  Name {sortBy === "name" && "✓"}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSortBy("orders")}>
-                  Total Orders {sortBy === "orders" && "✓"}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSortBy("spent")}>
-                  Total Spent {sortBy === "spent" && "✓"}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSortBy("date")}>
-                  Join Date {sortBy === "date" && "✓"}
-                </DropdownMenuItem>
-                
+
                 {activeFiltersCount > 0 && (
                   <>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem 
+                    <DropdownMenuItem
                       onClick={clearFilters}
                       className="text-red-600 focus:text-red-600"
                     >
@@ -378,71 +341,71 @@ export function CustomersManagement() {
                     <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Actions</th>
                   </tr>
                 </thead>
-              <tbody>
-                {filteredCustomers.length > 0 ? (
-                  filteredCustomers.map((customer) => (
-                    <tr key={customer.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-3">
-                          <Avatar>
-                            <AvatarFallback className="bg-gradient-to-br from-[#0066FF] to-[#00D4AA] text-white">
-                              {customer.name
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex flex-col">
-                            <span className="text-sm font-medium text-gray-900">{customer.name}</span>
-                            <span className="text-xs text-gray-500">{customer.id}</span>
+                <tbody>
+                  {filteredCustomers.length > 0 ? (
+                    filteredCustomers.map((customer) => (
+                      <tr key={customer.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-3">
+                            <Avatar>
+                              <AvatarFallback className="bg-linear-to-br from-[#0066FF] to-[#00D4AA] text-white">
+                                {customer.name
+                                  .split(" ")
+                                  .map((n) => n[0])
+                                  .join("")}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex flex-col">
+                              <span className="text-sm font-medium text-gray-900">{customer.name}</span>
+                              <span className="text-xs text-gray-500 font-mono break-all" title={customer.id}>{customer.id}</span>
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="flex flex-col gap-1">
-                          <div className="flex items-center gap-2 text-xs text-gray-600">
-                            <Mail className="w-3 h-3" />
-                            {customer.email}
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-2 text-xs text-gray-600">
+                              <Mail className="w-3 h-3" />
+                              {customer.email}
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-gray-600">
+                              <Phone className="w-3 h-3" />
+                              {customer.phone}
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2 text-xs text-gray-600">
-                            <Phone className="w-3 h-3" />
-                            {customer.phone}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 text-sm text-gray-700">{customer.totalOrders}</td>
-                      <td className="py-3 px-4 text-sm font-semibold text-gray-900">{customer.totalSpent}</td>
-                      <td className="py-3 px-4">
-                        <Badge
-                          variant={customer.status === "active" ? "default" : "outline"}
-                          className={
-                            customer.status === "active"
-                              ? "bg-green-100 text-green-700 hover:bg-green-100"
-                              : "bg-gray-100 text-gray-700 hover:bg-gray-100"
-                          }
-                        >
-                          {customer.status}
-                        </Badge>
-                      </td>
-                      <td className="py-3 px-4 text-sm text-gray-600">{customer.joinDate}</td>
-                      <td className="py-3 px-4">
-                        <Button variant="ghost" size="sm" onClick={() => handleView(customer)}>
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <NoResultsMessage />
-                )}
-              </tbody>
-            </table>
-          </div>
+                        </td>
+                        <td className="py-3 px-4 text-sm text-gray-700">{customer.orders}</td>
+                        <td className="py-3 px-4 text-sm font-semibold text-gray-900">${customer.spent.toFixed(2)}</td>
+                        <td className="py-3 px-4">
+                          <Badge
+                            variant={customer.status === "active" ? "default" : "outline"}
+                            className={
+                              customer.status === "active"
+                                ? "bg-green-100 text-green-700 hover:bg-green-100"
+                                : "bg-gray-100 text-gray-700 hover:bg-gray-100"
+                            }
+                          >
+                            {customer.status}
+                          </Badge>
+                        </td>
+                        <td className="py-3 px-4 text-sm text-gray-600">{customer.joinDate}</td>
+                        <td className="py-3 px-4">
+                          <Button variant="ghost" size="sm" onClick={() => handleView(customer)}>
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <NoResultsMessage />
+                  )}
+                </tbody>
+              </table>
+            </div>
           )}
         </CardContent>
       </Card>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Customer Details - {selectedCustomer?.id}</DialogTitle>
@@ -451,7 +414,7 @@ export function CustomersManagement() {
             <div className="space-y-6 py-4">
               <div className="flex items-center gap-4">
                 <Avatar className="w-16 h-16">
-                  <AvatarFallback className="bg-gradient-to-br from-[#0066FF] to-[#00D4AA] text-white text-xl">
+                  <AvatarFallback className="bg-linear-to-br from-[#0066FF] to-[#00D4AA] text-white text-xl">
                     {selectedCustomer.name
                       .split(" ")
                       .map((n) => n[0])
@@ -474,8 +437,8 @@ export function CustomersManagement() {
                   <p className="font-semibold">{selectedCustomer.phone}</p>
                 </div>
                 <div>
-                  <Label className="text-gray-600">Address</Label>
-                  <p className="font-semibold">{selectedCustomer.address}</p>
+                  <Label className="text-gray-600">Location</Label>
+                  <p className="font-semibold">{selectedCustomer.location}</p>
                 </div>
                 <div>
                   <Label className="text-gray-600">Join Date</Label>
@@ -483,15 +446,11 @@ export function CustomersManagement() {
                 </div>
                 <div>
                   <Label className="text-gray-600">Total Orders</Label>
-                  <p className="font-semibold">{selectedCustomer.totalOrders}</p>
+                  <p className="font-semibold">{selectedCustomer.orders}</p>
                 </div>
                 <div>
                   <Label className="text-gray-600">Total Spent</Label>
-                  <p className="font-semibold">{selectedCustomer.totalSpent}</p>
-                </div>
-                <div>
-                  <Label className="text-gray-600">Last Order</Label>
-                  <p className="font-semibold">{selectedCustomer.lastOrder}</p>
+                  <p className="font-semibold">${selectedCustomer.spent.toFixed(2)}</p>
                 </div>
                 <div>
                   <Label className="text-gray-600">Status</Label>
