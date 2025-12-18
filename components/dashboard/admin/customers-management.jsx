@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search, Download, Eye, Mail, Phone, Filter, ChevronDown, RefreshCw } from "lucide-react"
+import { Search, Download, Eye, Mail, Phone, Filter, ChevronDown, RefreshCw, Trash2 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -18,9 +18,20 @@ import {
   DropdownMenuTrigger,
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { SkeletonTable } from "@/components/ui/skeleton-table"
 import { createClient } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
+import { RefreshButton } from "@/components/ui/refresh-button"
 
 export function CustomersManagement() {
   const [customers, setCustomers] = useState([])
@@ -29,6 +40,8 @@ export function CustomersManagement() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCustomer, setSelectedCustomer] = useState(null)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [customerToDelete, setCustomerToDelete] = useState(null)
 
   // Filter states
   const [filterStatus, setFilterStatus] = useState("all")
@@ -41,60 +54,92 @@ export function CustomersManagement() {
   const fetchCustomers = async (showLoader = true) => {
     if (showLoader) setLoading(true)
     try {
-      // Fetch user profiles
-      const { data: profiles, error: profilesError } = await supabase
-        .from('user_profiles')
-        .select('*')
+      // Fetch user profiles and all bookings in parallel
+      const [{ data: profiles, error: profilesError }, { data: bookings, error: bookingsError }] = await Promise.all([
+        supabase.from('user_profiles').select('*'),
+        supabase.from('bookings').select('user_id, amount, passenger_details, created_at')
+      ])
 
       if (profilesError) throw profilesError
-
-      // Fetch all bookings to aggregate stats
-      const { data: bookings, error: bookingsError } = await supabase
-        .from('bookings')
-        .select('user_id, amount, passenger_details, created_at') // Added passenger_details
-
       if (bookingsError) throw bookingsError
 
-      // Helper to extract email from passenger_details
-      const getEmailFromDetails = (details) => {
-        if (!details) return null
+      // Helper to extract info from passenger_details
+      const getInfoFromDetails = (details) => {
+        if (!details) return {}
         try {
           const d = typeof details === 'string' ? JSON.parse(details) : details
-          if (Array.isArray(d) && d.length > 0) return d[0].email || d[0].contactEmail
-          return d.contactEmail || d.email
-        } catch (e) { return null }
+          // Some structures might be an array, some a single object
+          const p = Array.isArray(d) ? d[0] : d
+          return {
+            email: p?.email || p?.contactEmail || p?.deliveryEmail || null,
+            firstName: p?.firstName || p?.name || null,
+            lastName: p?.lastName || null,
+            phone: p?.phone || p?.whatsappNumber || null
+          }
+        } catch (e) { return {} }
       }
 
-      const formattedCustomers = profiles.map(profile => {
-        // Aggregate booking stats per user
-        // Match by user_id OR email
-        const customerBookings = bookings.filter(b => {
-          const matchesId = b.user_id === profile.user_id || b.user_id === profile.id
-          if (matchesId) return true
+      // We'll use a Map to keep track of unique customers by user_id
+      const customerMap = new Map()
 
-          // Fallback: match by email if user_id is missing
-          const bookingEmail = getEmailFromDetails(b.passenger_details)
-          return bookingEmail && bookingEmail.toLowerCase() === profile.email?.toLowerCase()
-        })
-
-        const count = customerBookings.length
-        const spent = customerBookings.reduce((sum, b) => sum + parseFloat(b.amount || 0), 0)
-
-        const name = profile.first_name ? `${profile.first_name} ${profile.last_name || ''}` : 'Guest User'
-
-        return {
-          id: (profile.user_id || profile.id || '').toString(), // Use user_id as primary, fallback to record id
-          name: name.trim(),
+      // 1. Initialize from Profiles
+      profiles?.forEach(profile => {
+        const id = profile.user_id || profile.id
+        customerMap.set(id, {
+          id: id.toString(),
+          name: profile.first_name ? `${profile.first_name} ${profile.last_name || ''}`.trim() : 'Guest User',
           email: profile.email || 'N/A',
           phone: profile.phone_number || 'N/A',
           location: `${profile.city || ''}, ${profile.country || ''}`.replace(/^, $/, 'N/A'),
-          orders: count,
-          spent: spent,
-          status: "active", // Defaulting to active as we don't have a status field
+          orders: 0,
+          spent: 0,
+          status: "active",
           joinDate: new Date(profile.created_at || Date.now()).toLocaleDateString(),
+          rawJoinDate: new Date(profile.created_at || Date.now())
+        })
+      })
+
+      // 2. Aggregate Bookings and add missing users
+      bookings?.forEach(booking => {
+        const userId = booking.user_id
+
+        // If user_id is missing, it's a guest checkout, skip or handle separately?
+        // For now, only handle authenticated users that might be missing from profile table
+        if (!userId) return
+
+        let customer = customerMap.get(userId)
+
+        if (!customer) {
+          // If customer not in profiles, extract from passenger details
+          const info = getInfoFromDetails(booking.passenger_details)
+          customer = {
+            id: userId.toString(),
+            name: info.firstName ? `${info.firstName} ${info.lastName || ''}`.trim() : 'Guest User',
+            email: info.email || 'N/A',
+            phone: info.phone || 'N/A',
+            location: 'N/A',
+            orders: 0,
+            spent: 0,
+            status: "active",
+            joinDate: new Date(booking.created_at).toLocaleDateString(),
+            rawJoinDate: new Date(booking.created_at)
+          }
+          customerMap.set(userId, customer)
+        }
+
+        // Update stats
+        customer.orders += 1
+        customer.spent += parseFloat(booking.amount || 0)
+
+        // Update join date if booking is older than current join date
+        const bookingDate = new Date(booking.created_at)
+        if (bookingDate < customer.rawJoinDate) {
+          customer.rawJoinDate = bookingDate
+          customer.joinDate = bookingDate.toLocaleDateString()
         }
       })
 
+      const formattedCustomers = Array.from(customerMap.values())
       setCustomers(formattedCustomers)
     } catch (error) {
       console.error('Error fetching customers:', error)
@@ -114,13 +159,51 @@ export function CustomersManagement() {
 
   const handleRefresh = async () => {
     setIsRefreshing(true)
-    setLoading(true) // Show skeleton
-    await Promise.all([
-      fetchCustomers(false), // Fetch data without toggling loader off
-      new Promise(resolve => setTimeout(resolve, 1500)) // Extended duration for smooth feel
-    ])
-    setLoading(false) // Hide skeleton only after delay
-    setIsRefreshing(false)
+    setLoading(true)
+    try {
+      await fetchCustomers(false)
+      // Small delay for UI feel
+      await new Promise(resolve => setTimeout(resolve, 800))
+    } finally {
+      setLoading(false)
+      setIsRefreshing(false)
+    }
+  }
+
+  const handleDeleteClick = (customer) => {
+    setCustomerToDelete(customer)
+    setIsDeleteDialogOpen(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!customerToDelete) return
+
+    try {
+      const { error } = await supabase
+        .from('user_profiles')
+        .delete()
+        .eq('user_id', customerToDelete.id)
+
+      if (error) throw error
+
+      toast({
+        title: "Success",
+        description: "Customer record deleted successfully."
+      })
+
+      // Update local state
+      setCustomers(prev => prev.filter(c => c.id !== customerToDelete.id))
+    } catch (error) {
+      console.error('Error deleting customer:', error)
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to delete customer record."
+      })
+    } finally {
+      setIsDeleteDialogOpen(false)
+      setCustomerToDelete(null)
+    }
   }
 
   // Apply filters and search
@@ -223,15 +306,10 @@ export function CustomersManagement() {
           <p className="text-gray-600 mt-1">View and manage customer information</p>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={fetchCustomers}
-            title="Refresh"
-            className="cursor-pointer gap-2"
-          >
-            <RefreshCw className={`h-4 w-4 ${loading || isRefreshing ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
+          <RefreshButton
+            onRefreshStart={handleRefresh}
+            className="cursor-pointer"
+          />
           <Button
             className="bg-linear-to-r from-[#0066FF] to-[#00D4AA] text-white cursor-pointer"
             onClick={handleExport}
@@ -389,9 +467,19 @@ export function CustomersManagement() {
                         </td>
                         <td className="py-3 px-4 text-sm text-gray-600">{customer.joinDate}</td>
                         <td className="py-3 px-4">
-                          <Button variant="ghost" size="sm" onClick={() => handleView(customer)}>
-                            <Eye className="w-4 h-4" />
-                          </Button>
+                          <div className="flex items-center gap-2">
+                            <Button variant="ghost" size="sm" onClick={() => handleView(customer)}>
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteClick(customer)}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     ))
@@ -467,6 +555,24 @@ export function CustomersManagement() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the customer's profile record from the database.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete} className="bg-red-600 hover:bg-red-700 text-white">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
