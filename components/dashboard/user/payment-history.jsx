@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -8,12 +8,18 @@ import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Search, Download, CreditCard, CheckCircle, FileX } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { RefreshButton } from "@/components/ui/refresh-button"
 
 export function PaymentHistory({ initialPayments = [] }) {
   const [searchTerm, setSearchTerm] = useState("")
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const { toast } = useToast()
 
-  const payments = initialPayments
+  const [payments, setPayments] = useState(initialPayments)
+
+  useEffect(() => {
+    setPayments(initialPayments)
+  }, [initialPayments])
 
   const filteredPayments = payments.filter(
     (payment) =>
@@ -186,10 +192,16 @@ startxref
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="lg:text-3xl text-2xl font-bold">Payment History</h2>
-        <Button className="cursor-pointer" variant="outline" onClick={handleExportAll} disabled={filteredPayments.length === 0}>
-          <Download className="mr-2 h-4 w-4" />
-          Export All
-        </Button>
+        <div className="flex items-center gap-2">
+          <RefreshButton
+            onRefreshStart={() => setIsRefreshing(true)}
+            onRefreshEnd={() => setIsRefreshing(false)}
+          />
+          <Button className="cursor-pointer" variant="outline" onClick={handleExportAll} disabled={filteredPayments.length === 0}>
+            <Download className="mr-2 h-4 w-4" />
+            Export All
+          </Button>
+        </div>
       </div>
 
       {/* Summary Cards */}
@@ -258,7 +270,20 @@ startxref
           <CardTitle>Transaction History</CardTitle>
         </CardHeader>
         <CardContent>
-          {filteredPayments.length > 0 ? (
+          {isRefreshing ? (
+            <div className="space-y-4">
+              {Array(3).fill(0).map((_, i) => (
+                <div key={i} className="flex items-center space-x-4 p-4 border rounded-lg animate-pulse">
+                  <div className="h-4 bg-gray-200 rounded w-1/6"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/6"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/6"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/12"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/12"></div>
+                </div>
+              ))}
+            </div>
+          ) : filteredPayments.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>

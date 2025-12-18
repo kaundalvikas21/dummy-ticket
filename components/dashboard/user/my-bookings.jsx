@@ -11,6 +11,7 @@ import { Search, Eye, Download, Plane, Calendar } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
 import { SkeletonCard, SkeletonCardContent } from "@/components/ui/skeleton-card"
+import { RefreshButton } from "@/components/ui/refresh-button"
 
 const Booking = {
   id: "",
@@ -40,8 +41,13 @@ export function MyBookings({ setActiveSection, initialBookings = [] }) {
 
   const router = useRouter()
   const { toast } = useToast()
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   const [bookings, setBookings] = useState(initialBookings)
+
+  useEffect(() => {
+    setBookings(initialBookings)
+  }, [initialBookings])
 
   const filteredBookings = bookings.filter((booking) => {
     const matchesSearch =
@@ -237,7 +243,13 @@ startxref
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="lg:text-3xl text-2xl font-bold">My Bookings</h2>
-        <Button className="cursor-pointer" onClick={() => router.push("/buy-ticket")}>Book New Ticket</Button>
+        <div className="flex items-center gap-2">
+          <RefreshButton
+            onRefreshStart={() => setIsRefreshing(true)}
+            onRefreshEnd={() => setIsRefreshing(false)}
+          />
+          <Button className="cursor-pointer" onClick={() => router.push("/buy-ticket")}>Book New Ticket</Button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -271,7 +283,7 @@ startxref
 
       {/* Bookings List */}
       <div className="space-y-4">
-        {loading ? (
+        {loading || isRefreshing ? (
           // Loading skeleton cards
           Array.from({ length: 3 }).map((_, i) => (
             <SkeletonCard key={i}>
