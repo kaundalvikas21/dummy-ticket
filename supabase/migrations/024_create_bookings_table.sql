@@ -1,5 +1,5 @@
 create table bookings (
-  id uuid default gen_random_uuid() primary key,
+  id text primary key,
   user_id uuid references auth.users(id),
   plan_id uuid references service_plans(id) not null,
   amount numeric not null,

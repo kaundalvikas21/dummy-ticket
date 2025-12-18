@@ -18,10 +18,16 @@ export async function POST(req) {
 
         const supabase = createAdminClient();
 
+        // Generate Custom ID: TKT-{YEAR}-{SHORT_HASH}
+        const year = new Date().getFullYear();
+        const hash = Math.random().toString(16).substring(2, 8).toUpperCase();
+        const customId = `TKT-${year}-${hash}`;
+
         // 1. Create a Booking Record in Supabase (Pending)
         const { data: booking, error: dbError } = await supabase
             .from("bookings")
             .insert({
+                id: customId,
                 user_id: user?.id || null,
                 plan_id: planId,
                 amount: amount,
