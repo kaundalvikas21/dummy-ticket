@@ -9,39 +9,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Search, Download, CreditCard, CheckCircle, FileX } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
-export function PaymentHistory() {
+export function PaymentHistory({ initialPayments = [] }) {
   const [searchTerm, setSearchTerm] = useState("")
   const { toast } = useToast()
 
-  const payments = [
-    {
-      id: "PAY-001",
-      bookingId: "TKT-12345",
-      date: "Dec 10, 2024",
-      amount: 19,
-      method: "Credit Card",
-      status: "Completed",
-      description: "Visa Ticket - New York to London",
-    },
-    {
-      id: "PAY-002",
-      bookingId: "TKT-12346",
-      date: "Dec 12, 2024",
-      amount: 15,
-      method: "PayPal",
-      status: "Completed",
-      description: "Return Ticket - Paris to Tokyo",
-    },
-    {
-      id: "PAY-003",
-      bookingId: "TKT-12344",
-      date: "Nov 5, 2024",
-      amount: 35,
-      method: "Credit Card",
-      status: "Completed",
-      description: "Ticket & Hotel - Dubai to Singapore",
-    },
-  ]
+  const payments = initialPayments
 
   const filteredPayments = payments.filter(
     (payment) =>
@@ -50,7 +22,7 @@ export function PaymentHistory() {
       payment.description.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
-  const totalSpent = payments.filter((p) => p.status === "Completed").reduce((sum, p) => sum + p.amount, 0)
+  const totalSpent = payments.filter((p) => ["Completed", "Paid"].includes(p.status)).reduce((sum, p) => sum + p.amount, 0)
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -198,7 +170,7 @@ startxref
         {hasSearch ? "No payments found" : "No payment history"}
       </h3>
       <p className="mb-4 text-sm text-gray-500 text-center max-w-sm">
-        {hasSearch 
+        {hasSearch
           ? `No payments match "${searchTerm}". Try searching with different keywords.`
           : "You haven't made any payments yet. Start by booking your first ticket."}
       </p>
@@ -290,7 +262,7 @@ startxref
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Payment ID</TableHead>
+                  <TableHead>Transaction ID</TableHead>
                   <TableHead>Booking ID</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Description</TableHead>

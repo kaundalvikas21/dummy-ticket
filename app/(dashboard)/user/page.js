@@ -2,6 +2,7 @@ import { UserDashboard } from '@/components/dashboard/user/user-dashboard';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import React from 'react';
+import { formatBookingData } from '@/lib/formatters';
 
 const UserDashboardPage = async () => {
   const supabase = await createClient();
@@ -19,17 +20,11 @@ const UserDashboardPage = async () => {
     .eq('id', user.id)
     .single();
 
-  // Fetch all bookings for the user with related plan details
+  // Fetch all bookings
   const { data: bookings, error: dbError } = await supabase
     .from('bookings')
     .select(`
-            id,
-            status,
-            created_at,
-            amount,
-            currency,
-            passenger_details,
-            plan_id,
+            *,
             service_plans (
                 name
             )
@@ -41,89 +36,74 @@ const UserDashboardPage = async () => {
     console.error("Error fetching bookings:", dbError);
   }
 
-  const allBookings = bookings || [];
+  // Normalize data using shared formatter
+  const formattedBookings = (bookings || []).map(formatBookingData);
   const now = new Date();
 
-  // Helper to get booking date from passenger_details or fallback to created_at
-  const getBookingDate = (booking) => {
-    if (booking.passenger_details) {
-      const details = typeof booking.passenger_details === 'string'
-        ? JSON.parse(booking.passenger_details)
-        : booking.passenger_details;
-
-      if (details?.departureDate) {
-        return new Date(details.departureDate);
-      }
-    }
-    return new Date(booking.created_at);
-  };
-
-  // Calculate Stats
+  // Calculate Stats using normalized data
   let activeCount = 0;
   let completedCount = 0;
   let upcomingCount = 0;
 
-  allBookings.forEach(booking => {
-    const bookingDate = getBookingDate(booking);
+  formattedBookings.forEach(booking => {
+    const bookingDate = new Date(booking.date !== "N/A" ? booking.date : booking.rawDate);
+
     // "Active" = Paid & Future or Today
-    if (booking.status === 'paid' && bookingDate >= now) {
+    if (booking.rawStatus === 'paid' && bookingDate >= now) {
       activeCount++;
       upcomingCount++;
     }
     // "Completed" = Paid & Past
-    else if (booking.status === 'paid' && bookingDate < now) {
+    else if (booking.rawStatus === 'paid' && bookingDate < now) {
       completedCount++;
     }
   });
 
   const stats = {
-    total: allBookings.length,
+    total: formattedBookings.length,
     active: activeCount,
     completed: completedCount,
     upcoming: upcomingCount
   };
 
   // Prepare Upcoming Bookings (Top 2 Future Paid/Pending)
-  const upcomingList = allBookings
+  const upcomingList = formattedBookings
     .filter(b => {
-      const d = getBookingDate(b);
+      const d = new Date(b.date !== "N/A" ? b.date : b.rawDate);
       return d >= now;
     })
-    .sort((a, b) => getBookingDate(a) - getBookingDate(b))
-    .slice(0, 2)
-    .map(b => {
-      const details = typeof b.passenger_details === 'string' ? JSON.parse(b.passenger_details) : b.passenger_details || {};
-      const departureCity = details.departureCity || 'Origin';
-      const arrivalCity = details.arrivalCity || 'Dest';
-      const planName = b.service_plans?.name || 'Ticket';
+    .sort((a, b) => {
+      const dA = new Date(a.date !== "N/A" ? a.date : a.rawDate);
+      const dB = new Date(b.date !== "N/A" ? b.date : b.rawDate);
+      return dA - dB;
+    })
+    .slice(0, 2);
 
-      return {
-        id: b.id,
-        route: `${departureCity} → ${arrivalCity}`,
-        date: getBookingDate(b).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-        status: b.status.charAt(0).toUpperCase() + b.status.slice(1),
-        type: planName
-      };
-    });
+  // Helper for relative time
+  const timeAgo = (date) => {
+    const seconds = Math.floor((new Date() - date) / 1000);
+    let interval = seconds / 31536000;
+    if (interval > 1) return Math.floor(interval) + " years ago";
+    interval = seconds / 2592000;
+    if (interval > 1) return Math.floor(interval) + " months ago";
+    interval = seconds / 86400;
+    if (interval > 1) return Math.floor(interval) + " days ago";
+    interval = seconds / 3600;
+    if (interval > 1) return Math.floor(interval) + " hours ago";
+    interval = seconds / 60;
+    if (interval > 1) return Math.floor(interval) + " minutes ago";
+    return Math.floor(seconds) + " seconds ago";
+  };
 
-  // Prepare Recent Activity (Top 3 most recent actions)
-  const recentActivity = allBookings.slice(0, 3).map(b => {
-    let action = "Booking Created";
-    if (b.status === 'paid') action = "Payment Successful";
-    if (b.status === 'cancelled') action = "Booking Cancelled";
-
-    const diffInHours = Math.abs(now - new Date(b.created_at)) / 36e5;
-    let timeStr = "";
-    if (diffInHours < 1) timeStr = "Just now";
-    else if (diffInHours < 24) timeStr = `${Math.floor(diffInHours)} hours ago`;
-    else timeStr = `${Math.floor(diffInHours / 24)} days ago`;
-
-    return {
-      action: action,
+  // Recent Activity (Top 3 latest)
+  // Mapping to props expected by UserDashboard: { action, ticket, time }
+  const recentActivity = formattedBookings
+    .slice(0, 3)
+    .map(b => ({
+      action: b.rawStatus === 'paid' ? 'Booking Confirmed' : 'Booking Created',
       ticket: b.id,
-      time: timeStr
-    };
-  });
+      time: timeAgo(new Date(b.rawDate))
+    }));
 
   return (
     <UserDashboard
