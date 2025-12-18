@@ -31,79 +31,17 @@ const MyBookingsProps = {
   setActiveSection: null,
 }
 
-export function MyBookings({ setActiveSection }) {
+export function MyBookings({ setActiveSection, initialBookings = [] }) {
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [selectedBooking, setSelectedBooking] = useState(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
 
   const router = useRouter()
   const { toast } = useToast()
 
-  const [bookings, setBookings] = useState([])
-  const [mockBookings] = useState([
-    {
-      id: "TKT-12345",
-      route: "New York → London",
-      departure: "JFK Airport",
-      arrival: "Heathrow Airport",
-      date: "Dec 25, 2024",
-      passenger: "John Doe",
-      email: "john@example.com",
-      phone: "+1 234 567 8900",
-      type: "Visa Ticket",
-      status: "Confirmed",
-      amount: 19,
-      bookingDate: "Dec 10, 2024",
-    },
-    {
-      id: "TKT-12346",
-      route: "Paris → Tokyo",
-      departure: "CDG Airport",
-      arrival: "Narita Airport",
-      date: "Jan 15, 2025",
-      passenger: "John Doe",
-      email: "john@example.com",
-      phone: "+1 234 567 8900",
-      type: "Return Ticket",
-      status: "Processing",
-      amount: 15,
-      bookingDate: "Dec 12, 2024",
-    },
-    {
-      id: "TKT-12344",
-      route: "Dubai → Singapore",
-      departure: "DXB Airport",
-      arrival: "Changi Airport",
-      date: "Nov 20, 2024",
-      passenger: "John Doe",
-      email: "john@example.com",
-      phone: "+1 234 567 8900",
-      type: "Ticket & Hotel",
-      status: "Completed",
-      amount: 35,
-      bookingDate: "Nov 5, 2024",
-    },
-  ])
-
-  // Simulate API call
-  useEffect(() => {
-    const fetchBookings = async () => {
-      try {
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        // Set the mock data
-        setBookings(mockBookings)
-      } catch (error) {
-        console.error('Error fetching bookings:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchBookings()
-  }, [mockBookings])
+  const [bookings, setBookings] = useState(initialBookings)
 
   const filteredBookings = bookings.filter((booking) => {
     const matchesSearch =
@@ -292,7 +230,7 @@ startxref
 
   const handleContactSupport = () => {
     setIsDialogOpen(false)
-    setActiveSection("support")
+    router.push("/user/support")
   }
 
   return (
@@ -409,20 +347,20 @@ startxref
               <p className="mb-6 max-w-sm text-sm text-gray-500">
                 {searchTerm || statusFilter !== "all" ? (
                   <>
-                    We couldn't find any bookings matching your search criteria. 
+                    We couldn't find any bookings matching your search criteria.
                     Try adjusting your filters or search terms.
                   </>
                 ) : (
                   <>
-                    You don't have any bookings yet. 
+                    You don't have any bookings yet.
                     Ready to plan your next journey?
                   </>
                 )}
               </p>
               <div className="flex gap-3">
                 {(searchTerm || statusFilter !== "all") && (
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     onClick={() => {
                       setSearchTerm("")
                       setStatusFilter("all")
