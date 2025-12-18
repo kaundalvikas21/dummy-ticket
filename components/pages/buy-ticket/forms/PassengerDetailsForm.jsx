@@ -38,6 +38,8 @@ export function PassengerDetailsForm({ formData, updateFormData }) {
     { value: "Mexico", label: "Mexico" },
     { value: "Thailand", label: "Thailand" },
   ];
+  const today = new Date();
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -105,8 +107,12 @@ export function PassengerDetailsForm({ formData, updateFormData }) {
           onChange={(value) => updateFormData("dateOfBirth", value)}
           placeholder={t('buyTicket.passengerDetails.placeholders.selectDateOfBirth')}
           required
+          captionLayout="dropdown"
+          fromYear={1900}
+          toYear={today.getFullYear()}
+          defaultMonth={formData.dateOfBirth ? new Date(formData.dateOfBirth) : today}
           disabledDate={(date) =>
-            date > new Date() || date < new Date("1900-01-01")
+            date > today || date < new Date("1900-01-01")
           }
         />
 

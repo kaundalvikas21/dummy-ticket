@@ -25,6 +25,8 @@ export function DatePicker({
   captionLayout,
   fromYear,
   toYear,
+  startMonth,
+  endMonth,
   defaultMonth,
 }) {
   const [date, setDate] = React.useState(value ? new Date(value) : undefined)
@@ -76,8 +78,8 @@ export function DatePicker({
               disabled={disabledDate}
               initialFocus
               captionLayout={captionLayout}
-              fromYear={fromYear}
-              toYear={toYear}
+              startMonth={startMonth || (fromYear ? new Date(fromYear, 0) : undefined)}
+              endMonth={endMonth || (toYear ? new Date(toYear, 11) : undefined)}
               defaultMonth={defaultMonth}
             />
           </PopoverContent>
