@@ -23,25 +23,40 @@ export async function POST(req) {
         const hash = Math.random().toString(16).substring(2, 8).toUpperCase();
         const customId = `TKT-${year}-${hash}`;
 
-        // 1. Create a Booking Record in Supabase (Pending)
-        const { data: booking, error: dbError } = await supabase
-            .from("bookings")
-            .insert({
-                id: customId,
-                user_id: user?.id || null,
-                plan_id: planId,
-                amount: amount,
-                currency: currency,
-                status: "pending",
-                passenger_details: formData,
-            })
-            .select()
-            .single();
+        // 1. Prepare metadata by splitting formData (max 500 chars per field)
+        const meta_passenger = JSON.stringify({
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            email: formData.email,
+            phone: formData.phone,
+            passport: formData.passportNumber,
+            dob: formData.dateOfBirth,
+            gender: formData.gender,
+            nationality: formData.nationality
+        });
 
-        if (dbError) {
-            console.error("Database Error:", dbError);
-            return NextResponse.json({ error: "Failed to create booking" }, { status: 500 });
-        }
+        const meta_travel = JSON.stringify({
+            dep_city: formData.departureCity,
+            arr_city: formData.arrivalCity,
+            dep_date: formData.departureDate,
+            ret_date: formData.returnDate,
+            class: formData.travelClass,
+            trip: formData.tripType
+        });
+
+        const meta_delivery = JSON.stringify({
+            method: formData.deliveryMethod,
+            email: formData.deliveryEmail,
+            wa: formData.whatsappNumber
+        });
+
+        const meta_billing = JSON.stringify({
+            name: formData.billingName,
+            addr: formData.billingAddress,
+            city: formData.billingCity,
+            zip: formData.billingZip,
+            country: formData.billingCountry
+        });
 
         // 2. Create Stripe Checkout Session
         // Fetch plan details to ensure price integrity
@@ -76,15 +91,17 @@ export async function POST(req) {
             success_url: `${req.headers.get("origin")}/buy-ticket/success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${req.headers.get("origin")}/buy-ticket?error=cancelled`,
             metadata: {
-                booking_id: booking.id,
+                booking_id: customId,
+                user_id: user?.id || "guest",
+                plan_id: planId,
+                amount: amount.toString(),
+                currency: currency,
+                meta_passenger,
+                meta_travel,
+                meta_delivery,
+                meta_billing
             },
         });
-
-        // 3. Update Booking with Session ID
-        await supabase
-            .from("bookings")
-            .update({ stripe_session_id: session.id })
-            .eq("id", booking.id);
 
         return NextResponse.json({ sessionId: session.id, url: session.url });
     } catch (error) {

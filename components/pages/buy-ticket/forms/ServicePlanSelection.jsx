@@ -28,7 +28,10 @@ export function ServicePlanSelection({ formData, updateFormData, servicePlans })
             key={plan.id}
             plan={plan}
             isSelected={formData.selectedPlan === plan.id}
-            onSelect={() => updateFormData("selectedPlan", plan.id)}
+            onSelect={() => {
+              updateFormData("selectedPlan", plan.id)
+              window.scrollTo({ top: 0, behavior: "smooth" })
+            }}
           />
         ))}
       </div>
@@ -52,8 +55,8 @@ function PlanCard({ plan, isSelected, onSelect }) {
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       className={`relative p-4 md:p-6 rounded-xl md:rounded-2xl border-2 transition-all text-left ${isSelected
-          ? "border-[#0066FF] bg-blue-50 shadow-lg shadow-blue-500/20"
-          : "border-gray-200 hover:border-gray-300 bg-white"
+        ? "border-[#0066FF] bg-blue-50 shadow-lg shadow-blue-500/20"
+        : "border-gray-200 hover:border-gray-300 bg-white"
         }`}
     >
       {plan.popular_label && (

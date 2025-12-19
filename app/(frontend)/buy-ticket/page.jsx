@@ -163,6 +163,7 @@ export default function BuyTicketPage() {
   }
 
   const handlePayment = async () => {
+    window.scrollTo({ top: 0, behavior: "smooth" })
     setLoading(true) // Re-use loading state or create a specific processing state
     try {
       const selectedPlanData = availablePlans.find(p => p.id === formData.selectedPlan)
