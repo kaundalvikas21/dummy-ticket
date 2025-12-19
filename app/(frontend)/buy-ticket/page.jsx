@@ -90,7 +90,7 @@ export default function BuyTicketPage() {
           const { data: profile } = await supabase
             .from('user_profiles')
             .select('*')
-            .eq('user_id', user.id)
+            .eq('auth_user_id', user.id)
             .single()
 
           if (profile) {
