@@ -8,9 +8,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
-import { FileText, Eye, CheckCircle, XCircle, Clock, Search, Filter, Calendar, FileX } from "lucide-react"
+import { FileText, Eye, CheckCircle, XCircle, Clock, Search, Filter, Calendar, FileX, ChevronDown } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+  DropdownMenuItem,
+  DropdownMenuCheckboxItem
+} from "@/components/ui/dropdown-menu"
 
 // Constants
 const STATUS_TYPES = {
@@ -110,12 +118,12 @@ export function DocumentReview() {
   // Memoized calculations
   const filteredDocuments = useMemo(() => {
     return documents.filter((doc) => {
-      const searchMatch = !searchTerm || 
+      const searchMatch = !searchTerm ||
         [doc.userName, doc.userEmail, doc.type]
           .some(field => field.toLowerCase().includes(searchTerm.toLowerCase()))
-      
+
       const statusMatch = statusFilter === "all" || doc.status === statusFilter
-      
+
       return searchMatch && statusMatch
     })
   }, [documents, searchTerm, statusFilter])
@@ -128,6 +136,7 @@ export function DocumentReview() {
   }), [documents])
 
   const hasActiveFilters = searchTerm || statusFilter !== "all"
+  const activeFiltersCount = (statusFilter !== "all" ? 1 : 0) + (searchTerm ? 1 : 0)
 
   // Handlers
   const handleReviewDocument = (doc, action) => {
@@ -147,19 +156,19 @@ export function DocumentReview() {
       return
     }
 
-    setDocuments(prev => prev.map(doc => 
-      doc.id === selectedDocument.id 
+    setDocuments(prev => prev.map(doc =>
+      doc.id === selectedDocument.id
         ? {
-            ...doc,
-            status: reviewAction,
-            reviewedBy: "Admin",
-            reviewDate: new Date().toLocaleDateString("en-US", { 
-              month: "short", 
-              day: "numeric", 
-              year: "numeric" 
-            }),
-            ...(reviewAction === STATUS_TYPES.REJECTED && { rejectionReason: reviewComment })
-          }
+          ...doc,
+          status: reviewAction,
+          reviewedBy: "Admin",
+          reviewDate: new Date().toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric"
+          }),
+          ...(reviewAction === STATUS_TYPES.REJECTED && { rejectionReason: reviewComment })
+        }
         : doc
     ))
 
@@ -262,18 +271,52 @@ export function DocumentReview() {
                 </button>
               )}
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-[180px] h-[44px]">
-                <Filter className="mr-2 h-4 w-4" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className="flex items-center justify-between w-full sm:w-[180px] h-[44px] px-3 py-2 text-sm font-medium transition-colors bg-white border border-gray-200 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none"
+                >
+                  <div className="flex items-center gap-2">
+                    <Filter className="h-4 w-4" />
+                    <span>Filters</span>
+                    {statusFilter !== "all" && (
+                      <Badge variant="secondary" className="px-1.5 py-0 h-5 bg-blue-100 text-blue-700 hover:bg-blue-100 border-none text-[10px] font-bold uppercase tracking-wider">
+                        {statusFilter}
+                      </Badge>
+                    )}
+                  </div>
+                  <ChevronDown className="h-4 w-4 ml-auto text-gray-400" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem
+                  onClick={clearAllFilters}
+                  className="text-red-600 focus:text-red-600 cursor-pointer font-medium bg-red-50/50 hover:bg-red-50"
+                >
+                  <XCircle className="w-4 h-4 mr-2" />
+                  Clear All Filters
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuCheckboxItem
+                  checked={statusFilter === "all"}
+                  onCheckedChange={() => setStatusFilter("all")}
+                >
+                  All Status
+                </DropdownMenuCheckboxItem>
                 {Object.values(STATUS_TYPES).map(status => (
-                  <SelectItem key={status} value={status}>{status}</SelectItem>
+                  <DropdownMenuCheckboxItem
+                    key={status}
+                    checked={statusFilter === status}
+                    onCheckedChange={() => setStatusFilter(status)}
+                  >
+                    {status}
+                  </DropdownMenuCheckboxItem>
                 ))}
-              </SelectContent>
-            </Select>
+
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </CardContent>
       </Card>
@@ -406,8 +449,8 @@ export function DocumentReview() {
               {reviewAction !== "preview" && (
                 <div>
                   <Label>
-                    {reviewAction === STATUS_TYPES.REJECTED 
-                      ? "Rejection Reason (Required)" 
+                    {reviewAction === STATUS_TYPES.REJECTED
+                      ? "Rejection Reason (Required)"
                       : "Review Comment (Optional)"}
                   </Label>
                   <Textarea
@@ -428,9 +471,8 @@ export function DocumentReview() {
                 {reviewAction !== "preview" ? (
                   <>
                     <Button
-                      className={`flex-1 ${
-                        reviewAction === STATUS_TYPES.APPROVED ? "bg-green-600 hover:bg-green-700" : ""
-                      }`}
+                      className={`flex-1 ${reviewAction === STATUS_TYPES.APPROVED ? "bg-green-600 hover:bg-green-700" : ""
+                        }`}
                       onClick={handleSubmitReview}
                     >
                       Confirm {reviewAction}

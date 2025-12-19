@@ -21,14 +21,19 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+  DropdownMenuItem,
+  DropdownMenuCheckboxItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem
+} from "@/components/ui/dropdown-menu"
 import { useToast } from "@/hooks/use-toast"
 import { SkeletonTable } from "@/components/ui/skeleton-table"
+import { ChevronDown } from "lucide-react"
 
 export function ContactSubmissionsViewer() {
   const { toast } = useToast()
@@ -131,6 +136,20 @@ export function ContactSubmissionsViewer() {
     } finally {
       setLoading(false)
     }
+  }
+
+  // Filters logic
+  const activeFiltersCount =
+    (statusFilter !== "all" ? 1 : 0) +
+    (priorityFilter !== "all" ? 1 : 0) +
+    (searchTerm ? 1 : 0)
+
+  const clearAllFilters = () => {
+    setSearchTerm("")
+    setStatusFilter("all")
+    setPriorityFilter("all")
+    setSortBy("created_at")
+    setSortOrder("desc")
   }
 
   useEffect(() => {
@@ -294,75 +313,76 @@ export function ContactSubmissionsViewer() {
       {/* Filters */}
       <Card className="shadow-sm">
         <CardContent className="p-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-            <div className="relative">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="relative w-full md:w-72">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
                 placeholder="Search submissions..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 h-[44px]"
               />
             </div>
 
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                {statusOptions.map(status => (
-                  <SelectItem key={status.value} value={status.value}>
-                    {status.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className="flex items-center justify-between w-full sm:w-auto min-w-[140px] h-[44px] px-3 py-2 text-sm font-medium transition-colors bg-white border border-gray-200 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none"
+                >
+                  <div className="flex items-center gap-2">
+                    <Filter className="h-4 w-4" />
+                    <span>Filters</span>
+                    {activeFiltersCount > 0 && (
+                      <Badge variant="secondary" className="px-1.5 py-0 h-5 bg-blue-100 text-blue-700 hover:bg-blue-100 border-none text-[10px] font-bold uppercase tracking-wider">
+                        {activeFiltersCount}
+                      </Badge>
+                    )}
+                  </div>
+                  <ChevronDown className="h-4 w-4 ml-auto text-gray-400" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-64 max-h-[80vh] overflow-y-auto">
+                <DropdownMenuItem
+                  onClick={clearAllFilters}
+                  className="text-red-600 focus:text-red-600 cursor-pointer font-medium bg-red-50/50 hover:bg-red-50"
+                >
+                  <X className="w-4 h-4 mr-2" />
+                  Clear All Filters
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
 
-            <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by priority" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Priorities</SelectItem>
-                {priorityOptions.map(priority => (
-                  <SelectItem key={priority.value} value={priority.value}>
-                    {priority.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
+                <DropdownMenuRadioGroup value={statusFilter} onValueChange={setStatusFilter}>
+                  <DropdownMenuRadioItem value="all">All Statuses</DropdownMenuRadioItem>
+                  {statusOptions.map(status => (
+                    <DropdownMenuRadioItem key={status.value} value={status.value}>
+                      {status.label}
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
 
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="created_at">Date Created</SelectItem>
-                <SelectItem value="name">Name</SelectItem>
-                <SelectItem value="email">Email</SelectItem>
-                <SelectItem value="subject">Subject</SelectItem>
-                <SelectItem value="priority">Priority</SelectItem>
-                <SelectItem value="status">Status</SelectItem>
-              </SelectContent>
-            </Select>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>Filter by Priority</DropdownMenuLabel>
+                <DropdownMenuRadioGroup value={priorityFilter} onValueChange={setPriorityFilter}>
+                  <DropdownMenuRadioItem value="all">All Priorities</DropdownMenuRadioItem>
+                  {priorityOptions.map(priority => (
+                    <DropdownMenuRadioItem key={priority.value} value={priority.value}>
+                      {priority.label}
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
 
-            <Select value={sortOrder} onValueChange={setSortOrder}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="desc">Newest First</SelectItem>
-                <SelectItem value="asc">Oldest First</SelectItem>
-              </SelectContent>
-            </Select>
+
+
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </CardContent>
       </Card>
 
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card className="shadow-sm transition-all duration-300 hover:shadow-lg hover:bg-gray-50">
+        <Card className="shadow-sm transition-all duration-300 bg-gray-50 hover:shadow-lg hover:bg-white">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -374,7 +394,7 @@ export function ContactSubmissionsViewer() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-sm transition-all duration-300 hover:shadow-lg hover:bg-yellow-50">
+        <Card className="shadow-sm transition-all duration-300 bg-yellow-50 hover:shadow-lg hover:bg-white">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -388,7 +408,7 @@ export function ContactSubmissionsViewer() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-sm transition-all duration-300 hover:shadow-lg hover:bg-blue-50">
+        <Card className="shadow-sm transition-all duration-300 bg-blue-50 hover:shadow-lg hover:bg-white">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -402,7 +422,7 @@ export function ContactSubmissionsViewer() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-sm transition-all duration-300 hover:shadow-lg hover:bg-red-50">
+        <Card className="shadow-sm transition-all duration-300 bg-red-50 hover:shadow-lg hover:bg-white">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>

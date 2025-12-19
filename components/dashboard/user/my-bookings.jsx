@@ -7,11 +7,20 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Search, Eye, Download, Plane, Calendar } from "lucide-react"
+import { Search, Eye, Download, Plane, Calendar, Filter, ChevronDown, XCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
 import { SkeletonCard, SkeletonCardContent } from "@/components/ui/skeleton-card"
 import { RefreshButton } from "@/components/ui/refresh-button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+  DropdownMenuItem,
+  DropdownMenuCheckboxItem
+} from "@/components/ui/dropdown-menu"
 
 const Booking = {
   id: "",
@@ -38,6 +47,13 @@ export function MyBookings({ setActiveSection, initialBookings = [] }) {
   const [selectedBooking, setSelectedBooking] = useState(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+
+  const activeFiltersCount = (statusFilter !== "all" ? 1 : 0) + (searchTerm ? 1 : 0)
+
+  const clearAllFilters = () => {
+    setSearchTerm("")
+    setStatusFilter("all")
+  }
 
   const router = useRouter()
   const { toast } = useToast()
@@ -255,8 +271,8 @@ startxref
       {/* Filters */}
       <Card>
         <CardContent className="p-6">
-          <div className="flex flex-col gap-4 md:flex-row">
-            <div className="relative flex-1">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="relative w-full md:w-80">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <Input
                 placeholder="Search by booking ID or route..."
@@ -265,18 +281,53 @@ startxref
                 className="pl-10"
               />
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full md:w-48">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="confirmed">Confirmed</SelectItem>
-                <SelectItem value="processing">Processing</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
-              </SelectContent>
-            </Select>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className="flex items-center justify-between w-full md:w-48 h-[44px] px-3 py-2 text-sm font-medium transition-colors bg-white border border-gray-200 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none"
+                >
+                  <div className="flex items-center gap-2">
+                    <Filter className="h-4 w-4" />
+                    <span>Filters</span>
+                    {statusFilter !== "all" && (
+                      <Badge variant="secondary" className="px-1.5 py-0 h-5 bg-blue-100 text-blue-700 hover:bg-blue-100 border-none text-[10px] font-bold uppercase tracking-wider">
+                        {statusFilter}
+                      </Badge>
+                    )}
+                  </div>
+                  <ChevronDown className="h-4 w-4 ml-auto text-gray-400" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem
+                  onClick={clearAllFilters}
+                  className="text-red-600 focus:text-red-600 cursor-pointer font-medium bg-red-50/50 hover:bg-red-50"
+                >
+                  <XCircle className="w-4 h-4 mr-2" />
+                  Clear All Filters
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuCheckboxItem
+                  checked={statusFilter === "all"}
+                  onCheckedChange={() => setStatusFilter("all")}
+                >
+                  All Status
+                </DropdownMenuCheckboxItem>
+                {["confirmed", "processing", "completed", "cancelled"].map(status => (
+                  <DropdownMenuCheckboxItem
+                    key={status}
+                    checked={statusFilter === status}
+                    onCheckedChange={() => setStatusFilter(status)}
+                    className="capitalize"
+                  >
+                    {status}
+                  </DropdownMenuCheckboxItem>
+                ))}
+
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </CardContent>
       </Card>
@@ -373,10 +424,7 @@ startxref
                 {(searchTerm || statusFilter !== "all") && (
                   <Button
                     variant="outline"
-                    onClick={() => {
-                      setSearchTerm("")
-                      setStatusFilter("all")
-                    }}
+                    onClick={clearAllFilters}
                   >
                     Clear Filters
                   </Button>

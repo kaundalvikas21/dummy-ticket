@@ -168,12 +168,12 @@ export function DashboardOverview() {
       setRecentOrders(formattedRecentOrders)
 
     } catch (error) {
-      console.error("Error fetching dashboard data:", {
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-        code: error.code,
-        fullError: error
+      console.error("Error fetching dashboard data:", error)
+      console.error("Error details:", {
+        message: error?.message,
+        details: error?.details,
+        hint: error?.hint,
+        code: error?.code
       })
       toast({
         variant: "destructive",

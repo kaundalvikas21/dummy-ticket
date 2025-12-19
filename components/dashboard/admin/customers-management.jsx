@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search, Download, Eye, Mail, Phone, Filter, ChevronDown, RefreshCw, Trash2 } from "lucide-react"
+import { Search, Download, Eye, Mail, Phone, Filter, ChevronDown, RefreshCw, Trash2, XCircle } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -145,6 +145,12 @@ export function CustomersManagement() {
       setCustomers(formattedCustomers)
     } catch (error) {
       console.error('Error fetching customers:', error)
+      console.error('Error details:', {
+        message: error?.message,
+        details: error?.details,
+        hint: error?.hint,
+        code: error?.code
+      })
       toast({
         variant: "destructive",
         title: "Error",
@@ -269,6 +275,7 @@ export function CustomersManagement() {
 
   const activeFiltersCount = [
     filterStatus !== "all",
+    searchQuery !== "",
   ].filter(Boolean).length
 
   // No Results Component
@@ -333,8 +340,8 @@ export function CustomersManagement() {
       {/* Filters */}
       <Card>
         <CardContent className="pt-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="relative flex-1">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="relative w-full md:w-96">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <Input
                 type="search"
@@ -360,6 +367,13 @@ export function CustomersManagement() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem
+                  onClick={clearFilters}
+                  className="text-red-600 focus:text-red-600 font-medium bg-red-50/50 hover:bg-red-50"
+                >
+                  <XCircle className="w-4 h-4 mr-2" />
+                  Clear All Filters
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
                 <DropdownMenuSeparator />
@@ -382,17 +396,6 @@ export function CustomersManagement() {
                   Inactive Only
                 </DropdownMenuCheckboxItem>
 
-                {activeFiltersCount > 0 && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={clearFilters}
-                      className="text-red-600 focus:text-red-600"
-                    >
-                      Clear All Filters
-                    </DropdownMenuItem>
-                  </>
-                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

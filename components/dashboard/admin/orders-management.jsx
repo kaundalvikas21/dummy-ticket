@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search, Download, Eye, Edit, Trash2, RefreshCw, MoreHorizontal, Filter, ChevronDown, Pencil } from "lucide-react"
+import { Search, Download, Eye, Edit, Trash2, RefreshCw, MoreHorizontal, Filter, ChevronDown, Pencil, XCircle } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -119,6 +119,12 @@ export function OrdersManagement() {
       setOrders(formattedOrders)
     } catch (error) {
       console.error('Error fetching orders:', error)
+      console.error('Error details:', {
+        message: error?.message,
+        details: error?.details,
+        hint: error?.hint,
+        code: error?.code
+      })
       toast({
         variant: "destructive",
         title: "Error",
@@ -252,6 +258,16 @@ export function OrdersManagement() {
     a.click()
   }
 
+  const clearFilters = () => {
+    setSearchQuery("")
+    setFilterStatus("all")
+  }
+
+  const activeFiltersCount = [
+    filterStatus !== "all",
+    searchQuery !== "",
+  ].filter(Boolean).length
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -280,8 +296,8 @@ export function OrdersManagement() {
       {/* Filters */}
       <Card>
         <CardContent className="pt-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="relative flex-1">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="relative w-full md:w-96">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <Input
                 type="search"
@@ -293,13 +309,26 @@ export function OrdersManagement() {
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-full md:w-48">
-                  <Filter className="w-4 h-4 mr-2" />
-                  Filter by Status
+                <Button variant="outline" className="min-w-[140px] gap-2">
+                  <Filter className="w-4 h-4" />
+                  <span>Filters</span>
+                  {filterStatus !== "all" && (
+                    <Badge variant="secondary" className="px-1.5 py-0 h-5 bg-blue-100 text-blue-700 hover:bg-blue-100 border-none text-[10px] font-bold uppercase tracking-wider">
+                      {filterStatus}
+                    </Badge>
+                  )}
                   <ChevronDown className="w-4 h-4 ml-auto" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem
+                  onClick={clearFilters}
+                  className="text-red-600 focus:text-red-600 font-medium bg-red-50/50 hover:bg-red-50"
+                >
+                  <XCircle className="w-4 h-4 mr-2" />
+                  Clear All Filters
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuLabel>Status</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {['all', 'pending', 'paid', 'processing', 'completed', 'cancelled'].map((status) => (
@@ -312,6 +341,7 @@ export function OrdersManagement() {
                     {status}
                   </DropdownMenuCheckboxItem>
                 ))}
+
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -605,6 +635,6 @@ export function OrdersManagement() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </div >
   )
 }
