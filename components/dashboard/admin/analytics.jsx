@@ -47,44 +47,63 @@ export function Analytics() {
 
       if (bookingsError) throw bookingsError
 
-      // Fetch customer count
-      const { count: customerCount, error: customerError } = await supabase
+      let profiles = []
+      const { data: profilesData, error: profilesError } = await supabase
         .from('user_profiles')
-        .select('*', { count: 'exact', head: true })
+        .select('*')
 
-      if (customerError) throw customerError
+      if (profilesError) {
+        console.warn("Analytics: Profile fetch failed.", profilesError.message)
+        // Continue with empty profiles if fetch fails
+        profiles = []
+      } else {
+        profiles = profilesData || []
+      }
 
       // key metrics
       const totalRevenue = bookings.reduce((sum, b) => sum + parseFloat(b.amount || 0), 0)
       const totalOrders = bookings.length
       const avgOrderVal = totalOrders > 0 ? totalRevenue / totalOrders : 0
 
+      // Compute Total Customers (Profiles + Bookings unique ids)
+      const customerIds = new Set()
+      profiles?.forEach(p => {
+        // Use auth_user_id if available, fallback to user_id
+        const id = p.auth_user_id || p.user_id
+        if (id) customerIds.add(id)
+      })
+      bookings?.forEach(b => { if (b.user_id) customerIds.add(b.user_id) })
+      const totalUniqueCustomers = customerIds.size
+
       setKeyMetrics({
         revenue: totalRevenue,
         orders: totalOrders,
-        customers: customerCount || 0,
+        customers: totalUniqueCustomers,
         avgOrderValue: avgOrderVal
       })
 
-      // Process Monthly Data
+      // Process Monthly Data (Grouped by Month and Year)
       const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
       const monthlyStats = {}
 
       bookings.forEach(booking => {
         const date = new Date(booking.created_at)
-        const monthKey = `${months[date.getMonth()]}` // Simple grouping by month name for now (ignores year for simplicity or assuming 1 year data)
+        const monthYearKey = `${months[date.getMonth()]} ${date.getFullYear()}`
 
-        if (!monthlyStats[monthKey]) {
-          monthlyStats[monthKey] = { month: monthKey, revenue: 0, orders: 0 }
+        if (!monthlyStats[monthYearKey]) {
+          monthlyStats[monthYearKey] = {
+            month: monthYearKey,
+            revenue: 0,
+            orders: 0,
+            sortKey: date.getFullYear() * 100 + date.getMonth()
+          }
         }
-        monthlyStats[monthKey].revenue += parseFloat(booking.amount || 0)
-        monthlyStats[monthKey].orders += 1
+        monthlyStats[monthYearKey].revenue += parseFloat(booking.amount || 0)
+        monthlyStats[monthYearKey].orders += 1
       })
 
-      // Ensure chronological order if needed, but for now map based on existence
-      const chartData = Object.values(monthlyStats)
-      // Sort roughly? Recharts renders in array order. 
-      // A proper implementation would bucket by Year-Month.
+      // Ensure chronological order
+      const chartData = Object.values(monthlyStats).sort((a, b) => a.sortKey - b.sortKey)
 
       setMonthlyData(chartData.length > 0 ? chartData : [{ month: "No Data", revenue: 0, orders: 0 }])
 
@@ -112,11 +131,17 @@ export function Analytics() {
       setServiceDistribution(distArray)
 
     } catch (error) {
-      console.error("Error fetching analytics:", error)
+      console.error("Error fetching analytics data:", {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code,
+        fullError: error
+      })
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to load analytics data"
+        title: "Error Loading Analytics",
+        description: error.message || "Failed to load analytics data. Please check console."
       })
     } finally {
       setLoading(false)

@@ -66,18 +66,35 @@ export function DashboardOverview() {
 
       if (bookingsError) throw bookingsError
 
-      const { count: customerCount, error: customerError } = await supabase
+      let profiles = []
+      const { data: profilesData, error: profilesError } = await supabase
         .from('user_profiles')
-        .select('*', { count: 'exact', head: true })
+        .select('*')
 
-      if (customerError) throw customerError
+      if (profilesError) {
+        console.error("Critical: Profile fetch failed.", profilesError)
+        // Continue with empty profiles if fetch fails
+        profiles = []
+      } else {
+        profiles = profilesData || []
+      }
 
       // Calculate stats
       const totalRevenue = bookings.reduce((sum, booking) => sum + parseFloat(booking.amount || 0), 0)
       const totalOrders = bookings.length
 
-      // Calculate changes (mock logic for now as we need historical data for real comparisons)
-      // Ideally, you'd fetch data from 'last month' to compare.
+      // Unify Customer Count (Profiles + Unique IDs from Bookings)
+      const customerIds = new Set()
+      profiles?.forEach(p => {
+        // Use auth_user_id if available, fallback to user_id (the original column)
+        const id = p.auth_user_id || p.user_id
+        if (id) customerIds.add(id)
+      })
+      bookings?.forEach(b => {
+        if (b.user_id) customerIds.add(b.user_id)
+      })
+
+      const totalUniqueCustomers = customerIds.size
 
       setStats([
         {
@@ -98,7 +115,7 @@ export function DashboardOverview() {
         },
         {
           title: "Total Customers",
-          value: (customerCount || 0).toString(),
+          value: totalUniqueCustomers.toString(),
           change: "+100%", // Placeholder
           trend: "up",
           icon: Users,
@@ -106,7 +123,7 @@ export function DashboardOverview() {
         },
         {
           title: "Conversion Rate",
-          value: totalOrders > 0 ? `${((totalOrders / (customerCount || 1)) * 100).toFixed(1)}%` : "0%",
+          value: totalOrders > 0 ? `${((totalOrders / (totalUniqueCustomers || 1)) * 100).toFixed(1)}%` : "0%",
           change: "+0.0%",
           trend: "up",
           icon: TrendingUp,
@@ -146,11 +163,17 @@ export function DashboardOverview() {
       setRecentOrders(formattedRecentOrders)
 
     } catch (error) {
-      console.error("Error fetching dashboard data:", error)
+      console.error("Error fetching dashboard data:", {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code,
+        fullError: error
+      })
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to load dashboard data."
+        title: "Error Loading Dashboard",
+        description: error.message || "Failed to load dashboard data. Please try again or check console."
       })
     } finally {
       setLoading(false)

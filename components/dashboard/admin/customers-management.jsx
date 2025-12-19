@@ -84,9 +84,14 @@ export function CustomersManagement() {
 
       // 1. Initialize from Profiles
       profiles?.forEach(profile => {
-        const id = profile.user_id || profile.id
+        // Core fix: use auth_user_id (from Supabase Auth) as primary, fallback to old user_id or PK id
+        const id = profile.auth_user_id || profile.user_id || profile.id
+
         customerMap.set(id, {
           id: id.toString(),
+          auth_user_id: profile.auth_user_id,
+          user_id: profile.user_id,
+          profile_id: profile.id,
           name: profile.first_name ? `${profile.first_name} ${profile.last_name || ''}`.trim() : 'Guest User',
           email: profile.email || 'N/A',
           phone: profile.phone_number || 'N/A',
@@ -103,17 +108,16 @@ export function CustomersManagement() {
       bookings?.forEach(booking => {
         const userId = booking.user_id
 
-        // If user_id is missing, it's a guest checkout, skip or handle separately?
-        // For now, only handle authenticated users that might be missing from profile table
         if (!userId) return
 
         let customer = customerMap.get(userId)
 
         if (!customer) {
-          // If customer not in profiles, extract from passenger details
           const info = getInfoFromDetails(booking.passenger_details)
           customer = {
             id: userId.toString(),
+            auth_user_id: userId,
+            user_id: userId,
             name: info.firstName ? `${info.firstName} ${info.lastName || ''}`.trim() : 'Guest User',
             email: info.email || 'N/A',
             phone: info.phone || 'N/A',
@@ -127,11 +131,9 @@ export function CustomersManagement() {
           customerMap.set(userId, customer)
         }
 
-        // Update stats
         customer.orders += 1
         customer.spent += parseFloat(booking.amount || 0)
 
-        // Update join date if booking is older than current join date
         const bookingDate = new Date(booking.created_at)
         if (bookingDate < customer.rawJoinDate) {
           customer.rawJoinDate = bookingDate
@@ -179,26 +181,33 @@ export function CustomersManagement() {
     if (!customerToDelete) return
 
     try {
+      // Use profile_id (the PK) if available, fallback to auth_user_id or user_id
+      const idToDelete = customerToDelete.profile_id || customerToDelete.id
+      const column = customerToDelete.profile_id ? 'id' : (customerToDelete.auth_user_id ? 'auth_user_id' : 'user_id')
+
       const { error } = await supabase
         .from('user_profiles')
         .delete()
-        .eq('user_id', customerToDelete.id)
+        .eq(column, idToDelete)
 
-      if (error) throw error
+      if (error) {
+        console.error('Full deletion error object:', JSON.stringify(error, null, 2))
+        throw error
+      }
 
       toast({
         title: "Success",
-        description: "Customer record deleted successfully."
+        description: "Customer record removed successfully."
       })
 
       // Update local state
       setCustomers(prev => prev.filter(c => c.id !== customerToDelete.id))
     } catch (error) {
-      console.error('Error deleting customer:', error)
+      console.error('Error in handleDelete:', error)
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to delete customer record."
+        description: "Failed to delete customer record. See console for details."
       })
     } finally {
       setIsDeleteDialogOpen(false)
