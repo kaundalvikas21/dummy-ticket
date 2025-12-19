@@ -348,12 +348,12 @@ export function CustomersManagement() {
             {/* Filter Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="min-w-[140px]">
-                  <Filter className="w-4 h-4 mr-2" />
-                  Filters
-                  {activeFiltersCount > 0 && (
-                    <Badge className="ml-2 px-1.5 py-0 h-5 bg-linear-to-r from-[#0066FF] to-[#00D4AA] text-white">
-                      {activeFiltersCount}
+                <Button variant="outline" className="min-w-[140px] gap-2">
+                  <Filter className="w-4 h-4" />
+                  <span>Filters</span>
+                  {filterStatus !== "all" && (
+                    <Badge variant="secondary" className="px-1.5 py-0 h-5 bg-blue-100 text-blue-700 hover:bg-blue-100 border-none text-[10px] font-bold uppercase tracking-wider">
+                      {filterStatus}
                     </Badge>
                   )}
                   <ChevronDown className="w-4 h-4 ml-auto" />

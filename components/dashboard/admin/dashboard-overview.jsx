@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { createClient } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { SkeletonTable } from "@/components/ui/skeleton-table"
+import { cn } from "@/lib/utils"
 
 export function DashboardOverview() {
   const [stats, setStats] = useState([
@@ -21,6 +22,7 @@ export function DashboardOverview() {
       trend: "up",
       icon: DollarSign,
       color: "from-green-500 to-emerald-600",
+      hover: "hover:bg-green-50",
     },
     {
       title: "Total Orders",
@@ -29,6 +31,7 @@ export function DashboardOverview() {
       trend: "up",
       icon: ShoppingCart,
       color: "from-blue-500 to-cyan-600",
+      hover: "hover:bg-blue-50",
     },
     {
       title: "Total Customers",
@@ -37,6 +40,7 @@ export function DashboardOverview() {
       trend: "up",
       icon: Users,
       color: "from-purple-500 to-pink-600",
+      hover: "hover:bg-purple-50",
     },
     {
       title: "Conversion Rate",
@@ -45,6 +49,7 @@ export function DashboardOverview() {
       trend: "up",
       icon: TrendingUp,
       color: "from-orange-500 to-red-600",
+      hover: "hover:bg-orange-50",
     },
   ])
   const [recentOrders, setRecentOrders] = useState([])
@@ -123,7 +128,7 @@ export function DashboardOverview() {
         },
         {
           title: "Conversion Rate",
-          value: totalOrders > 0 ? `${((totalOrders / (totalUniqueCustomers || 1)) * 100).toFixed(1)}%` : "0%",
+          value: totalOrders > 0 ? `${((totalOrders / (totalUniqueCustomers || 1)) * 100).toFixed(2)}%` : "0%",
           change: "+0.0%",
           trend: "up",
           icon: TrendingUp,
@@ -205,16 +210,24 @@ export function DashboardOverview() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
+            whileHover={{ y: -4 }}
+            className="h-full"
           >
-            <Card className="relative overflow-hidden">
+            <Card className={cn(
+              "relative overflow-hidden transition-all duration-300 hover:shadow-xl border-gray-100/50 h-full group hover:bg-white/80",
+              stat.title === "Total Revenue" && "bg-green-50/80",
+              stat.title === "Total Orders" && "bg-blue-50/80",
+              stat.title === "Total Customers" && "bg-purple-50/80",
+              stat.title === "Conversion Rate" && "bg-orange-50/80"
+            )}>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600">{stat.title}</CardTitle>
-                <div className={`p-2 rounded-lg bg-linear-to-br ${stat.color}`}>
+                <CardTitle className="text-lg font-bold text-gray-600 transition-colors group-hover:text-gray-900">{stat.title}</CardTitle>
+                <div className={`p-2 rounded-lg bg-linear-to-br ${stat.color} shadow-sm transition-transform group-hover:scale-110`}>
                   <stat.icon className="w-4 h-4 text-white" />
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-gray-900">{loading ? "..." : stat.value}</div>
+                <div className="text-2xl font-bold text-gray-900 tracking-tight">{loading ? "..." : stat.value}</div>
                 <div className="flex items-center gap-1 mt-1">
                   {stat.trend === "up" ? (
                     <ArrowUp className="w-4 h-4 text-green-600" />
@@ -224,7 +237,7 @@ export function DashboardOverview() {
                   <span className={`text-sm font-medium ${stat.trend === "up" ? "text-green-600" : "text-red-600"}`}>
                     {stat.change}
                   </span>
-                  <span className="text-sm text-gray-500">from last month</span>
+                  <span className="text-sm text-gray-400">from last month</span>
                 </div>
               </CardContent>
             </Card>

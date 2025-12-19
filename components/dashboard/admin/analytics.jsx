@@ -1,8 +1,10 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { TrendingUp, Users, DollarSign, ShoppingCart, Calendar } from "lucide-react"
+import { motion } from "framer-motion"
+import { TrendingUp, Users, DollarSign, ShoppingCart, Calendar, ArrowUp, ArrowDown } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { cn } from "@/lib/utils"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import {
   Line,
@@ -162,77 +164,81 @@ export function Analytics() {
 
       {/* Key Metrics */}
       <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-blue-100">
-                <DollarSign className="w-5 h-5 text-blue-600" />
+        {/* Total Revenue */}
+        <motion.div whileHover={{ y: -4 }} className="h-full">
+          <Card className="transition-all duration-300 hover:shadow-xl bg-green-50/80 hover:bg-white/80 border-gray-100/50 group h-full">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-lg font-bold text-gray-600 transition-colors group-hover:text-gray-900">Total Revenue</CardTitle>
+              <div className="p-2 rounded-lg bg-linear-to-br from-green-500 to-emerald-600 shadow-sm transition-transform group-hover:scale-110">
+                <DollarSign className="w-4 h-4 text-white" />
               </div>
-              <div>
-                <p className="text-sm text-gray-600">Total Revenue</p>
-                <p className="text-2xl font-bold text-gray-900">{loading ? "..." : `$${keyMetrics.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</p>
-                <p className="text-xs text-green-600 flex items-center gap-1 mt-1">
-                  <TrendingUp className="w-3 h-3" />
-                  Lifetime
-                </p>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-gray-900 tracking-tight">
+                {loading ? "..." : `$${keyMetrics.revenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
               </div>
-            </div>
-          </CardContent>
-        </Card>
+              <div className="flex items-center gap-1 mt-1">
+                <span className="text-sm text-gray-400">Total revenue accumulated</span>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-green-100">
-                <ShoppingCart className="w-5 h-5 text-green-600" />
+        {/* Total Orders */}
+        <motion.div whileHover={{ y: -4 }} className="h-full">
+          <Card className="transition-all duration-300 hover:shadow-xl bg-blue-50/80 hover:bg-white/80 border-gray-100/50 group h-full">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-lg font-bold text-gray-600 transition-colors group-hover:text-gray-900">Total Orders</CardTitle>
+              <div className="p-2 rounded-lg bg-linear-to-br from-blue-500 to-cyan-600 shadow-sm transition-transform group-hover:scale-110">
+                <ShoppingCart className="w-4 h-4 text-white" />
               </div>
-              <div>
-                <p className="text-sm text-gray-600">Total Orders</p>
-                <p className="text-2xl font-bold text-gray-900">{loading ? "..." : keyMetrics.orders}</p>
-                <p className="text-xs text-green-600 flex items-center gap-1 mt-1">
-                  <TrendingUp className="w-3 h-3" />
-                  Lifetime
-                </p>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-gray-900 tracking-tight">{loading ? "..." : keyMetrics.orders}</div>
+              <div className="flex items-center gap-1 mt-1">
+                <span className="text-sm text-gray-400">Total bookings completed</span>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-purple-100">
-                <Users className="w-5 h-5 text-purple-600" />
+        {/* Total Customers */}
+        <motion.div whileHover={{ y: -4 }} className="h-full">
+          <Card className="transition-all duration-300 hover:shadow-xl bg-purple-50/80 hover:bg-white/80 border-gray-100/50 group h-full">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-lg font-bold text-gray-600 transition-colors group-hover:text-gray-900">Total Customers</CardTitle>
+              <div className="p-2 rounded-lg bg-linear-to-br from-purple-500 to-pink-600 shadow-sm transition-transform group-hover:scale-110">
+                <Users className="w-4 h-4 text-white" />
               </div>
-              <div>
-                <p className="text-sm text-gray-600">Total Customers</p>
-                <p className="text-2xl font-bold text-gray-900">{loading ? "..." : keyMetrics.customers}</p>
-                <p className="text-xs text-green-600 flex items-center gap-1 mt-1">
-                  <TrendingUp className="w-3 h-3" />
-                  Registered
-                </p>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-gray-900 tracking-tight">{loading ? "..." : keyMetrics.customers}</div>
+              <div className="flex items-center gap-1 mt-1">
+                <span className="text-sm text-gray-400">Registered users</span>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-orange-100">
-                <Calendar className="w-5 h-5 text-orange-600" />
+        {/* Avg Order Value */}
+        <motion.div whileHover={{ y: -4 }} className="h-full">
+          <Card className="transition-all duration-300 hover:shadow-xl bg-orange-50/80 hover:bg-white/80 border-gray-100/50 group h-full">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-lg font-bold text-gray-600 transition-colors group-hover:text-gray-900">Avg. Order Value</CardTitle>
+              <div className="p-2 rounded-lg bg-linear-to-br from-orange-500 to-red-600 shadow-sm transition-transform group-hover:scale-110">
+                <Calendar className="w-4 h-4 text-white" />
               </div>
-              <div>
-                <p className="text-sm text-gray-600">Avg. Order Value</p>
-                <p className="text-2xl font-bold text-gray-900">{loading ? "..." : `$${keyMetrics.avgOrderValue.toFixed(2)}`}</p>
-                <p className="text-xs text-green-600 flex items-center gap-1 mt-1">
-                  <TrendingUp className="w-3 h-3" />
-                  Per order
-                </p>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-gray-900 tracking-tight">
+                {loading ? "..." : `$${keyMetrics.avgOrderValue.toFixed(2)}`}
               </div>
-            </div>
-          </CardContent>
-        </Card>
+              <div className="flex items-center gap-1 mt-1">
+                <span className="text-sm text-gray-400">Average amount per order</span>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
 
       <Card>
