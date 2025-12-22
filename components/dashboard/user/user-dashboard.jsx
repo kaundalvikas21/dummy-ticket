@@ -34,28 +34,32 @@ export function UserDashboard({ statsData, upcomingBookingsData, recentActivityD
       value: statsData?.total || 0,
       icon: Ticket,
       color: "text-blue-600",
-      bgColor: "bg-blue-100",
+      bgColor: "bg-blue-200",
+      cardBgColor: "bg-blue-100",
     },
     {
       title: "Active Bookings",
       value: statsData?.active || 0,
       icon: Clock,
       color: "text-orange-600",
-      bgColor: "bg-orange-100",
+      bgColor: "bg-orange-200",
+      cardBgColor: "bg-orange-100",
     },
     {
       title: "Completed",
       value: statsData?.completed || 0,
       icon: CheckCircle,
       color: "text-green-600",
-      bgColor: "bg-green-100",
+      bgColor: "bg-green-200",
+      cardBgColor: "bg-green-100",
     },
     {
       title: "Upcoming Trips",
       value: statsData?.upcoming || 0,
       icon: Calendar,
       color: "text-purple-600",
-      bgColor: "bg-purple-100",
+      bgColor: "bg-purple-200",
+      cardBgColor: "bg-purple-100",
     },
   ];
 
@@ -73,7 +77,7 @@ export function UserDashboard({ statsData, upcomingBookingsData, recentActivityD
                 Welcome back, {userName || 'User'}!
               </h2>
               <p className="text-blue-100 text-sm sm:text-base">
-                You have {upcomingBookings.length} upcoming trip{upcomingBookings.length !== 1 ? 's' : ''}. Ready for your next adventure?
+                You have {statsData?.upcoming || 0} upcoming trip{(statsData?.upcoming || 0) !== 1 ? 's' : ''}. Ready for your next adventure?
               </p>
             </div>
 
@@ -92,11 +96,11 @@ export function UserDashboard({ statsData, upcomingBookingsData, recentActivityD
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <Card key={stat.title}>
+            <Card key={stat.title} className={`${stat.cardBgColor} hover:bg-white duration-300 ease-in-out`}>
               <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
-                    <p className="text-sm text-gray-600">{stat.title}</p>
+                    <p className="text-lg font-bold text-gray-600">{stat.title}</p>
                     <p className="text-2xl sm:text-3xl font-bold mt-2">{stat.value}</p>
                   </div>
                   <div className={`${stat.bgColor} p-2 sm:p-3 rounded-lg flex-shrink-0 ml-4`}>
@@ -131,7 +135,7 @@ export function UserDashboard({ statsData, upcomingBookingsData, recentActivityD
                 upcomingBookings.map((booking) => (
                   <div
                     key={booking.id}
-                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between rounded-lg border p-3 sm:p-4 gap-3"
+                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between rounded-lg border p-3 sm:p-4 gap-3 hover:bg-gray-100 hover:border-blue-200 transition-colors duration-200"
                   >
                     <div className="flex items-center gap-3">
                       <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-lg bg-blue-100 flex-shrink-0">
@@ -174,7 +178,7 @@ export function UserDashboard({ statsData, upcomingBookingsData, recentActivityD
                 recentActivity.map((activity, index) => (
                   <div
                     key={index}
-                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b pb-3 sm:pb-4 last:border-0 gap-2"
+                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b py-3 sm:py-4 last:border-0 gap-2 hover:bg-gray-100 transition-colors duration-200 rounded-lg px-2"
                   >
                     <div>
                       <p className="font-medium text-sm sm:text-base">{activity.action}</p>

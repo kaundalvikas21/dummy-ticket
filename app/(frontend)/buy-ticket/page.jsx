@@ -168,6 +168,12 @@ export default function BuyTicketPage() {
     try {
       const selectedPlanData = availablePlans.find(p => p.id === formData.selectedPlan)
 
+      // Sanitize data before sending
+      const sanitizedFormData = {
+        ...formData,
+        returnDate: formData.tripType === "one-way" ? "" : formData.returnDate
+      }
+
       const response = await fetch("/api/checkout_sessions", {
         method: "POST",
         headers: {
@@ -175,7 +181,7 @@ export default function BuyTicketPage() {
         },
         body: JSON.stringify({
           planId: formData.selectedPlan,
-          formData, // Pass the full form data
+          formData: sanitizedFormData, // Pass the sanitized form data
           amount: selectedPlanData?.price,
           currency: "USD",
         }),

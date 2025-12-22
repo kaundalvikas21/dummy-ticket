@@ -39,7 +39,7 @@ export async function POST(req) {
             dep_city: formData.departureCity,
             arr_city: formData.arrivalCity,
             dep_date: formData.departureDate,
-            ret_date: formData.returnDate,
+            ret_date: formData.tripType === "one-way" ? "" : formData.returnDate,
             class: formData.travelClass,
             trip: formData.tripType
         });

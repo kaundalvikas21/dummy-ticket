@@ -364,7 +364,7 @@ startxref
           ))
         ) : filteredBookings.length > 0 ? (
           filteredBookings.map((booking) => (
-            <Card key={booking.id}>
+            <Card key={booking.id} className="hover:bg-gray-100 hover:border-blue-200 transition-colors duration-200">
               <CardContent className="p-6">
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                   <div className="flex items-center gap-4">
