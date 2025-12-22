@@ -15,6 +15,7 @@ import { useAuth } from '@/contexts/auth-context'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/hooks/use-toast'
 import { SelectInput } from '@/components/ui/input/SelectInput'
+import { countries } from '@/lib/countries'
 
 const nationalityOptions = [
   { value: "United States", label: "United States" },
@@ -37,6 +38,9 @@ const nationalityOptions = [
   { value: "South Africa", label: "South Africa" },
   { value: "Mexico", label: "Mexico" },
   { value: "Thailand", label: "Thailand" },
+  { value: "Russia", label: "Russia" },
+  { value: "Hong Kong", label: "Hong Kong" },
+  { value: "Netherlands", label: "Netherlands" },
 ]
 
 const registerSchema = z.object({
@@ -74,6 +78,14 @@ export default function RegisterPage() {
       phone_number: ''
     }
   })
+
+  // Derive priority country code from selected nationality
+  const selectedNationality = watch('nationality')
+  const getPriorityCountryCode = () => {
+    if (!selectedNationality) return undefined
+    const country = countries.find(c => c.name === selectedNationality)
+    return country?.code
+  }
 
   const onRegister = async (data) => {
     setIsLoading(true)
@@ -215,7 +227,15 @@ export default function RegisterPage() {
             <SelectInput
               label="Nationality"
               value={watch('nationality') || ''}
-              onValueChange={(value) => setValue('nationality', value)}
+              onValueChange={(value) => {
+                setValue('nationality', value)
+
+                // Find matching country by name to auto-select code
+                const country = countries.find(c => c.name === value)
+                if (country) {
+                  setValue('country_code', country.dialCode)
+                }
+              }}
               options={nationalityOptions}
               placeholder="Select nationality"
               error={registerErrors.nationality?.message}
@@ -234,6 +254,7 @@ export default function RegisterPage() {
                 setValue('phone_number', value.phoneNumber)
               }}
               label="Phone Number"
+              priorityCountryCode={getPriorityCountryCode()}
               required
               placeholder="Phone number"
               error={registerErrors.country_code?.message || registerErrors.phone_number?.message}

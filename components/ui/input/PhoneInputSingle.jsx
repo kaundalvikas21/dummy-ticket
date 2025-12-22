@@ -21,49 +21,22 @@ export function PhoneInputSingle({
   required = false,
   placeholder = "+1234567890",
   disabled = false,
+  priorityCountryCode,
   error
 }) {
   const [displayValue, setDisplayValue] = useState('')
-  const [selectedCountryCode, setSelectedCountryCode] = useState('+1')
+  const [selectedIsoCode, setSelectedIsoCode] = useState('US')
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
-  // Group countries by dial code to avoid duplicates
-  const countryCodeMap = new Map()
-
-  countries.forEach(country => {
-    if (!countryCodeMap.has(country.dialCode)) {
-      countryCodeMap.set(country.dialCode, {
-        value: country.dialCode,
-        countries: [],
-        primaryCode: country.code
-      })
-    }
-    countryCodeMap.get(country.dialCode).countries.push(country)
-    // Prioritize certain countries as primary
-    if (country.code === 'US' && country.dialCode === '+1') {
-      countryCodeMap.get(country.dialCode).primaryCode = country.code
-    }
-    if (country.code === 'GB' && country.dialCode === '+44') {
-      countryCodeMap.get(country.dialCode).primaryCode = country.code
-    }
-  })
-
-  // Convert map to array and sort
-  const countryCodeOptions = Array.from(countryCodeMap.values()).map(option => {
-    const primaryCountry = option.countries.find(c =>
-      (option.value === '+1' && c.code === 'US') ||
-      (option.value === '+44' && c.code === 'GB') ||
-      option.countries.length === 1
-    ) || option.countries[0]
-
-    return {
-      value: option.value,
-      label: `${option.value} (${primaryCountry.code})`,
-      primaryCode: option.primaryCode
-    }
-  }).sort((a, b) => {
+  // Generate options for ALL countries keying by ISO code
+  const countryCodeOptions = countries.map(country => ({
+    value: country.code, // Use ISO code as value (e.g., 'US', 'CA')
+    label: `${country.dialCode} (${country.code})`,
+    dialCode: country.dialCode,
+    primaryCode: country.code
+  })).sort((a, b) => {
     // Popular countries order
-    const popularOrder = ['+1', '+91', '+44', '+86', '+81', '+49', '+33', '+55', '+52', '+61']
+    const popularOrder = ['US', 'IN', 'GB', 'CN', 'JP', 'DE', 'FR', 'BR', 'MX', 'AU', 'CA']
     const aIndex = popularOrder.indexOf(a.value)
     const bIndex = popularOrder.indexOf(b.value)
 
@@ -71,42 +44,80 @@ export function PhoneInputSingle({
     if (aIndex !== -1) return -1
     if (bIndex !== -1) return 1
 
-    return a.value.localeCompare(b.value)
+    return a.label.localeCompare(b.label)
   })
 
+  // Helper to find ISO code for a dial code
+  const findIsoForDialCode = (dialCode) => {
+    // If we have a priority country for this dial code, return it
+    if (priorityCountryCode) {
+      const match = countries.find(c => c.dialCode === dialCode && c.code === priorityCountryCode)
+      if (match) return match.code
+    }
+
+    // Otherwise return default primary for this dial code
+    const defaultMatch = countries.find(c =>
+      (dialCode === '+1' && c.code === 'US') ||
+      (dialCode === '+44' && c.code === 'GB') ||
+      c.dialCode === dialCode
+    )
+    return defaultMatch?.code || 'US'
+  }
+
+  // Sync state when props change
   useEffect(() => {
-    if (value) {
-      // Set country code from form value
-      setSelectedCountryCode(value.countryCode || '+1')
+    if (value?.countryCode) {
+      // Only update ISO if the current ISO doesn't match the new dial code
+      // OR if priority country changed and matches the new dial code
+      const currentCountry = countries.find(c => c.code === selectedIsoCode)
+
+      if (currentCountry?.dialCode !== value.countryCode) {
+        // Dial code changed externally, find best ISO matches
+        setSelectedIsoCode(findIsoForDialCode(value.countryCode))
+      } else if (priorityCountryCode && currentCountry?.code !== priorityCountryCode) {
+        // Dial code matches, but priority country mandates a swap (e.g. US -> CA)
+        // Only swap if the new priority country actually HAS this dial code
+        const priorityMatch = countries.find(c => c.code === priorityCountryCode && c.dialCode === value.countryCode)
+        if (priorityMatch) {
+          setSelectedIsoCode(priorityCountryCode)
+        }
+      }
+
       // Combine country code and phone number for display
       const combined = `${value.countryCode || ''}${value.phoneNumber || ''}`
       setDisplayValue(combined)
     }
-  }, [value])
+  }, [value, priorityCountryCode])
 
-  const handleCountryCodeChange = (countryCode) => {
-    setSelectedCountryCode(countryCode)
+  const handleCountryChange = (isoCode) => {
+    setSelectedIsoCode(isoCode)
     setIsDropdownOpen(false)
+
+    const country = countries.find(c => c.code === isoCode)
+    const newDialCode = country?.dialCode || '+1'
 
     // Update display value with new country code
     const currentPhoneNumber = value?.phoneNumber || ''
-    const newValue = `${countryCode}${currentPhoneNumber}`
+    const newValue = `${newDialCode}${currentPhoneNumber}`
     setDisplayValue(newValue)
 
-    // Notify parent of change
+    // Notify parent of change - sending dial code
     onChange({
-      countryCode,
+      countryCode: newDialCode,
       phoneNumber: currentPhoneNumber
     })
   }
 
   const handlePhoneChange = (e) => {
     const phoneNumber = e.target.value.replace(/\D/g, '') // Only accept digits
-    const newValue = `${selectedCountryCode}${phoneNumber}`
+    const country = countries.find(c => c.code === selectedIsoCode)
+    const currentDialCode = country?.dialCode || '+1'
+
+    const newValue = `${currentDialCode}${phoneNumber}`
     setDisplayValue(newValue)
 
     onChange({
-      countryCode: selectedCountryCode,
+      countryCode: currentDialCode,
       phoneNumber
     })
   }
@@ -117,7 +128,8 @@ export function PhoneInputSingle({
       'AU': '🇦🇺', 'DE': '🇩🇪', 'FR': '🇫🇷', 'IT': '🇮🇹',
       'ES': '🇪🇸', 'JP': '🇯🇵', 'CN': '🇨🇳', 'BR': '🇧🇷',
       'MX': '🇲🇽', 'RU': '🇷🇺', 'KR': '🇰🇷', 'AE': '🇦🇪',
-      'SA': '🇸🇦', 'SG': '🇸🇬', 'HK': '🇭🇰', 'NL': '🇳🇱'
+      'SA': '🇸🇦', 'SG': '🇸🇬', 'HK': '🇭🇰', 'NL': '🇳🇱',
+      'NZ': '🇳🇿', 'ZA': '🇿🇦', 'TH': '🇹🇭'
     }
     return flagMap[code] || '🌍'
   }
@@ -135,8 +147,8 @@ export function PhoneInputSingle({
         {/* Country Code Dropdown - Compact width */}
         <div className="relative shrink-0">
           <Select
-            value={selectedCountryCode}
-            onValueChange={handleCountryCodeChange}
+            value={selectedIsoCode}
+            onValueChange={handleCountryChange}
             open={isDropdownOpen}
             onOpenChange={setIsDropdownOpen}
             disabled={disabled}
@@ -144,7 +156,7 @@ export function PhoneInputSingle({
             <SelectTrigger className={`${error ? "border-red-500" : ""} w-[112px]`}>
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-[300px]">
               {countryCodeOptions.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
@@ -169,12 +181,10 @@ export function PhoneInputSingle({
             className={`text-sm md:text-base w-full ${error ? "border-red-500" : ""} ${Icon ? "pl-10" : ""}`}
             disabled={disabled}
           />
-          {selectedCountryCode && (
+          {selectedIsoCode && (
             <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
               <span className="text-xs text-gray-400">
-                {getCountryFlag(
-                  countryCodeOptions.find(opt => opt.value === selectedCountryCode)?.primaryCode || 'US'
-                )}
+                {getCountryFlag(selectedIsoCode)}
               </span>
             </div>
           )}
