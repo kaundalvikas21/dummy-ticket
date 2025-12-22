@@ -113,22 +113,9 @@ export function CustomersManagement() {
         let customer = customerMap.get(userId)
 
         if (!customer) {
-          const info = getInfoFromDetails(booking.passenger_details)
-          customer = {
-            id: userId.toString(),
-            auth_user_id: userId,
-            user_id: userId,
-            name: info.firstName ? `${info.firstName} ${info.lastName || ''}`.trim() : 'Guest User',
-            email: info.email || 'N/A',
-            phone: info.phone || 'N/A',
-            location: 'N/A',
-            orders: 0,
-            spent: 0,
-            status: "active",
-            joinDate: new Date(booking.created_at).toLocaleDateString(),
-            rawJoinDate: new Date(booking.created_at)
-          }
-          customerMap.set(userId, customer)
+          // If the user profile doesn't exist (e.g. deleted), we do NOT want to show them
+          // even if they have bookings. This checks strictly against the fetched profiles.
+          return
         }
 
         customer.orders += 1
@@ -187,23 +174,31 @@ export function CustomersManagement() {
     if (!customerToDelete) return
 
     try {
-      // Use profile_id (the PK) if available, fallback to auth_user_id or user_id
-      const idToDelete = customerToDelete.profile_id || customerToDelete.id
-      const column = customerToDelete.profile_id ? 'id' : (customerToDelete.auth_user_id ? 'auth_user_id' : 'user_id')
+      // Use auth_user_id as the primary identifier for Auth deletion
+      // If auth_user_id is missing, we can't delete from Auth easily properly (unless we have a way to lookup).
+      // But assuming the customer object was built with it.
+      const userIdToDelete = customerToDelete.auth_user_id
 
-      const { error } = await supabase
-        .from('user_profiles')
-        .delete()
-        .eq(column, idToDelete)
+      if (!userIdToDelete) {
+        throw new Error("Cannot delete user: Missing Auth ID")
+      }
 
-      if (error) {
-        console.error('Full deletion error object:', JSON.stringify(error, null, 2))
-        throw error
+      const response = await fetch('/api/admin/users', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ user_id: userIdToDelete }),
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || "Failed to delete user")
       }
 
       toast({
         title: "Success",
-        description: "Customer record removed successfully."
+        description: "Customer account permanently deleted."
       })
 
       // Update local state
@@ -213,7 +208,7 @@ export function CustomersManagement() {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to delete customer record. See console for details."
+        description: error.message || "Failed to delete customer record."
       })
     } finally {
       setIsDeleteDialogOpen(false)

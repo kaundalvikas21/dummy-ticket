@@ -88,18 +88,10 @@ export function DashboardOverview() {
       const totalRevenue = bookings.reduce((sum, booking) => sum + parseFloat(booking.amount || 0), 0)
       const totalOrders = bookings.length
 
-      // Unify Customer Count (Profiles + Unique IDs from Bookings)
-      const customerIds = new Set()
-      profiles?.forEach(p => {
-        // Use auth_user_id if available, fallback to user_id (the original column)
-        const id = p.auth_user_id || p.user_id
-        if (id) customerIds.add(id)
-      })
-      bookings?.forEach(b => {
-        if (b.user_id) customerIds.add(b.user_id)
-      })
-
-      const totalUniqueCustomers = customerIds.size
+      // Unify Customer Count (Use ONLY registered profiles for "Total Customers" stat)
+      // This ensures that when a user is deleted from Auth/Profiles, this number goes down,
+      // even if their bookings remain in the database.
+      const totalUniqueCustomers = profiles ? profiles.length : 0
 
       setStats([
         {
