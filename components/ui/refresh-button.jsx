@@ -32,7 +32,7 @@ export function RefreshButton({ className, onRefreshStart, onRefreshEnd }) {
     return (
         <Button
             variant="outline"
-            size="sm"
+            size="default"
             onClick={handleRefresh}
             disabled={isLoading}
             className={cn("gap-2", className)}

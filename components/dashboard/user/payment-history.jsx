@@ -206,42 +206,42 @@ startxref
 
       {/* Summary Cards */}
       <div className="grid gap-6 md:grid-cols-3">
-        <Card>
+        <Card className="bg-blue-100 hover:bg-white duration-300 ease-in-out">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Total Spent</p>
+                <p className="text-lg font-bold text-gray-600">Total Spent</p>
                 <p className="text-3xl font-bold mt-2">${totalSpent}</p>
               </div>
-              <div className="bg-blue-100 p-3 rounded-lg">
+              <div className="bg-blue-200 p-3 rounded-lg">
                 <CreditCard className="h-6 w-6 text-blue-600" />
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-green-100 hover:bg-white duration-300 ease-in-out">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Total Transactions</p>
+                <p className="text-lg font-bold text-gray-600">Total Transactions</p>
                 <p className="text-3xl font-bold mt-2">{payments.length}</p>
               </div>
-              <div className="bg-green-100 p-3 rounded-lg">
+              <div className="bg-green-200 p-3 rounded-lg">
                 <CheckCircle className="h-6 w-6 text-green-600" />
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-purple-100 hover:bg-white duration-300 ease-in-out">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Average Transaction</p>
+                <p className="text-lg font-bold text-gray-600">Average Transaction</p>
                 <p className="text-3xl font-bold mt-2">
                   ${payments.length > 0 ? (totalSpent / payments.length).toFixed(2) : "0.00"}
                 </p>
               </div>
-              <div className="bg-purple-100 p-3 rounded-lg">
+              <div className="bg-purple-200 p-3 rounded-lg">
                 <CreditCard className="h-6 w-6 text-purple-600" />
               </div>
             </div>

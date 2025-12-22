@@ -74,7 +74,7 @@ export default function SuccessPage() {
                 </div>
 
                 <div className="space-y-3">
-                    <Button onClick={() => router.push("/dashboard")} className="w-full h-12 rounded-xl font-semibold bg-[#0066FF] hover:bg-blue-700">
+                    <Button onClick={() => router.push("/user")} className="w-full h-12 rounded-xl font-semibold bg-[#0066FF] hover:bg-blue-700 cursor-pointer">
                         Go to Dashboard <ArrowRight className="w-4 h-4 ml-2" />
                     </Button>
 
