@@ -12,12 +12,37 @@ export default function SuccessPage() {
     const sessionId = searchParams.get("session_id")
     const router = useRouter()
 
-    if (!sessionId) {
-        // If accessed directly without session, redirect to home
-        // useEffect(() => router.push("/"), [router]) 
-        // return null
-        // Or show a generic message
-    }
+    const [status, setStatus] = useState('processing');
+
+    useEffect(() => {
+        if (!sessionId) {
+            router.push("/");
+            return;
+        }
+
+        const verifyPayment = async () => {
+            try {
+                const response = await fetch("/api/verify-payment", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ session_id: sessionId }),
+                });
+
+                if (response.ok) {
+                    setStatus('success');
+                } else {
+                    console.error("Payment verification failed", await response.json());
+                    // Keep valid session as success for user but log error
+                    setStatus('success');
+                }
+            } catch (error) {
+                console.error("Verification error:", error);
+                setStatus('success');
+            }
+        };
+
+        verifyPayment();
+    }, [sessionId, router]);
 
     return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -42,7 +67,9 @@ export default function SuccessPage() {
                     </div>
                     <div className="flex justify-between items-center">
                         <span className="text-sm text-gray-500">Status</span>
-                        <span className="text-sm font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full">Completed</span>
+                        <span className="text-sm font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+                            {status === 'processing' ? 'Finalizing...' : 'Completed'}
+                        </span>
                     </div>
                 </div>
 
