@@ -2,12 +2,26 @@
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { DollarSign, ShoppingCart, Users, TrendingUp, ArrowUp, ArrowDown, Eye } from "lucide-react"
+import { DollarSign, ShoppingCart, Users, TrendingUp, ArrowUp, ArrowDown, Eye, Calendar } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Calendar as CalendarComponent } from "@/components/ui/calendar"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { format } from "date-fns"
 import { createClient } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { SkeletonTable } from "@/components/ui/skeleton-table"
@@ -56,14 +70,165 @@ export function DashboardOverview() {
   const [loading, setLoading] = useState(true)
   const [selectedOrder, setSelectedOrder] = useState(null)
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
+  const [dateRange, setDateRange] = useState("all_time")
+  const [dateRangeLabel, setDateRangeLabel] = useState("")
+  const [customDate, setCustomDate] = useState(undefined)
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false)
 
   const supabase = createClient()
   const { toast } = useToast()
 
+  const getDateRange = (range) => {
+    const now = new Date()
+    const currentStart = new Date(now)
+    const currentEnd = new Date(now)
+    const prevStart = new Date(now)
+    const prevEnd = new Date(now)
+
+    if (range === "all_time") {
+      if (customDate?.from) {
+        // Clone to avoid mutating state
+        const start = new Date(customDate.from)
+        start.setHours(0, 0, 0, 0)
+
+        // If 'to' is missing (in progress), default to 'from' (single day filter) instead of today (which confusingly shows huge current range)
+        const end = customDate.to ? new Date(customDate.to) : new Date(customDate.from)
+        end.setHours(23, 59, 59, 999)
+
+        return {
+          currentStart: start,
+          currentEnd: end,
+          prevStart: null,
+          prevEnd: null
+        }
+      }
+      return { currentStart: null, currentEnd: null, prevStart: null, prevEnd: null }
+    }
+
+    switch (range) {
+      case "last_7_days":
+        // Last 7 days (rolling)
+        currentStart.setDate(now.getDate() - 7)
+        // Previous period: The 7 days before that (days 8-14 ago)
+        prevEnd.setDate(now.getDate() - 7)
+        prevStart.setDate(now.getDate() - 14)
+        break
+
+      case "last_week":
+        // Previous calendar week (Mon-Sun)
+        const day = now.getDay() || 7 // Get current day number, converting Sun (0) to 7
+        if (day !== 1) now.setHours(-24 * (day - 1)) // Set to last Monday
+        else now.setHours(-24 * 7) // If today is Mon, go to last Mon
+
+        // Start of "Last Week"
+        currentStart.setDate(now.getDate() - 7)
+        currentStart.setHours(0, 0, 0, 0)
+        // End of "Last Week"
+        currentEnd.setDate(now.getDate()) // This is actually start of this week, so we use < currentEnd
+        currentEnd.setHours(0, 0, 0, 0)
+
+        // Previous period
+        prevStart.setDate(currentStart.getDate() - 7)
+        prevEnd.setDate(currentStart.getDate())
+        break
+
+      case "this_month":
+        // This Month (1st to now)
+        currentStart.setDate(1)
+        currentStart.setHours(0, 0, 0, 0)
+
+        // Previous Month (1st to last day of prev month)
+        prevStart.setMonth(now.getMonth() - 1)
+        prevStart.setDate(1)
+        prevStart.setHours(0, 0, 0, 0)
+        prevEnd.setDate(0) // Last day of previous month
+        prevEnd.setHours(23, 59, 59, 999)
+        break
+
+      case "last_month":
+        // Previous Calendar Month
+        currentStart.setMonth(now.getMonth() - 1)
+        currentStart.setDate(1)
+        currentStart.setHours(0, 0, 0, 0)
+        currentEnd.setDate(0) // Last day of last month
+        currentEnd.setHours(23, 59, 59, 999)
+
+        // Month before last
+        prevStart.setMonth(now.getMonth() - 2)
+        prevStart.setDate(1)
+        prevStart.setHours(0, 0, 0, 0)
+        prevEnd.setMonth(now.getMonth() - 1)
+        prevEnd.setDate(0)
+        prevEnd.setHours(23, 59, 59, 999)
+        break
+
+      case "last_year":
+        // Last Calendar Year
+        currentStart.setFullYear(now.getFullYear() - 1)
+        currentStart.setMonth(0, 1) // Jan 1st
+        currentStart.setHours(0, 0, 0, 0)
+
+        currentEnd.setFullYear(now.getFullYear() - 1)
+        currentEnd.setMonth(11, 31) // Dec 31st
+        currentEnd.setHours(23, 59, 59, 999)
+
+        // Year before last
+        prevStart.setFullYear(now.getFullYear() - 2)
+        prevStart.setMonth(0, 1)
+
+        prevEnd.setFullYear(now.getFullYear() - 2)
+        prevEnd.setMonth(11, 31)
+        break
+
+      default:
+        // Default to This Month
+        currentStart.setDate(1)
+        currentStart.setHours(0, 0, 0, 0)
+        prevStart.setMonth(now.getMonth() - 1)
+        prevStart.setDate(1)
+    }
+
+    return { currentStart, currentEnd, prevStart, prevEnd }
+  }
+
+  const formatDate = (date) => {
+    if (!date) return ""
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  }
+
+  const calculateChange = (current, previous, isLifetime) => {
+    if (isLifetime) return "Lifetime"
+    if (previous === 0) return current > 0 ? "+100%" : "0%"
+    const change = ((current - previous) / previous) * 100
+    return `${change > 0 ? "+" : ""}${change.toFixed(1)}%`
+  }
+
   const fetchDashboardData = async () => {
     setLoading(true)
     try {
-      // Fetch stats
+      const isAllTimeView = dateRange === "all_time"
+      const hasCustomDate = isAllTimeView && customDate?.from
+      const isLifetime = isAllTimeView && !hasCustomDate
+
+      const { currentStart, currentEnd, prevStart, prevEnd } = getDateRange(dateRange)
+
+      // Set label
+      if (isAllTimeView) {
+        if (hasCustomDate) {
+          if (customDate.to) {
+            setDateRangeLabel(`${format(customDate.from, "LLL dd, y")} - ${format(customDate.to, "LLL dd, y")}`)
+          } else {
+            setDateRangeLabel(`${format(customDate.from, "LLL dd, y")}`)
+          }
+        } else {
+          // Default All Time: Show current date as requested ("bottom current date")
+          setDateRangeLabel(format(new Date(), "LLL dd, y"))
+        }
+      } else {
+        setDateRangeLabel(`${formatDate(currentStart)} - ${formatDate(currentEnd)}`)
+      }
+
+      // Fetch bookings for both periods
       const { data: bookings, error: bookingsError } = await supabase
         .from('bookings')
         .select('*, service_plans(name)')
@@ -77,63 +242,85 @@ export function DashboardOverview() {
         .select('*')
 
       if (profilesError) {
-        console.error("Critical: Profile fetch failed.", profilesError)
-        // Continue with empty profiles if fetch fails
+        // handle
         profiles = []
       } else {
         profiles = profilesData || []
       }
 
-      // Calculate stats
-      const totalRevenue = bookings.reduce((sum, booking) => sum + parseFloat(booking.amount || 0), 0)
-      const totalOrders = bookings.length
+      // Filter Data
+      const filterByDate = (item, start, end) => {
+        if (isLifetime) return true
+        if (!start || !end) return true
+        const date = new Date(item.created_at)
+        return date >= start && date <= end
+      }
 
-      // Unify Customer Count (Use ONLY registered profiles for "Total Customers" stat)
-      // This ensures that when a user is deleted from Auth/Profiles, this number goes down,
-      // even if their bookings remain in the database.
-      const totalUniqueCustomers = profiles ? profiles.length : 0
+      // Current Period Data
+      const currentBookings = bookings.filter(b => filterByDate(b, currentStart, currentEnd))
+      const currentProfiles = profiles.filter(p => filterByDate(p, currentStart, currentEnd))
+
+      // Previous Period Data
+      // For All Time/Custom, we don't have a "previous all time".
+      const prevBookings = isAllTimeView ? [] : bookings.filter(b => filterByDate(b, prevStart, prevEnd))
+      const prevProfiles = isAllTimeView ? [] : profiles.filter(p => filterByDate(p, prevStart, prevEnd))
+
+      // Stats Calculation
+      const currentRevenue = currentBookings.reduce((sum, b) => sum + parseFloat(b.amount || 0), 0)
+      const prevRevenue = prevBookings.reduce((sum, b) => sum + parseFloat(b.amount || 0), 0)
+
+      const currentOrders = currentBookings.length
+      const prevOrders = prevBookings.length
+
+      const currentCustomers = currentProfiles.length
+      const prevCustomers = prevProfiles.length
+
+      // Conversion Rate (Orders / Unique Customers in Period) - tricky if no customers
+      // If 0 customers, 0 conversion.
+      const currentConversion = currentCustomers > 0 ? (currentOrders / currentCustomers) * 100 : 0
+      const prevConversion = prevCustomers > 0 ? (prevOrders / prevCustomers) * 100 : 0
 
       setStats([
         {
-          title: "Total Revenue",
-          value: `$${totalRevenue.toFixed(2)}`,
-          change: "+100%", // Placeholder
-          trend: "up",
+          title: isLifetime ? "Total Revenue" : "Revenue",
+          value: `$${currentRevenue.toFixed(2)}`,
+          change: calculateChange(currentRevenue, prevRevenue, isLifetime),
+          trend: isLifetime ? "neutral" : (currentRevenue >= prevRevenue ? "up" : "down"),
           icon: DollarSign,
           color: "from-green-500 to-emerald-600",
         },
         {
-          title: "Total Orders",
-          value: totalOrders.toString(),
-          change: "+100%", // Placeholder
-          trend: "up",
+          title: isLifetime ? "Total Orders" : "Orders",
+          value: currentOrders.toString(),
+          change: calculateChange(currentOrders, prevOrders, isLifetime),
+          trend: isLifetime ? "neutral" : (currentOrders >= prevOrders ? "up" : "down"),
           icon: ShoppingCart,
           color: "from-blue-500 to-cyan-600",
         },
         {
-          title: "Total Customers",
-          value: totalUniqueCustomers.toString(),
-          change: "+100%", // Placeholder
-          trend: "up",
+          title: isLifetime ? "Total Customers" : "New Customers",
+          value: currentCustomers.toString(),
+          change: calculateChange(currentCustomers, prevCustomers, isLifetime),
+          trend: isLifetime ? "neutral" : (currentCustomers >= prevCustomers ? "up" : "down"),
           icon: Users,
           color: "from-purple-500 to-pink-600",
         },
         {
           title: "Conversion Rate",
-          value: totalOrders > 0 ? `${((totalOrders / (totalUniqueCustomers || 1)) * 100).toFixed(2)}%` : "0%",
-          change: "+0.0%",
-          trend: "up",
+          value: `${currentConversion.toFixed(2)}%`,
+          change: calculateChange(currentConversion, prevConversion, isLifetime),
+          trend: isLifetime ? "neutral" : (currentConversion >= prevConversion ? "up" : "down"),
           icon: TrendingUp,
           color: "from-orange-500 to-red-600",
         },
       ])
 
-      // Format Recent Orders (Top 5)
-      const formattedRecentOrders = bookings.slice(0, 5).map(booking => {
+      // Format Recent Orders (Top 5 from Current Range or just Global Top 5? Usually global recent is fine, but if filtering dashboard, maybe recent in that period?)
+      // Let's show recent orders from the filtered selection to be consistent.
+      const formattedRecentOrders = currentBookings.slice(0, 5).map(booking => {
         let passengerName = "Guest"
         try {
           if (booking.passenger_details) {
-            // Handle if passenger_details is object or array or string
             const details = typeof booking.passenger_details === 'string'
               ? JSON.parse(booking.passenger_details)
               : booking.passenger_details
@@ -161,16 +348,10 @@ export function DashboardOverview() {
 
     } catch (error) {
       console.error("Error fetching dashboard data:", error)
-      console.error("Error details:", {
-        message: error?.message,
-        details: error?.details,
-        hint: error?.hint,
-        code: error?.code
-      })
       toast({
         variant: "destructive",
         title: "Error Loading Dashboard",
-        description: error.message || "Failed to load dashboard data. Please try again or check console."
+        description: error.message || "Failed to load dashboard data."
       })
     } finally {
       setLoading(false)
@@ -179,7 +360,7 @@ export function DashboardOverview() {
 
   useEffect(() => {
     fetchDashboardData()
-  }, [])
+  }, [dateRange, customDate]) // Trigger when dateRange or customDate changes
 
   const handleView = (order) => {
     setSelectedOrder(order)
@@ -189,9 +370,61 @@ export function DashboardOverview() {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard Overview</h1>
-        <p className="text-gray-600 mt-1">Welcome back! Here's what's happening with your business today.</p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Dashboard Overview</h1>
+          <p className="text-gray-600 mt-1">Welcome back! Here's what's happening with your business.</p>
+        </div>
+
+        {/* Date Range Select */}
+        <div className="flex flex-col items-end gap-2">
+          <div className="flex items-center gap-2 bg-white p-1 rounded-lg border shadow-sm">
+            <Calendar className="w-4 h-4 text-gray-500 ml-2" />
+            <Select value={dateRange} onValueChange={setDateRange}>
+              <SelectTrigger className="w-[180px] border-0 focus:ring-0 shadow-none h-9 font-medium text-gray-700">
+                <SelectValue placeholder="Select period" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all_time" className="cursor-pointer">All Time</SelectItem>
+                <SelectItem value="last_7_days" className="cursor-pointer">Last 7 Days</SelectItem>
+                <SelectItem value="last_week" className="cursor-pointer">Last Week</SelectItem>
+                <SelectItem value="this_month" className="cursor-pointer">This Month</SelectItem>
+                <SelectItem value="last_month" className="cursor-pointer">Last Month</SelectItem>
+                <SelectItem value="last_year" className="cursor-pointer">Last Year</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {dateRangeLabel && (
+            <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+              <PopoverTrigger asChild>
+                <div
+                  onClick={() => dateRange === 'all_time' && setIsCalendarOpen(true)}
+                  className={cn(
+                    "w-full flex justify-center items-center gap-1.5 px-3 py-1 bg-gray-50 border border-gray-200 rounded-full shadow-xs transition-colors",
+                    dateRange === 'all_time' ? "cursor-pointer hover:bg-gray-100 hover:border-gray-300" : "cursor-default"
+                  )}
+                >
+                  <span className={cn("w-1.5 h-1.5 rounded-full animate-pulse", dateRange === 'all_time' ? "bg-blue-500" : "bg-emerald-500")} />
+                  <span className="text-xs font-medium text-gray-600">
+                    {dateRangeLabel}
+                  </span>
+                </div>
+              </PopoverTrigger>
+              {dateRange === 'all_time' && (
+                <PopoverContent className="w-auto p-0" align="end">
+                  <CalendarComponent
+                    mode="range"
+                    defaultMonth={customDate?.from || new Date()}
+                    selected={customDate}
+                    onSelect={setCustomDate}
+                    numberOfMonths={2}
+                  />
+                </PopoverContent>
+              )}
+            </Popover>
+          )}
+        </div>
       </div>
 
       {/* Stats Grid */}
@@ -207,10 +440,10 @@ export function DashboardOverview() {
           >
             <Card className={cn(
               "relative overflow-hidden transition-all duration-300 hover:shadow-xl border-gray-100/50 h-full group hover:bg-white/80",
-              stat.title === "Total Revenue" && "bg-green-50/80",
-              stat.title === "Total Orders" && "bg-blue-50/80",
-              stat.title === "Total Customers" && "bg-purple-50/80",
-              stat.title === "Conversion Rate" && "bg-orange-50/80"
+              stat.title.includes("Revenue") && "bg-green-50/80",
+              stat.title.includes("Orders") && "bg-blue-50/80",
+              stat.title.includes("Customers") && "bg-purple-50/80",
+              stat.title.includes("Conversion") && "bg-orange-50/80"
             )}>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-lg font-bold text-gray-600 transition-colors group-hover:text-gray-900">{stat.title}</CardTitle>
@@ -221,15 +454,25 @@ export function DashboardOverview() {
               <CardContent>
                 <div className="text-2xl font-bold text-gray-900 tracking-tight">{loading ? "..." : stat.value}</div>
                 <div className="flex items-center gap-1 mt-1">
-                  {stat.trend === "up" ? (
-                    <ArrowUp className="w-4 h-4 text-green-600" />
+                  {stat.trend === "neutral" ? (
+                    <span className="text-sm font-medium text-gray-500">Total accumulated</span>
                   ) : (
-                    <ArrowDown className="w-4 h-4 text-red-600" />
+                    <>
+                      {stat.trend === "up" ? (
+                        <ArrowUp className="w-4 h-4 text-green-600" />
+                      ) : (
+                        <ArrowDown className="w-4 h-4 text-red-600" />
+                      )}
+                      <span className={`text-sm font-medium ${stat.trend === "up" ? "text-green-600" : "text-red-600"}`}>
+                        {stat.change}
+                      </span>
+                      <span className="text-sm text-gray-400">
+                        {dateRange === 'this_month' ? 'vs last month' :
+                          dateRange === 'last_month' ? 'vs prev month' :
+                            dateRange === 'last_year' ? 'vs prev year' : 'vs prev period'}
+                      </span>
+                    </>
                   )}
-                  <span className={`text-sm font-medium ${stat.trend === "up" ? "text-green-600" : "text-red-600"}`}>
-                    {stat.change}
-                  </span>
-                  <span className="text-sm text-gray-400">from last month</span>
                 </div>
               </CardContent>
             </Card>
@@ -242,7 +485,9 @@ export function DashboardOverview() {
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle>Recent Orders</CardTitle>
-            <p className="text-sm text-gray-600 mt-1">Latest bookings and transactions</p>
+            <p className="text-sm text-gray-600 mt-1">
+              Latest bookings {dateRange === 'all_time' ? 'overall' : `for ${dateRange.replace(/_/g, ' ')}`}
+            </p>
           </div>
           <Button variant="outline" asChild>
             <a href="/admin/orders">View All</a>
@@ -317,7 +562,7 @@ export function DashboardOverview() {
                       </motion.tr>
                     ))
                   ) : (
-                    <tr><td colSpan="7" className="text-center py-4">No recent orders found.</td></tr>
+                    <tr><td colSpan="7" className="text-center py-4">No recent orders found for this period.</td></tr>
                   )}
                 </tbody>
               </table>
