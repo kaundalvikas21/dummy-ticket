@@ -34,6 +34,7 @@ export function Analytics() {
     avgOrderValue: 0
   })
   const [loading, setLoading] = useState(true)
+  const [activeMetric, setActiveMetric] = useState('both') // 'both', 'revenue', 'orders'
 
   const supabase = createClient()
   const { toast } = useToast()
@@ -88,21 +89,47 @@ export function Analytics() {
       const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
       const monthlyStats = {}
 
-      bookings.forEach(booking => {
-        const date = new Date(booking.created_at)
-        const monthYearKey = `${months[date.getMonth()]} ${date.getFullYear()}`
+      if (bookings.length > 0 || true) { // Always show a range even with no bookings
+        // Show at least the last 6 months
+        const sixMonthsAgo = new Date()
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5)
+        let startDate = new Date(sixMonthsAgo.getFullYear(), sixMonthsAgo.getMonth(), 1)
 
-        if (!monthlyStats[monthYearKey]) {
+        if (bookings.length > 0) {
+          const firstBookingDate = new Date(bookings[0].created_at)
+          const firstMonth = new Date(firstBookingDate.getFullYear(), firstBookingDate.getMonth(), 1)
+          if (firstMonth < startDate) {
+            startDate = firstMonth
+          }
+        }
+
+        const endBooking = new Date() // Today
+        let current = new Date(startDate)
+        const last = new Date(endBooking.getFullYear(), endBooking.getMonth(), 1)
+
+        // Initialize all months with zero values
+        while (current <= last) {
+          const monthYearKey = `${months[current.getMonth()]} ${current.getFullYear()}`
           monthlyStats[monthYearKey] = {
             month: monthYearKey,
             revenue: 0,
             orders: 0,
-            sortKey: date.getFullYear() * 100 + date.getMonth()
+            sortKey: current.getFullYear() * 100 + current.getMonth()
           }
+          current.setMonth(current.getMonth() + 1)
         }
-        monthlyStats[monthYearKey].revenue += parseFloat(booking.amount || 0)
-        monthlyStats[monthYearKey].orders += 1
-      })
+
+        // Fill in actual data
+        bookings.forEach(booking => {
+          const date = new Date(booking.created_at)
+          const monthYearKey = `${months[date.getMonth()]} ${date.getFullYear()}`
+
+          if (monthlyStats[monthYearKey]) {
+            monthlyStats[monthYearKey].revenue += parseFloat(booking.amount || 0)
+            monthlyStats[monthYearKey].orders += 1
+          }
+        })
+      }
 
       // Ensure chronological order
       const chartData = Object.values(monthlyStats).sort((a, b) => a.sortKey - b.sortKey)
@@ -124,7 +151,7 @@ export function Analytics() {
       setTopServices(servicesArray)
 
       // Service Distribution (Pie Chart)
-      const colors = ["#0066FF", "#00D4AA", "#FF6B35", "#FFC107", "#9C27B0"]
+      const colors = ["#00D4AA", "#0066FF", "#FF6B35", "#FFC107", "#9C27B0"] // Updated with new primary colors
       const distArray = servicesArray.map((s, i) => ({
         name: s.name,
         value: s.sales,
@@ -165,11 +192,20 @@ export function Analytics() {
       {/* Key Metrics */}
       <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {/* Total Revenue */}
-        <motion.div whileHover={{ y: -4 }} className="h-full">
-          <Card className="transition-all duration-300 hover:shadow-xl bg-green-50/80 hover:bg-white/80 border-gray-100/50 group h-full">
+        <motion.div
+          whileHover={{ y: -4 }}
+          whileTap={{ scale: 0.98 }}
+          className="h-full cursor-pointer"
+          onClick={() => setActiveMetric(activeMetric === 'revenue' ? 'both' : 'revenue')}
+        >
+          <Card className={cn(
+            "transition-all duration-300 hover:shadow-xl bg-green-50/80 hover:bg-white/80 border-gray-100/50 group h-full",
+            activeMetric === 'revenue' && "ring-2 ring-green-500 bg-white",
+            activeMetric === 'orders' && "opacity-60 saturate-50"
+          )}>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-lg font-bold text-gray-600 transition-colors group-hover:text-gray-900">Total Revenue</CardTitle>
-              <div className="p-2 rounded-lg bg-linear-to-br from-green-500 to-emerald-600 shadow-sm transition-transform group-hover:scale-110">
+              <div className="p-2 rounded-lg bg-linear-to-br from-[#00D4AA] to-emerald-600 shadow-sm transition-transform group-hover:scale-110">
                 <DollarSign className="w-4 h-4 text-white" />
               </div>
             </CardHeader>
@@ -185,11 +221,20 @@ export function Analytics() {
         </motion.div>
 
         {/* Total Orders */}
-        <motion.div whileHover={{ y: -4 }} className="h-full">
-          <Card className="transition-all duration-300 hover:shadow-xl bg-blue-50/80 hover:bg-white/80 border-gray-100/50 group h-full">
+        <motion.div
+          whileHover={{ y: -4 }}
+          whileTap={{ scale: 0.98 }}
+          className="h-full cursor-pointer"
+          onClick={() => setActiveMetric(activeMetric === 'orders' ? 'both' : 'orders')}
+        >
+          <Card className={cn(
+            "transition-all duration-300 hover:shadow-xl bg-blue-50/80 hover:bg-white/80 border-gray-100/50 group h-full",
+            activeMetric === 'orders' && "ring-2 ring-blue-500 bg-white",
+            activeMetric === 'revenue' && "opacity-60 saturate-50"
+          )}>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-lg font-bold text-gray-600 transition-colors group-hover:text-gray-900">Total Orders</CardTitle>
-              <div className="p-2 rounded-lg bg-linear-to-br from-blue-500 to-cyan-600 shadow-sm transition-transform group-hover:scale-110">
+              <div className="p-2 rounded-lg bg-linear-to-br from-[#0066FF] to-cyan-600 shadow-sm transition-transform group-hover:scale-110">
                 <ShoppingCart className="w-4 h-4 text-white" />
               </div>
             </CardHeader>
@@ -251,43 +296,63 @@ export function Analytics() {
             config={{
               revenue: {
                 label: "Revenue ($)",
-                color: "#0066FF",
+                color: "#00D4AA",
               },
               orders: {
                 label: "Orders",
-                color: "#00D4AA",
+                color: "#0066FF",
               },
             }}
             className="h-[350px]"
           >
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={monthlyData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis dataKey="month" stroke="#6b7280" />
-                <YAxis yAxisId="left" stroke="#0066FF" />
-                <YAxis yAxisId="right" orientation="right" stroke="#00D4AA" />
+              <LineChart data={monthlyData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                <XAxis dataKey="month" hide />
+                {(activeMetric === 'both' || activeMetric === 'revenue') && (
+                  <YAxis yAxisId="left" stroke="#00D4AA" />
+                )}
+                {(activeMetric === 'both' || activeMetric === 'orders') && (
+                  <YAxis yAxisId="right" orientation="right" stroke="#0066FF" />
+                )}
                 <ChartTooltip content={<ChartTooltipContent />} />
-                <Legend />
-                <Line
-                  yAxisId="left"
-                  type="monotone"
-                  dataKey="revenue"
-                  stroke="#0066FF"
-                  strokeWidth={2}
-                  name="Revenue ($)"
-                  dot={{ fill: "#0066FF", r: 4 }}
-                  activeDot={{ r: 6 }}
-                />
-                <Line
-                  yAxisId="right"
-                  type="monotone"
-                  dataKey="orders"
-                  stroke="#00D4AA"
-                  strokeWidth={2}
-                  name="Orders"
-                  dot={{ fill: "#00D4AA", r: 4 }}
-                  activeDot={{ r: 6 }}
-                />
+                <Legend
+                  wrapperStyle={{ paddingTop: "20px" }}
+                  formatter={(value) => <span className="text-sm font-medium ml-1">{value}</span>}
+                  onClick={(e) => {
+                    if (e.dataKey === 'revenue') setActiveMetric(activeMetric === 'revenue' ? 'both' : 'revenue')
+                    if (e.dataKey === 'orders') setActiveMetric(activeMetric === 'orders' ? 'both' : 'orders')
+                  }} />
+                {(activeMetric === 'both' || activeMetric === 'revenue') && (
+                  <Line
+                    yAxisId="left"
+                    type="monotone"
+                    dataKey="revenue"
+                    stroke="#00D4AA"
+                    strokeWidth={3}
+                    name="Revenue ($)"
+                    dot={{ fill: "#00D4AA", r: 4 }}
+                    activeDot={{ r: 6 }}
+                    isAnimationActive={true}
+                    animationDuration={1500}
+                    animationEasing="ease-in-out"
+                  />
+                )}
+                {(activeMetric === 'both' || activeMetric === 'orders') && (
+                  <Line
+                    yAxisId="right"
+                    type="monotone"
+                    dataKey="orders"
+                    stroke="#0066FF"
+                    strokeWidth={3}
+                    name="Orders"
+                    dot={{ fill: "#0066FF", r: 4 }}
+                    activeDot={{ r: 6 }}
+                    isAnimationActive={true}
+                    animationDuration={1500}
+                    animationEasing="ease-in-out"
+                  />
+                )}
               </LineChart>
             </ResponsiveContainer>
           </ChartContainer>
@@ -305,13 +370,16 @@ export function Analytics() {
               config={{
                 revenue: {
                   label: "Revenue ($)",
-                  color: "#0066FF",
+                  color: "#00D4AA",
                 },
               }}
-              className="h-[250px] sm:h-[300px]"
+              className="h-[300px] w-full"
             >
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={topServices} margin={{ top: 5, right: 30, left: 20, bottom: 60 }}>
+                <BarChart
+                  data={topServices}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                >
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis
                     dataKey="name"
@@ -319,11 +387,18 @@ export function Analytics() {
                     angle={-45}
                     textAnchor="end"
                     height={80}
-                    tick={{ fontSize: 12 }}
+                    tick={{ fontSize: 11 }}
+                    interval={0}
                   />
                   <YAxis stroke="#6b7280" tick={{ fontSize: 12 }} />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="revenue" fill="#0066FF" radius={[8, 8, 0, 0]} name="Revenue ($)" />
+                  <ChartTooltip content={<ChartTooltipContent />} cursor={{ fill: 'transparent' }} />
+                  <Bar
+                    dataKey="revenue"
+                    fill="#00D4AA"
+                    radius={[4, 4, 0, 0]}
+                    name="Revenue ($)"
+                    barSize={40}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </ChartContainer>
@@ -342,7 +417,7 @@ export function Analytics() {
                   label: "Sales",
                 },
               }}
-              className="h-[250px] sm:h-[300px]"
+              className="h-[250px] sm:h-[300px] w-full"
             >
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -387,7 +462,7 @@ export function Analytics() {
             {topServices.map((service, index) => (
               <div key={index} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-4 bg-gray-50 rounded-lg">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-linear-to-br from-[#0066FF] to-[#00D4AA] flex items-center justify-center text-white font-bold text-sm">
+                  <div className="w-8 h-8 rounded-full bg-linear-to-br from-[#00D4AA] to-[#0066FF] flex items-center justify-center text-white font-bold text-sm">
                     {index + 1}
                   </div>
                   <div>
