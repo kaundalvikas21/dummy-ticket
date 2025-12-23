@@ -114,22 +114,20 @@ export function DashboardOverview() {
         prevStart.setDate(now.getDate() - 14)
         break
 
-      case "last_week":
-        // Previous calendar week (Mon-Sun)
-        const day = now.getDay() || 7 // Get current day number, converting Sun (0) to 7
-        if (day !== 1) now.setHours(-24 * (day - 1)) // Set to last Monday
-        else now.setHours(-24 * 7) // If today is Mon, go to last Mon
-
-        // Start of "Last Week"
-        currentStart.setDate(now.getDate() - 7)
+      case "this_year":
+        // This Year (Jan 1st to now)
+        currentStart.setFullYear(now.getFullYear())
+        currentStart.setMonth(0, 1)
         currentStart.setHours(0, 0, 0, 0)
-        // End of "Last Week"
-        currentEnd.setDate(now.getDate()) // This is actually start of this week, so we use < currentEnd
-        currentEnd.setHours(0, 0, 0, 0)
 
-        // Previous period
-        prevStart.setDate(currentStart.getDate() - 7)
-        prevEnd.setDate(currentStart.getDate())
+        // Previous Year (Full last year)
+        prevStart.setFullYear(now.getFullYear() - 1)
+        prevStart.setMonth(0, 1)
+        prevStart.setHours(0, 0, 0, 0)
+
+        prevEnd.setFullYear(now.getFullYear() - 1)
+        prevEnd.setMonth(11, 31)
+        prevEnd.setHours(23, 59, 59, 999)
         break
 
       case "this_month":
@@ -387,9 +385,9 @@ export function DashboardOverview() {
               <SelectContent>
                 <SelectItem value="all_time" className="cursor-pointer">All Time</SelectItem>
                 <SelectItem value="last_7_days" className="cursor-pointer">Last 7 Days</SelectItem>
-                <SelectItem value="last_week" className="cursor-pointer">Last Week</SelectItem>
                 <SelectItem value="this_month" className="cursor-pointer">This Month</SelectItem>
                 <SelectItem value="last_month" className="cursor-pointer">Last Month</SelectItem>
+                <SelectItem value="this_year" className="cursor-pointer">This Year</SelectItem>
                 <SelectItem value="last_year" className="cursor-pointer">Last Year</SelectItem>
               </SelectContent>
             </Select>

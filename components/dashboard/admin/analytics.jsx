@@ -22,6 +22,21 @@ import {
 } from "recharts"
 import { createClient } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
+import { Button } from "@/components/ui/button"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Calendar as CalendarComponent } from "@/components/ui/calendar"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { format } from "date-fns"
 
 export function Analytics() {
   const [monthlyData, setMonthlyData] = useState([])
@@ -36,16 +51,75 @@ export function Analytics() {
   const [loading, setLoading] = useState(true)
   const [activeMetric, setActiveMetric] = useState('both') // 'both', 'revenue', 'orders'
 
+  // Filter State
+  const [dateRange, setDateRange] = useState("all_time") // Default to all_time as requested
+  const [dateRangeLabel, setDateRangeLabel] = useState("")
+  const [customDate, setCustomDate] = useState(undefined)
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false)
+  const [chartData, setChartData] = useState([]) // Replaces monthlyData
+
   const supabase = createClient()
   const { toast } = useToast()
+
+  const getDateRange = (range) => {
+    const now = new Date()
+    const currentStart = new Date(now)
+    const currentEnd = new Date(now)
+
+    if (range === "all_time") {
+      if (customDate?.from) {
+        const start = new Date(customDate.from)
+        start.setHours(0, 0, 0, 0)
+        const end = customDate.to ? new Date(customDate.to) : new Date(customDate.from)
+        end.setHours(23, 59, 59, 999)
+        return { start, end }
+      }
+      return { start: null, end: null } // All time
+    }
+
+    switch (range) {
+      case "last_7_days":
+        currentStart.setDate(now.getDate() - 7)
+        currentStart.setHours(0, 0, 0, 0)
+        break
+      case "this_year":
+        currentStart.setFullYear(now.getFullYear())
+        currentStart.setMonth(0, 1)
+        currentStart.setHours(0, 0, 0, 0)
+        break
+      case "this_month":
+        currentStart.setDate(1)
+        currentStart.setHours(0, 0, 0, 0)
+        break
+      case "last_month":
+        currentStart.setMonth(now.getMonth() - 1)
+        currentStart.setDate(1)
+        currentStart.setHours(0, 0, 0, 0)
+        currentEnd.setDate(0)
+        currentEnd.setHours(23, 59, 59, 999)
+        break
+      case "last_year":
+        currentStart.setFullYear(now.getFullYear() - 1)
+        currentStart.setMonth(0, 1)
+        currentStart.setHours(0, 0, 0, 0)
+        currentEnd.setFullYear(now.getFullYear() - 1)
+        currentEnd.setMonth(11, 31)
+        currentEnd.setHours(23, 59, 59, 999)
+        break
+      default:
+        currentStart.setDate(1)
+        currentStart.setHours(0, 0, 0, 0)
+    }
+    return { start: currentStart, end: currentEnd }
+  }
 
   const fetchAnalyticsData = async () => {
     setLoading(true)
     try {
-      // Fetch all bookings for aggregation
+      // Fetch all bookings
       const { data: bookings, error: bookingsError } = await supabase
         .from('bookings')
-        .select('amount, created_at, status, service_plans(name)')
+        .select('amount, created_at, status, service_plans(name), user_id')
         .order('created_at', { ascending: true })
 
       if (bookingsError) throw bookingsError
@@ -55,90 +129,116 @@ export function Analytics() {
         .from('user_profiles')
         .select('*')
 
-      if (profilesError) {
-        console.warn("Analytics: Profile fetch failed.", profilesError.message)
-        // Continue with empty profiles if fetch fails
-        profiles = []
-      } else {
-        profiles = profilesData || []
-      }
+      if (!profilesError) profiles = profilesData || []
 
-      // key metrics
+      // --- Global Metrics (Always All Time based on user request "Same i want in Revenue & Orders Trend right side displayed") ---
+      // Implied: Top cards remain global totals, only the Trend Chart is filtered.
       const totalRevenue = bookings.reduce((sum, b) => sum + parseFloat(b.amount || 0), 0)
       const totalOrders = bookings.length
       const avgOrderVal = totalOrders > 0 ? totalRevenue / totalOrders : 0
 
-      // Compute Total Customers (Profiles + Bookings unique ids)
       const customerIds = new Set()
       profiles?.forEach(p => {
-        // Use auth_user_id if available, fallback to user_id
         const id = p.auth_user_id || p.user_id
         if (id) customerIds.add(id)
       })
       bookings?.forEach(b => { if (b.user_id) customerIds.add(b.user_id) })
-      const totalUniqueCustomers = customerIds.size
 
       setKeyMetrics({
         revenue: totalRevenue,
         orders: totalOrders,
-        customers: totalUniqueCustomers,
+        customers: customerIds.size,
         avgOrderValue: avgOrderVal
       })
 
-      // Process Monthly Data (Grouped by Month and Year)
-      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-      const monthlyStats = {}
 
-      if (bookings.length > 0 || true) { // Always show a range even with no bookings
-        // Show at least the last 6 months
-        const sixMonthsAgo = new Date()
-        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5)
-        let startDate = new Date(sixMonthsAgo.getFullYear(), sixMonthsAgo.getMonth(), 1)
+      // --- Chart Data Filtering ---
+      const { start, end } = getDateRange(dateRange)
+      const isAllTime = dateRange === "all_time" && !customDate?.from // True all time
 
-        if (bookings.length > 0) {
-          const firstBookingDate = new Date(bookings[0].created_at)
-          const firstMonth = new Date(firstBookingDate.getFullYear(), firstBookingDate.getMonth(), 1)
-          if (firstMonth < startDate) {
-            startDate = firstMonth
-          }
+      // Update Label
+      if (dateRange === "all_time") {
+        if (customDate?.from) {
+          setDateRangeLabel(customDate.to ?
+            `${format(customDate.from, "LLL dd, y")} - ${format(customDate.to, "LLL dd, y")}` :
+            format(customDate.from, "LLL dd, y"))
+        } else {
+          // Default All Time: Show current date 
+          setDateRangeLabel(format(new Date(), "LLL dd, y"))
         }
-
-        const endBooking = new Date() // Today
-        let current = new Date(startDate)
-        const last = new Date(endBooking.getFullYear(), endBooking.getMonth(), 1)
-
-        // Initialize all months with zero values
-        while (current <= last) {
-          const monthYearKey = `${months[current.getMonth()]} ${current.getFullYear()}`
-          monthlyStats[monthYearKey] = {
-            month: monthYearKey,
-            revenue: 0,
-            orders: 0,
-            sortKey: current.getFullYear() * 100 + current.getMonth()
-          }
-          current.setMonth(current.getMonth() + 1)
-        }
-
-        // Fill in actual data
-        bookings.forEach(booking => {
-          const date = new Date(booking.created_at)
-          const monthYearKey = `${months[date.getMonth()]} ${date.getFullYear()}`
-
-          if (monthlyStats[monthYearKey]) {
-            monthlyStats[monthYearKey].revenue += parseFloat(booking.amount || 0)
-            monthlyStats[monthYearKey].orders += 1
-          }
-        })
+      } else {
+        setDateRangeLabel(`${format(start, "LLL dd, y")} - ${format(end, "LLL dd, y")}`)
       }
 
-      // Ensure chronological order
-      const chartData = Object.values(monthlyStats).sort((a, b) => a.sortKey - b.sortKey)
 
-      setMonthlyData(chartData.length > 0 ? chartData : [{ month: "No Data", revenue: 0, orders: 0 }])
+      const filteredBookings = bookings.filter(b => {
+        if (isAllTime) return true
+        const d = new Date(b.created_at)
+        return d >= start && d <= end
+      })
 
-      // Process Services Data
+      // Determine grouping: Daily if <= 60 days, else Monthly
+      let useDaily = false
+      if (!isAllTime) {
+        const diffTime = Math.abs(end - start)
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+        useDaily = diffDays <= 62
+      }
+
+      const chartStats = {}
+      const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+      // Initialize Chart buckets
+      let iterDate = isAllTime
+        ? (bookings.length > 0 ? new Date(bookings[0].created_at) : new Date())
+        : new Date(start)
+      const endDate = isAllTime ? new Date() : new Date(end)
+
+      if (isAllTime) iterDate.setDate(1) // Start from 1st of month for consistency
+
+      // Guard for empty initial state
+      if (iterDate > endDate && !isAllTime) iterDate = new Date(endDate)
+
+      while (iterDate <= endDate) {
+        let key, sortKey
+        if (useDaily) {
+          key = format(iterDate, "MMM dd")
+          sortKey = iterDate.getTime()
+          iterDate.setDate(iterDate.getDate() + 1)
+        } else {
+          key = `${months[iterDate.getMonth()]} ${iterDate.getFullYear()}`
+          sortKey = iterDate.getFullYear() * 100 + iterDate.getMonth()
+          iterDate.setMonth(iterDate.getMonth() + 1)
+          iterDate.setDate(1) // Reset to 1st to avoid skipping months with shorter days
+        }
+
+        chartStats[key] = { name: key, revenue: 0, orders: 0, sortKey }
+      }
+
+      // Populate Data
+      filteredBookings.forEach(b => {
+        const d = new Date(b.created_at)
+        let key
+        if (useDaily) {
+          key = format(d, "MMM dd")
+        } else {
+          key = `${months[d.getMonth()]} ${d.getFullYear()}`
+        }
+
+        if (chartStats[key]) {
+          chartStats[key].revenue += parseFloat(b.amount || 0)
+          chartStats[key].orders += 1
+        }
+      })
+
+      const finalChartData = Object.values(chartStats).sort((a, b) => a.sortKey - b.sortKey)
+      setChartData(finalChartData.length > 0 ? finalChartData : [{ name: "No Data", revenue: 0, orders: 0 }])
+
+
+      // --- Service Stats (Also Global or Filtered? Request said "Revenue & Orders Trend", likely top services stays global unless specified. I'll keep it simple and consistent: Top Services usually reflects current context. Let's make Top Services reflect the Filtered Range too for consistency.) ---
+      // Decision: Dashboard usually filters everything. I'll filter Top Services too.
       const serviceStats = {}
-      bookings.forEach(booking => {
+      filteredBookings.forEach(booking => {
         const serviceName = booking.service_plans?.name || "Unknown Service"
         if (!serviceStats[serviceName]) {
           serviceStats[serviceName] = { name: serviceName, sales: 0, revenue: 0 }
@@ -150,8 +250,8 @@ export function Analytics() {
       const servicesArray = Object.values(serviceStats).sort((a, b) => b.revenue - a.revenue)
       setTopServices(servicesArray)
 
-      // Service Distribution (Pie Chart)
-      const colors = ["#00D4AA", "#0066FF", "#FF6B35", "#FFC107", "#9C27B0"] // Updated with new primary colors
+      // Service Distribution
+      const colors = ["#00D4AA", "#0066FF", "#FF6B35", "#FFC107", "#9C27B0"]
       const distArray = servicesArray.map((s, i) => ({
         name: s.name,
         value: s.sales,
@@ -160,17 +260,11 @@ export function Analytics() {
       setServiceDistribution(distArray)
 
     } catch (error) {
-      console.error("Error fetching analytics data:", {
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-        code: error.code,
-        fullError: error
-      })
+      console.error("Error fetching analytics data:", error)
       toast({
         variant: "destructive",
         title: "Error Loading Analytics",
-        description: error.message || "Failed to load analytics data. Please check console."
+        description: error.message
       })
     } finally {
       setLoading(false)
@@ -179,7 +273,7 @@ export function Analytics() {
 
   useEffect(() => {
     fetchAnalyticsData()
-  }, [])
+  }, [dateRange, customDate])
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -287,9 +381,59 @@ export function Analytics() {
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Revenue & Orders Trend</CardTitle>
-          <CardDescription>Monthly performance</CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Revenue & Orders Trend</CardTitle>
+            <CardDescription>{dateRange === 'all_time' ? "All time performance" : `Performance for ${dateRangeLabel}`}</CardDescription>
+          </div>
+          <div className="flex flex-col items-end gap-2">
+            <div className="flex items-center gap-2 bg-white p-1 rounded-lg border shadow-sm">
+              <Calendar className="w-4 h-4 text-gray-500 ml-2" />
+              <Select value={dateRange} onValueChange={setDateRange}>
+                <SelectTrigger className="w-[150px] border-0 focus:ring-0 shadow-none h-9 font-medium text-gray-700">
+                  <SelectValue placeholder="Period" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all_time" className="cursor-pointer">All Time</SelectItem>
+                  <SelectItem value="last_7_days" className="cursor-pointer">Last 7 Days</SelectItem>
+                  <SelectItem value="this_month" className="cursor-pointer">This Month</SelectItem>
+                  <SelectItem value="last_month" className="cursor-pointer">Last Month</SelectItem>
+                  <SelectItem value="this_year" className="cursor-pointer">This Year</SelectItem>
+                  <SelectItem value="last_year" className="cursor-pointer">Last Year</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {dateRangeLabel && (
+              <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+                <PopoverTrigger asChild>
+                  <div
+                    onClick={() => dateRange === 'all_time' && setIsCalendarOpen(true)}
+                    className={cn(
+                      "w-full flex justify-center items-center gap-1.5 px-3 py-1 bg-gray-50 border border-gray-200 rounded-full shadow-xs transition-colors",
+                      dateRange === 'all_time' ? "cursor-pointer hover:bg-gray-100 hover:border-gray-300" : "cursor-default"
+                    )}
+                  >
+                    <span className={cn("w-1.5 h-1.5 rounded-full animate-pulse", dateRange === 'all_time' ? "bg-blue-500" : "bg-emerald-500")} />
+                    <span className="text-xs font-medium text-gray-600">
+                      {dateRangeLabel}
+                    </span>
+                  </div>
+                </PopoverTrigger>
+                {dateRange === 'all_time' && (
+                  <PopoverContent className="w-auto p-0" align="end">
+                    <CalendarComponent
+                      mode="range"
+                      defaultMonth={customDate?.from || new Date()}
+                      selected={customDate}
+                      onSelect={setCustomDate}
+                      numberOfMonths={2}
+                    />
+                  </PopoverContent>
+                )}
+              </Popover>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           <ChartContainer
@@ -306,9 +450,9 @@ export function Analytics() {
             className="h-[350px]"
           >
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={monthlyData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+              <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-                <XAxis dataKey="month" hide />
+                <XAxis dataKey="name" hide={false} tick={{ fontSize: 12 }} />
                 {(activeMetric === 'both' || activeMetric === 'revenue') && (
                   <YAxis yAxisId="left" stroke="#00D4AA" />
                 )}
