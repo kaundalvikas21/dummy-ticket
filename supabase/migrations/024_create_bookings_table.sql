@@ -32,14 +32,24 @@ create policy "Users can view own bookings"
   on bookings for select
   using (auth.uid() = user_id);
 
--- Admins can view all bookings
--- Checks both standard role claim and app_metadata role
-create policy "Admins can view all bookings"
-  on bookings for select
-  using (
+-- Helper Function for RLS Policies (consistent, maintainable approach)
+CREATE OR REPLACE FUNCTION is_admin()
+RETURNS BOOLEAN AS $$
+BEGIN
+  -- Check if user has admin role from JWT claims or app_metadata
+  RETURN (
     auth.jwt() ->> 'role' = 'admin' OR
-    auth.jwt() -> 'app_metadata' ->> 'role' = 'admin'
+    auth.jwt() -> 'app_metadata' ->> 'role' = 'admin' OR
+    auth.jwt() -> 'user_metadata' ->> 'role' = 'admin'
   );
+END;
+$$ LANGUAGE plpgsql IMMUTABLE SECURITY DEFINER;
+
+-- Admins can manage all bookings
+create policy "Admins can manage all bookings"
+  on bookings for all
+  using (is_admin())
+  with check (is_admin());
 
 -- Anyone can create bookings (Guest checkout support)
 create policy "Anyone can create bookings"
