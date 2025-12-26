@@ -1,5 +1,6 @@
 "use client"
 
+import { createClient } from "@/lib/supabase/client"
 import { Bell, User, ChevronDown, UserCircle, Settings, LogOut, Loader2, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -13,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/contexts/auth-context"
@@ -25,44 +26,95 @@ export function AdminHeader({ onMenuClick, sidebarOpen }) {
   const { logout, profile, loading } = useAuth()
   const [isLoggingOut, setIsLoggingOut] = useState(false)
 
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      title: "New order received",
-      description: "Order #12345 - $35.00",
-      type: "order",
-      targetView: "orders",
-      read: false,
-    },
-    {
-      id: 2,
-      title: "Support ticket opened",
-      description: "Customer needs help with booking",
-      type: "ticket",
-      targetView: "support",
-      read: false,
-    },
-    {
-      id: 3,
-      title: "Payment received",
-      description: "$19.00 from John Doe",
-      type: "payment",
-      targetView: "orders",
-      read: false,
-    },
-  ])
-
+  const supabase = createClient()
+  const [notifications, setNotifications] = useState([])
   const [notificationDropdownOpen, setNotificationDropdownOpen] = useState(false)
+  const [loadingNotifications, setLoadingNotifications] = useState(true)
 
-  const handleNotificationClick = (notification) => {
-    setNotifications((prev) => prev.map((n) => (n.id === notification.id ? { ...n, read: true } : n)))
-    const targetRoute = `/admin/${notification.targetView}`;
-    router.push(targetRoute);
+  // Fetch notifications and set up realtime subscription
+  useEffect(() => {
+    if (!profile?.id) return
+
+    const fetchNotifications = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('notifications')
+          .select('*')
+          .eq('user_id', profile.auth_user_id || profile.user_id) // Handle both ID fields just in case
+          .order('created_at', { ascending: false })
+          .limit(20)
+
+        if (error) throw error
+        setNotifications(data || [])
+      } catch (error) {
+        console.error('Error fetching notifications:', error)
+      } finally {
+        setLoadingNotifications(false)
+      }
+    }
+
+    fetchNotifications()
+
+    // Subscribe to realtime changes
+    const channel = supabase
+      .channel('admin-notifications')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${profile.auth_user_id || profile.user_id}`,
+        },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            setNotifications((prev) => [payload.new, ...prev])
+            toast({
+              title: payload.new.title,
+              description: payload.new.message,
+            })
+          } else if (payload.eventType === 'UPDATE') {
+            setNotifications((prev) =>
+              prev.map((n) => (n.id === payload.new.id ? payload.new : n))
+            )
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [profile, supabase, toast])
+
+  const handleNotificationClick = async (notification) => {
+    // Mark as read in DB
+    if (!notification.read) {
+      try {
+        const { error } = await supabase
+          .from('notifications')
+          .update({ read: true })
+          .eq('id', notification.id)
+
+        if (error) throw error
+
+        // Optimistic update
+        setNotifications((prev) =>
+          prev.map((n) => (n.id === notification.id ? { ...n, read: true } : n))
+        )
+      } catch (error) {
+        console.error('Error marking notification as read:', error)
+      }
+    }
+
+    if (notification.link) {
+      router.push(notification.link)
+      toast({
+        title: "Navigating",
+        description: `Opening ${notification.title}`,
+      })
+    }
     setNotificationDropdownOpen(false)
-    toast({
-      title: "Navigating",
-      description: `Opening ${notification.title}`,
-    })
   }
 
   const handleLogout = async () => {
@@ -166,7 +218,7 @@ export function AdminHeader({ onMenuClick, sidebarOpen }) {
                           className="text-sm p-3 rounded-lg cursor-pointer transition-colors hover:bg-gray-100 bg-blue-50"
                         >
                           <p className="font-medium">{notification.title}</p>
-                          <p className="text-gray-500">{notification.description}</p>
+                          <p className="text-gray-500">{notification.message}</p>
                         </div>
                       ))}
                   </div>
@@ -210,15 +262,15 @@ export function AdminHeader({ onMenuClick, sidebarOpen }) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               {profile?.email && (
-              <div className="px-2 py-1.5">
-                <p className="text-sm font-semibold">
-                  {loading || !profile ? <Skeleton className="w-32 h-4" /> : getUserDisplayName()}
-                </p>
-                <p className="text-xs text-gray-500">
-                  {profile?.email}
-                </p>
-              </div>
-            )}
+                <div className="px-2 py-1.5">
+                  <p className="text-sm font-semibold">
+                    {loading || !profile ? <Skeleton className="w-32 h-4" /> : getUserDisplayName()}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {profile?.email}
+                  </p>
+                </div>
+              )}
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => router.push("/admin/profile")} className="cursor-pointer">
                 <UserCircle className="mr-2 h-4 w-4" />

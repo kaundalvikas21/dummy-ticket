@@ -1,5 +1,6 @@
 "use client"
 
+import { createClient } from "@/lib/supabase/client"
 import { Bell, LogOut, Settings, User, UserCircle, HelpCircle, ChevronDown, Loader2, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -25,51 +26,98 @@ export function UserHeader({ onMenuClick, sidebarOpen }) {
   const { logout } = useAuth()
   const { profile, loading } = useProfileSync()
   const [isLoggingOut, setIsLoggingOut] = useState(false)
-
   const [mounted, setMounted] = useState(false);
+  const supabase = createClient()
+  const [notifications, setNotifications] = useState([])
+  const [loadingNotifications, setLoadingNotifications] = useState(true)
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      title: "Booking Confirmed",
-      description: "Your ticket #12345 is ready",
-      type: "booking",
-      targetSection: "bookings",
-      read: false,
-    },
-    {
-      id: 2,
-      title: "Payment Successful",
-      description: "$35.00 processed successfully",
-      type: "payment",
-      targetSection: "payments",
-      read: false,
-    },
-    {
-      id: 3,
-      title: "Document Available",
-      description: "Download your travel document",
-      type: "document",
-      targetSection: "documents",
-      read: false,
-    },
-  ])
+  // Fetch notifications and set up realtime subscription
+  useEffect(() => {
+    if (!profile?.id) return
+
+    const fetchNotifications = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('notifications')
+          .select('*')
+          .eq('user_id', profile.auth_user_id || profile.user_id)
+          .order('created_at', { ascending: false })
+          .limit(20)
+
+        if (error) throw error
+        setNotifications(data || [])
+      } catch (error) {
+        console.error('Error fetching notifications:', error)
+      } finally {
+        setLoadingNotifications(false)
+      }
+    }
+
+    fetchNotifications()
+
+    const channel = supabase
+      .channel('user-notifications')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${profile.auth_user_id || profile.user_id}`,
+        },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            setNotifications((prev) => [payload.new, ...prev])
+            toast({
+              title: payload.new.title,
+              description: payload.new.message,
+            })
+          } else if (payload.eventType === 'UPDATE') {
+            setNotifications((prev) =>
+              prev.map((n) => (n.id === payload.new.id ? payload.new : n))
+            )
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [profile, supabase, toast])
 
   const [notificationDropdownOpen, setNotificationDropdownOpen] = useState(false)
 
-  const handleNotificationClick = (notification) => {
-    setNotifications((prev) => prev.map((n) => (n.id === notification.id ? { ...n, read: true } : n)))
-    const targetRoute = `/user/${notification.targetSection}`
-    router.push(targetRoute)
+  const handleNotificationClick = async (notification) => {
+    if (!notification.read) {
+      try {
+        const { error } = await supabase
+          .from('notifications')
+          .update({ read: true })
+          .eq('id', notification.id)
+
+        if (error) throw error
+
+        setNotifications((prev) =>
+          prev.map((n) => (n.id === notification.id ? { ...n, read: true } : n))
+        )
+      } catch (error) {
+        console.error('Error marking notification as read:', error)
+      }
+    }
+
+    if (notification.link) {
+      router.push(notification.link)
+      toast({
+        title: "Navigating",
+        description: `Opening ${notification.title}`,
+      })
+    }
     setNotificationDropdownOpen(false)
-    toast({
-      title: "Navigating",
-      description: `Opening ${notification.title}`,
-    })
   }
 
   const unreadCount = notifications.filter((n) => !n.read).length
@@ -185,7 +233,7 @@ export function UserHeader({ onMenuClick, sidebarOpen }) {
                         className="text-sm p-3 rounded-lg cursor-pointer transition-colors hover:bg-gray-100 bg-blue-50"
                       >
                         <p className="font-medium">{notification.title}</p>
-                        <p className="text-gray-500">{notification.description}</p>
+                        <p className="text-gray-500">{notification.message}</p>
                       </div>
                     ))}
                 </div>
