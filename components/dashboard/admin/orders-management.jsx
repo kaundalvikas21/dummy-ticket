@@ -31,6 +31,7 @@ import { Label } from "@/components/ui/label"
 import { SkeletonTable } from "@/components/ui/skeleton-table"
 import { createClient } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
+import { Pagination } from "@/components/ui/pagination"
 
 export function OrdersManagement() {
   const [orders, setOrders] = useState([])
@@ -43,6 +44,8 @@ export function OrdersManagement() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [orderToDelete, setOrderToDelete] = useState(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const ITEMS_PER_PAGE = 10
   const { toast } = useToast()
   const supabase = createClient()
 
@@ -139,6 +142,10 @@ export function OrdersManagement() {
     fetchOrders()
   }, [])
 
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, filterStatus])
+
   const handleRefresh = async () => {
     setIsRefreshing(true)
     setLoading(true) // Show skeleton
@@ -160,6 +167,12 @@ export function OrdersManagement() {
 
     return matchesSearch && matchesStatus
   })
+
+  const totalPages = Math.ceil(filteredOrders.length / ITEMS_PER_PAGE)
+  const paginatedOrders = filteredOrders.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  )
 
   const handleView = (order) => {
     setSelectedOrder(order)
@@ -373,8 +386,8 @@ export function OrdersManagement() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredOrders.length > 0 ? (
-                    filteredOrders.map((order) => (
+                  {paginatedOrders.length > 0 ? (
+                    paginatedOrders.map((order) => (
                       <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                         <td className="py-3 px-4 text-sm font-medium text-gray-900 break-all" title={order.id}>{order.id}</td>
                         <td className="py-3 px-4 text-sm font-medium text-gray-900 break-all" title={order.payment_intent_id}>{order.payment_intent_id}</td>
@@ -486,6 +499,15 @@ export function OrdersManagement() {
             </div>
           )}
         </CardContent>
+        {!loading && filteredOrders.length > 0 && (
+          <div className="border-t border-gray-100 px-6 py-4">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+        )}
       </Card>
 
       {/* View Order Dialog */}

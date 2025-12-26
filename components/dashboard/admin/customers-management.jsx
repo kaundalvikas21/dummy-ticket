@@ -32,6 +32,7 @@ import { SkeletonTable } from "@/components/ui/skeleton-table"
 import { createClient } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { RefreshButton } from "@/components/ui/refresh-button"
+import { Pagination } from "@/components/ui/pagination"
 
 export function CustomersManagement() {
   const [customers, setCustomers] = useState([])
@@ -47,6 +48,8 @@ export function CustomersManagement() {
   const [filterStatus, setFilterStatus] = useState("all")
   const [filterOrderRange, setFilterOrderRange] = useState("all")
   const [sortBy, setSortBy] = useState("name")
+  const [currentPage, setCurrentPage] = useState(1)
+  const ITEMS_PER_PAGE = 10
 
   const { toast } = useToast()
   const supabase = createClient()
@@ -152,6 +155,10 @@ export function CustomersManagement() {
     fetchCustomers()
   }, [])
 
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, filterStatus])
+
   const handleRefresh = async () => {
     setIsRefreshing(true)
     setLoading(true)
@@ -229,6 +236,12 @@ export function CustomersManagement() {
       // Default sort by name
       return a.name.localeCompare(b.name)
     })
+
+  const totalPages = Math.ceil(filteredCustomers.length / ITEMS_PER_PAGE)
+  const paginatedCustomers = filteredCustomers.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  )
 
   const handleView = (customer) => {
     setSelectedCustomer(customer)
@@ -427,8 +440,8 @@ export function CustomersManagement() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredCustomers.length > 0 ? (
-                    filteredCustomers.map((customer) => (
+                  {paginatedCustomers.length > 0 ? (
+                    paginatedCustomers.map((customer) => (
                       <tr key={customer.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                         <td className="py-3 px-4">
                           <div className="flex items-center gap-3">
@@ -498,6 +511,15 @@ export function CustomersManagement() {
             </div>
           )}
         </CardContent>
+        {!loading && filteredCustomers.length > 0 && (
+          <div className="border-t border-gray-100 px-6 py-4">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+        )}
       </Card>
 
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
