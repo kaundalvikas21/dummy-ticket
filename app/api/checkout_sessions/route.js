@@ -72,8 +72,15 @@ export async function POST(req) {
 
         const unitAmount = Math.round(plan.price * 100); // USD cents
 
+        // Determine payment method types
+        let payment_method_types = ["card"];
+        if (formData.paymentMethod === "amazon_pay") {
+            payment_method_types = ["amazon_pay"];
+        }
+        // "apple_pay" is handled via "card" in Stripe Checkout
+
         const session = await stripe.checkout.sessions.create({
-            payment_method_types: ["card"],
+            payment_method_types,
             line_items: [
                 {
                     price_data: {
