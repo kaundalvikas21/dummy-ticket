@@ -79,7 +79,7 @@
     "title": "Precios"
   },
   "otherServices": {
-    "title": "otros servicios:",
+    "title": "otros servicios",
     "services": [
       {
         "title": "Boletos con fecha pasada",
@@ -146,16 +146,31 @@
     "news": {
       "title": "Últimas noticias de viajes",
       "items": [
-        {"title": "Fly Dubai agrega 2 destinos más en Arabia Saudita", "link": "https://www.dubaistandard.com/fly-dubai-adds-destination-saudi-arabia/"},
-        {"title": "Actualización vuelos Israel 2024", "link": "https://www.dubaistandard.com/israel-flights-update-2024/"},
-        {"title": "Unión Europea y GCC discuten exención de visa Schengen para ciudadanos GCC", "link": "https://www.dubaistandard.com/gcc-eu-schengen-visa-waiver/"}
+        {
+          "title": "Fly Dubai agrega 2 destinos más en Arabia Saudita",
+          "link": "https://www.dubaistandard.com/fly-dubai-adds-destination-saudi-arabia/"
+        },
+        {
+          "title": "Actualización vuelos Israel 2024",
+          "link": "https://www.dubaistandard.com/israel-flights-update-2024/"
+        },
+        {
+          "title": "Unión Europea y GCC discuten exención de visa Schengen para ciudadanos GCC",
+          "link": "https://www.dubaistandard.com/gcc-eu-schengen-visa-waiver/"
+        }
       ]
     },
     "blog": {
       "title": "Del blog",
       "posts": [
-        {"title": "Diferencia entre boleto falso e itinerario de vuelo", "link": "#"},
-        {"title": "Por qué Dubái es especial, segura y destino turístico popular y primera opción para expatriados", "link": "https://www.dubaistandard.com/heres-why-dubai-is-special-safe-popular-tourist-spot-and-expats-as-a-first-choice/"}
+        {
+          "title": "Diferencia entre boleto falso e itinerario de vuelo",
+          "link": "#"
+        },
+        {
+          "title": "Por qué Dubái es especial, segura y destino turístico popular y primera opción para expatriados",
+          "link": "https://www.dubaistandard.com/heres-why-dubai-is-special-safe-popular-tourist-spot-and-expats-as-a-first-choice/"
+        }
       ]
     }
   },
@@ -167,7 +182,11 @@
     "cookieDuration": "Duración de la Cookie",
     "minPayout": "Pago Mínimo",
     "buttonText": "Únete Ahora",
-    "features": ["Seguimiento en tiempo real", "Pagos mensuales", "Soporte dedicado"]
+    "features": [
+      "Seguimiento en tiempo real",
+      "Pagos mensuales",
+      "Soporte dedicado"
+    ]
   },
   "faq": {
     "title": "Preguntas",

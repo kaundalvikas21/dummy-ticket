@@ -79,7 +79,7 @@
     "title": "Prijzen"
   },
   "otherServices": {
-    "title": "andere diensten:",
+    "title": "andere diensten",
     "services": [
       {
         "title": "Gedateerde tickets",
@@ -146,16 +146,31 @@
     "news": {
       "title": "Laatste reisnieuws",
       "items": [
-        {"title": "Fly Dubai voegt 2 extra bestemmingen toe in Saoedi-Arabië", "link": "https://www.dubaistandard.com/fly-dubai-adds-destination-saudi-arabia/"},
-        {"title": "Israël vluchten update 2024", "link": "https://www.dubaistandard.com/israel-flights-update-2024/"},
-        {"title": "Europese Unie en GCC bespreken Schengen visa vrijstelling voor GCC burgers", "link": "https://www.dubaistandard.com/gcc-eu-schengen-visa-waiver/"}
+        {
+          "title": "Fly Dubai voegt 2 extra bestemmingen toe in Saoedi-Arabië",
+          "link": "https://www.dubaistandard.com/fly-dubai-adds-destination-saudi-arabia/"
+        },
+        {
+          "title": "Israël vluchten update 2024",
+          "link": "https://www.dubaistandard.com/israel-flights-update-2024/"
+        },
+        {
+          "title": "Europese Unie en GCC bespreken Schengen visa vrijstelling voor GCC burgers",
+          "link": "https://www.dubaistandard.com/gcc-eu-schengen-visa-waiver/"
+        }
       ]
     },
     "blog": {
       "title": "Van de blog",
       "posts": [
-        {"title": "Verschil tussen een nep ticket en een vluchtroute", "link": "#"},
-        {"title": "Waarom Dubai speciaal, veilig en populaire toeristenbestemming is en eerste keuze voor expats", "link": "https://www.dubaistandard.com/heres-why-dubai-is-special-safe-popular-tourist-spot-and-expats-as-a-first-choice/"}
+        {
+          "title": "Verschil tussen een nep ticket en een vluchtroute",
+          "link": "#"
+        },
+        {
+          "title": "Waarom Dubai speciaal, veilig en populaire toeristenbestemming is en eerste keuze voor expats",
+          "link": "https://www.dubaistandard.com/heres-why-dubai-is-special-safe-popular-tourist-spot-and-expats-as-a-first-choice/"
+        }
       ]
     }
   },
@@ -167,7 +182,11 @@
     "cookieDuration": "Cookie Duur",
     "minPayout": "Minimale Uitbetaling",
     "buttonText": "Nu Lid Worden",
-    "features": ["Real-time tracking", "Maandelijkse uitbetalingen", "Toegewijd support"]
+    "features": [
+      "Real-time tracking",
+      "Maandelijkse uitbetalingen",
+      "Toegewijd support"
+    ]
   },
   "faq": {
     "title": "Veelgestelde",

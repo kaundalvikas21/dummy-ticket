@@ -79,7 +79,7 @@
     "title": "Pricing"
   },
   "otherServices": {
-    "title": "other services:",
+    "title": "other services",
     "services": [
       {
         "title": "Past dated tickets",
@@ -158,7 +158,11 @@
     "cookieDuration": "Cookie Duration",
     "minPayout": "Min Payout",
     "buttonText": "Join Now",
-    "features": ["Real-time tracking", "Monthly payouts", "Dedicated support"]
+    "features": [
+      "Real-time tracking",
+      "Monthly payouts",
+      "Dedicated support"
+    ]
   },
   "faq": {
     "title": "Frequently Asked",

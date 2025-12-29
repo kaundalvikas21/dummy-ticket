@@ -79,7 +79,7 @@
     "title": "Tarifs"
   },
   "otherServices": {
-    "title": "autres services:",
+    "title": "autres services",
     "services": [
       {
         "title": "Billets antidatés",
@@ -182,7 +182,11 @@
     "cookieDuration": "Durée du Cookie",
     "minPayout": "Paiement Minimum",
     "buttonText": "Rejoindre Maintenant",
-    "features": ["Suivi en temps réel", "Paiements mensuels", "Support dédié"]
+    "features": [
+      "Suivi en temps réel",
+      "Paiements mensuels",
+      "Support dédié"
+    ]
   },
   "faq": {
     "title": "Questions",

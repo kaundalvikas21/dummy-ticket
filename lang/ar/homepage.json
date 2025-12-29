@@ -79,7 +79,7 @@
     "title": "الأسعار"
   },
   "otherServices": {
-    "title": "خدمات أخرى:",
+    "title": "خدمات أخرى",
     "services": [
       {
         "title": "تذاكر مؤرخة سابقاً",
@@ -146,16 +146,31 @@
     "news": {
       "title": "أخبار السفر الأخيرة",
       "items": [
-        {"title": "فلاي دبي تضيف وجهتين إضافيتين في المملكة العربية السعودية", "link": "https://www.dubaistandard.com/fly-dubai-adds-destination-saudi-arabia/"},
-        {"title": "تحديث رحلات إسرائيل 2024", "link": "https://www.dubaistandard.com/israel-flights-update-2024/"},
-        {"title": "الاتحاد الأوروبي ومجلس التعاون الخليجي يناقشان إعفاء تأشيرة شنغن لمواطني مجلس التعاون الخليجي", "link": "https://www.dubaistandard.com/gcc-eu-schengen-visa-waiver/"}
+        {
+          "title": "فلاي دبي تضيف وجهتين إضافيتين في المملكة العربية السعودية",
+          "link": "https://www.dubaistandard.com/fly-dubai-adds-destination-saudi-arabia/"
+        },
+        {
+          "title": "تحديث رحلات إسرائيل 2024",
+          "link": "https://www.dubaistandard.com/israel-flights-update-2024/"
+        },
+        {
+          "title": "الاتحاد الأوروبي ومجلس التعاون الخليجي يناقشان إعفاء تأشيرة شنغن لمواطني مجلس التعاون الخليجي",
+          "link": "https://www.dubaistandard.com/gcc-eu-schengen-visa-waiver/"
+        }
       ]
     },
     "blog": {
       "title": "من المدونة",
       "posts": [
-        {"title": "الفرق بين التذكرة المزيفة ومسار الرحلة", "link": "#"},
-        {"title": "لماذا دبي خاصة وآمنة ووجهة سياحية شعبية والخيار الأول للمغتربين", "link": "https://www.dubaistandard.com/heres-why-dubai-is-special-safe-popular-tourist-spot-and-expats-as-a-first-choice/"}
+        {
+          "title": "الفرق بين التذكرة المزيفة ومسار الرحلة",
+          "link": "#"
+        },
+        {
+          "title": "لماذا دبي خاصة وآمنة ووجهة سياحية شعبية والخيار الأول للمغتربين",
+          "link": "https://www.dubaistandard.com/heres-why-dubai-is-special-safe-popular-tourist-spot-and-expats-as-a-first-choice/"
+        }
       ]
     }
   },
@@ -167,7 +182,11 @@
     "cookieDuration": "مدة الكوكيز",
     "minPayout": "الحد الأدنى للسداد",
     "buttonText": "انضم الآن",
-    "features": ["تتبع فوري", "دفعات شهرية", "دعم مخصص"]
+    "features": [
+      "تتبع فوري",
+      "دفعات شهرية",
+      "دعم مخصص"
+    ]
   },
   "faq": {
     "title": "أسئلة",
