@@ -15,7 +15,6 @@ export async function POST(req) {
         const session = await stripe.checkout.sessions.retrieve(session_id, {
             expand: ['payment_intent'],
         });
-        console.log("Retrieved Stripe Session (Expanded):", JSON.stringify(session, null, 2));
 
         if (!session) {
             return NextResponse.json({ error: "Invalid session" }, { status: 404 });

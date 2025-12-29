@@ -67,7 +67,7 @@ export function UserHeader({ onMenuClick, sidebarOpen }) {
           event: '*',
           schema: 'public',
           table: 'notifications',
-          filter: `user_id=eq.${profile.auth_user_id || profile.user_id}`,
+          filter: `user_id=eq.${profile.auth_user_id}`,
         },
         (payload) => {
           if (payload.eventType === 'INSERT') {

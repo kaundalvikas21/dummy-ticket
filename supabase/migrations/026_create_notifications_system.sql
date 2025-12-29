@@ -248,3 +248,5 @@ CREATE TRIGGER trigger_notify_on_new_user
     AFTER INSERT ON user_profiles
     FOR EACH ROW
     EXECUTE FUNCTION handle_new_user_notification();
+-- 7. Enable Realtime
+ALTER PUBLICATION supabase_realtime ADD TABLE notifications;

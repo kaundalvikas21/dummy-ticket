@@ -90,7 +90,7 @@ export function BillingPaymentForm({ formData, updateFormData }) {
         {/* Payment Method */}
         <div>
           <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('buyTicket.billingPayment.fields.paymentMethod')}</h3>
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <PaymentMethodButton
               method="card"
               icon={CreditCard}

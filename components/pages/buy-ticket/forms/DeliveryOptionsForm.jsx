@@ -57,7 +57,11 @@ export function DeliveryOptionsForm({ formData, updateFormData }) {
           icon={formData.deliveryMethod === "email" ? Mail : Phone}
           type={formData.deliveryMethod === "email" ? "email" : "tel"}
           value={formData.deliveryMethod === "email" ? formData.deliveryEmail : formData.whatsappNumber}
-          onChange={(value) => updateFormData(formData.deliveryMethod === "email" ? "deliveryEmail" : "whatsappNumber", value)}
+          onChange={(value) => {
+            // Only allow numbers
+            const numericValue = value.replace(/[^0-9]/g, '');
+            updateFormData(formData.deliveryMethod === "email" ? "deliveryEmail" : "whatsappNumber", formData.deliveryMethod === "email" ? value : numericValue);
+          }}
           placeholder={
             formData.deliveryMethod === "email"
               ? t('buyTicket.deliveryOptions.placeholders.deliveryEmail')
