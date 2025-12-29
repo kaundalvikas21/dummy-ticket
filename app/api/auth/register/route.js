@@ -43,7 +43,7 @@ export async function POST(request) {
 
     const supabase = await createClient()
 
-  
+
     // Format phone number for Supabase auth (E.164 format required)
     let formattedPhone = null
     if (phoneNumber && phoneNumber.trim()) {
@@ -55,7 +55,7 @@ export async function POST(request) {
       formattedPhone = cleanCountryCode + cleanPhone
     }
 
-    
+
     // Prepare signup options (phone will be synced via admin API after signup)
     const signUpOptions = {
       email,
@@ -76,7 +76,7 @@ export async function POST(request) {
     // Create user with Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp(signUpOptions)
 
-    
+
     if (authError) {
       console.error('Supabase auth error:', authError)
 
@@ -103,12 +103,61 @@ export async function POST(request) {
       )
     }
 
-  // If phone number was provided, sync it to auth.users after signup
+    // 4. Create User Profile manually (backup for trigger)
+    if (authData.user?.id) {
+      try {
+        const { createClient: createAdminClient } = await import('@supabase/supabase-js')
+        const supabaseAdmin = createAdminClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL,
+          process.env.SUPABASE_SERVICE_ROLE_KEY,
+          {
+            auth: {
+              autoRefreshToken: false,
+              persistSession: false
+            }
+          }
+        )
+
+        // Check if profile already exists (to avoid duplicate errors if trigger worked)
+        const { data: existingProfile } = await supabaseAdmin
+          .from('user_profiles')
+          .select('id')
+          .eq('auth_user_id', authData.user.id)
+          .single()
+
+        if (!existingProfile) {
+          console.log('Profile not found for new user, creating manually...')
+          const { error: profileError } = await supabaseAdmin
+            .from('user_profiles')
+            .insert({
+              auth_user_id: authData.user.id,
+              first_name: firstName,
+              last_name: lastName,
+              email: email,
+              phone_number: phoneNumber,
+              country_code: countryCode,
+              nationality: nationality,
+              role: role || 'user',
+              preferred_language: 'en'
+            })
+
+          if (profileError) {
+            console.error('Manual profile creation failed:', profileError.message)
+          } else {
+            console.log('Manual profile creation successful')
+          }
+        }
+      } catch (profileCatchError) {
+        console.warn('Error in manual profile creation flow:', profileCatchError.message)
+      }
+    }
+
+    // 5. If phone number was provided, sync it to auth.users after signup
     // This ensures the phone is stored correctly with country code prefix
     if (formattedPhone && authData.user?.id) {
       try {
-        const { createClient } = await import('@supabase/supabase-js')
-        const supabaseAdmin = createClient(
+        const { createClient: createAdminClient } = await import('@supabase/supabase-js')
+        const supabaseAdmin = createAdminClient(
           process.env.NEXT_PUBLIC_SUPABASE_URL,
           process.env.SUPABASE_SERVICE_ROLE_KEY,
           {

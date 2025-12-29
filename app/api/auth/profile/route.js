@@ -1,15 +1,15 @@
 import { NextResponse } from 'next/server'
-import { 
-  requireAuth, 
-  createSupabaseClientWithAuth, 
-  createAuthError 
+import {
+  requireAuth,
+  createSupabaseClientWithAuth,
+  createAuthError
 } from "@/lib/auth-helper"
 
 export async function GET(request) {
   try {
     // Create Supabase client with auth
     const supabase = createSupabaseClientWithAuth(request)
-    
+
     // Authenticate user
     const user = await requireAuth(supabase)
 
@@ -51,19 +51,19 @@ export async function GET(request) {
       auth_user_id: user.id,
       first_name: user.user_metadata?.first_name || null,
       last_name: user.user_metadata?.last_name || null,
-      phone_number: null,
-      country_code: null,
+      phone_number: user.user_metadata?.phone_number || null,
+      country_code: user.user_metadata?.country_code || null,
       date_of_birth: null,
-      nationality: null,
+      nationality: user.user_metadata?.nationality || null,
       passport_number: null,
       address: null,
       city: null,
       postal_code: null,
-      preferred_language: 'en',
+      preferred_language: user.user_metadata?.preferred_language || 'en',
       avatar_url: null,
       notification_preferences: {},
       privacy_settings: {},
-      role: user.app_metadata?.role || 'user',
+      role: user.app_metadata?.role || user.user_metadata?.role || 'user',
       email: user.email,
       status: 'active'
     }
