@@ -171,6 +171,7 @@ export default function RegisterPage() {
     <AuthLayout
       title="Create Account"
       description="Sign up to get started with VisaFly"
+      isLoading={isLoading}
     >
       <form onSubmit={handleRegisterSubmit(onRegister)} className="space-y-4">
         {error && (

@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 
-export function AuthLayout({ children, title, description, backLink }) {
+export function AuthLayout({ children, title, description, backLink, isLoading = false }) {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 via-white to-teal-50">
       {/* Header */}
@@ -20,7 +20,14 @@ export function AuthLayout({ children, title, description, backLink }) {
 
         <div className="w-full max-w-md relative z-10 animate-fade-in">
           {/* Card with glassmorphism effect */}
-          <div className="shadow-2xl border-0 backdrop-blur-lg bg-white/95 ring-1 ring-white/20 rounded-2xl">
+          <div className="shadow-2xl border-0 backdrop-blur-lg bg-white/95 ring-1 ring-white/20 rounded-2xl overflow-hidden relative">
+            {/* Loading Bar */}
+            {isLoading && (
+              <div className="absolute top-0 left-0 right-0 h-1 z-20 overflow-hidden bg-gray-100">
+                <div className="h-full w-full bg-gradient-to-r from-blue-600 to-teal-400 animate-progress-loading" />
+              </div>
+            )}
+
             {/* Header Section */}
             <div className="space-y-6 pb-6 pt-8 px-8">
               {/* Logo */}

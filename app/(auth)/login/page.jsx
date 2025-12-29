@@ -114,6 +114,7 @@ export default function LoginPage() {
     <AuthLayout
       title="Welcome to VisaFly"
       description="Sign in to your account"
+      isLoading={isLoading}
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
 
