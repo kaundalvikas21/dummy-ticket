@@ -7,6 +7,7 @@ create table bookings (
   status text not null default 'pending', -- pending, paid, failed, cancelled
   stripe_session_id text,
   payment_intent_id text,
+  payment_method text default 'Credit Card',
   passenger_details jsonb, -- Stores the full form data snapshot
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null

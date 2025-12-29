@@ -31,7 +31,8 @@ export default function SuccessPage() {
                 if (response.ok) {
                     setStatus('success');
                 } else {
-                    console.error("Payment verification failed", await response.json());
+                    const errorData = await response.json();
+                    console.error("Payment verification failed:", errorData);
                     // Keep valid session as success for user but log error
                     setStatus('success');
                 }

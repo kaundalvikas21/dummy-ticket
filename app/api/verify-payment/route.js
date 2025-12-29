@@ -11,8 +11,11 @@ export async function POST(req) {
             return NextResponse.json({ error: "Missing session_id" }, { status: 400 });
         }
 
-        // 1. Retrieve session from Stripe
-        const session = await stripe.checkout.sessions.retrieve(session_id);
+        // 1. Retrieve session from Stripe with expanded payment_intent
+        const session = await stripe.checkout.sessions.retrieve(session_id, {
+            expand: ['payment_intent'],
+        });
+        console.log("Retrieved Stripe Session (Expanded):", JSON.stringify(session, null, 2));
 
         if (!session) {
             return NextResponse.json({ error: "Invalid session" }, { status: 404 });
@@ -26,7 +29,9 @@ export async function POST(req) {
         const supabase = createAdminClient();
 
         // 3. Create or confirm booking
+        console.log("Verifying payment for session:", session_id);
         const result = await createBookingFromSession(session, supabase);
+        console.log("Booking result:", result);
 
         return NextResponse.json({ success: true, booking: result.booking });
 
