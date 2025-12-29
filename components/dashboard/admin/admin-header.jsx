@@ -215,7 +215,17 @@ export function AdminHeader({ onMenuClick, sidebarOpen }) {
           {/* Notifications */}
           <DropdownMenu open={notificationDropdownOpen} onOpenChange={setNotificationDropdownOpen}>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="relative h-9 w-9 lg:h-10 lg:w-10">
+              <Button
+                variant="ghost"
+                size="icon"
+                className={`
+                  relative h-9 w-9 lg:h-10 lg:w-10 rounded-full transition-all duration-300
+                  ${unreadCount > 0
+                    ? "bg-blue-50 text-blue-600 border border-blue-100 animate-notification-pulse"
+                    : "bg-slate-50 text-gray-600 border border-slate-100 hover:bg-slate-100"
+                  }
+                `}
+              >
                 <Bell className="w-4 h-4 lg:w-5 lg:h-5" />
                 {unreadCount > 0 && (
                   <Badge className="absolute -top-1 -right-1 w-4 h-4 lg:w-5 lg:h-5 flex items-center justify-center p-0 bg-red-500 text-white text-xs">

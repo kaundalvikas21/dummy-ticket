@@ -225,7 +225,13 @@ export function UserHeader({ onMenuClick, sidebarOpen }) {
             <Button
               variant="ghost"
               size="icon"
-              className="relative h-10 w-10 min-h-[44px] min-w-[44px] touch-manipulation"
+              className={`
+                relative h-10 w-10 min-h-[44px] min-w-[44px] rounded-full touch-manipulation transition-all duration-300
+                ${unreadCount > 0
+                  ? "bg-blue-50 text-blue-600 border border-blue-100 animate-notification-pulse"
+                  : "bg-slate-50 text-gray-600 border border-slate-100 hover:bg-slate-100"
+                }
+              `}
               aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
             >
               <Bell className="h-5 w-5" />
