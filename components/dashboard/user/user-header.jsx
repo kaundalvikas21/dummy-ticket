@@ -120,6 +120,34 @@ export function UserHeader({ onMenuClick, sidebarOpen }) {
     setNotificationDropdownOpen(false)
   }
 
+  const handleClearAllNotifications = async () => {
+    try {
+      const { error } = await supabase
+        .from('notifications')
+        .update({ read: true })
+        .eq('user_id', profile.auth_user_id || profile.user_id)
+        .eq('read', false)
+
+      if (error) throw error
+
+      setNotifications((prev) =>
+        prev.map((n) => ({ ...n, read: true }))
+      )
+
+      toast({
+        title: "Notifications Cleared",
+        description: "All notifications have been marked as read",
+      })
+    } catch (error) {
+      console.error('Error clearing notifications:', error)
+      toast({
+        title: "Error",
+        description: "Failed to clear notifications",
+        variant: "destructive",
+      })
+    }
+  }
+
   const unreadCount = notifications.filter((n) => !n.read).length
 
   const handleLogout = async () => {
@@ -213,7 +241,17 @@ export function UserHeader({ onMenuClick, sidebarOpen }) {
             collisionPadding={8}
           >
             <div className="p-4">
-              <h3 className="font-semibold mb-2">Notifications</h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-gray-900 text-lg">Notifications</h3>
+                {unreadCount > 0 && (
+                  <button
+                    onClick={handleClearAllNotifications}
+                    className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+                  >
+                    Clear All
+                  </button>
+                )}
+              </div>
               {unreadCount === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
                   <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#0066FF] to-[#00D4AA] flex items-center justify-center mb-3">
