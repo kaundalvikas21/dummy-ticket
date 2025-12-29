@@ -251,7 +251,7 @@ export function Analytics() {
       setTopServices(servicesArray)
 
       // Service Distribution
-      const colors = ["#00D4AA", "#0066FF", "#FF6B35", "#FFC107", "#9C27B0"]
+      const colors = ["#00D4AA", "#0066FF", "#FF6B35", "#FFC107", "#9C27B0", "#E91E63", "#3F51B5"]
       const distArray = servicesArray.map((s, i) => ({
         name: s.name,
         value: s.sales,
