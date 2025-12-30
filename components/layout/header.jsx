@@ -227,28 +227,12 @@ export function Header() {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 ) : (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" className="flex items-center gap-2">
-                        <User className="w-4 h-4" />
-                        Account
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem asChild>
-                        <Link href="/login" className="flex items-center gap-2">
-                          <User className="w-4 h-4" />
-                          Login
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href="/register" className="flex items-center gap-2">
-                          <User className="w-4 h-4" />
-                          Register
-                        </Link>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <Link href="/login">
+                    <Button variant="outline" className="flex items-center gap-2">
+                      <User className="w-4 h-4" />
+                      Login
+                    </Button>
+                  </Link>
                 )}
 
                 <Link href="/buy-ticket">
@@ -348,14 +332,14 @@ export function Header() {
                     </button>
                   </>
                 ) : (
-                  <>
-                    <Link href="/login" className="block py-2 text-gray-700 hover:text-[#0066FF] font-medium">
-                      Login
+                  <div className="py-2">
+                    <Link href="/login" onClick={() => setIsOpen(false)}>
+                      <Button variant="outline" className="w-full flex items-center justify-center gap-2">
+                        <User className="w-4 h-4" />
+                        Login
+                      </Button>
                     </Link>
-                    <Link href="/register" className="block py-2 text-gray-700 hover:text-[#0066FF] font-medium">
-                      Register
-                    </Link>
-                  </>
+                  </div>
                 )}
               </>
             )}
