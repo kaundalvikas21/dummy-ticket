@@ -1,0 +1,39 @@
+{
+    "hero": {
+        "title": "Privacy",
+        "highlight": "Policy",
+        "description": "At VisaFly, we value your privacy. This policy explains how we collect, use, and protect your personal information."
+    },
+    "sections": [
+        {
+            "id": "collection",
+            "title": "1. Data Collection",
+            "content": "We collect information you provide directly to us when you book a flight reservation or hotel booking, including your name, email address, passport details, and travel dates. We also collect automated data such as IP addresses and device information for security and performance purposes."
+        },
+        {
+            "id": "usage",
+            "title": "2. How We Use Data",
+            "content": "Your data is used solely to provide and improve our services. This includes processing your bookings, sending confirmation emails, and providing customer support. We do not sell your personal data to third parties for marketing purposes."
+        },
+        {
+            "id": "sharing",
+            "title": "3. Data Sharing",
+            "content": "We only share your information with trusted partners and service providers necessary to fulfill your bookings (e.g., airline reservation systems). We may also disclose information if required by law or to protect our legal rights."
+        },
+        {
+            "id": "security",
+            "title": "4. Data Security",
+            "content": "We implement industry-standard security measures, including SSL encryption and secure servers, to protect your personal information from unauthorized access, disclosure, or alteration."
+        },
+        {
+            "id": "cookies",
+            "title": "5. Cookies Policy",
+            "content": "We use cookies to enhance your browsing experience, remember your preferences, and analyze site traffic. You can manage your cookie preferences through your browser settings at any time."
+        },
+        {
+            "id": "rights",
+            "title": "6. Your Rights",
+            "content": "You have the right to access, correct, or delete your personal information stored with us. To exercise these rights or if you have any privacy-related questions, please contact our support team."
+        }
+    ]
+}
