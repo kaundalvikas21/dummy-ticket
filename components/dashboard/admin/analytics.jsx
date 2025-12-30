@@ -52,7 +52,7 @@ export function Analytics() {
   const [activeMetric, setActiveMetric] = useState('both') // 'both', 'revenue', 'orders'
 
   // Filter State
-  const [dateRange, setDateRange] = useState("all_time") // Default to all_time as requested
+  const [dateRange, setDateRange] = useState("last_6_months") // Default to last 6 months as requested
   const [dateRangeLabel, setDateRangeLabel] = useState("")
   const [customDate, setCustomDate] = useState(undefined)
   const [isCalendarOpen, setIsCalendarOpen] = useState(false)
@@ -105,6 +105,11 @@ export function Analytics() {
         currentEnd.setFullYear(now.getFullYear() - 1)
         currentEnd.setMonth(11, 31)
         currentEnd.setHours(23, 59, 59, 999)
+        break
+      case "last_6_months":
+        currentStart.setMonth(now.getMonth() - 5)
+        currentStart.setDate(1)
+        currentStart.setHours(0, 0, 0, 0)
         break
       default:
         currentStart.setDate(1)
@@ -395,6 +400,7 @@ export function Analytics() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all_time" className="cursor-pointer">All Time</SelectItem>
+                  <SelectItem value="last_6_months" className="cursor-pointer">Last 6 Months</SelectItem>
                   <SelectItem value="last_7_days" className="cursor-pointer">Last 7 Days</SelectItem>
                   <SelectItem value="this_month" className="cursor-pointer">This Month</SelectItem>
                   <SelectItem value="last_month" className="cursor-pointer">Last Month</SelectItem>
