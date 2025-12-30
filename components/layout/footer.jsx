@@ -230,11 +230,11 @@ export function Footer() {
               © 2025 <span className="text-[#00D4AA] font-semibold">{logoData?.company_name || "VisaFly"}</span>. All rights reserved.
             </p>
             <div className="flex gap-6 md:gap-8">
-              <Link href="#" className="text-gray-400 hover:text-[#00D4AA] transition-colors text-sm relative group">
+              <Link href="/terms-of-service" className="text-gray-400 hover:text-[#00D4AA] transition-colors text-sm relative group">
                 Terms
                 <span className="absolute -bottom-1 left-0 w-0 group-hover:w-full h-0.5 bg-[#00D4AA] transition-all duration-300" />
               </Link>
-              <Link href="#" className="text-gray-400 hover:text-[#00D4AA] transition-colors text-sm relative group">
+              <Link href="/privacy-policy" className="text-gray-400 hover:text-[#00D4AA] transition-colors text-sm relative group">
                 Privacy
                 <span className="absolute -bottom-1 left-0 w-0 group-hover:w-full h-0.5 bg-[#00D4AA] transition-all duration-300" />
               </Link>
