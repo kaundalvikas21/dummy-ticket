@@ -1,6 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { CURRENCY_SYMBOLS } from "@/lib/exchange-rate"
+
+
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -187,7 +190,7 @@ BT
 (PAYMENT INFORMATION) Tj
 0 -20 Td
 /F2 10 Tf
-(Total Amount Paid: $${booking.amount} USD) Tj
+(Total Amount Paid: ${booking.amount} ${booking.currency || 'USD'}) Tj
 0 -15 Td
 (Payment Status: Completed) Tj
 
@@ -504,7 +507,7 @@ startxref
                   </div>
                   <div className="text-right">
                     <p className="text-sm text-gray-600">Total Amount</p>
-                    <p className="text-2xl font-bold text-blue-600">${selectedBooking.amount}</p>
+                    <p className="text-2xl font-bold text-blue-600">{CURRENCY_SYMBOLS[selectedBooking.currency] || '$'}{selectedBooking.amount}</p>
                   </div>
                 </div>
               </div>

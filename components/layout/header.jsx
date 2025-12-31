@@ -13,6 +13,7 @@ import { Menu, X, User, ChevronDown, LogOut, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { LocaleSelector } from "@/components/ui/locale-selector"
+import { CurrencySelector } from "@/components/ui/currency-selector"
 import { useAuth } from "@/contexts/auth-context"
 import { useToast } from "@/hooks/use-toast"
 import { useProfileSync } from "@/hooks/useProfileSync"
@@ -150,6 +151,7 @@ export function Header() {
                 </Link>
               </motion.div>
             ))}
+            <CurrencySelector />
             <LocaleSelector />
 
             {/* Auth Section */}
@@ -269,6 +271,10 @@ export function Header() {
                 {item.name}
               </Link>
             ))}
+            <div className="flex items-center justify-between py-2">
+              <span className="font-medium text-gray-700">Currency</span>
+              <CurrencySelector />
+            </div>
             <div className="flex items-center justify-between py-2">
               <span className="font-medium text-gray-700">Language</span>
               <LocaleSelector />

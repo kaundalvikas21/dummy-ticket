@@ -17,6 +17,8 @@ import { PassengerDetailsForm } from "@/components/pages/buy-ticket/forms/Passen
 import { TravelDetailsForm } from "@/components/pages/buy-ticket/forms/TravelDetailsForm"
 import { DeliveryOptionsForm } from "@/components/pages/buy-ticket/forms/DeliveryOptionsForm"
 import { BillingPaymentForm } from "@/components/pages/buy-ticket/forms/BillingPaymentForm"
+import { useCurrency } from "@/contexts/currency-context"
+import { Price } from "@/components/ui/price"
 
 import { steps } from "@/lib/constants/formSteps"
 import { useFormValidation } from "@/lib/hooks/useFormValidation"
@@ -56,6 +58,7 @@ export default function BuyTicketPage() {
   const planIdParam = searchParams.get("planId") || searchParams.get("service")
 
   const [currentStep, setCurrentStep] = useState(1)
+  const { currency: globalCurrency } = useCurrency()
   const [formData, setFormData] = useState(initialFormData)
   const [availablePlans, setAvailablePlans] = useState([])
   const [loading, setLoading] = useState(true)
@@ -183,7 +186,7 @@ export default function BuyTicketPage() {
           planId: formData.selectedPlan,
           formData: sanitizedFormData, // Pass the sanitized form data
           amount: selectedPlanData?.price,
-          currency: "USD",
+          currency: globalCurrency || "USD",
         }),
       })
 
@@ -305,9 +308,8 @@ export default function BuyTicketPage() {
 
                   <div className="flex-shrink-0 bg-gray-50/80 backdrop-blur-sm px-8 py-6 rounded-2xl border border-gray-100 min-w-[200px] text-center self-stretch flex flex-col justify-center">
                     <div className="flex items-baseline justify-center gap-1 text-[#0066FF]">
-                      <span className="text-lg font-semibold">$</span>
-                      <span className="text-5xl font-bold tracking-tight">{selectedPlanData.price}</span>
-                      <span className="text-sm text-gray-400 font-medium">/ person</span>
+                      <span className="text-5xl font-bold tracking-tight"><Price amount={selectedPlanData.price} /></span>
+                      <span className="text-sm text-gray-500 font-medium ml-1">/ person</span>
                     </div>
                   </div>
                 </div>
@@ -399,7 +401,7 @@ export default function BuyTicketPage() {
 
                     <div className="flex justify-between items-start mb-4">
                       <h4 className="font-bold text-xl text-gray-900 group-hover:text-[#0066FF] transition-colors line-clamp-2 pr-8">{plan.name}</h4>
-                      <span className="font-bold text-xl text-[#0066FF] flex-shrink-0 ml-4">${plan.price}</span>
+                      <span className="font-bold text-xl text-[#0066FF] flex-shrink-0 ml-4"><Price amount={plan.price} /></span>
                     </div>
 
                     <p className="text-sm text-gray-600 mb-6 leading-relaxed line-clamp-3">{plan.description}</p>

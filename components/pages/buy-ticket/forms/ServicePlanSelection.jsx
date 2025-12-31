@@ -4,6 +4,8 @@ import { motion } from "framer-motion"
 import { Check, Shield } from "lucide-react"
 import { InfoCard } from "@/components/ui/input/InfoCard"
 import { useTranslation } from "@/lib/translations"
+import { useCurrency } from "@/contexts/currency-context"
+import { Price } from "@/components/ui/price"
 
 export function ServicePlanSelection({ formData, updateFormData, servicePlans }) {
   const { t } = useTranslation()
@@ -73,11 +75,10 @@ function PlanCard({ plan, isSelected, onSelect }) {
             {plan.name}
           </h3>
           <div className="flex items-baseline gap-1 mb-1 md:mb-2">
-            <span className="text-2xl md:text-3xl font-bold text-gray-700">$</span>
             <span className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#0066FF] to-[#00D4AA] bg-clip-text text-transparent">
-              {plan.price}
+              <Price amount={plan.price} />
             </span>
-            <span className="text-xs md:text-sm text-gray-500 ml-1">/person</span>
+            <span className="text-xs md:text-sm text-gray-500 ml-1">/ person</span>
           </div>
           <p className="text-[10px] md:text-xs text-gray-500">{plan.currencies}</p>
         </div>

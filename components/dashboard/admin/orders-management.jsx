@@ -32,9 +32,13 @@ import { SkeletonTable } from "@/components/ui/skeleton-table"
 import { createClient } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { Pagination } from "@/components/ui/pagination"
+// Import Currency Context
+import { useCurrency } from "@/contexts/currency-context"
 
 export function OrdersManagement() {
+  const { rates } = useCurrency() // Consume rates
   const [orders, setOrders] = useState([])
+  const [rawBookings, setRawBookings] = useState([]) // Store raw data
   const [loading, setLoading] = useState(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
@@ -59,67 +63,7 @@ export function OrdersManagement() {
 
       if (error) throw error
 
-      const formattedOrders = data.map(booking => {
-        let passengerName = "Guest"
-        let passengerEmail = "N/A"
-        let passengerPhone = "N/A"
-        let fromCity = "N/A"
-        let toCity = "N/A"
-
-        // Check structure
-        // console.log('Raw Booking Data:', booking)
-
-        try {
-          if (booking.passenger_details) {
-            const details = typeof booking.passenger_details === 'string'
-              ? JSON.parse(booking.passenger_details)
-              : booking.passenger_details
-
-            // console.log('Parsed Details:', details)
-
-            // Handling Array (List of passengers) vs Object (Contact + Passengers)
-            if (Array.isArray(details) && details.length > 0) {
-              // It's an array of passengers
-              const p = details[0]
-              passengerName = `${p.firstName || ''} ${p.lastName || ''}`.trim()
-              passengerEmail = p.email || p.contactEmail || "N/A"
-              passengerPhone = p.phone || p.contactPhone || "N/A"
-
-              fromCity = p.fromCity || p.departureCity || "N/A"
-              toCity = p.toCity || p.arrivalCity || "N/A"
-
-            } else {
-              // It's an object (likely { contactEmail, passengers: [...] } or single passenger)
-              if (details.firstName) {
-                passengerName = `${details.firstName} ${details.lastName}`.trim()
-              }
-              passengerEmail = details.contactEmail || details.email || "N/A"
-              passengerPhone = details.contactPhone || details.phone || "N/A"
-
-              fromCity = details.departureCity || details.fromCity || "N/A"
-              toCity = details.arrivalCity || details.toCity || "N/A"
-            }
-          }
-        } catch (e) { console.error("Error parsing details", e) }
-
-        return {
-          id: booking.id, // ID should never be N/A if row exists
-          customer: passengerName || 'Guest',
-          email: passengerEmail,
-          service: booking.service_plans?.name || 'Unknown Service',
-          amount: parseFloat(booking.amount || 0),
-          currency: booking.currency || 'USD',
-          status: booking.status,
-          date: new Date(booking.created_at).toLocaleDateString(),
-          departure: fromCity,
-          arrival: toCity,
-          phone: passengerPhone,
-          pnr: booking.pnr || 'N/A',
-          payment_intent_id: booking.payment_intent_id || 'N/A',
-          details: { ...booking }
-        }
-      })
-      setOrders(formattedOrders)
+      setRawBookings(data || [])
     } catch (error) {
       console.error('Error fetching orders:', error)
       console.error('Error details:', {
@@ -137,6 +81,72 @@ export function OrdersManagement() {
       if (showLoader) setLoading(false)
     }
   }
+
+  // Process raw bookings into display format whenever data or rates change
+  useEffect(() => {
+    if (!rawBookings.length) {
+      setOrders([])
+      return
+    }
+
+    const formattedOrders = rawBookings.map(booking => {
+      let passengerName = "Guest"
+      let passengerEmail = "N/A"
+      let passengerPhone = "N/A"
+      let fromCity = "N/A"
+      let toCity = "N/A"
+
+      try {
+        if (booking.passenger_details) {
+          const details = typeof booking.passenger_details === 'string'
+            ? JSON.parse(booking.passenger_details)
+            : booking.passenger_details
+
+          if (Array.isArray(details) && details.length > 0) {
+            const p = details[0]
+            passengerName = `${p.firstName || ''} ${p.lastName || ''}`.trim()
+            passengerEmail = p.email || p.contactEmail || "N/A"
+            passengerPhone = p.phone || p.contactPhone || "N/A"
+            fromCity = p.fromCity || p.departureCity || "N/A"
+            toCity = p.toCity || p.arrivalCity || "N/A"
+          } else {
+            if (details.firstName) {
+              passengerName = `${details.firstName} ${details.lastName}`.trim()
+            }
+            passengerEmail = details.contactEmail || details.email || "N/A"
+            passengerPhone = details.contactPhone || details.phone || "N/A"
+            fromCity = details.departureCity || details.fromCity || "N/A"
+            toCity = details.arrivalCity || details.toCity || "N/A"
+          }
+        }
+      } catch (e) { console.error("Error parsing details", e) }
+
+      // Convert to USD
+      const nativeAmount = parseFloat(booking.amount || 0)
+      const currencyCode = booking.currency || 'USD'
+      const rate = (rates && rates[currencyCode]) ? rates[currencyCode] : 1
+      const amountInUSD = currencyCode === 'USD' ? nativeAmount : (rate ? nativeAmount / rate : nativeAmount)
+
+      return {
+        id: booking.id,
+        customer: passengerName || 'Guest',
+        email: passengerEmail,
+        service: booking.service_plans?.name || 'Unknown Service',
+        amount: amountInUSD, // Now in USD
+        currency: 'USD',    // Force display logic to USD
+        status: booking.status,
+        date: new Date(booking.created_at).toLocaleDateString(),
+        departure: fromCity,
+        arrival: toCity,
+        phone: passengerPhone,
+        pnr: booking.pnr || 'N/A',
+        payment_intent_id: booking.payment_intent_id || 'N/A',
+        details: { ...booking }
+      }
+    })
+
+    setOrders(formattedOrders)
+  }, [rawBookings, rates])
 
   useEffect(() => {
     fetchOrders()

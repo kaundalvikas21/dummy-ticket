@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { CheckCircle, ArrowLeftRight, FileText, Calendar, Globe2, Ticket, Shield, Star, User, Home, Settings, Clock, CheckCircle2, Plane, Hotel } from "lucide-react"
 import { useTranslation } from "@/lib/translations"
+import { useCurrency } from "@/contexts/currency-context"
+import { Price } from "@/components/ui/price"
 
 export default function MainServices({ servicePlans }) {
   const { t, isLoading } = useTranslation()
@@ -161,7 +163,7 @@ export default function MainServices({ servicePlans }) {
                               : "text-gray-900"
                               }`}
                           >
-                            ${service.price}
+                            <Price amount={service.price} />
                           </span>
                           <span className="text-gray-500 text-sm">/person</span>
                         </div>

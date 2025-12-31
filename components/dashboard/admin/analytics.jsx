@@ -37,9 +37,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { format } from "date-fns"
+// Import Currency Context
+import { useCurrency } from "@/contexts/currency-context"
 
 export function Analytics() {
-  const [monthlyData, setMonthlyData] = useState([])
+  const { rates } = useCurrency() // Consume rates
+  const [monthlyData, setMonthlyData] = useState([]) // clean up unused later? keeping for now
   const [topServices, setTopServices] = useState([])
   const [serviceDistribution, setServiceDistribution] = useState([])
   const [keyMetrics, setKeyMetrics] = useState({
@@ -121,10 +124,10 @@ export function Analytics() {
   const fetchAnalyticsData = async () => {
     setLoading(true)
     try {
-      // Fetch all bookings
+      // Fetch all bookings including currency
       const { data: bookings, error: bookingsError } = await supabase
         .from('bookings')
-        .select('amount, created_at, status, service_plans(name), user_id')
+        .select('amount, currency, created_at, status, service_plans(name), user_id')
         .order('created_at', { ascending: true })
 
       if (bookingsError) throw bookingsError
@@ -136,9 +139,17 @@ export function Analytics() {
 
       if (!profilesError) profiles = profilesData || []
 
+      // Helper to convert to USD
+      const convertToUSD = (amount, currencyCode) => {
+        const val = parseFloat(amount || 0)
+        if (!currencyCode || currencyCode === 'USD') return val
+        const r = (rates && rates[currencyCode]) ? rates[currencyCode] : 1
+        return r ? val / r : val
+      }
+
       // --- Global Metrics (Always All Time based on user request "Same i want in Revenue & Orders Trend right side displayed") ---
       // Implied: Top cards remain global totals, only the Trend Chart is filtered.
-      const totalRevenue = bookings.reduce((sum, b) => sum + parseFloat(b.amount || 0), 0)
+      const totalRevenue = bookings.reduce((sum, b) => sum + convertToUSD(b.amount, b.currency), 0)
       const totalOrders = bookings.length
       const avgOrderVal = totalOrders > 0 ? totalRevenue / totalOrders : 0
 
@@ -231,7 +242,7 @@ export function Analytics() {
         }
 
         if (chartStats[key]) {
-          chartStats[key].revenue += parseFloat(b.amount || 0)
+          chartStats[key].revenue += convertToUSD(b.amount, b.currency)
           chartStats[key].orders += 1
         }
       })
@@ -249,7 +260,7 @@ export function Analytics() {
           serviceStats[serviceName] = { name: serviceName, sales: 0, revenue: 0 }
         }
         serviceStats[serviceName].sales += 1
-        serviceStats[serviceName].revenue += parseFloat(booking.amount || 0)
+        serviceStats[serviceName].revenue += convertToUSD(booking.amount, booking.currency)
       })
 
       const servicesArray = Object.values(serviceStats).sort((a, b) => b.revenue - a.revenue)
@@ -278,7 +289,7 @@ export function Analytics() {
 
   useEffect(() => {
     fetchAnalyticsData()
-  }, [dateRange, customDate])
+  }, [dateRange, customDate, rates])
 
   return (
     <div className="space-y-4 sm:space-y-6">

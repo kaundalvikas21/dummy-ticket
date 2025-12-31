@@ -4,9 +4,11 @@ import { createAdminClient } from "@/lib/supabase/admin"; // Use admin client
 
 import { createClient } from "@/lib/supabase/server"
 
+import { getExchangeRates } from '@/lib/exchange-rate'
+
 export async function POST(req) {
     try {
-        const { planId, formData, amount, currency } = await req.json();
+        const { planId, formData, amount, currency = 'USD' } = await req.json();
 
         if (!planId || !amount) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -70,7 +72,30 @@ export async function POST(req) {
             return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
         }
 
-        const unitAmount = Math.round(plan.price * 100); // USD cents
+        let finalAmount = plan.price;
+        let finalCurrency = currency.toUpperCase();
+
+        // Convert currency if not USD
+        if (finalCurrency !== 'USD') {
+            const rates = await getExchangeRates('USD');
+            if (rates && rates[finalCurrency]) {
+                finalAmount = plan.price * rates[finalCurrency];
+            } else {
+                // Fallback to USD if rate not found
+                finalCurrency = 'USD';
+            }
+        }
+
+        // Calculate unit amount (cents for most, 1 for zero-decimal currencies)
+        const zeroDecimalCurrencies = ['JPY', 'KRW', 'BIF', 'CLP', 'DJF', 'GNF', 'KMF', 'MGA', 'PYG', 'RWF', 'UGX', 'VND', 'VUV', 'XAF', 'XOF', 'XPF'];
+        const isZeroDecimal = zeroDecimalCurrencies.includes(finalCurrency);
+
+        let unitAmount;
+        if (isZeroDecimal) {
+            unitAmount = Math.round(finalAmount);
+        } else {
+            unitAmount = Math.round(finalAmount * 100);
+        }
 
         // Determine payment method types
         let payment_method_types = ["card"];
@@ -84,7 +109,7 @@ export async function POST(req) {
             line_items: [
                 {
                     price_data: {
-                        currency: "usd",
+                        currency: finalCurrency.toLowerCase(),
                         product_data: {
                             name: plan.name,
                             description: plan.description || "Travel documentation service",

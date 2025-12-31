@@ -2,6 +2,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { LocaleProvider } from "@/contexts/locale-context";
 import { AuthProvider } from "@/contexts/auth-context";
+import { CurrencyProvider } from "@/contexts/currency-context";
 import { Toaster } from "@/components/ui/toaster";
 import { ScrollToTop } from "@/components/ui/scroll-to-top";
 
@@ -33,9 +34,11 @@ export default function RootLayout({ children }) {
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
         <LocaleProvider>
-          <AuthProvider>
-            {children}
-          </AuthProvider>
+          <CurrencyProvider>
+            <AuthProvider>
+              {children}
+            </AuthProvider>
+          </CurrencyProvider>
         </LocaleProvider>
         <Toaster />
         <ScrollToTop />

@@ -26,8 +26,12 @@ import { createClient } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { SkeletonTable } from "@/components/ui/skeleton-table"
 import { cn } from "@/lib/utils"
+// Import Currency Context
+import { useCurrency } from "@/contexts/currency-context"
 
 export function DashboardOverview() {
+  const { rates } = useCurrency() // Consume context for rates
+
   const [stats, setStats] = useState([
     {
       title: "Total Revenue",
@@ -263,9 +267,23 @@ export function DashboardOverview() {
       const prevBookings = isAllTimeView ? [] : bookings.filter(b => filterByDate(b, prevStart, prevEnd))
       const prevProfiles = isAllTimeView ? [] : profiles.filter(p => filterByDate(p, prevStart, prevEnd))
 
-      // Stats Calculation
-      const currentRevenue = currentBookings.reduce((sum, b) => sum + parseFloat(b.amount || 0), 0)
-      const prevRevenue = prevBookings.reduce((sum, b) => sum + parseFloat(b.amount || 0), 0)
+      // Stats Calculation - Converting to USD for aggregation
+      // We assume b.amount is in b.currency. We want to sum everything in USD.
+      const calculateRevenueInUSD = (bookingsList) => {
+        return bookingsList.reduce((sum, b) => {
+          const amount = parseFloat(b.amount || 0)
+          const currencyCode = b.currency || 'USD'
+
+          if (currencyCode === 'USD') return sum + amount
+
+          // Convert to USD: Amount (Native) / Rate (USD -> Native) = Amount (USD)
+          const rate = (rates && rates[currencyCode]) ? rates[currencyCode] : 1
+          return sum + (rate ? amount / rate : amount)
+        }, 0)
+      }
+
+      const currentRevenue = calculateRevenueInUSD(currentBookings)
+      const prevRevenue = calculateRevenueInUSD(prevBookings)
 
       const currentOrders = currentBookings.length
       const prevOrders = prevBookings.length
@@ -281,7 +299,7 @@ export function DashboardOverview() {
       setStats([
         {
           title: isLifetime ? "Total Revenue" : "Revenue",
-          value: `$${currentRevenue.toFixed(2)}`,
+          value: `$${currentRevenue.toFixed(2)}`, // Hardcoded to USD
           change: calculateChange(currentRevenue, prevRevenue, isLifetime),
           trend: isLifetime ? "neutral" : (currentRevenue >= prevRevenue ? "up" : "down"),
           icon: DollarSign,
@@ -331,12 +349,18 @@ export function DashboardOverview() {
           }
         } catch (e) { console.error("Error parsing passenger details", e) }
 
+        // Convert individual order amount to USD for display
+        const nativeAmount = parseFloat(booking.amount || 0)
+        const currencyCode = booking.currency || 'USD'
+        const rate = (rates && rates[currencyCode]) ? rates[currencyCode] : 1
+        const amountInUSD = currencyCode === 'USD' ? nativeAmount : (rate ? nativeAmount / rate : nativeAmount)
+
         return {
           id: booking.id,
           customer: passengerName,
           service: booking.service_plans?.name || "Unknown Service",
-          amount: parseFloat(booking.amount || 0),
-          currency: booking.currency || 'USD',
+          amount: amountInUSD, // Now in USD
+          currency: 'USD',    // Force display logic to see it as USD (though we just hardcode $)
           status: booking.status || "pending",
           date: new Date(booking.created_at).toLocaleDateString(),
         }
@@ -358,7 +382,7 @@ export function DashboardOverview() {
 
   useEffect(() => {
     fetchDashboardData()
-  }, [dateRange, customDate]) // Trigger when dateRange or customDate changes
+  }, [dateRange, customDate, rates]) // Added rates to dependency so it updates when rates load
 
   const handleView = (order) => {
     setSelectedOrder(order)

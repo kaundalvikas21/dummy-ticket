@@ -4,6 +4,8 @@ import { motion } from "framer-motion"
 import { loadStripe } from "@stripe/stripe-js"
 import { Check, Shield } from "lucide-react"
 import { useTranslation } from "@/lib/translations"
+import { useCurrency } from "@/contexts/currency-context"
+import { Price } from "@/components/ui/price"
 
 export function OrderSummary({ formData, servicePlans }) {
   const { t } = useTranslation()
@@ -90,7 +92,7 @@ export function OrderSummary({ formData, servicePlans }) {
 
                 <div className="flex justify-between text-xs md:text-sm">
                   <span className="text-gray-600">Service Plan</span>
-                  <span className="font-semibold">${selectedPlan.price}</span>
+                  <span className="font-semibold"><Price amount={selectedPlan.price} /></span>
                 </div>
               </>
             ) : (
@@ -102,7 +104,7 @@ export function OrderSummary({ formData, servicePlans }) {
             {deliveryFee > 0 && (
               <div className="flex justify-between text-xs md:text-sm">
                 <span className="text-gray-600">{t('buyTicket.orderSummary.whatsappDelivery')}</span>
-                <span className="font-semibold">${deliveryFee}</span>
+                <span className="font-semibold"><Price amount={deliveryFee} /></span>
               </div>
             )}
 
@@ -110,7 +112,7 @@ export function OrderSummary({ formData, servicePlans }) {
             <div className="border-t border-gray-200 pt-3 md:pt-4">
               <div className="flex justify-between items-center">
                 <span className="font-bold text-gray-900 text-sm md:text-base">{t('buyTicket.orderSummary.total')}</span>
-                <span className="font-bold text-xl md:text-2xl text-[#0066FF]">${total}</span>
+                <span className="font-bold text-xl md:text-2xl text-[#0066FF]"><Price amount={total} /></span>
               </div>
             </div>
           </div>

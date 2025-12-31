@@ -17,6 +17,7 @@ import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/contexts/auth-context"
 import { getAvatarDisplayUrl, getUserInitials } from "@/lib/utils"
+import { CURRENCY_SYMBOLS } from "@/lib/exchange-rate"
 import { useProfileSync } from "@/hooks/useProfileSync"
 import { useState, useEffect } from "react"
 
@@ -29,11 +30,47 @@ export function UserHeader({ onMenuClick, sidebarOpen }) {
   const [mounted, setMounted] = useState(false);
   const supabase = createClient()
   const [notifications, setNotifications] = useState([])
+  const [relatedBookings, setRelatedBookings] = useState({})
   const [loadingNotifications, setLoadingNotifications] = useState(true)
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Helper to format notification message
+  const getFormattedNotificationMessage = (notification) => {
+    // If no metadata, return original
+    if (!notification.metadata || !notification.metadata.booking_id) return notification.message
+
+    // Check if we have booking details
+    const bookingDetails = relatedBookings[notification.metadata.booking_id]
+    if (!bookingDetails) return notification.message
+
+    // User: Use Original Currency from Booking
+    const currency = bookingDetails.currency || 'USD'
+    const symbol = CURRENCY_SYMBOLS[currency] || '$'
+
+    // Replace the "$" in the message with the correct symbol
+    // The migration hardcodes "$" like "Payment of $100..."
+    // We want "Payment of AED 100..." (or just symbol if preferred, user said "display converted with usd" for admin, 
+    // and "user dashboard notifications received with there user make payment with currency to make bookings."
+    // Assuming this means "AED 100" or similar.
+
+    try {
+      // Replace "$" followed by digits with "Symbol digits"
+      // Or if the symbol is '$' (like USD), keep it unless we want to distinguish.
+      // Let's replace `$` with `symbol ` (with space? or without?)
+      // Symbols in CURRENCY_SYMBOLS are like '₹', 'د.إ', '$'.
+      // Format: 'د.إ100' looks weird. 'د.إ 100' is better.
+      // Existing message: "... $100 ...".
+      // Replaced: "... د.إ100 ..." (whitespace might be eaten if I match strict `$`).
+      // Regex `\$` matches the dollar sign. 
+      // We replace it with the symbol.
+      return notification.message.replace('$', symbol)
+    } catch (e) {
+      return notification.message
+    }
+  }
 
   // Fetch notifications and set up realtime subscription
   useEffect(() => {
@@ -50,6 +87,27 @@ export function UserHeader({ onMenuClick, sidebarOpen }) {
 
         if (error) throw error
         setNotifications(data || [])
+
+        // Fetch related bookings
+        const bookingIds = (data || [])
+          .filter(n => n.metadata && n.metadata.booking_id)
+          .map(n => n.metadata.booking_id)
+
+        if (bookingIds.length > 0) {
+          const { data: bookingsData, error: bookingsError } = await supabase
+            .from('bookings')
+            .select('id, amount, currency')
+            .in('id', bookingIds)
+
+          if (!bookingsError && bookingsData) {
+            const map = {}
+            bookingsData.forEach(b => {
+              map[b.id] = b
+            })
+            setRelatedBookings(map)
+          }
+        }
+
       } catch (error) {
         console.error('Error fetching notifications:', error)
       } finally {
@@ -69,12 +127,30 @@ export function UserHeader({ onMenuClick, sidebarOpen }) {
           table: 'notifications',
           filter: `user_id=eq.${profile.auth_user_id}`,
         },
-        (payload) => {
+        async (payload) => {
           if (payload.eventType === 'INSERT') {
-            setNotifications((prev) => [payload.new, ...prev])
+            const newNotif = payload.new
+            setNotifications((prev) => [newNotif, ...prev])
+
+            // If new notification has booking_id, fetch it
+            if (newNotif.metadata && newNotif.metadata.booking_id) {
+              const { data: bookingData } = await supabase
+                .from('bookings')
+                .select('id, amount, currency')
+                .eq('id', newNotif.metadata.booking_id)
+                .single()
+
+              if (bookingData) {
+                setRelatedBookings(prev => ({
+                  ...prev,
+                  [bookingData.id]: bookingData
+                }))
+              }
+            }
+
             toast({
-              title: payload.new.title,
-              description: payload.new.message,
+              title: newNotif.title,
+              description: newNotif.message,
             })
           } else if (payload.eventType === 'UPDATE') {
             setNotifications((prev) =>
@@ -277,7 +353,7 @@ export function UserHeader({ onMenuClick, sidebarOpen }) {
                         className="text-sm p-3 rounded-lg cursor-pointer transition-colors hover:bg-gray-100 bg-blue-50"
                       >
                         <p className="font-medium">{notification.title}</p>
-                        <p className="text-gray-500">{notification.message}</p>
+                        <p className="text-gray-500">{getFormattedNotificationMessage(notification)}</p>
                       </div>
                     ))}
                 </div>

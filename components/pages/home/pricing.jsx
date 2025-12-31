@@ -9,9 +9,12 @@ import { Check } from "lucide-react"
 import Link from "next/link"
 import { useTranslation } from "@/lib/translations"
 import { createClient } from "@/lib/supabase/client"
+import { useCurrency } from "@/contexts/currency-context"
+import { Price } from "@/components/ui/price"
 
 export function Pricing() {
   const { t } = useTranslation()
+  const { rates: globalRates } = useCurrency()
   const [plans, setPlans] = useState([])
   const [loading, setLoading] = useState(true)
   const [exchangeRates, setExchangeRates] = useState(null)
@@ -150,9 +153,8 @@ export function Pricing() {
                   <h3 className="text-base md:text-xl font-bold text-gray-900 mb-3 md:mb-4 uppercase">{plan.name}</h3>
                   <div className="flex flex-col items-center">
                     <div className="flex items-baseline justify-center gap-0.5 mb-2">
-                      <span className="text-3xl md:text-4xl font-bold text-gray-700">$</span>
                       <span className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-[#0066FF] to-[#00D4AA] bg-clip-text text-transparent">
-                        {plan.price}
+                        <Price amount={plan.price} />
                       </span>
                       <span className="text-sm md:text-base text-gray-500 ml-1">/ person</span>
                     </div>

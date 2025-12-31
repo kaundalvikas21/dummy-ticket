@@ -9,11 +9,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Search, Download, CreditCard, CheckCircle, FileX } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { RefreshButton } from "@/components/ui/refresh-button"
+import { CURRENCY_SYMBOLS } from "@/lib/exchange-rate"
+import { useCurrency } from "@/contexts/currency-context"
 
 export function PaymentHistory({ initialPayments = [] }) {
   const [searchTerm, setSearchTerm] = useState("")
   const [isRefreshing, setIsRefreshing] = useState(false)
   const { toast } = useToast()
+  const { rates, formatPrice } = useCurrency()
 
   const [payments, setPayments] = useState(initialPayments)
 
@@ -28,11 +31,21 @@ export function PaymentHistory({ initialPayments = [] }) {
       payment.description.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
-  const totalSpent = payments.filter((p) => ["Completed", "Paid"].includes(p.status)).reduce((sum, p) => sum + p.amount, 0)
+  // Calculate total spent by converting all amounts to USD first
+  const totalSpentUSD = payments
+    .filter((p) => ["Completed", "Paid"].includes(p.status))
+    .reduce((sum, p) => {
+      // If payment has currency and we have rates, convert to USD
+      if (p.currency && p.currency !== "USD" && rates && rates[p.currency]) {
+        return sum + (p.amount / rates[p.currency])
+      }
+      return sum + p.amount // Assume USD if no info
+    }, 0)
 
   const getStatusColor = (status) => {
     switch (status) {
       case "Completed":
+      case "Paid":
         return "bg-green-100 text-green-800"
       case "Pending":
         return "bg-yellow-100 text-yellow-800"
@@ -45,8 +58,8 @@ export function PaymentHistory({ initialPayments = [] }) {
 
   const handleExportAll = () => {
     const csvContent = [
-      ["Payment ID", "Booking ID", "Date", "Description", "Method", "Amount", "Status"],
-      ...payments.map((p) => [p.id, p.bookingId, p.date, p.description, p.method, p.amount, p.status]),
+      ["Payment ID", "Booking ID", "Date", "Description", "Method", "Amount", "Currency", "Status"],
+      ...payments.map((p) => [p.id, p.bookingId, p.date, p.description, p.method, p.amount, p.currency || 'USD', p.status]),
     ]
       .map((row) => row.join(","))
       .join("\n")
@@ -73,6 +86,9 @@ export function PaymentHistory({ initialPayments = [] }) {
       title: "Download Started",
       description: `Downloading invoice for ${paymentId}`,
     })
+
+    const currencySymbol = CURRENCY_SYMBOLS[payment.currency] || '$'
+    const formattedAmount = `${currencySymbol}${payment.amount}`
 
     // Create PDF-like invoice content
     const pdfContent = `%PDF-1.4
@@ -130,7 +146,7 @@ BT
 (Status: ${payment.status}) Tj
 0 -40 Td
 /F1 16 Tf
-(Amount: $${payment.amount}.00) Tj
+(Amount: ${formattedAmount}) Tj
 0 -40 Td
 /F1 10 Tf
 (Thank you for your business!) Tj
@@ -211,7 +227,7 @@ startxref
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-lg font-bold text-gray-600">Total Spent</p>
-                <p className="text-3xl font-bold mt-2">${totalSpent}</p>
+                <p className="text-3xl font-bold mt-2">{formatPrice(totalSpentUSD)}</p>
               </div>
               <div className="bg-blue-200 p-3 rounded-lg">
                 <CreditCard className="h-6 w-6 text-blue-600" />
@@ -238,7 +254,7 @@ startxref
               <div>
                 <p className="text-lg font-bold text-gray-600">Average Transaction</p>
                 <p className="text-3xl font-bold mt-2">
-                  ${payments.length > 0 ? (totalSpent / payments.length).toFixed(2) : "0.00"}
+                  {payments.length > 0 ? formatPrice(totalSpentUSD / payments.length) : formatPrice(0)}
                 </p>
               </div>
               <div className="bg-purple-200 p-3 rounded-lg">
@@ -305,7 +321,7 @@ startxref
                     <TableCell>{payment.date}</TableCell>
                     <TableCell className="max-w-xs truncate">{payment.description}</TableCell>
                     <TableCell>{payment.method}</TableCell>
-                    <TableCell className="font-semibold">${payment.amount}</TableCell>
+                    <TableCell className="font-semibold">{CURRENCY_SYMBOLS[payment.currency] || '$'}{payment.amount}</TableCell>
                     <TableCell>
                       <Badge className={getStatusColor(payment.status)}>{payment.status}</Badge>
                     </TableCell>

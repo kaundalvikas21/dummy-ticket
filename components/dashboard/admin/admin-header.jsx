@@ -20,16 +20,60 @@ import { useRouter } from "next/navigation"
 import { useAuth } from "@/contexts/auth-context"
 import { getAvatarDisplayUrl, getUserInitials } from "@/lib/utils"
 
+// Import currency context
+import { useCurrency } from "@/contexts/currency-context"
+
 export function AdminHeader({ onMenuClick, sidebarOpen }) {
   const { toast } = useToast()
   const router = useRouter()
   const { logout, profile, loading } = useAuth()
   const [isLoggingOut, setIsLoggingOut] = useState(false)
 
+  // Consume currency context
+  const { rates } = useCurrency()
+
   const supabase = createClient()
   const [notifications, setNotifications] = useState([])
+  const [relatedBookings, setRelatedBookings] = useState({}) // Store { id: { currency, amount } }
   const [notificationDropdownOpen, setNotificationDropdownOpen] = useState(false)
   const [loadingNotifications, setLoadingNotifications] = useState(true)
+
+  // Helper to format notification message
+  const getFormattedNotificationMessage = (notification) => {
+    // If no metadata or booking_id, return original message
+    if (!notification.metadata || !notification.metadata.booking_id) return notification.message
+
+    // Check if we have booking details
+    const bookingDetails = relatedBookings[notification.metadata.booking_id]
+    if (!bookingDetails) return notification.message
+
+    // Admin: Convert to USD
+    // Parse the original message to extract the static "$" part if needed, 
+    // but the instruction says "same price display that have made booking" for USER, and "converted with usd" for ADMIN.
+    // The original message is likely: "New booking from Name - $AMOUNT"
+    // We want to replace "$AMOUNT" with "$CONVERTED_AMOUNT"
+
+    // Convert booking amount to USD
+    const nativeAmount = parseFloat(bookingDetails.amount || 0)
+    const currencyCode = bookingDetails.currency || 'USD'
+    const adminRate = (rates && rates[currencyCode]) ? rates[currencyCode] : 1
+    const amountInUSD = currencyCode === 'USD' ? nativeAmount : (adminRate ? nativeAmount / adminRate : nativeAmount)
+    const formattedUSD = `$${amountInUSD.toFixed(2)}`
+
+    // Replace the amount in the message
+    // Regex to find " - $NUMBER" at the end or embedded
+    // The migration creates: "... - $AMOUNT"
+    // We replace the last part or search for $ + digits
+    try {
+      // Simple replace of the amount part
+      // We know the structure is "... - $X.XX" or similar.
+      // Let's replace the existing dollar amount with the new USD amount.
+      // RegEx: \$\d+(\.\d+)?
+      return notification.message.replace(/\$\d+(\.\d+)?/g, formattedUSD)
+    } catch (e) {
+      return notification.message
+    }
+  }
 
   // Fetch notifications and set up realtime subscription
   useEffect(() => {
@@ -46,6 +90,27 @@ export function AdminHeader({ onMenuClick, sidebarOpen }) {
 
         if (error) throw error
         setNotifications(data || [])
+
+        // Fetch related bookings
+        const bookingIds = (data || [])
+          .filter(n => n.metadata && n.metadata.booking_id)
+          .map(n => n.metadata.booking_id)
+
+        if (bookingIds.length > 0) {
+          const { data: bookingsData, error: bookingsError } = await supabase
+            .from('bookings')
+            .select('id, amount, currency')
+            .in('id', bookingIds)
+
+          if (!bookingsError && bookingsData) {
+            const map = {}
+            bookingsData.forEach(b => {
+              map[b.id] = b
+            })
+            setRelatedBookings(map)
+          }
+        }
+
       } catch (error) {
         console.error('Error fetching notifications:', error)
       } finally {
@@ -66,12 +131,30 @@ export function AdminHeader({ onMenuClick, sidebarOpen }) {
           table: 'notifications',
           filter: `user_id=eq.${profile.auth_user_id}`,
         },
-        (payload) => {
+        async (payload) => {
           if (payload.eventType === 'INSERT') {
-            setNotifications((prev) => [payload.new, ...prev])
+            const newNotif = payload.new
+            setNotifications((prev) => [newNotif, ...prev])
+
+            // If new notification has booking_id, fetch it
+            if (newNotif.metadata && newNotif.metadata.booking_id) {
+              const { data: bookingData } = await supabase
+                .from('bookings')
+                .select('id, amount, currency')
+                .eq('id', newNotif.metadata.booking_id)
+                .single()
+
+              if (bookingData) {
+                setRelatedBookings(prev => ({
+                  ...prev,
+                  [bookingData.id]: bookingData
+                }))
+              }
+            }
+
             toast({
-              title: payload.new.title,
-              description: payload.new.message,
+              title: newNotif.title,
+              description: newNotif.message,
             })
           } else if (payload.eventType === 'UPDATE') {
             setNotifications((prev) =>
@@ -266,7 +349,7 @@ export function AdminHeader({ onMenuClick, sidebarOpen }) {
                           className="text-sm p-3 rounded-lg cursor-pointer transition-colors hover:bg-gray-100 bg-blue-50"
                         >
                           <p className="font-medium">{notification.title}</p>
-                          <p className="text-gray-500">{notification.message}</p>
+                          <p className="text-gray-500">{getFormattedNotificationMessage(notification)}</p>
                         </div>
                       ))}
                   </div>
