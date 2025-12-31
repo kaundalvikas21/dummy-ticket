@@ -160,6 +160,7 @@ export function VendorHeader() {
                       <AvatarImage
                         src={getAvatarDisplayUrl(profile?.avatar_url)}
                         alt="Profile picture"
+                        title="Profile picture"
                       />
                       <AvatarFallback className="bg-gradient-to-br from-[#0066FF] to-[#00D4AA] text-white text-xs">
                         {profile?.first_name || profile?.last_name
@@ -180,15 +181,15 @@ export function VendorHeader() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               {profile?.email && (
-              <div className="px-2 py-1.5">
-                <p className="text-sm font-semibold">
-                  {loading || !profile ? <Skeleton className="w-32 h-4" /> : getUserDisplayName()}
-                </p>
-                <p className="text-xs text-gray-500">
-                  {profile?.email}
-                </p>
-              </div>
-            )}
+                <div className="px-2 py-1.5">
+                  <p className="text-sm font-semibold">
+                    {loading || !profile ? <Skeleton className="w-32 h-4" /> : getUserDisplayName()}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {profile?.email}
+                  </p>
+                </div>
+              )}
               <DropdownMenuSeparator />
               <Link href="/vendor/profile">
                 <DropdownMenuItem className="cursor-pointer">

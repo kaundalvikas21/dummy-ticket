@@ -39,6 +39,7 @@ export function Hero() {
         <img
           src="/modern-airport-terminal-with-planes-and-travelers-.jpg"
           alt="Travel Background"
+          title="Travel Background"
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-br from-[#0066FF]/85 via-[#0066FF]/75 to-[#00D4AA]/70" />
@@ -63,9 +64,8 @@ export function Hero() {
               ].map((item, index) => (
                 <div
                   key={item.text}
-                  className={`flex items-center justify-center gap-1.5 md:gap-2 px-3 py-2 md:px-5 md:py-3 bg-white/95 backdrop-blur-sm rounded-full shadow-lg ${
-                    index === 2 ? "col-span-2 md:col-span-1" : ""
-                  }`}
+                  className={`flex items-center justify-center gap-1.5 md:gap-2 px-3 py-2 md:px-5 md:py-3 bg-white/95 backdrop-blur-sm rounded-full shadow-lg ${index === 2 ? "col-span-2 md:col-span-1" : ""
+                    }`}
                 >
                   <item.icon className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#0066FF]" />
                   <span className="text-xs md:text-sm font-medium text-gray-700">{item.text}</span>

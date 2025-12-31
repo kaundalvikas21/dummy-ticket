@@ -168,6 +168,7 @@ export function Header() {
                                 <AvatarImage
                                   src={getAvatarDisplayUrl(syncedProfile?.avatar_url)}
                                   alt="Profile picture"
+                                  title="Profile picture"
                                 />
                               </Avatar>
                             ) : syncedProfile?.first_name || syncedProfile?.last_name ? (
@@ -288,6 +289,7 @@ export function Header() {
                               <AvatarImage
                                 src={getAvatarDisplayUrl(syncedProfile?.avatar_url)}
                                 alt="Profile picture"
+                                title="Profile picture"
                               />
                             </Avatar>
                           ) : syncedProfile?.first_name || syncedProfile?.last_name ? (

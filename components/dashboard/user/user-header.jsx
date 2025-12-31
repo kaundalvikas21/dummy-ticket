@@ -305,6 +305,7 @@ export function UserHeader({ onMenuClick, sidebarOpen }) {
                     <AvatarImage
                       src={getAvatarDisplayUrl(profile?.avatar_url)}
                       alt="Profile picture"
+                      title="Profile picture"
                     />
                   </Avatar>
                 ) : profile?.first_name || profile?.last_name ? (

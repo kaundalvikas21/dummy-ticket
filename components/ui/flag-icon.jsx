@@ -64,9 +64,9 @@ export function FlagIcon({ src, alt, countryCode, size = 20, className = '' }) {
       <img
         src={src}
         alt={alt || `${countryCode} flag`}
-        className={`rounded max-w-full h-full border border-gray-200 ${
-          isLoading ? 'opacity-0' : 'opacity-100'
-        } transition-opacity duration-200`}
+        title={alt || `${countryCode} flag`}
+        className={`rounded max-w-full h-full border border-gray-200 ${isLoading ? 'opacity-0' : 'opacity-100'
+          } transition-opacity duration-200`}
         width={size}
         height={size}
         onLoad={handleLoad}

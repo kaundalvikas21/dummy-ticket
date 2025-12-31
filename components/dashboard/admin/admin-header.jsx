@@ -290,6 +290,7 @@ export function AdminHeader({ onMenuClick, sidebarOpen }) {
                       <AvatarImage
                         src={getAvatarDisplayUrl(profile?.avatar_url)}
                         alt="Profile picture"
+                        title="Profile picture"
                       />
                       <AvatarFallback className="bg-gradient-to-br from-[#0066FF] to-[#00D4AA] text-white text-xs">
                         {profile?.first_name || profile?.last_name

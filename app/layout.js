@@ -14,9 +14,18 @@ const inter = Inter({
 export const metadata = {
   title: "VisaFly | Flight Reservations for Visa Applications",
   description:
-    "Get verifiable flight reservations for visa applications in minutes. Trusted by 50,000+ travelers worldwide.",
+    "Secure verifiable flight reservations for visa applications in minutes. Trusted by 50,000+ travelers worldwide, we provide reliable dummy tickets and flight itineraries to simplify your visa approval process.",
   keywords:
     "dummy ticket, flight reservation, visa application, travel booking, PNR code",
+  alternates: {
+    canonical: "http://192.168.29.26:3000/",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  authors: [{ name: "VisaFly" }],
+  publisher: "VisaFly",
 };
 
 export default function RootLayout({ children }) {

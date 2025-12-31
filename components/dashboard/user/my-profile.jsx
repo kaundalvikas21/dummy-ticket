@@ -633,6 +633,7 @@ export function MyProfile({ stats }) {
               <AvatarImage
                 src={profileImage || undefined}
                 alt="Profile picture"
+                title="Profile picture"
                 onLoad={() => setImageLoading(false)}
                 onError={(e) => {
                   // If image fails to load, hide it to show fallback
