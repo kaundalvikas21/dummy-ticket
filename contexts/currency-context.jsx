@@ -47,6 +47,7 @@ export const CurrencyProvider = ({ children }) => {
     const [hasMounted, setHasMounted] = useState(false)
     const [currency, setCurrency] = useState('USD')
     const [rates, setRates] = useState(null)
+    const [isConverting, setIsConverting] = useState(false)
 
     useEffect(() => {
         const initCurrency = async () => {
@@ -102,10 +103,16 @@ export const CurrencyProvider = ({ children }) => {
         fetchRates()
     }, [])
 
-    const changeCurrency = useCallback((code) => {
+    const changeCurrency = useCallback(async (code) => {
         if (SUPPORTED_CURRENCIES.includes(code)) {
+            setIsConverting(true)
+            // Brief delay for smooth loading animation
+            await new Promise(resolve => setTimeout(resolve, 300))
             setCurrency(code)
             localStorage.setItem('selected-currency', code)
+            // Keep loading state a bit longer for visual feedback
+            await new Promise(resolve => setTimeout(resolve, 200))
+            setIsConverting(false)
         }
     }, [])
 
@@ -137,7 +144,8 @@ export const CurrencyProvider = ({ children }) => {
         convert,
         formatPrice,
         symbol: CURRENCY_SYMBOLS[hasMounted ? currency : 'USD'] || '$',
-        supportedCurrencies: SUPPORTED_CURRENCIES
+        supportedCurrencies: SUPPORTED_CURRENCIES,
+        isConverting
     }
 
     return (

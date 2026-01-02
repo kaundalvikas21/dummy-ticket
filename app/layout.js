@@ -5,6 +5,7 @@ import { AuthProvider } from "@/contexts/auth-context";
 import { CurrencyProvider } from "@/contexts/currency-context";
 import { Toaster } from "@/components/ui/toaster";
 import { ScrollToTop } from "@/components/ui/scroll-to-top";
+import { CurrencyLoadingOverlay } from "@/components/ui/currency-loading-overlay";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -35,6 +36,7 @@ export default function RootLayout({ children }) {
       <body className={`${inter.variable} font-sans antialiased`}>
         <LocaleProvider>
           <CurrencyProvider>
+            <CurrencyLoadingOverlay />
             <AuthProvider>
               {children}
             </AuthProvider>
