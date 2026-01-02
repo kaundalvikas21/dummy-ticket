@@ -47,7 +47,7 @@ export function CurrencySelector() {
                     <Coins className="w-4 h-4 text-gray-500" />
                     <span className="hidden sm:inline-flex items-center gap-2">
                         <span className="text-xs sm:text-sm font-bold text-gray-700">
-                            {CURRENCY_SYMBOLS[currency]} {currency}
+                            ({CURRENCY_SYMBOLS[currency]}) {currency}
                         </span>
                     </span>
                     <ChevronDown className="w-3 h-3 ml-1" />

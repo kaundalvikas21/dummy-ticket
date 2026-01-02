@@ -21,6 +21,28 @@ const SUPPORTED_CURRENCIES = [
 ]
 const EUROZONE_COUNTRIES = ['AT', 'BE', 'HR', 'CY', 'EE', 'FI', 'FR', 'DE', 'GR', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PT', 'SK', 'SI', 'ES']
 
+// Map country codes to their primary currency
+const COUNTRY_TO_CURRENCY = {
+    IN: 'INR',
+    AE: 'AED',
+    GB: 'GBP',
+    CA: 'CAD',
+    AU: 'AUD',
+    JP: 'JPY',
+    CN: 'CNY',
+    SG: 'SGD',
+    SA: 'SAR',
+    NZ: 'NZD',
+    KR: 'KRW',
+    BR: 'BRL',
+    ZA: 'ZAR',
+    MX: 'MXN',
+    TH: 'THB',
+    RU: 'RUB',
+    HK: 'HKD',
+    US: 'USD'
+}
+
 export const CurrencyProvider = ({ children }) => {
     const [hasMounted, setHasMounted] = useState(false)
     const [currency, setCurrency] = useState('USD')
@@ -30,14 +52,9 @@ export const CurrencyProvider = ({ children }) => {
         const initCurrency = async () => {
             setHasMounted(true)
 
-            // Check localStorage first
-            const saved = localStorage.getItem('selected-currency')
-            if (saved && SUPPORTED_CURRENCIES.includes(saved)) {
-                setCurrency(saved)
-                return
-            }
+            const savedCurrency = localStorage.getItem('selected-currency')
+            const lastCountry = localStorage.getItem('last-detected-country')
 
-            // If no saved preference, detect from IP
             try {
                 const token = process.env.NEXT_PUBLIC_IPINFO_TOKEN || '91287bf4fddcdf'
                 const response = await fetch(`https://ipinfo.io/json?token=${token}`)
@@ -45,23 +62,28 @@ export const CurrencyProvider = ({ children }) => {
                 const country = data.country
 
                 let detected = 'USD'
-
-                if (country === 'IN') {
-                    detected = 'INR'
-                } else if (country === 'AE') {
-                    detected = 'AED'
-                } else if (country === 'GB') {
-                    detected = 'GBP'
+                if (COUNTRY_TO_CURRENCY[country]) {
+                    detected = COUNTRY_TO_CURRENCY[country]
                 } else if (EUROZONE_COUNTRIES.includes(country)) {
                     detected = 'EUR'
                 }
 
-                if (SUPPORTED_CURRENCIES.includes(detected)) {
+                // Logic: If country changed (e.g. VPN), auto-switch currency.
+                // If country is same, respect saved preference.
+                if (country !== lastCountry) {
+                    setCurrency(detected)
+                    localStorage.setItem('selected-currency', detected)
+                    localStorage.setItem('last-detected-country', country)
+                } else if (savedCurrency && SUPPORTED_CURRENCIES.includes(savedCurrency)) {
+                    setCurrency(savedCurrency)
+                } else {
                     setCurrency(detected)
                 }
             } catch (error) {
                 console.error('Currency detection failed:', error)
-                // Default to USD is already set
+                if (savedCurrency && SUPPORTED_CURRENCIES.includes(savedCurrency)) {
+                    setCurrency(savedCurrency)
+                }
             }
         }
 

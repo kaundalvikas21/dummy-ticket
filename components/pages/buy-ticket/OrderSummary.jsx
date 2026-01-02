@@ -9,6 +9,7 @@ import { Price } from "@/components/ui/price"
 
 export function OrderSummary({ formData, servicePlans }) {
   const { t } = useTranslation()
+  const { currency } = useCurrency()
 
   const selectedPlan = servicePlans.find((plan) => plan.id === formData.selectedPlan)
   const basePrice = selectedPlan?.price || 0
@@ -27,7 +28,7 @@ export function OrderSummary({ formData, servicePlans }) {
           planId: selectedPlan.id,
           formData, // Pass the full form data to be stored in bookings
           amount: selectedPlan.price, // Or calculate total locally if needed
-          currency: "USD", // Or dynamic if supported
+          currency: currency, // Pass the selected currency dynamically
         }),
       })
 
@@ -121,7 +122,7 @@ export function OrderSummary({ formData, servicePlans }) {
           <div className="space-y-2 md:space-y-3 mb-4 md:mb-6">
             {benefits.map((benefit) => (
               <div key={benefit} className="flex items-start gap-2 text-xs md:text-sm text-gray-600">
-                <Check className="w-3.5 h-3.5 md:w-4 md:h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                <Check className="w-3.5 h-3.5 md:w-4 md:h-4 text-green-500 shrink-0 mt-0.5" />
                 <span>{benefit}</span>
               </div>
             ))}

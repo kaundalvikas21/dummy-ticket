@@ -32,15 +32,40 @@ export function PaymentHistory({ initialPayments = [] }) {
   )
 
   // Calculate total spent by converting all amounts to USD first
-  const totalSpentUSD = payments
-    .filter((p) => ["Completed", "Paid"].includes(p.status))
-    .reduce((sum, p) => {
+  const completedPayments = payments.filter((p) => ["Completed", "Paid"].includes(p.status))
+  const uniqueCurrencies = [...new Set(completedPayments.map(p => p.currency || 'USD'))]
+  const isSingleCurrency = uniqueCurrencies.length === 1
+  const singleCurrency = isSingleCurrency ? uniqueCurrencies[0] : null
+
+  let totalSpentDisplay
+  let averageTransactionDisplay
+
+  if (isSingleCurrency) {
+    const total = completedPayments.reduce((sum, p) => sum + p.amount, 0)
+    const symbol = CURRENCY_SYMBOLS[singleCurrency] || '$'
+
+    // Format with commas and 2 decimal places if needed, or integers like the original if round numbers
+    // The original formatPrice uses a specific context. Here we want a simple display.
+    // Let's us basic toLocaleString
+    const formattedTotal = total.toLocaleString(undefined, { maximumFractionDigits: 2 })
+    totalSpentDisplay = `${symbol}${formattedTotal}`
+
+    const avg = completedPayments.length > 0 ? total / completedPayments.length : 0
+    const formattedAvg = avg.toLocaleString(undefined, { maximumFractionDigits: 2 })
+    averageTransactionDisplay = `${symbol}${formattedAvg}`
+  } else {
+    // Calculate total spent by converting all amounts to USD first (Existing Logic)
+    const totalSpentUSD = completedPayments.reduce((sum, p) => {
       // If payment has currency and we have rates, convert to USD
       if (p.currency && p.currency !== "USD" && rates && rates[p.currency]) {
         return sum + (p.amount / rates[p.currency])
       }
       return sum + p.amount // Assume USD if no info
     }, 0)
+
+    totalSpentDisplay = formatPrice(totalSpentUSD)
+    averageTransactionDisplay = completedPayments.length > 0 ? formatPrice(totalSpentUSD / payments.length) : formatPrice(0)
+  }
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -227,7 +252,7 @@ startxref
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-lg font-bold text-gray-600">Total Spent</p>
-                <p className="text-3xl font-bold mt-2">{formatPrice(totalSpentUSD)}</p>
+                <p className="text-3xl font-bold mt-2">{totalSpentDisplay}</p>
               </div>
               <div className="bg-blue-200 p-3 rounded-lg">
                 <CreditCard className="h-6 w-6 text-blue-600" />
@@ -254,7 +279,7 @@ startxref
               <div>
                 <p className="text-lg font-bold text-gray-600">Average Transaction</p>
                 <p className="text-3xl font-bold mt-2">
-                  {payments.length > 0 ? formatPrice(totalSpentUSD / payments.length) : formatPrice(0)}
+                  {averageTransactionDisplay}
                 </p>
               </div>
               <div className="bg-purple-200 p-3 rounded-lg">
