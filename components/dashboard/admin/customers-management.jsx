@@ -33,6 +33,7 @@ import { createClient } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { RefreshButton } from "@/components/ui/refresh-button"
 import { Pagination } from "@/components/ui/pagination"
+import { useCurrency } from "@/contexts/currency-context"
 
 export function CustomersManagement() {
   const [customers, setCustomers] = useState([])
@@ -51,6 +52,7 @@ export function CustomersManagement() {
   const [currentPage, setCurrentPage] = useState(1)
   const ITEMS_PER_PAGE = 10
 
+  const { rates } = useCurrency()
   const { toast } = useToast()
   const supabase = createClient()
 
@@ -60,7 +62,7 @@ export function CustomersManagement() {
       // Fetch user profiles and all bookings in parallel
       const [{ data: profiles, error: profilesError }, { data: bookings, error: bookingsError }] = await Promise.all([
         supabase.from('user_profiles').select('*'),
-        supabase.from('bookings').select('user_id, amount, passenger_details, created_at')
+        supabase.from('bookings').select('user_id, amount, currency, passenger_details, created_at')
       ])
 
       if (profilesError) throw profilesError
@@ -122,7 +124,17 @@ export function CustomersManagement() {
         }
 
         customer.orders += 1
-        customer.spent += parseFloat(booking.amount || 0)
+        const amount = parseFloat(booking.amount || 0)
+        const currencyCode = booking.currency || 'USD'
+
+        // Convert to USD if needed
+        let finalAmount = amount
+        if (currencyCode !== 'USD') {
+          const rate = (rates && rates[currencyCode]) ? rates[currencyCode] : 1
+          finalAmount = rate ? amount / rate : amount
+        }
+
+        customer.spent += finalAmount
 
         const bookingDate = new Date(booking.created_at)
         if (bookingDate < customer.rawJoinDate) {
@@ -153,7 +165,7 @@ export function CustomersManagement() {
 
   useEffect(() => {
     fetchCustomers()
-  }, [])
+  }, [rates])
 
   useEffect(() => {
     setCurrentPage(1)
