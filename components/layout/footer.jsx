@@ -135,7 +135,7 @@ export function Footer() {
                   <li key={`company-${link.id || `link-${index}`}`}>
                     <Link
                       href={link.href}
-                      className="text-gray-300 hover:text-[#00D4AA] transition-all duration-300 text-xs md:text-sm flex items-center gap-2 group"
+                      className="text-gray-300 hover:text-[#00D4AA] transition-all duration-300 text-xs md:text-sm flex items-center gap-2 group !min-h-0 !min-w-0"
                     >
                       <span className="w-0 group-hover:w-2 h-0.5 bg-[#00D4AA] transition-all duration-300" />
                       {link.title}
@@ -158,7 +158,7 @@ export function Footer() {
                   <li key={`support-${link.id || `link-${index}`}`}>
                     <Link
                       href={link.href}
-                      className="text-gray-300 hover:text-[#00D4AA] transition-all duration-300 text-xs md:text-sm flex items-center gap-2 group"
+                      className="text-gray-300 hover:text-[#00D4AA] transition-all duration-300 text-xs md:text-sm flex items-center gap-2 group !min-h-0 !min-w-0"
                     >
                       <span className="w-0 group-hover:w-2 h-0.5 bg-[#00D4AA] transition-all duration-300" />
                       {link.title}
@@ -182,7 +182,7 @@ export function Footer() {
                   return (
                     <li key={`contact-${item.id || `item-${index}`}`} className="flex items-start gap-2 text-gray-300 group">
                       <Icon className="w-3.5 h-3.5 md:w-5 md:h-5 flex-shrink-0 mt-0.5 text-[#00D4AA] group-hover:scale-110 transition-transform" />
-                      <a href={item.href} className="text-[10px] md:text-sm leading-tight group-hover:text-white transition-colors break-all">
+                      <a href={item.href} className="text-[10px] md:text-sm leading-tight group-hover:text-white transition-colors break-all !min-h-0 !min-w-0">
                         {item.text}
                       </a>
                     </li>
@@ -206,7 +206,7 @@ export function Footer() {
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 rounded-lg md:rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-gradient-to-br hover:from-[#0066FF] hover:to-[#00D4AA] hover:border-transparent flex items-center justify-center transition-all duration-300 group hover:scale-110 hover:shadow-lg hover:shadow-[#0066FF]/30"
+                    className="w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 rounded-lg md:rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-gradient-to-br hover:from-[#0066FF] hover:to-[#00D4AA] hover:border-transparent flex items-center justify-center transition-all duration-300 group hover:scale-110 hover:shadow-lg hover:shadow-[#0066FF]/30 !min-h-0 !min-w-0"
                     aria-label={social.name}
                   >
                     {typeof social.icon === "function" ? (
