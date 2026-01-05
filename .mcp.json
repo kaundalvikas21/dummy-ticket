@@ -1,6 +1,5 @@
-
 {
-  "mcpServers": { 
+  "mcpServers": {
     "sequential-thinking": {
       "command": "/home/vikas/.local/bin/uvx",
       "args": [
@@ -9,18 +8,24 @@
         "--with",
         "portalocker",
         "mcp-sequential-thinking"
-      ],
-      "transportType": "stdio"
+      ]
     },
     "chrome-devtools": {
       "command": "npx",
-      "args": ["chrome-devtools-mcp@latest"]
+      "args": [
+        "chrome-devtools-mcp@latest"
+      ]
     },
     "serena": {
-            "command": "/home/vikas/.local/bin/uvx",
-            "args": ["--from", "git+https://github.com/oraios/serena", "serena", "start-mcp-server"]
-        },
- "context7": {
+      "command": "/home/vikas/.local/bin/uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/oraios/serena",
+        "serena",
+        "start-mcp-server"
+      ]
+    },
+    "context7": {
       "command": "npx",
       "args": [
         "-y",
@@ -29,12 +34,11 @@
     },
     "linear": {
       "command": "npx",
-      "args": ["-y", "mcp-remote", "https://mcp.linear.app/sse"]
-    },
-    "consult7": {
-      "type": "stdio",
-      "command": "uvx",
-      "args": ["consult7", "openrouter", "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"]
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://mcp.linear.app/sse"
+      ]
     }
   }
 }
