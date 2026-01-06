@@ -7,8 +7,8 @@ import {
 
 export async function GET(request) {
   try {
-    // Create Supabase client with auth
-    const supabase = createSupabaseClientWithAuth(request)
+    // Create Supabase client with auth (now uses cookies, no request param needed)
+    const supabase = await createSupabaseClientWithAuth()
 
     // Authenticate user
     const user = await requireAuth(supabase)

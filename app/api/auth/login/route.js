@@ -1,8 +1,16 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { withRateLimit, getClientIP } from '@/lib/rate-limit'
 
-export async function POST(request) {
+// Apply rate limiting: 5 attempts per minute per IP
+const rateLimitedLogin = withRateLimit(handleLogin, {
+  limit: 5,
+  window: 60000,
+  identifierGenerator: getClientIP
+})
+
+async function handleLogin(request) {
   try {
     const { email, password } = await request.json()
 
@@ -155,3 +163,6 @@ export async function POST(request) {
     )
   }
 }
+
+// Export the rate-limited handler
+export { rateLimitedLogin as POST }

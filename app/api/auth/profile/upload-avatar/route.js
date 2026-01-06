@@ -15,7 +15,7 @@ import {
 export async function POST(request) {
   try {
     // Create authenticated Supabase client and get authenticated user
-    const supabaseClient = createSupabaseClientWithAuth(request)
+    const supabaseClient = await createSupabaseClientWithAuth()
     const user = await requireAuth(supabaseClient)
 
     // Use authenticated user's ID - never accept from request

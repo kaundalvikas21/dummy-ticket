@@ -14,7 +14,7 @@ import { supabaseAdmin } from "@/lib/supabase"
 export async function POST(request) {
   try {
     // Check admin authentication using Supabase
-    const supabase = createSupabaseClientWithAuth(request)
+    const supabase = await createSupabaseClientWithAuth()
     await requireAdmin(supabase)
 
     // Parse form data
@@ -77,7 +77,7 @@ export async function POST(request) {
 export async function DELETE(request) {
   try {
     // Check admin authentication using Supabase
-    const supabase = createSupabaseClientWithAuth(request)
+    const supabase = await createSupabaseClientWithAuth()
     await requireAdmin(supabase)
 
     const { searchParams } = new URL(request.url)

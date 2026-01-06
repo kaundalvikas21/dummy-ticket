@@ -9,7 +9,7 @@ import { NextResponse } from 'next/server'
 export async function PUT(request, { params }) {
   try {
     // SECURITY: Require admin authentication
-    const supabaseAuth = createSupabaseClientWithAuth(request)
+    const supabaseAuth = await createSupabaseClientWithAuth()
     await requireAdmin(supabaseAuth)
 
     const { id } = await params
@@ -63,7 +63,7 @@ export async function PUT(request, { params }) {
 export async function DELETE(request, { params }) {
   try {
     // SECURITY: Require admin authentication
-    const supabaseAuth = createSupabaseClientWithAuth(request)
+    const supabaseAuth = await createSupabaseClientWithAuth()
     await requireAdmin(supabaseAuth)
 
     const { id } = await params

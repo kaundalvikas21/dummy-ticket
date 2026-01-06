@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { AnimatePresence, motion } from "framer-motion"
 import { useSearchParams, useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
@@ -23,6 +23,7 @@ import { Price } from "@/components/ui/price"
 import { steps } from "@/lib/constants/formSteps"
 import { useFormValidation } from "@/lib/hooks/useFormValidation"
 import { Button } from "@/components/ui/button"
+import { countries } from "@/lib/countries"
 
 const initialFormData = {
   selectedPlan: "",
@@ -58,8 +59,22 @@ export default function BuyTicketPage() {
   const planIdParam = searchParams.get("planId") || searchParams.get("service")
 
   const [currentStep, setCurrentStep] = useState(1)
+  const formRef = useRef(null)
   const { currency: globalCurrency } = useCurrency()
-  const [formData, setFormData] = useState(initialFormData)
+  const [formData, setFormData] = useState(() => {
+    // Restore form data from session storage if available
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('buyTicketFormData')
+      if (saved) {
+        try {
+          return JSON.parse(saved)
+        } catch (e) {
+          console.error('Error parsing saved form data:', e)
+        }
+      }
+    }
+    return initialFormData
+  })
   const [availablePlans, setAvailablePlans] = useState([])
   const [loading, setLoading] = useState(true)
   const [exchangeRates, setExchangeRates] = useState(null)
@@ -68,8 +83,26 @@ export default function BuyTicketPage() {
   const [otherServicesPage, setOtherServicesPage] = useState(1)
   const OTHER_SERVICES_PER_PAGE = 6
 
+  // Flag to track if we're returning from a cancelled Stripe checkout
+  const isReturningFromCheckout = searchParams.get("error") === "cancelled"
+
+  // Save form data to session storage whenever it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('buyTicketFormData', JSON.stringify(formData))
+    }
+  }, [formData])
+
   const updateFormData = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
+  }
+
+  // Function to clear form data (call after successful payment)
+  const clearFormData = () => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('buyTicketFormData')
+    }
+    setFormData(initialFormData)
   }
 
   const { isStepValid } = useFormValidation(currentStep, formData)
@@ -89,6 +122,7 @@ export default function BuyTicketPage() {
           supabase.auth.getUser()
         ])
 
+        // Fetch profile data if user is logged in
         if (user) {
           const { data: profile } = await supabase
             .from('user_profiles')
@@ -99,19 +133,56 @@ export default function BuyTicketPage() {
           if (profile) {
             setFormData(prev => ({
               ...prev,
-              firstName: profile.first_name || prev.firstName,
-              lastName: profile.last_name || prev.lastName,
-              email: profile.email || prev.email,
-              phone: profile.phone_number || prev.phone,
-              passportNumber: profile.passport_number || prev.passportNumber,
-              dateOfBirth: profile.date_of_birth || prev.dateOfBirth,
-              nationality: profile.nationality || prev.nationality,
+              firstName: prev.firstName || profile.first_name || "",
+              lastName: prev.lastName || profile.last_name || "",
+              email: prev.email || user.email || "",
+              phone: prev.phone || profile.phone_number || "",
+              passportNumber: prev.passportNumber || profile.passport_number || "",
+              dateOfBirth: prev.dateOfBirth || profile.date_of_birth || "",
+              nationality: (() => {
+                const val = (prev.nationality || profile.nationality || "").trim();
+                if (!val) return "";
+                // If it's already matching a country name exactly (or close enough), use the official name from our list
+                // This helps map "Indian" -> "India" to match the PassengerDetailsForm dropdown
+                const matched = countries.find(c => {
+                  const name = c.name.toLowerCase();
+                  const target = val.toLowerCase();
+                  return target.includes(name) || name.includes(target);
+                });
+                return matched ? matched.name : val;
+              })(),
+              // Delivery Options prefill
+              deliveryEmail: prev.deliveryEmail || user.email || "",
+              whatsappNumber: prev.whatsappNumber || profile.phone_number || "",
               // Map address fields to Billing if available
-              billingName: `${profile.first_name} ${profile.last_name}`.trim() || prev.billingName,
-              billingAddress: profile.address || prev.billingAddress,
-              billingCity: profile.city || prev.billingCity,
-              billingZip: profile.postal_code || prev.billingZip,
-              billingCountry: profile.nationality || prev.billingCountry // Assuming nationality matches country for billing default
+              billingName: prev.billingName || `${profile.first_name || ""} ${profile.last_name || ""}`.trim() || "",
+              billingAddress: prev.billingAddress || profile.address || "",
+              billingCity: prev.billingCity || profile.city || "",
+              billingZip: prev.billingZip || profile.postal_code || "",
+              billingCountry: (() => {
+                const getCode = (v) => {
+                  if (!v || typeof v !== 'string') return null;
+                  const clean = v.trim();
+                  if (!clean) return null;
+                  // Exact code match
+                  const codeMatch = countries.find(c => c.code.toUpperCase() === clean.toUpperCase());
+                  if (codeMatch) return codeMatch.code;
+                  // Name match
+                  const nameMatch = countries.find(c => {
+                    const name = c.name.toLowerCase();
+                    const target = clean.toLowerCase();
+                    return target.includes(name) || name.includes(target);
+                  });
+                  return nameMatch ? nameMatch.code : null;
+                };
+
+                // Use priority: profile country_code > profile nationality > existing form data
+                // We prefer profile data over potentially old/incorrect session storage for these specific fields
+                return getCode(profile.country_code) ||
+                  getCode(profile.nationality) ||
+                  getCode(prev.billingCountry) ||
+                  "";
+              })()
             }))
           }
         }
@@ -143,11 +214,27 @@ export default function BuyTicketPage() {
       const planExists = availablePlans.find((plan) => plan.id === planIdParam)
       if (planExists) {
         setFormData((prev) => ({ ...prev, selectedPlan: planIdParam }))
-        // If plan is pre-selected, start at Step 2 (Passenger Details)
-        setCurrentStep(2)
+
+        // Correct flow logic:
+        // 1. If returning from cancelled checkout, jump to step 5
+        // 2. If NOT on step 1 already, don't force a move (maybe user is navigating)
+        // 3. Otherwise (starting fresh with plan), move to Step 2
+        if (isReturningFromCheckout) {
+          setCurrentStep(5)
+        } else if (currentStep === 1) {
+          setCurrentStep(2)
+        }
       }
     }
-  }, [loading, planIdParam, availablePlans])
+  }, [loading, planIdParam, availablePlans, isReturningFromCheckout])
+
+  // Handle step restoration when returning from checkout (no planId in URL)
+  useEffect(() => {
+    if (!loading && isReturningFromCheckout && !planIdParam) {
+      // User returned from checkout and no planId in URL, go to Step 5
+      setCurrentStep(5)
+    }
+  }, [loading, isReturningFromCheckout, planIdParam])
 
   const nextStep = () => {
     if (currentStep < steps.length && isStepValid()) {
@@ -208,6 +295,15 @@ export default function BuyTicketPage() {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (formRef.current) {
+      // Scroll to the top of the form with a slight offset
+      const yOffset = -100; // Account for any fixed header
+      const y = formRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+  }, [currentStep])
 
   const renderFormStep = () => {
     switch (currentStep) {
@@ -332,7 +428,7 @@ export default function BuyTicketPage() {
             </div>
           )}
 
-          <div className={(isPreSelected && currentStep > 1) ? "mt-24" : ""}>
+          <div ref={formRef} className={(isPreSelected && currentStep > 1) ? "mt-24" : ""}>
             <ProgressSteps steps={steps} currentStep={currentStep} />
           </div>
 

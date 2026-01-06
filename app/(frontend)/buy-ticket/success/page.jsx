@@ -20,6 +20,10 @@ export default function SuccessPage() {
             return;
         }
 
+        // Clear form data immediately upon landing on success page
+        // This ensures the next booking starts fresh from Step 1
+        sessionStorage.removeItem('buyTicketFormData');
+
         const verifyPayment = async () => {
             try {
                 const response = await fetch("/api/verify-payment", {
@@ -30,15 +34,21 @@ export default function SuccessPage() {
 
                 if (response.ok) {
                     setStatus('success');
+                    // Clear form data from session storage after successful payment
+                    sessionStorage.removeItem('buyTicketFormData');
                 } else {
                     const errorData = await response.json();
                     console.error("Payment verification failed:", errorData);
                     // Keep valid session as success for user but log error
                     setStatus('success');
+                    // Still clear form data even if verification has issues
+                    sessionStorage.removeItem('buyTicketFormData');
                 }
             } catch (error) {
                 console.error("Verification error:", error);
                 setStatus('success');
+                // Still clear form data on success page
+                sessionStorage.removeItem('buyTicketFormData');
             }
         };
 

@@ -20,7 +20,7 @@ export const metadata = {
   keywords:
     "dummy ticket, flight reservation, visa application, travel booking, PNR code",
   alternates: {
-    canonical: "http://192.168.29.26:3000/",
+    canonical: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
   },
   robots: {
     index: true,

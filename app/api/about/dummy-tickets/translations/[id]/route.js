@@ -122,7 +122,7 @@ export async function PUT(request, { params }) {
 export async function DELETE(request, { params }) {
   try {
     // SECURITY: Require admin authentication
-    const supabaseAuth = createSupabaseClientWithAuth(request)
+    const supabaseAuth = await createSupabaseClientWithAuth()
     await requireAdmin(supabaseAuth)
 
     const { id } = await params

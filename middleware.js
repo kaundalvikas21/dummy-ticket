@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/server'
-import { supabaseAdmin } from '@/lib/supabase'
 import { NextResponse } from 'next/server'
 
 export async function middleware(request) {
@@ -11,25 +10,9 @@ export async function middleware(request) {
   // Refresh session if expired - required for Server Components
   const { data: { user } } = await supabase.auth.getUser()
 
-  let userRole = user?.app_metadata?.role
-
-  // Try to get role from database profile if available
-  if (user) {
-    try {
-      const { data: profile } = await supabaseAdmin
-        .from('user_profiles')
-        .select('role')
-        .eq('auth_user_id', user.id)
-        .single()
-
-      if (profile?.role) {
-        userRole = profile.role
-      }
-    } catch (error) {
-      // If profile lookup fails, use auth metadata role
-      console.error('Middleware profile lookup failed:', error)
-    }
-  }
+  // OPTIMIZED: Use role from app_metadata (already in JWT, no DB query needed)
+  // Default to 'user' if no role is set
+  const userRole = user?.app_metadata?.role || 'user'
 
   // Define protected routes and their required roles
   const protectedRoutes = {

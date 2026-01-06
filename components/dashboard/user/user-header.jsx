@@ -64,9 +64,9 @@ export function UserHeader({ onMenuClick, sidebarOpen }) {
       // Format: 'د.إ100' looks weird. 'د.إ 100' is better.
       // Existing message: "... $100 ...".
       // Replaced: "... د.إ100 ..." (whitespace might be eaten if I match strict `$`).
-      // Regex `\$` matches the dollar sign. 
-      // We replace it with the symbol.
-      return notification.message.replace('$', symbol)
+      // Replaced: "... د.إ100.00 ..."
+      // RegEx: \$\d+(?:,\d{3})*(?:\.\d+)?
+      return notification.message.replace(/\$\d+(?:,\d{3})*(?:\.\d+)?/g, symbol)
     } catch (e) {
       return notification.message
     }
@@ -132,7 +132,8 @@ export function UserHeader({ onMenuClick, sidebarOpen }) {
             const newNotif = payload.new
             setNotifications((prev) => [newNotif, ...prev])
 
-            // If new notification has booking_id, fetch it
+            // Fetch booking data if needed before showing toast
+            let finalMessage = newNotif.message;
             if (newNotif.metadata && newNotif.metadata.booking_id) {
               const { data: bookingData } = await supabase
                 .from('bookings')
@@ -141,16 +142,22 @@ export function UserHeader({ onMenuClick, sidebarOpen }) {
                 .single()
 
               if (bookingData) {
+                // Update relatedBookings state for the dropdown
                 setRelatedBookings(prev => ({
                   ...prev,
                   [bookingData.id]: bookingData
                 }))
+
+                // Format message for toast
+                const currency = bookingData.currency || 'USD'
+                const symbol = CURRENCY_SYMBOLS[currency] || '$'
+                finalMessage = newNotif.message.replace(/\$\d+(?:,\d{3})*(?:\.\d+)?/g, symbol)
               }
             }
 
             toast({
               title: newNotif.title,
-              description: newNotif.message,
+              description: finalMessage,
             })
           } else if (payload.eventType === 'UPDATE') {
             setNotifications((prev) =>
@@ -336,14 +343,14 @@ export function UserHeader({ onMenuClick, sidebarOpen }) {
               </div>
               {unreadCount === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#0066FF] to-[#00D4AA] flex items-center justify-center mb-3">
+                  <div className="w-16 h-16 rounded-full bg-linear-to-br from-[#0066FF] to-[#00D4AA] flex items-center justify-center mb-3">
                     <Bell className="h-8 w-8 text-white" />
                   </div>
                   <p className="font-medium text-gray-900 mb-1">All caught up!</p>
                   <p className="text-sm text-gray-500">You have no new notifications</p>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-3 max-h-[280px] overflow-y-auto pr-1 custom-scrollbar">
                   {notifications
                     .filter((n) => !n.read)
                     .map((notification) => (
@@ -373,7 +380,7 @@ export function UserHeader({ onMenuClick, sidebarOpen }) {
               "
               aria-label="User menu"
             >
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#0066FF] to-[#00D4AA] ring-2 ring-white shadow-sm">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-linear-to-br from-[#0066FF] to-[#00D4AA] ring-2 ring-white shadow-sm">
                 {loading || !profile ? (
                   <div className="h-5 w-5 bg-gray-200/30 animate-pulse rounded-full"></div>
                 ) : profile?.avatar_url ? (
@@ -386,17 +393,17 @@ export function UserHeader({ onMenuClick, sidebarOpen }) {
                   </Avatar>
                 ) : profile?.first_name || profile?.last_name ? (
                   <Avatar className="h-8 w-8">
-                    <AvatarFallback className="bg-gradient-to-br from-[#0066FF] to-[#00D4AA] text-white text-xs">
+                    <AvatarFallback className="bg-linear-to-br from-[#0066FF] to-[#00D4AA] text-white text-xs">
                       {getUserInitials(profile?.first_name, profile?.last_name, profile?.email)}
                     </AvatarFallback>
                   </Avatar>
                 ) : (
-                  <div className="h-8 w-8 bg-gradient-to-br from-[#0066FF] to-[#00D4AA] ring-2 ring-white shadow-sm flex items-center justify-center">
+                  <div className="h-8 w-8 bg-linear-to-br from-[#0066FF] to-[#00D4AA] ring-2 ring-white shadow-sm flex items-center justify-center">
                     <User className="h-4 w-4 text-white" />
                   </div>
                 )}
               </div>
-              <div className="flex flex-col items-start hidden sm:block">
+              <div className="hidden sm:flex flex-col items-start">
                 <span className="text-sm font-medium text-gray-900">
                   {loading || !profile ? <Skeleton className="w-24 sm:w-32 h-4" /> : getUserDisplayName()}
                 </span>

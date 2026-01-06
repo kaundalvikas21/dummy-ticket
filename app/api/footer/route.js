@@ -110,7 +110,7 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     // Check admin authentication using Supabase
-    const supabase = createSupabaseClientWithAuth(request)
+    const supabase = await createSupabaseClientWithAuth()
     await requireAdmin(supabase)
 
     const body = await request.json()
@@ -278,7 +278,7 @@ export async function POST(request) {
 export async function PUT(request) {
   try {
     // Check admin authentication using Supabase
-    const supabase = createSupabaseClientWithAuth(request)
+    const supabase = await createSupabaseClientWithAuth()
     await requireAdmin(supabase)
 
     const body = await request.json()
@@ -378,7 +378,7 @@ export async function PUT(request) {
 export async function DELETE(request) {
   try {
     // Check admin authentication using Supabase
-    const supabase = createSupabaseClientWithAuth(request)
+    const supabase = await createSupabaseClientWithAuth()
     await requireAdmin(supabase)
 
     const { searchParams } = new URL(request.url)
@@ -442,7 +442,7 @@ export async function DELETE(request) {
 export async function PATCH(request) {
   try {
     // Check admin authentication using Supabase
-    const supabase = createSupabaseClientWithAuth(request)
+    const supabase = await createSupabaseClientWithAuth()
     await requireAdmin(supabase)
 
     const body = await request.json()

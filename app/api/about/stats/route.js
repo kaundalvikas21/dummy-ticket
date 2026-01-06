@@ -74,7 +74,7 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     // SECURITY: Require admin authentication
-    const supabase = createSupabaseClientWithAuth(request)
+    const supabase = await createSupabaseClientWithAuth()
     await requireAdmin(supabase)
 
     // Validate input data

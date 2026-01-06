@@ -96,7 +96,7 @@ export async function POST(request) {
 export async function GET(request) {
   try {
     // SECURITY: Require admin authentication
-    const supabaseAuth = createSupabaseClientWithAuth(request)
+    const supabaseAuth = await createSupabaseClientWithAuth()
     await requireAdmin(supabaseAuth)
 
     const { searchParams } = new URL(request.url)

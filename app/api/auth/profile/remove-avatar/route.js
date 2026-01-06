@@ -14,7 +14,7 @@ export async function DELETE(request) {
 
   try {
     // Create authenticated Supabase client and get authenticated user
-    const supabaseClient = createSupabaseClientWithAuth(request)
+    const supabaseClient = await createSupabaseClientWithAuth()
     const user = await requireAuth(supabaseClient)
 
     console.log('User authenticated for avatar removal:', user.id)

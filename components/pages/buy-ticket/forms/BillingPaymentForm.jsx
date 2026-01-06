@@ -6,17 +6,32 @@ import { TextInput } from "@/components/ui/input/TextInput"
 import { SelectInput } from "@/components/ui/input/SelectInput"
 import { InfoCard } from "@/components/ui/input/InfoCard"
 import { useTranslation } from "@/lib/translations"
+import { useCurrency } from "@/contexts/currency-context"
+import { useEffect } from "react"
 
 
 import { countries } from "@/lib/countries"
 
 export function BillingPaymentForm({ formData, updateFormData }) {
   const { t } = useTranslation()
+  const { currency: globalCurrency } = useCurrency()
 
   const countryOptions = countries.map(country => ({
     value: country.code,
     label: country.name
   }))
+
+  // Amazon Pay is currently NOT working in Stripe account
+  // Comment: Amazon Pay requires additional setup and verification
+  // Keeping code for future enablement - set to false to disable
+  const showAmazonPay = true // Set to true when Amazon Pay is properly configured in Stripe
+
+  // Reset payment method to "card" if Amazon Pay is selected but currency changed to unsupported
+  useEffect(() => {
+    if (formData.paymentMethod === "amazon_pay" && !showAmazonPay) {
+      updateFormData("paymentMethod", "card")
+    }
+  }, [globalCurrency, showAmazonPay, formData.paymentMethod, updateFormData])
 
   return (
     <motion.div
@@ -112,19 +127,21 @@ export function BillingPaymentForm({ formData, updateFormData }) {
               isSelected={formData.paymentMethod === "apple_pay"}
               onSelect={() => updateFormData("paymentMethod", "apple_pay")}
             />
-            <PaymentMethodButton
-              method="amazon_pay"
-              customIcon={
-                <svg viewBox="0 0 448 512" fill="currentColor" className="w-5 h-5 text-[#FF9900]">
-                  <path d="M257.2 162.7c-48.7 1.8-166.3 1.5-166.3 1.5l-16-.2v127l16.8.2c47.1 0 134.7-.5 134.7-.5l17.2-.2-27.1 36.6-8.6 11.6-2.5 3.4c-3.1 4.2-6.1 8.3-9.2 12.5-4.4 6-8.8 11.9-13.2 17.9-2.7 3.7-5.4 7.4-8.1 11.1l-10 13.6-20.7 28.1c-12.7 17.2-12.6 17.1-12.6 17.1s-16.6 22.4 12.8 22.4h111.9l-34.9-35.1c-5.2-5.2-10.4-10.4-15.6-15.6l-50.6-50.7 78.5-106-2.2-2.9c-10.5-13.7-52.9-68.9-52.9-68.9zm-46.3 34.6c2.7 3.5 125.7 163.6 125.7 163.6s16.6 21.6 16.6 21.6c17.2 22.4 16.6 22.4 16.6 22.4s16.6 22.4-12.8 22.4h-68.1c-6.2 0-11.8-3-15.4-8.1l-10-14.1-39.7-55.8-9.4-13.1c-3.1-4.3-6.1-8.6-9.2-12.9-2.8-3.9-5.5-7.8-8.2-11.7l-9.9-13.9-35.3-49.6-15.4-21.7c-3.8-5.3 0-12.6 6.5-12.6h33zm-101.9 14.1l32.5 45.7 16 22.5 16.5 23.2 24.3 34.1 8.6 12.1 2.9 4.1c16.1 22.6 10.1 54.3-17.6 54.3H32.4c-6.5 0-10.3-7.3-6.5-12.6l23.1-32.5c11.9-16.7 11.9-16.7 11.9-16.7l50.3-70.7c3.9-5.5 10.2-5.5 14.1 0z" />
-                  <path d="M239.1 364.6c-48.8 33.6-114.3 37.3-155.3 12.6-3.8-2.3-5.3-7.1-3.6-11.2l12.1-27.9c1.9-4.3 7-6.2 11.1-4.1 26.6 13.9 66.2 14.3 103.7-9.5 3.9-2.5 9-1.4 11.5 2.5l18.5 26.6c2.5 3.9 1.4 9-2.5 11.5z" />
-                </svg>
-              }
-              title="Amazon Pay"
-              subtitle="Pay with Amazon Pay"
-              isSelected={formData.paymentMethod === "amazon_pay"}
-              onSelect={() => updateFormData("paymentMethod", "amazon_pay")}
-            />
+            {showAmazonPay && (
+              <PaymentMethodButton
+                method="amazon_pay"
+                customIcon={
+                  <svg viewBox="0 0 448 512" fill="currentColor" className="w-5 h-5 text-[#FF9900]">
+                    <path d="M257.2 162.7c-48.7 1.8-166.3 1.5-166.3 1.5l-16-.2v127l16.8.2c47.1 0 134.7-.5 134.7-.5l17.2-.2-27.1 36.6-8.6 11.6-2.5 3.4c-3.1 4.2-6.1 8.3-9.2 12.5-4.4 6-8.8 11.9-13.2 17.9-2.7 3.7-5.4 7.4-8.1 11.1l-10 13.6-20.7 28.1c-12.7 17.2-12.6 17.1-12.6 17.1s-16.6 22.4 12.8 22.4h111.9l-34.9-35.1c-5.2-5.2-10.4-10.4-15.6-15.6l-50.6-50.7 78.5-106-2.2-2.9c-10.5-13.7-52.9-68.9-52.9-68.9zm-46.3 34.6c2.7 3.5 125.7 163.6 125.7 163.6s16.6 21.6 16.6 21.6c17.2 22.4 16.6 22.4 16.6 22.4s16.6 22.4-12.8 22.4h-68.1c-6.2 0-11.8-3-15.4-8.1l-10-14.1-39.7-55.8-9.4-13.1c-3.1-4.3-6.1-8.6-9.2-12.9-2.8-3.9-5.5-7.8-8.2-11.7l-9.9-13.9-35.3-49.6-15.4-21.7c-3.8-5.3 0-12.6 6.5-12.6h33zm-101.9 14.1l32.5 45.7 16 22.5 16.5 23.2 24.3 34.1 8.6 12.1 2.9 4.1c16.1 22.6 10.1 54.3-17.6 54.3H32.4c-6.5 0-10.3-7.3-6.5-12.6l23.1-32.5c11.9-16.7 11.9-16.7 11.9-16.7l50.3-70.7c3.9-5.5 10.2-5.5 14.1 0z" />
+                    <path d="M239.1 364.6c-48.8 33.6-114.3 37.3-155.3 12.6-3.8-2.3-5.3-7.1-3.6-11.2l12.1-27.9c1.9-4.3 7-6.2 11.1-4.1 26.6 13.9 66.2 14.3 103.7-9.5 3.9-2.5 9-1.4 11.5 2.5l18.5 26.6c2.5 3.9 1.4 9-2.5 11.5z" />
+                  </svg>
+                }
+                title="Amazon Pay"
+                subtitle="Pay with Amazon Pay"
+                isSelected={formData.paymentMethod === "amazon_pay"}
+                onSelect={() => updateFormData("paymentMethod", "amazon_pay")}
+              />
+            )}
           </div>
         </div>
 

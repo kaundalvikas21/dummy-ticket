@@ -10,7 +10,7 @@ import { createClient } from '@supabase/supabase-js'
 export async function POST(request) {
   try {
     // SECURITY: Require admin authentication
-    const supabase = createSupabaseClientWithAuth(request)
+    const supabase = await createSupabaseClientWithAuth()
     await requireAdmin(supabase)
 
     // Validate input data
@@ -65,7 +65,7 @@ export async function POST(request) {
 export async function PUT(request) {
   try {
     // SECURITY: Require admin authentication
-    const supabase = createSupabaseClientWithAuth(request)
+    const supabase = await createSupabaseClientWithAuth()
     await requireAdmin(supabase)
 
     // Validate input data
@@ -118,7 +118,7 @@ export async function PUT(request) {
 export async function DELETE(request) {
   try {
     // SECURITY: Require admin authentication
-    const supabase = createSupabaseClientWithAuth(request)
+    const supabase = await createSupabaseClientWithAuth()
     await requireAdmin(supabase)
 
     // Get translation ID from URL or body
@@ -168,7 +168,7 @@ export async function DELETE(request) {
 export async function GET(request) {
   try {
     // SECURITY: Require basic authentication (RLS will handle access control)
-    const supabase = createSupabaseClientWithAuth(request)
+    const supabase = await createSupabaseClientWithAuth()
 
     const { searchParams } = new URL(request.url)
     const faq_id = searchParams.get('faq_id')

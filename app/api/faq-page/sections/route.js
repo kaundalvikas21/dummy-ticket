@@ -31,7 +31,7 @@ export async function GET(request) {
     // Use admin authentication if requesting inactive sections
     let supabaseClient = supabase
     if (includeInactive) {
-      supabaseClient = createSupabaseClientWithAuth(request)
+      supabaseClient = await createSupabaseClientWithAuth()
       await requireAdmin(supabaseClient)
     }
 
@@ -115,7 +115,7 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     // Check admin authentication using Supabase
-    const supabase = createSupabaseClientWithAuth(request)
+    const supabase = await createSupabaseClientWithAuth()
     await requireAdmin(supabase)
 
     const { title, icon, status = 'active', sort_order } = await request.json()

@@ -11,7 +11,7 @@ import { createClient } from '@supabase/supabase-js'
 export async function PUT(request, { params }) {
   try {
     // SECURITY: Require admin authentication
-    const supabase = createSupabaseClientWithAuth(request)
+    const supabase = await createSupabaseClientWithAuth()
     await requireAdmin(supabase)
 
     const { id } = await params
@@ -68,7 +68,7 @@ export async function PUT(request, { params }) {
 export async function DELETE(request, { params }) {
   try {
     // SECURITY: Require admin authentication
-    const supabase = createSupabaseClientWithAuth(request)
+    const supabase = await createSupabaseClientWithAuth()
     await requireAdmin(supabase)
 
     const { id } = await params

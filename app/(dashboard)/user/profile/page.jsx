@@ -2,6 +2,7 @@ import { MyProfile } from "@/components/dashboard/user/my-profile";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { formatBookingData } from "@/lib/formatters";
+import { getExchangeRates } from "@/lib/exchange-rate";
 
 export default async function ProfilePage() {
   const supabase = await createClient();
@@ -26,13 +27,27 @@ export default async function ProfilePage() {
 
   const totalBookings = allBookings.length;
 
-  // Total Spent = Sum of amounts for 'paid' bookings
-  const totalSpent = allBookings
+  // Total Spent in USD = Convert all paid booking amounts to USD first, then sum
+  // This ensures accurate total regardless of individual booking currencies
+  const rates = await getExchangeRates('USD');
+
+  const totalSpentUSD = allBookings
     .filter(b => b.rawStatus === 'paid')
-    .reduce((sum, b) => sum + Number(b.amount || 0), 0);
+    .reduce((sum, b) => {
+      const amount = Number(b.amount || 0);
+      const currency = b.currency || 'USD';
+
+      // Convert to USD if not already USD
+      if (currency !== 'USD' && rates && rates[currency]) {
+        // Amount is in foreign currency, divide by rate to get USD
+        return sum + (amount / rates[currency]);
+      }
+      // Amount is already in USD (or we couldn't convert)
+      return sum + amount;
+    }, 0);
 
   // Active = Future bookings (Pending or Paid)
-  // Actually, standard logic in dashboard was: Active = Paid & Future. 
+  // Actually, standard logic in dashboard was: Active = Paid & Future.
   // Let's stick to valid active trips.
   // Or checking "Upcoming" logic from dashboard: status === 'paid' && date >= now.
   const activeBookings = allBookings.filter(b => {
@@ -48,7 +63,7 @@ export default async function ProfilePage() {
 
   const stats = {
     totalBookings,
-    totalSpent,
+    totalSpent: totalSpentUSD, // Store in USD, MyProfile component will format with user's currency
     activeBookings,
     completedBookings
   };

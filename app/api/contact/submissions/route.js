@@ -10,7 +10,7 @@ import { NextResponse } from 'next/server'
 export async function GET(request) {
   try {
     // SECURITY: Require admin authentication for read operations
-    const supabaseAuth = createSupabaseClientWithAuth(request)
+    const supabaseAuth = await createSupabaseClientWithAuth()
     await requireAdmin(supabaseAuth)
 
     // Use admin client for database operations to properly handle RLS
@@ -94,7 +94,7 @@ export async function GET(request) {
 export async function PUT(request) {
   try {
     // SECURITY: Require admin authentication for write operations
-    const supabaseAuth = createSupabaseClientWithAuth(request)
+    const supabaseAuth = await createSupabaseClientWithAuth()
     await requireAdmin(supabaseAuth)
 
     // Use admin client for database operations to properly handle RLS
@@ -175,7 +175,7 @@ export async function PUT(request) {
 export async function DELETE(request) {
   try {
     // SECURITY: Require admin authentication for delete operations
-    const supabaseAuth = createSupabaseClientWithAuth(request)
+    const supabaseAuth = await createSupabaseClientWithAuth()
     await requireAdmin(supabaseAuth)
 
     // Use admin client for database operations to properly handle RLS

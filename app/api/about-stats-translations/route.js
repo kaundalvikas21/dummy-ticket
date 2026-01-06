@@ -10,7 +10,7 @@ import { createClient } from '@supabase/supabase-js'
 export async function POST(request) {
   try {
     // SECURITY: Require admin authentication
-    const supabase = createSupabaseClientWithAuth(request)
+    const supabase = await createSupabaseClientWithAuth()
     await requireAdmin(supabase)
 
     const { stat_id, locale, label, value } = await request.json()

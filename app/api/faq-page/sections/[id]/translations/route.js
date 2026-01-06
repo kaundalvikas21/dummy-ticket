@@ -64,7 +64,7 @@ export async function GET(request, { params }) {
 export async function POST(request, { params }) {
   try {
     // Check admin authentication using Supabase
-    const supabase = createSupabaseClientWithAuth(request)
+    const supabase = await createSupabaseClientWithAuth()
     await requireAdmin(supabase)
 
     const { id } = await params
@@ -154,7 +154,7 @@ export async function POST(request, { params }) {
 export async function DELETE(request, { params }) {
   try {
     // Check admin authentication using Supabase
-    const supabase = createSupabaseClientWithAuth(request)
+    const supabase = await createSupabaseClientWithAuth()
     await requireAdmin(supabase)
 
     const { id } = await params

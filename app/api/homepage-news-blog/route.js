@@ -79,7 +79,7 @@ export async function GET() {
 export async function POST(request) {
   try {
     // Check admin authentication using Supabase
-    const supabase = createSupabaseClientWithAuth(request)
+    const supabase = await createSupabaseClientWithAuth()
     await requireAdmin(supabase)
 
     const body = await request.json()

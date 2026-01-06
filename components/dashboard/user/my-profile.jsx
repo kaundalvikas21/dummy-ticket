@@ -12,6 +12,7 @@ import { Upload, Trash2, Lock, Eye, EyeOff, Check, X, User, Mail, FileText, Buil
 import { Progress } from "@/components/ui/progress"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/contexts/auth-context"
+import { useCurrency } from "@/contexts/currency-context"
 import { createClient } from "@/lib/supabase/client"
 import { DatePicker } from "@/components/ui/input/DatePicker"
 import { SelectInput } from "@/components/ui/input/SelectInput"
@@ -74,6 +75,7 @@ export function MyProfile({ stats }) {
   // ...
   const { toast } = useToast()
   const { user, profile: authProfile, updateProfile } = useAuth()
+  const { formatPrice } = useCurrency()
   const {
     profile: syncedProfile,
     loading,
@@ -954,7 +956,7 @@ export function MyProfile({ stats }) {
               <p className="text-xs sm:text-sm text-gray-600 mt-1">Active Bookings</p>
             </div>
             <div className="text-center p-3 sm:p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
-              <p className="text-2xl sm:text-3xl font-bold text-purple-600">${(stats?.totalSpent || 0).toLocaleString()}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-purple-600">{formatPrice(stats?.totalSpent || 0)}</p>
               <p className="text-xs sm:text-sm text-gray-600 mt-1">Total Spent</p>
             </div>
           </div>

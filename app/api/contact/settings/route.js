@@ -57,7 +57,7 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     // SECURITY: Require admin authentication for write operations
-    const supabaseAuth = createSupabaseClientWithAuth(request)
+    const supabaseAuth = await createSupabaseClientWithAuth()
     await requireAdmin(supabaseAuth)
 
     // Use admin client for database operations to properly handle RLS
@@ -144,7 +144,7 @@ export async function POST(request) {
 export async function PUT(request) {
   try {
     // SECURITY: Require admin authentication for write operations
-    const supabaseAuth = createSupabaseClientWithAuth(request)
+    const supabaseAuth = await createSupabaseClientWithAuth()
     await requireAdmin(supabaseAuth)
 
     // Use admin client for database operations to properly handle RLS
@@ -195,7 +195,7 @@ export async function PUT(request) {
 export async function DELETE(request) {
   try {
     // SECURITY: Require admin authentication for write operations
-    const supabaseAuth = createSupabaseClientWithAuth(request)
+    const supabaseAuth = await createSupabaseClientWithAuth()
     await requireAdmin(supabaseAuth)
 
     // Use admin client for database operations to properly handle RLS

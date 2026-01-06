@@ -9,7 +9,7 @@ import { createClient } from '@supabase/supabase-js'
 export async function GET(request) {
   try {
     // SECURITY: Require admin authentication
-    const supabase = createSupabaseClientWithAuth(request)
+    const supabase = await createSupabaseClientWithAuth()
     await requireAdmin(supabase)
 
     // Use admin client for database operations to bypass RLS if needed

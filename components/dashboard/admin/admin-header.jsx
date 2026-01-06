@@ -66,10 +66,9 @@ export function AdminHeader({ onMenuClick, sidebarOpen }) {
     // We replace the last part or search for $ + digits
     try {
       // Simple replace of the amount part
-      // We know the structure is "... - $X.XX" or similar.
-      // Let's replace the existing dollar amount with the new USD amount.
-      // RegEx: \$\d+(\.\d+)?
-      return notification.message.replace(/\$\d+(\.\d+)?/g, formattedUSD)
+      // Replaced: "... $100.00 ...".
+      // RegEx: \$\d+(?:,\d{3})*(?:\.\d+)?
+      return notification.message.replace(/\$\d+(?:,\d{3})*(?:\.\d+)?/g, formattedUSD)
     } catch (e) {
       return notification.message
     }
@@ -136,7 +135,8 @@ export function AdminHeader({ onMenuClick, sidebarOpen }) {
             const newNotif = payload.new
             setNotifications((prev) => [newNotif, ...prev])
 
-            // If new notification has booking_id, fetch it
+            // Fetch booking data if needed before showing toast
+            let finalMessage = newNotif.message;
             if (newNotif.metadata && newNotif.metadata.booking_id) {
               const { data: bookingData } = await supabase
                 .from('bookings')
@@ -145,16 +145,32 @@ export function AdminHeader({ onMenuClick, sidebarOpen }) {
                 .single()
 
               if (bookingData) {
+                // Update relatedBookings state for the dropdown
                 setRelatedBookings(prev => ({
                   ...prev,
                   [bookingData.id]: bookingData
                 }))
+
+                // Format message for toast
+                // We need to simulate the notification object for the helper
+                const tempNotif = { ...newNotif };
+                // Use a temporary map to ensure the helper has access to the new data
+                const tempRelatedBookings = { [bookingData.id]: bookingData };
+
+                // Admin: Convert to USD
+                const nativeAmount = parseFloat(bookingData.amount || 0)
+                const currencyCode = bookingData.currency || 'USD'
+                const adminRate = (rates && rates[currencyCode]) ? rates[currencyCode] : 1
+                const amountInUSD = currencyCode === 'USD' ? nativeAmount : (adminRate ? nativeAmount / adminRate : nativeAmount)
+                const formattedUSD = `$${amountInUSD.toFixed(2)}`
+
+                finalMessage = newNotif.message.replace(/\$\d+(?:,\d{3})*(?:\.\d+)?/g, formattedUSD)
               }
             }
 
             toast({
               title: newNotif.title,
-              description: newNotif.message,
+              description: finalMessage,
             })
           } else if (payload.eventType === 'UPDATE') {
             setNotifications((prev) =>
@@ -332,14 +348,14 @@ export function AdminHeader({ onMenuClick, sidebarOpen }) {
                 </div>
                 {unreadCount === 0 ? (
                   <div className="flex flex-col items-center justify-center py-8 text-center">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#0066FF] to-[#00D4AA] flex items-center justify-center mb-3">
+                    <div className="w-16 h-16 rounded-full bg-linear-to-br from-[#0066FF] to-[#00D4AA] flex items-center justify-center mb-3">
                       <Bell className="h-8 w-8 text-white" />
                     </div>
                     <p className="font-medium text-gray-900 mb-1">All caught up!</p>
                     <p className="text-sm text-gray-500">You have no new notifications</p>
                   </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-3 max-h-[280px] overflow-y-auto pr-1 custom-scrollbar">
                     {notifications
                       .filter((n) => !n.read)
                       .map((notification) => (
@@ -365,7 +381,7 @@ export function AdminHeader({ onMenuClick, sidebarOpen }) {
                 variant="ghost"
                 className="flex items-center gap-2 px-2 lg:px-3 py-2 h-auto hover:bg-gray-100 transition-colors rounded-lg"
               >
-                <div className="flex h-8 w-8 lg:h-9 lg:w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#0066FF] to-[#00D4AA] ring-2 ring-white shadow-sm">
+                <div className="flex h-8 w-8 lg:h-9 lg:w-9 items-center justify-center rounded-full bg-linear-to-br from-[#0066FF] to-[#00D4AA] ring-2 ring-white shadow-sm">
                   {loading || !profile ? (
                     <div className="h-4 w-4 lg:h-5 lg:w-5 bg-gray-200/30 animate-pulse rounded-full"></div>
                   ) : (
@@ -375,7 +391,7 @@ export function AdminHeader({ onMenuClick, sidebarOpen }) {
                         alt="Profile picture"
                         title="Profile picture"
                       />
-                      <AvatarFallback className="bg-gradient-to-br from-[#0066FF] to-[#00D4AA] text-white text-xs">
+                      <AvatarFallback className="bg-linear-to-br from-[#0066FF] to-[#00D4AA] text-white text-xs">
                         {profile?.first_name || profile?.last_name
                           ? getUserInitials(profile?.first_name, profile?.last_name, profile?.email)
                           : "U"

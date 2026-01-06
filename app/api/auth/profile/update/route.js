@@ -8,8 +8,8 @@ import { createClient } from '@supabase/supabase-js'
 
 export async function PUT(request) {
   try {
-    // Create authenticated Supabase client and get authenticated user
-    const supabase = createSupabaseClientWithAuth(request)
+    // Create authenticated Supabase client and get authenticated user (now uses cookies)
+    const supabase = await createSupabaseClientWithAuth()
     const user = await requireAuth(supabase)
 
     // Get update data from request body

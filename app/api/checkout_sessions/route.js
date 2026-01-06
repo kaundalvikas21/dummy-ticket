@@ -75,6 +75,14 @@ export async function POST(req) {
         let finalAmount = plan.price;
         let finalCurrency = currency.toUpperCase();
 
+        // Amazon Pay supported currencies
+        const amazonPaySupportedCurrencies = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY'];
+
+        // Force USD for Amazon Pay if selected currency is not supported
+        if (formData.paymentMethod === "amazon_pay" && !amazonPaySupportedCurrencies.includes(finalCurrency)) {
+            finalCurrency = 'USD';
+        }
+
         // Convert currency if not USD
         if (finalCurrency !== 'USD') {
             const rates = await getExchangeRates('USD');
@@ -97,12 +105,15 @@ export async function POST(req) {
             unitAmount = Math.round(finalAmount * 100);
         }
 
-        // Determine payment method types
         let payment_method_types = ["card"];
+
         if (formData.paymentMethod === "amazon_pay") {
+            // We've already ensured the currency is supported (or forced to USD)
+            // Strictly enforce amazon_pay to show the Amazon Pay checkout page
             payment_method_types = ["amazon_pay"];
         }
         // "apple_pay" is handled via "card" in Stripe Checkout
+        console.log('Final payment_method_types:', payment_method_types, 'Selected method:', formData.paymentMethod);
 
         const session = await stripe.checkout.sessions.create({
             payment_method_types,
@@ -139,6 +150,11 @@ export async function POST(req) {
         return NextResponse.json({ sessionId: session.id, url: session.url });
     } catch (error) {
         console.error("Stripe Checkout Error:", error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        // Return proper JSON error response
+        const errorMessage = error.message || "Failed to create checkout session";
+        return NextResponse.json(
+            { error: errorMessage, details: error.type || "stripe_error" },
+            { status: 500 }
+        );
     }
 }

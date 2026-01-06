@@ -9,7 +9,7 @@ import {
 export async function POST(request, { params }) {
   try {
     // Check admin authentication using Supabase
-    const supabase = createSupabaseClientWithAuth(request)
+    const supabase = await createSupabaseClientWithAuth()
     await requireAdmin(supabase)
 
     const { id } = await params
