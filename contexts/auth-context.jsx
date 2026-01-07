@@ -46,6 +46,10 @@ export function AuthProvider({ children }) {
       } else if (event === 'SIGNED_OUT') {
         setUser(null)
         setProfile(null)
+        // Clear booking form data on logout to prevent cross-user data leak
+        if (typeof window !== 'undefined') {
+          sessionStorage.removeItem('buyTicketFormData')
+        }
       }
       setLoading(false)
     })

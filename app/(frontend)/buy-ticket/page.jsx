@@ -133,12 +133,12 @@ export default function BuyTicketPage() {
           if (profile) {
             setFormData(prev => ({
               ...prev,
-              firstName: prev.firstName || profile.first_name || "",
-              lastName: prev.lastName || profile.last_name || "",
-              email: prev.email || user.email || "",
-              phone: prev.phone || profile.phone_number || "",
-              passportNumber: prev.passportNumber || profile.passport_number || "",
-              dateOfBirth: prev.dateOfBirth || profile.date_of_birth || "",
+              firstName: isReturningFromCheckout ? (prev.firstName || profile.first_name || "") : (profile.first_name || prev.firstName || ""),
+              lastName: isReturningFromCheckout ? (prev.lastName || profile.last_name || "") : (profile.last_name || prev.lastName || ""),
+              email: isReturningFromCheckout ? (prev.email || user.email || "") : (user.email || prev.email || ""),
+              phone: isReturningFromCheckout ? (prev.phone || profile.phone_number || "") : (profile.phone_number || prev.phone || ""),
+              passportNumber: isReturningFromCheckout ? (prev.passportNumber || profile.passport_number || "") : (profile.passport_number || prev.passportNumber || ""),
+              dateOfBirth: isReturningFromCheckout ? (prev.dateOfBirth || profile.date_of_birth || "") : (profile.date_of_birth || prev.dateOfBirth || ""),
               nationality: (() => {
                 const val = (prev.nationality || profile.nationality || "").trim();
                 if (!val) return "";
@@ -152,13 +152,15 @@ export default function BuyTicketPage() {
                 return matched ? matched.name : val;
               })(),
               // Delivery Options prefill
-              deliveryEmail: prev.deliveryEmail || user.email || "",
-              whatsappNumber: prev.whatsappNumber || profile.phone_number || "",
+              deliveryEmail: isReturningFromCheckout ? (prev.deliveryEmail || user.email || "") : (user.email || prev.deliveryEmail || ""),
+              whatsappNumber: isReturningFromCheckout ? (prev.whatsappNumber || profile.phone_number || "") : (profile.phone_number || prev.whatsappNumber || ""),
               // Map address fields to Billing if available
-              billingName: prev.billingName || `${profile.first_name || ""} ${profile.last_name || ""}`.trim() || "",
-              billingAddress: prev.billingAddress || profile.address || "",
-              billingCity: prev.billingCity || profile.city || "",
-              billingZip: prev.billingZip || profile.postal_code || "",
+              billingName: isReturningFromCheckout
+                ? (prev.billingName || `${profile.first_name || ""} ${profile.last_name || ""}`.trim() || "")
+                : (`${profile.first_name || ""} ${profile.last_name || ""}`.trim() || prev.billingName || ""),
+              billingAddress: isReturningFromCheckout ? (prev.billingAddress || profile.address || "") : (profile.address || prev.billingAddress || ""),
+              billingCity: isReturningFromCheckout ? (prev.billingCity || profile.city || "") : (profile.city || prev.billingCity || ""),
+              billingZip: isReturningFromCheckout ? (prev.billingZip || profile.postal_code || "") : (profile.postal_code || prev.billingZip || ""),
               billingCountry: (() => {
                 const getCode = (v) => {
                   if (!v || typeof v !== 'string') return null;

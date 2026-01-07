@@ -644,7 +644,7 @@ export function MyProfile({ stats }) {
                 }}
                 onLoadStart={() => setImageLoading(true)}
               />
-              <AvatarFallback className="text-3xl font-bold bg-gradient-to-br from-blue-500 to-purple-600 text-white">
+              <AvatarFallback className="text-3xl font-bold bg-linear-to-br from-blue-500 to-purple-600 text-white">
                 {imageLoading ? (
                   <div className="h-6 w-6 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
                 ) : firstName || lastName ? (
@@ -956,7 +956,12 @@ export function MyProfile({ stats }) {
               <p className="text-xs sm:text-sm text-gray-600 mt-1">Active Bookings</p>
             </div>
             <div className="text-center p-3 sm:p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
-              <p className="text-2xl sm:text-3xl font-bold text-purple-600">{formatPrice(stats?.totalSpent || 0)}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-purple-600">
+                {stats?.isMultiCurrency
+                  ? `$${(stats?.totalSpent || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}`
+                  : `${CURRENCY_SYMBOLS[stats?.currencyCode || 'USD'] || '$'}${(stats?.totalSpent || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}`
+                }
+              </p>
               <p className="text-xs sm:text-sm text-gray-600 mt-1">Total Spent</p>
             </div>
           </div>

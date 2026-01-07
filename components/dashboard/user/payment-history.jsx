@@ -63,8 +63,9 @@ export function PaymentHistory({ initialPayments = [] }) {
       return sum + p.amount // Assume USD if no info
     }, 0)
 
-    totalSpentDisplay = formatPrice(totalSpentUSD)
-    averageTransactionDisplay = completedPayments.length > 0 ? formatPrice(totalSpentUSD / payments.length) : formatPrice(0)
+    totalSpentDisplay = `$${totalSpentUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+    const averageUSD = completedPayments.length > 0 ? totalSpentUSD / completedPayments.length : 0
+    averageTransactionDisplay = `$${averageUSD.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
   }
 
   const getStatusColor = (status) => {
