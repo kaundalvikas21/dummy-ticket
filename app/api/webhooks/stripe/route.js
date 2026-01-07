@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { createAdminClient } from "@/lib/supabase/admin"; // Use admin client
 import { createBookingFromSession } from "@/lib/bookings";
+import { sendWhatsAppBookingConfirmation } from "@/lib/whatsapp";
 
 export async function POST(req) {
     const body = await req.text();
@@ -30,7 +31,15 @@ export async function POST(req) {
 
             if (metadata?.booking_id) {
                 try {
-                    await createBookingFromSession(session, supabase);
+                    const result = await createBookingFromSession(session, supabase);
+
+                    // Send WhatsApp notification if delivery method is 'whatsapp'
+                    if (result.success && result.booking && result.booking.passenger_details?.deliveryMethod === 'whatsapp') {
+                        const whatsappNumber = result.booking.passenger_details.whatsappNumber;
+                        if (whatsappNumber) {
+                            await sendWhatsAppBookingConfirmation(whatsappNumber, result.booking);
+                        }
+                    }
                 } catch (err) {
                     console.error("Error processing booking in webhook:", err);
                     return NextResponse.json({ error: "Booking creation failed" }, { status: 500 });

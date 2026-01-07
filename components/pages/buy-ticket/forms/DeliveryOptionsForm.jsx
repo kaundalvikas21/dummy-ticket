@@ -58,14 +58,14 @@ export function DeliveryOptionsForm({ formData, updateFormData }) {
           type={formData.deliveryMethod === "email" ? "email" : "tel"}
           value={formData.deliveryMethod === "email" ? formData.deliveryEmail : formData.whatsappNumber}
           onChange={(value) => {
-            // Only allow numbers
-            const numericValue = value.replace(/[^0-9]/g, '');
-            updateFormData(formData.deliveryMethod === "email" ? "deliveryEmail" : "whatsappNumber", formData.deliveryMethod === "email" ? value : numericValue);
+            // Allow numbers and leading +
+            const sanitizedValue = value.replace(/[^+0-9]/g, '');
+            updateFormData(formData.deliveryMethod === "email" ? "deliveryEmail" : "whatsappNumber", formData.deliveryMethod === "email" ? value : sanitizedValue);
           }}
           placeholder={
             formData.deliveryMethod === "email"
               ? t('buyTicket.deliveryOptions.placeholders.deliveryEmail')
-              : "Enter WhatsApp Number"
+              : "e.g. +917650907626"
           }
           required
         />
