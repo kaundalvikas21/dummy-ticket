@@ -20,6 +20,7 @@ import { PhoneInputSingle } from "@/components/ui/input/PhoneInputSingle"
 import { getUserInitials, getAvatarDisplayUrl } from "@/lib/utils"
 import { formatFileSize, truncateFilename } from "@/lib/avatar-utils"
 import { useProfileSync } from "@/hooks/useProfileSync"
+import { CURRENCY_SYMBOLS } from "@/lib/exchange-rate"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -959,7 +960,7 @@ export function MyProfile({ stats }) {
               <p className="text-2xl sm:text-3xl font-bold text-purple-600">
                 {stats?.isMultiCurrency
                   ? `$${(stats?.totalSpent || 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}`
-                  : `${CURRENCY_SYMBOLS[stats?.currencyCode || 'USD'] || '$'}${(stats?.totalSpent || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}`
+                  : `${CURRENCY_SYMBOLS[stats?.currencyCode || 'USD'] || '$'}${(stats?.totalSpent || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                 }
               </p>
               <p className="text-xs sm:text-sm text-gray-600 mt-1">Total Spent</p>

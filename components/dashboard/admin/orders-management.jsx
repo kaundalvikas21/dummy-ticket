@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search, Download, Eye, Edit, Trash2, RefreshCw, MoreHorizontal, Filter, ChevronDown, Pencil, XCircle } from "lucide-react"
+import { Search, Download, Eye, Edit, Trash2, RefreshCw, MoreHorizontal, Filter, ChevronDown, Pencil, XCircle, MoveRight, ArrowLeftRight } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -121,6 +121,20 @@ export function OrdersManagement() {
         }
       } catch (e) { console.error("Error parsing details", e) }
 
+      // Detect round trip
+      let isRoundTrip = false
+      try {
+        const details = typeof booking.passenger_details === 'string'
+          ? JSON.parse(booking.passenger_details)
+          : booking.passenger_details
+
+        if (Array.isArray(details) && details.length > 0) {
+          isRoundTrip = details[0].tripType === 'round-trip' || !!details[0].returnDate
+        } else if (details) {
+          isRoundTrip = details.tripType === 'round-trip' || !!details.returnDate
+        }
+      } catch (e) { }
+
       // Convert to USD
       const nativeAmount = parseFloat(booking.amount || 0)
       const currencyCode = booking.currency || 'USD'
@@ -141,6 +155,7 @@ export function OrdersManagement() {
         phone: passengerPhone,
         pnr: booking.pnr || 'N/A',
         payment_intent_id: booking.payment_intent_id || 'N/A',
+        isRoundTrip: isRoundTrip,
         details: { ...booking }
       }
     })
@@ -409,10 +424,20 @@ export function OrdersManagement() {
                         </td>
                         <td className="py-3 px-4 text-sm text-gray-700">{order.service}</td>
                         <td className="py-3 px-4">
-                          <div className="flex flex-col">
-                            <span className="text-xs text-gray-600">{order.departure}</span>
-                            <span className="text-xs text-gray-400">→</span>
-                            <span className="text-xs text-gray-600">{order.arrival}</span>
+                          <div className="flex items-center gap-3">
+                            <div className="flex flex-col bg-blue-50/50 px-2 py-1 rounded border border-blue-100/50 min-w-[70px]">
+                              <span className="text-[8px] font-bold text-blue-400 uppercase leading-none mb-1">From</span>
+                              <span className="text-xs font-bold text-blue-700 truncate" title={order.departure}>{order.departure}</span>
+                            </div>
+                            {order.isRoundTrip ? (
+                              <ArrowLeftRight className="h-4 w-4 text-slate-400" />
+                            ) : (
+                              <MoveRight className="h-4 w-4 text-slate-400" />
+                            )}
+                            <div className="flex flex-col bg-emerald-50/50 px-2 py-1 rounded border border-emerald-100/50 min-w-[70px]">
+                              <span className="text-[8px] font-bold text-emerald-400 uppercase leading-none mb-1">To</span>
+                              <span className="text-xs font-bold text-emerald-700 truncate" title={order.arrival}>{order.arrival}</span>
+                            </div>
                           </div>
                         </td>
                         <td className="py-3 px-4 text-sm font-semibold text-gray-900">${order.amount.toFixed(2)}</td>

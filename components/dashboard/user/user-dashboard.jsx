@@ -11,6 +11,23 @@ import {
   Plane,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { CURRENCY_SYMBOLS } from "@/lib/exchange-rate";
+
+const getBadgeStyle = (status) => {
+  switch (status?.toLowerCase()) {
+    case "confirmed":
+    case "paid":
+      return "bg-green-100 text-green-800 border-green-200";
+    case "processing":
+      return "bg-yellow-100 text-yellow-800 border-yellow-200";
+    case "completed":
+      return "bg-blue-100 text-blue-800 border-blue-200";
+    case "cancelled":
+      return "bg-red-100 text-red-800 border-red-200";
+    default:
+      return "bg-gray-100 text-gray-800 border-gray-200";
+  }
+};
 
 export function UserDashboard({ statsData, upcomingBookingsData, recentActivityData, userName }) {
   const router = useRouter();
@@ -142,17 +159,22 @@ export function UserDashboard({ statsData, upcomingBookingsData, recentActivityD
                         <Plane className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
                       </div>
                       <div>
-                        <p className="font-semibold text-sm sm:text-base">{booking.route}</p>
-                        <p className="text-sm text-gray-600">{booking.id}</p>
-                        <p className="text-xs sm:text-sm text-gray-500">{booking.date}</p>
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center bg-blue-50/50 px-1.5 py-0.5 rounded border border-blue-100/30">
+                            <span className="text-[12px] font-bold text-blue-700">{booking.departure}</span>
+                          </div>
+                          <span className="text-gray-400 text-xs">→</span>
+                          <div className="flex items-center bg-emerald-50/50 px-1.5 py-0.5 rounded border border-emerald-100/30">
+                            <span className="text-[12px] font-bold text-emerald-700">{booking.arrival}</span>
+                          </div>
+                        </div>
+                        <p className="text-xs text-gray-400 mt-1">ID: {booking.id}</p>
+                        <p className="text-xs text-gray-500">{booking.date}</p>
                       </div>
                     </div>
                     <div className="flex sm:flex-col items-start sm:items-end gap-2 sm:gap-1">
                       <Badge
-                        variant={
-                          booking.status === "Paid" || booking.status === "Confirmed" ? "default" : "secondary"
-                        }
-                        className="text-xs"
+                        className={`text-xs ${getBadgeStyle(booking.status)}`}
                       >
                         {booking.status}
                       </Badge>

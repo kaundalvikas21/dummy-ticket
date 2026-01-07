@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Search, Download, CreditCard, CheckCircle, FileX } from "lucide-react"
+import { Search, Download, CreditCard, CheckCircle, FileX, MoveRight, ArrowLeftRight } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { RefreshButton } from "@/components/ui/refresh-button"
 import { CURRENCY_SYMBOLS } from "@/lib/exchange-rate"
@@ -345,7 +345,26 @@ startxref
                     <TableCell className="font-medium">{payment.id}</TableCell>
                     <TableCell>{payment.bookingId}</TableCell>
                     <TableCell>{payment.date}</TableCell>
-                    <TableCell className="max-w-xs truncate">{payment.description}</TableCell>
+                    <TableCell className="max-w-xs">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-xs font-medium text-gray-500">{payment.type}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center bg-blue-50/50 px-1.5 py-0.5 rounded border border-blue-100/30">
+                            <span className="text-[12px] font-bold text-blue-700">{payment.departure}</span>
+                          </div>
+
+                          {payment.isRoundTrip ? (
+                            <ArrowLeftRight className="h-3 w-3 text-slate-400" />
+                          ) : (
+                            <MoveRight className="h-3 w-3 text-slate-400" />
+                          )}
+
+                          <div className="flex items-center bg-emerald-50/50 px-1.5 py-0.5 rounded border border-emerald-100/30">
+                            <span className="text-[12px] font-bold text-emerald-700">{payment.arrival}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </TableCell>
                     <TableCell>{payment.method}</TableCell>
                     <TableCell className="font-semibold">{CURRENCY_SYMBOLS[payment.currency] || '$'}{payment.amount}</TableCell>
                     <TableCell>

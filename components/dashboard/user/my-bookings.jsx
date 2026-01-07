@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Search, Eye, Download, Plane, Calendar, Filter, ChevronDown, XCircle } from "lucide-react"
+import { Search, Eye, Download, Plane, Calendar, Filter, ChevronDown, XCircle, MoveRight, ArrowLeftRight } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
 import { SkeletonCard, SkeletonCardContent } from "@/components/ui/skeleton-card"
@@ -84,6 +84,7 @@ export function MyBookings({ setActiveSection, initialBookings = [] }) {
   const getStatusColor = (status) => {
     switch (status) {
       case "Confirmed":
+      case "Paid":
         return "bg-green-100 text-green-800"
       case "Processing":
         return "bg-yellow-100 text-yellow-800"
@@ -318,7 +319,7 @@ startxref
                 >
                   All Status
                 </DropdownMenuCheckboxItem>
-                {["confirmed", "processing", "completed", "cancelled"].map(status => (
+                {["confirmed", "paid", "processing", "completed", "cancelled"].map(status => (
                   <DropdownMenuCheckboxItem
                     key={status}
                     checked={statusFilter === status}
@@ -371,16 +372,38 @@ startxref
               <CardContent className="p-6">
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-blue-100">
-                      <Plane className="h-8 w-8 text-blue-600" />
+                    <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-blue-50 border border-blue-100/50">
+                      {booking.isRoundTrip ? (
+                        <ArrowLeftRight className="h-8 w-8 text-blue-600" />
+                      ) : (
+                        <Plane className="h-8 w-8 text-blue-600" />
+                      )}
                     </div>
                     <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-lg font-semibold">{booking.route}</h3>
+                      <div className="flex items-center gap-2 mb-2">
                         <Badge className={getStatusColor(booking.status)}>{booking.status}</Badge>
+                        <p className="text-sm text-gray-400">ID: {booking.id}</p>
                       </div>
-                      <p className="text-sm text-gray-600">Booking ID: {booking.id}</p>
-                      <div className="mt-2 flex items-center gap-4 text-sm text-gray-500">
+
+                      <div className="flex items-center gap-3">
+                        <div className="flex flex-col bg-blue-50/50 px-2 py-1 rounded border border-blue-100/50 min-w-[70px]">
+                          <span className="text-[8px] font-bold text-blue-400 uppercase leading-none mb-1">From</span>
+                          <span className="text-xs font-bold text-blue-700 truncate" title={booking.departure}>{booking.departure}</span>
+                        </div>
+
+                        {booking.isRoundTrip ? (
+                          <ArrowLeftRight className="h-4 w-4 text-slate-400" />
+                        ) : (
+                          <MoveRight className="h-4 w-4 text-slate-400" />
+                        )}
+
+                        <div className="flex flex-col bg-emerald-50/50 px-2 py-1 rounded border border-emerald-100/50 min-w-[70px]">
+                          <span className="text-[8px] font-bold text-emerald-400 uppercase leading-none mb-1">To</span>
+                          <span className="text-xs font-bold text-emerald-700 truncate" title={booking.arrival}>{booking.arrival}</span>
+                        </div>
+                      </div>
+
+                      <div className="mt-2 flex items-center gap-4 text-xs text-gray-500">
                         <span className="flex items-center gap-1">
                           <Calendar className="h-4 w-4" />
                           {booking.date}
@@ -477,6 +500,12 @@ startxref
                       <p className="text-sm text-gray-600">Travel Date</p>
                       <p className="font-medium">{selectedBooking.date}</p>
                     </div>
+                    {selectedBooking.isRoundTrip && selectedBooking.returnDate && (
+                      <div>
+                        <p className="text-sm text-gray-600">Return Date</p>
+                        <p className="font-medium">{selectedBooking.returnDate}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -507,7 +536,7 @@ startxref
                   </div>
                   <div className="text-right">
                     <p className="text-sm text-gray-600">Total Amount</p>
-                    <p className="text-2xl font-bold text-blue-600">{CURRENCY_SYMBOLS[selectedBooking.currency] || '$'}{selectedBooking.amount}</p>
+                    <p className="text-2xl font-bold text-blue-600">{`${CURRENCY_SYMBOLS[selectedBooking.currency || 'USD'] || '$'}${selectedBooking.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</p>
                   </div>
                 </div>
               </div>
