@@ -1,183 +1,259 @@
-# Supabase CLI
+# VisaFly - Dummy Ticket Booking System
 
-[![Coverage Status](https://coveralls.io/repos/github/supabase/cli/badge.svg?branch=main)](https://coveralls.io/github/supabase/cli?branch=main) [![Bitbucket Pipelines](https://img.shields.io/bitbucket/pipelines/supabase-cli/setup-cli/master?style=flat-square&label=Bitbucket%20Canary)](https://bitbucket.org/supabase-cli/setup-cli/pipelines) [![Gitlab Pipeline Status](https://img.shields.io/gitlab/pipeline-status/sweatybridge%2Fsetup-cli?label=Gitlab%20Canary)
-](https://gitlab.com/sweatybridge/setup-cli/-/pipelines)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Next.js](https://img.shields.io/badge/Next.js-15.5.6-black.svg)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19.1.0-blue.svg)](https://react.dev/)
 
-[Supabase](https://supabase.io) is an open source Firebase alternative. We're building the features of Firebase using enterprise-grade open source tools.
+Secure, verifiable flight reservations for visa applications. Trusted by travelers worldwide for reliable dummy tickets and flight itineraries.
 
-This repository contains all the functionality for Supabase CLI.
+## 🚀 Features
 
-- [x] Running Supabase locally
-- [x] Managing database migrations
-- [x] Creating and deploying Supabase Functions
-- [x] Generating types directly from your database schema
-- [x] Making authenticated HTTP requests to [Management API](https://supabase.com/docs/reference/api/introduction)
+- **Flight Booking System**: One-way and round-trip reservations
+- **Multi-Currency Support**: Automatic currency detection and conversion
+- **Secure Payments**: Stripe integration with multiple payment methods
+- **WhatsApp Notifications**: Real-time booking confirmations via Twilio
+- **User Dashboard**: Track bookings, payment history, and manage profile
+- **Multi-Language**: Support for multiple locales
+- **Admin Panel**: Content management and user management
+- **Rate Limiting**: Built-in protection against brute force attacks
+- **Responsive Design**: Mobile-first UI with Tailwind CSS v4
 
-## Getting started
+## 🛠️ Tech Stack
 
-### Install the CLI
+| Category | Technology |
+|----------|-----------|
+| **Frontend** | Next.js 15.5.6 (App Router), React 19.1.0 |
+| **Styling** | Tailwind CSS v4 |
+| **Backend** | Supabase (PostgreSQL + Auth + Storage) |
+| **Payment** | Stripe |
+| **Notifications** | Twilio WhatsApp |
+| **State** | Zustand |
+| **Forms** | React Hook Form + Zod |
+| **Icons** | Lucide React |
 
-Available via [NPM](https://www.npmjs.com) as dev dependency. To install:
+## 📋 Prerequisites
 
-```bash
-npm i supabase --save-dev
-```
+- Node.js 18+ 
+- npm or yarn
+- Supabase account
+- Stripe account
+- Twilio account (for WhatsApp notifications)
 
-To install the beta release channel:
+## 🚦 Quick Start
 
-```bash
-npm i supabase@beta --save-dev
-```
-
-When installing with yarn 4, you need to disable experimental fetch with the following nodejs config.
-
-```
-NODE_OPTIONS=--no-experimental-fetch yarn add supabase
-```
-
-> **Note**
-For Bun versions below v1.0.17, you must add `supabase` as a [trusted dependency](https://bun.sh/guides/install/trusted) before running `bun add -D supabase`.
-
-<details>
-  <summary><b>macOS</b></summary>
-
-  Available via [Homebrew](https://brew.sh). To install:
-
-  ```sh
-  brew install supabase/tap/supabase
-  ```
-
-  To install the beta release channel:
-  
-  ```sh
-  brew install supabase/tap/supabase-beta
-  brew link --overwrite supabase-beta
-  ```
-  
-  To upgrade:
-
-  ```sh
-  brew upgrade supabase
-  ```
-</details>
-
-<details>
-  <summary><b>Windows</b></summary>
-
-  Available via [Scoop](https://scoop.sh). To install:
-
-  ```powershell
-  scoop bucket add supabase https://github.com/supabase/scoop-bucket.git
-  scoop install supabase
-  ```
-
-  To upgrade:
-
-  ```powershell
-  scoop update supabase
-  ```
-</details>
-
-<details>
-  <summary><b>Linux</b></summary>
-
-  Available via [Homebrew](https://brew.sh) and Linux packages.
-
-  #### via Homebrew
-
-  To install:
-
-  ```sh
-  brew install supabase/tap/supabase
-  ```
-
-  To upgrade:
-
-  ```sh
-  brew upgrade supabase
-  ```
-
-  #### via Linux packages
-
-  Linux packages are provided in [Releases](https://github.com/supabase/cli/releases). To install, download the `.apk`/`.deb`/`.rpm`/`.pkg.tar.zst` file depending on your package manager and run the respective commands.
-
-  ```sh
-  sudo apk add --allow-untrusted <...>.apk
-  ```
-
-  ```sh
-  sudo dpkg -i <...>.deb
-  ```
-
-  ```sh
-  sudo rpm -i <...>.rpm
-  ```
-
-  ```sh
-  sudo pacman -U <...>.pkg.tar.zst
-  ```
-</details>
-
-<details>
-  <summary><b>Other Platforms</b></summary>
-
-  You can also install the CLI via [go modules](https://go.dev/ref/mod#go-install) without the help of package managers.
-
-  ```sh
-  go install github.com/supabase/cli@latest
-  ```
-
-  Add a symlink to the binary in `$PATH` for easier access:
-
-  ```sh
-  ln -s "$(go env GOPATH)/bin/cli" /usr/bin/supabase
-  ```
-
-  This works on other non-standard Linux distros.
-</details>
-
-<details>
-  <summary><b>Community Maintained Packages</b></summary>
-
-  Available via [pkgx](https://pkgx.sh/). Package script [here](https://github.com/pkgxdev/pantry/blob/main/projects/supabase.com/cli/package.yml).
-  To install in your working directory:
-
-  ```bash
-  pkgx install supabase
-  ```
-
-  Available via [Nixpkgs](https://nixos.org/). Package script [here](https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/tools/supabase-cli/default.nix).
-</details>
-
-### Run the CLI
+### 1. Clone and Install
 
 ```bash
-supabase bootstrap
+git clone <repository-url>
+cd dummy-ticket
+npm install
 ```
 
-Or using npx:
+### 2. Environment Setup
+
+Create a `.env.local` file in the project root:
 
 ```bash
-npx supabase bootstrap
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+
+# Stripe
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_key
+STRIPE_SECRET_KEY=your_stripe_secret
+STRIPE_WEBHOOK_SECRET=your_webhook_secret
+
+# Twilio (WhatsApp)
+TWILIO_ACCOUNT_SID=your_account_sid
+TWILIO_AUTH_TOKEN=your_auth_token
+TWILIO_WHATSAPP_NUMBER=whatsapp:+14155238886
+
+# Application
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-The bootstrap command will guide you through the process of setting up a Supabase project using one of the [starter](https://github.com/supabase-community/supabase-samples/blob/main/samples.json) templates.
+### 3. Database Setup
 
-## Docs
+```bash
+# Install Supabase CLI (if not installed)
+npm install -D supabase
 
-Command & config reference can be found [here](https://supabase.com/docs/reference/cli/about).
-
-## Breaking changes
-
-We follow semantic versioning for changes that directly impact CLI commands, flags, and configurations.
-
-However, due to dependencies on other service images, we cannot guarantee that schema migrations, seed.sql, and generated types will always work for the same CLI major version. If you need such guarantees, we encourage you to pin a specific version of CLI in package.json.
-
-## Developing
-
-To run from source:
-
-```sh
-# Go >= 1.22
-go run . help
+# Run migrations
+supabase db push
 ```
+
+### 4. Start Development Server
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## 📁 Project Structure
+
+```
+dummy-ticket/
+├── app/                      # Next.js App Router
+│   ├── (auth)/              # Authentication routes
+│   ├── (dashboard)/         # Protected dashboards
+│   ├── (frontend)/          # Public pages
+│   └── api/                 # API endpoints (~40 routes)
+│       ├── auth/            # Authentication
+│       ├── admin/           # Admin operations
+│       └── webhooks/        # Stripe webhooks
+├── components/              # React components
+│   ├── auth/               # Authentication components
+│   ├── dashboard/          # Dashboard components
+│   ├── layout/             # Layout components
+│   └── ui/                 # UI components (shadcn/ui)
+├── contexts/               # React contexts
+│   ├── auth-context.jsx    # Authentication state
+│   ├── currency-context.jsx # Currency conversion
+│   └── locale-context.jsx  # Language/locale
+├── lib/                    # Utilities
+│   ├── supabase/           # Supabase clients
+│   ├── auth-helper.js      # Auth helpers
+│   ├── rate-limit.js       # Rate limiting
+│   └── whatsapp.js         # Twilio integration
+├── hooks/                  # Custom React hooks
+├── store/                  # Zustand stores
+└── middleware.js           # Next.js middleware
+```
+
+## 🔑 Key Features Explained
+
+### Authentication Flow
+- **Server Components**: Use `@/lib/supabase/server` (cookies-based)
+- **Client Components**: Use `@/lib/supabase/client` (browser-based)
+- **API Routes**: Use `createSupabaseClientWithAuth()` helper
+- **Automatic Token Refresh**: Handled by Supabase SSR
+
+### Rate Limiting
+Protected endpoints use built-in rate limiting:
+- **Login**: 5 attempts per minute per IP
+- **Register**: 3 attempts per hour per IP
+
+See [lib/rate-limit.js](lib/rate-limit.js) for configuration.
+
+### Payment Flow
+1. User selects flight options
+2. Stripe Checkout session created
+3. Payment processed via Stripe
+4. Webhook confirms payment
+5. WhatsApp notification sent
+6. Booking record created
+
+### Currency Conversion
+- Auto-detects user location via IP
+- Supports 50+ currencies
+- Real-time exchange rates
+- Client-side caching with Next.js revalidation
+
+## 🗄️ Database Schema
+
+Key tables (managed via Supabase):
+- `auth.users` - Supabase Auth (user accounts)
+- `user_profiles` - Extended user information
+- `bookings` - Flight bookings
+- `payments` - Payment records
+- `faqs` - FAQ content (with translations)
+- `homepage_news_blog` - Blog content
+- `contact_submissions` - Contact form submissions
+
+**Row Level Security (RLS)** enabled on all tables.
+
+## 🔐 Security Features
+
+- ✅ Supabase RLS policies
+- ✅ Rate limiting on auth endpoints
+- ✅ Input validation with Zod schemas
+- ✅ CSRF protection (Next.js built-in)
+- ✅ Environment-based secrets
+- ✅ Stripe webhook signature verification
+- ✅ No SQL injection risk (parameterized queries)
+
+## 🚀 Deployment
+
+### Vercel (Recommended)
+
+```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# Deploy
+vercel
+```
+
+**Required Environment Variables** (set in Vercel dashboard):
+- All variables from `.env.local` above
+
+### Environment-Specific URLs
+```bash
+# Development
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# Production
+NEXT_PUBLIC_APP_URL=https://your-domain.com
+```
+
+## 📚 Available Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start dev server with Turbopack |
+| `npm run build` | Build for production with Turbopack |
+| `npm run start` | Start production server |
+| `npm run lint` | Run ESLint |
+
+## 🧪 Testing
+
+```bash
+# Run tests (when implemented)
+npm test
+
+# Test auth flow
+npm run test:auth
+
+# Test payment flow
+npm run test:payment
+```
+
+## 📖 Documentation
+
+- [Project Reference](project-reference.md) - Detailed technical reference
+- [Architecture Analysis](ARCHITECTURE_ANALYSIS_AND_IMPLEMENTATION_PLAN.md) - System design
+- [Optimization Report](context-optimization-report.md) - Performance optimizations
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🆘 Support
+
+For issues and questions:
+- Check existing GitHub Issues
+- Review documentation in `/docs` folder
+- Contact support team
+
+## 🙏 Acknowledgments
+
+- [Supabase](https://supabase.io) - Backend infrastructure
+- [Stripe](https://stripe.com) - Payment processing
+- [Twilio](https://twilio.com) - WhatsApp notifications
+- [Vercel](https://vercel.com) - Deployment platform
+- [shadcn/ui](https://ui.shadcn.com) - UI components
+
+---
+
+**Built with ❤️ for travelers worldwide**
+

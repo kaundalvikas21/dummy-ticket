@@ -14,7 +14,9 @@
       "mcp__serena__find_file",
       "Read(//mnt/c/Users/**)",
       "mcp__sequential-thinking__process_thought",
-      "mcp__sequential-thinking__generate_summary"
+      "mcp__sequential-thinking__generate_summary",
+      "mcp__serena__list_dir",
+      "mcp__serena__read_file"
     ]
   },
   "enableAllProjectMcpServers": true,

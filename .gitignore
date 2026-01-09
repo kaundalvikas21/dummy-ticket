@@ -31,9 +31,10 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files (protect real credentials)
-.env*
 .env.local
-!.env.example  # Allow safe template file
+.env
+!.env.example  # Allow safe template file (must come before .env*)
+.env.example
 
 # vercel
 .vercel
@@ -45,6 +46,7 @@ next-env.d.ts
 #claude code
 .claude
 .mcp.json
+.serena
 
 # Development scripts and logs
 *.mjs
