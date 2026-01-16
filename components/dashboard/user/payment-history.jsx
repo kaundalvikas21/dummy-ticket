@@ -47,11 +47,11 @@ export function PaymentHistory({ initialPayments = [] }) {
     // Format with commas and 2 decimal places if needed, or integers like the original if round numbers
     // The original formatPrice uses a specific context. Here we want a simple display.
     // Let's us basic toLocaleString
-    const formattedTotal = total.toLocaleString(undefined, { maximumFractionDigits: 2 })
+    const formattedTotal = total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
     totalSpentDisplay = `${symbol}${formattedTotal}`
 
     const avg = completedPayments.length > 0 ? total / completedPayments.length : 0
-    const formattedAvg = avg.toLocaleString(undefined, { maximumFractionDigits: 2 })
+    const formattedAvg = avg.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
     averageTransactionDisplay = `${symbol}${formattedAvg}`
   } else {
     // Calculate total spent by converting all amounts to USD first (Existing Logic)
