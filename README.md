@@ -1,13 +1,14 @@
 # VisaFly - Dummy Ticket Booking System
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Next.js](https://img.shields.io/badge/Next.js-15.5.6-black.svg)](https://nextjs.org/)
-[![React](https://img.shields.io/badge/React-19.1.0-blue.svg)](https://react.dev/)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black.svg)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19-blue.svg)](https://react.dev/)
 
 Secure, verifiable flight reservations for visa applications. Trusted by travelers worldwide for reliable dummy tickets and flight itineraries.
 
 ## 🚀 Features
 
+- **Next.js 16**: Latest stable release with React Compiler enabled
 - **Flight Booking System**: One-way and round-trip reservations
 - **Multi-Currency Support**: Automatic currency detection and conversion
 - **Secure Payments**: Stripe integration with multiple payment methods
@@ -22,7 +23,7 @@ Secure, verifiable flight reservations for visa applications. Trusted by travele
 
 | Category | Technology |
 |----------|-----------|
-| **Frontend** | Next.js 15.5.6 (App Router), React 19.1.0 |
+| **Frontend** | Next.js 16 (App Router), React 19 |
 | **Styling** | Tailwind CSS v4 |
 | **Backend** | Supabase (PostgreSQL + Auth + Storage) |
 | **Payment** | Stripe |

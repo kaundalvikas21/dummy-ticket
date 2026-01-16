@@ -152,7 +152,7 @@ export function VendorHeader() {
                 variant="ghost"
                 className="flex items-center gap-2 px-3 py-2 h-auto hover:bg-gray-100 transition-colors rounded-lg"
               >
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#0066FF] to-[#00D4AA] ring-2 ring-white shadow-sm">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-linear-to-br from-[#0066FF] to-[#00D4AA] ring-2 ring-white shadow-sm">
                   {loading || !profile ? (
                     <div className="h-5 w-5 bg-gray-200/30 animate-pulse rounded-full"></div>
                   ) : (
@@ -162,7 +162,7 @@ export function VendorHeader() {
                         alt="Profile picture"
                         title="Profile picture"
                       />
-                      <AvatarFallback className="bg-gradient-to-br from-[#0066FF] to-[#00D4AA] text-white text-xs">
+                      <AvatarFallback className="bg-linear-to-br from-[#0066FF] to-[#00D4AA] text-white text-xs">
                         {profile?.first_name || profile?.last_name
                           ? getUserInitials(profile?.first_name, profile?.last_name, profile?.email)
                           : "U"
@@ -182,9 +182,9 @@ export function VendorHeader() {
             <DropdownMenuContent align="end" className="w-56">
               {profile?.email && (
                 <div className="px-2 py-1.5">
-                  <p className="text-sm font-semibold">
+                  <div className="text-sm font-semibold">
                     {loading || !profile ? <Skeleton className="w-32 h-4" /> : getUserDisplayName()}
-                  </p>
+                  </div>
                   <p className="text-xs text-gray-500">
                     {profile?.email}
                   </p>

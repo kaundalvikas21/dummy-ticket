@@ -411,9 +411,9 @@ export function AdminHeader({ onMenuClick, sidebarOpen }) {
             <DropdownMenuContent align="end" className="w-56">
               {profile?.email && (
                 <div className="px-2 py-1.5">
-                  <p className="text-sm font-semibold">
+                  <div className="text-sm font-semibold">
                     {loading || !profile ? <Skeleton className="w-32 h-4" /> : getUserDisplayName()}
-                  </p>
+                  </div>
                   <p className="text-xs text-gray-500">
                     {profile?.email}
                   </p>

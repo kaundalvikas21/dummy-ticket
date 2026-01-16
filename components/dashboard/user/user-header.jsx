@@ -418,9 +418,9 @@ export function UserHeader({ onMenuClick, sidebarOpen }) {
             collisionPadding={8}
           >
             <div className="px-2 py-1.5">
-              <p className="text-sm font-semibold">
+              <div className="text-sm font-semibold">
                 {loading || !profile ? <Skeleton className="w-32 h-4" /> : getUserDisplayName()}
-              </p>
+              </div>
               {profile?.email && (
                 <p className="text-xs text-gray-500">
                   {profile?.email}

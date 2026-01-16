@@ -16,6 +16,3 @@ export function AvatarFallbackSkeleton({ className, ...props }) {
     </div>
   )
 }
-
-// Named exports for compatibility
-export { AvatarFallbackSkeleton }
