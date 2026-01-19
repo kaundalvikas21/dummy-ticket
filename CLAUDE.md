@@ -1,14 +1,27 @@
 # AI Instructions - Dummy Ticket Booking
 
 ## Project Overview
-Next.js 15.5.6 ticket booking system with Supabase backend + Stripe payments.
+Next.js 16.1.2 ticket booking system with Supabase backend + Stripe payments.
+Role-based system with User, Vendor, and Admin dashboards.
 
-## Tech Stack
-- **Frontend**: Next.js 15.5.6, React 19.1.0, Tailwind CSS v4
-- **Backend**: Supabase (PostgreSQL + Auth + Storage)
-- **Payment**: Stripe
-- **State**: Zustand
-- **Forms**: React Hook Form + Zod
+## Tech Stack (Current Versions - Jan 2026)
+- **Frontend**: Next.js 16.1.2, React 19.2.3, Tailwind CSS v4
+- **Backend**: Supabase (PostgreSQL + Auth + Storage) - @supabase/ssr v0.7.0
+- **Payment**: Stripe v20.0.0 (Node), @stripe/stripe-js v8.1.0
+- **State Management**: Zustand v5.0.8 (installed, implementation needed)
+- **Forms**: React Hook Form v7.65.0 + Zod v4.1.12
+- **UI Components**: shadcn/ui (Radix UI primitives)
+- **Notifications**: Twilio v5.11.2 (WhatsApp integration)
+- **PDF Generation**: jspdf v4.0.0, html2canvas v1.4.1
+- **Animations**: framer-motion v12.23.24
+- **Charts**: recharts v2.15.4
+- **Build Tool**: Turbopack (enabled)
+- **React Compiler**: Enabled (babel-plugin-react-compiler v1.0.0)
+
+### Key Configuration
+- **React Compiler**: ✅ Enabled in next.config.mjs
+- **Turbopack**: ✅ Enabled for dev and build
+- **Language**: JavaScript (intentional choice, not TypeScript)
 
 ## Core Commands
 
@@ -99,3 +112,52 @@ store/              # Zustand store
 ## Reference Files
 - Detailed implementation: `dummy-ticket-booking-plan.md`
 - Context analysis: `context-optimization-report.md`
+
+## Production Readiness Status (Updated Jan 2026)
+
+### ✅ Implemented Features
+- Role-based authentication (User, Vendor, Admin)
+- Stripe payment integration with webhook verification
+- WhatsApp notifications via Twilio
+- PDF ticket generation and download
+- Supabase RLS policies for data security
+- Multi-step booking form with session persistence
+
+### ⚠️ Critical Issues Before Production
+1. **Security Headers Missing** - No CSP, X-Frame-Options, HSTS in next.config.mjs
+2. **Rate Limiting** - In-memory implementation won't scale (needs Vercel KV/Redis)
+3. **Error Boundaries** - No React error boundaries implemented
+4. **React 19 Features** - Not using useOptimistic, useActionState, useFormStatus
+
+### 🔄 Recommended Upgrades (Priority Order)
+
+#### 🔴 CRITICAL (Do Before Production)
+1. **Add Security Headers** to next.config.mjs
+2. **Migrate Rate Limiting** to Vercel KV or Upstash Redis
+3. **Implement Error Boundaries** (app/error.jsx, component-level)
+4. **Remove Console.logs** from production code
+
+#### 🟡 HIGH PRIORITY (Performance & UX)
+5. **Adopt React 19 Patterns** - useOptimistic for bookings, useActionState for forms
+6. **Server Component Migration** - Convert static pages to Server Components
+7. **Add Idempotency** to Stripe webhook handler
+8. **Implement Proper Logging** (replace console.log with structured logging)
+
+#### 🟢 MEDIUM PRIORITY (Best Practices)
+9. **Image Optimization** - Configure next/image with WebP/AVIF
+10. **Code Splitting** - Dynamic imports for heavy components (recharts, framer-motion)
+11. **Add Monitoring** - Vercel Analytics, Sentry for errors
+12. **Testing Setup** - Jest + Playwright for critical flows
+
+### Known Technical Debt
+- Large components (800+ lines) need splitting
+- Zustand installed but not utilized for global state
+- Some pages are client components when Server Components would be better
+- No API response caching strategy
+
+## Architecture Notes
+- **App Router Structure**: (dashboard), (frontend), (auth) route groups
+- **Middleware**: proxy.js handles auth and role-based redirects
+- **Supabase Clients**: Separate client.js, server.js, and admin.js
+- **Form Handling**: React Hook Form with Zod validation
+- **State**: Currently using React Context + local state; consider Zustand for complex state
