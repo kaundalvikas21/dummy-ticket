@@ -1,5 +1,6 @@
 import { supabaseAdmin } from '@/lib/supabase'
 import { NextResponse } from 'next/server'
+import { sendEmail } from '@/lib/email'
 
 export async function POST(request) {
   try {
@@ -79,6 +80,27 @@ export async function POST(request) {
         { error: 'Failed to submit contact form', details: error.message },
         { status: 500 }
       )
+    }
+
+    // Send email notification to admin
+    try {
+      await sendEmail({
+        to: process.env.EMAIL_FROM || 'admin@dummy-ticket.com', // Admin email
+        subject: `New Contact Submission: ${subject}`,
+        html: `
+          <h3>New Contact Form Submission</h3>
+          <p><strong>Name:</strong> ${name}</p>
+          <p><strong>Email:</strong> ${email}</p>
+          <p><strong>Phone:</strong> ${phone || 'N/A'}</p>
+          <p><strong>Priority:</strong> ${priority}</p>
+          <p><strong>Subject:</strong> ${subject}</p>
+          <p><strong>Message:</strong></p>
+          <p>${message.replace(/\n/g, '<br>')}</p>
+        `
+      });
+    } catch (emailError) {
+      console.error('Failed to send contact notification email:', emailError);
+      // We don't return error here because the submission was saved to DB
     }
 
     // Log successful submission

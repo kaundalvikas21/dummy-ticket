@@ -33,11 +33,71 @@ export async function POST(req) {
                 try {
                     const result = await createBookingFromSession(session, supabase);
 
+                    // Generate PDF for the booking
+                    let pdfBuffer = null;
+                    if (result.success && result.booking) {
+                        try {
+                            const { generateBookingPDF } = await import('@/lib/pdf-generator');
+                            pdfBuffer = await generateBookingPDF(result.booking);
+                        } catch (pdfError) {
+                            console.error('PDF generation failed:', pdfError);
+                            // Continue without PDF if generation fails
+                        }
+                    }
+
                     // Send WhatsApp notification if delivery method is 'whatsapp'
                     if (result.success && result.booking && result.booking.passenger_details?.deliveryMethod === 'whatsapp') {
                         const whatsappNumber = result.booking.passenger_details.whatsappNumber;
                         if (whatsappNumber) {
-                            await sendWhatsAppBookingConfirmation(whatsappNumber, result.booking);
+                            await sendWhatsAppBookingConfirmation(whatsappNumber, result.booking, pdfBuffer);
+                        }
+
+                        // Also send email with PDF for WhatsApp delivery
+                        const deliveryEmail = result.booking.passenger_details.whatsappEmail || result.booking.passenger_details.email;
+                        if (deliveryEmail) {
+                            const { sendEmail } = await import('@/lib/email');
+                            const { getBookingConfirmationEmail } = await import('@/lib/email-templates');
+
+                            const emailOptions = {
+                                to: deliveryEmail,
+                                subject: `✈️ Booking Confirmed - ${result.booking.id}`,
+                                html: getBookingConfirmationEmail(result.booking)
+                            };
+
+                            // Attach PDF if available
+                            if (pdfBuffer) {
+                                emailOptions.attachments = [{
+                                    filename: `Booking_Receipt_${result.booking.id}.pdf`,
+                                    content: pdfBuffer
+                                }];
+                            }
+
+                            await sendEmail(emailOptions);
+                        }
+                    }
+
+                    // Send Email notification if delivery method is 'email'
+                    if (result.success && result.booking && result.booking.passenger_details?.deliveryMethod === 'email') {
+                        const deliveryEmail = result.booking.passenger_details.deliveryEmail || result.booking.passenger_details.email;
+                        if (deliveryEmail) {
+                            const { sendEmail } = await import('@/lib/email');
+                            const { getBookingConfirmationEmail } = await import('@/lib/email-templates');
+
+                            const emailOptions = {
+                                to: deliveryEmail,
+                                subject: `✈️ Booking Confirmed - ${result.booking.id}`,
+                                html: getBookingConfirmationEmail(result.booking)
+                            };
+
+                            // Attach PDF if available
+                            if (pdfBuffer) {
+                                emailOptions.attachments = [{
+                                    filename: `Booking_Receipt_${result.booking.id}.pdf`,
+                                    content: pdfBuffer
+                                }];
+                            }
+
+                            await sendEmail(emailOptions);
                         }
                     }
                 } catch (err) {
