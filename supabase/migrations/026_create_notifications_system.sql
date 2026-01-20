@@ -97,75 +97,87 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Trigger: Booking Status Update (Payment/Completion)
+-- Trigger: Booking Status Update (Payment/Completion/Booking)
 CREATE OR REPLACE FUNCTION handle_booking_update_notification()
 RETURNS TRIGGER AS $$
 DECLARE
     admin_record RECORD;
     user_name TEXT;
 BEGIN
-    -- Only trigger if status changed
-    IF OLD.status = NEW.status THEN
-        RETURN NEW;
-    END IF;
+    -- 1. Handle Payment Status Changes (status column)
+    IF OLD.status != NEW.status THEN
+        -- Get User Name
+        SELECT CONCAT(first_name, ' ', last_name) INTO user_name 
+        FROM user_profiles 
+        WHERE auth_user_id = NEW.user_id;
 
-    -- Get User Name
-    SELECT CONCAT(first_name, ' ', last_name) INTO user_name 
-    FROM user_profiles 
-    WHERE auth_user_id = NEW.user_id;
-
-    -- Case 1: Payment Successful (Pending -> Paid)
-    IF NEW.status = 'paid' AND OLD.status != 'paid' THEN
-        -- Notify User
-        INSERT INTO notifications (user_id, type, title, message, link, metadata)
-        VALUES (
-            NEW.user_id, 
-            'payment', 
-            'Payment Successful', 
-            'Your payment of $' || NEW.amount || ' for booking #' || NEW.id::text || ' was successful.', 
-            '/user/payments', 
-            jsonb_build_object('booking_id', NEW.id)
-        );
-
-        -- Notify Admins
-        FOR admin_record IN SELECT admin_id FROM get_admin_user_ids() LOOP
+        -- Case 1: Payment Successful (Pending -> Paid)
+        IF NEW.status = 'paid' AND OLD.status != 'paid' THEN
+            -- Notify User
             INSERT INTO notifications (user_id, type, title, message, link, metadata)
             VALUES (
-                admin_record.admin_id,
-                'payment',
-                'Payment Received',
-                'Payment of $' || NEW.amount || ' received from ' || COALESCE(user_name, 'User'),
-                '/admin/orders',
+                NEW.user_id, 
+                'payment', 
+                'Payment Successful', 
+                'Your payment of $' || NEW.amount || ' for booking #' || NEW.id::text || ' was successful.', 
+                '/user/payments', 
                 jsonb_build_object('booking_id', NEW.id)
             );
-        END LOOP;
+
+            -- Notify Admins
+            FOR admin_record IN SELECT admin_id FROM get_admin_user_ids() LOOP
+                INSERT INTO notifications (user_id, type, title, message, link, metadata)
+                VALUES (
+                    admin_record.admin_id,
+                    'payment',
+                    'Payment Received',
+                    'Payment of $' || NEW.amount || ' received from ' || COALESCE(user_name, 'User'),
+                    '/admin/orders',
+                    jsonb_build_object('booking_id', NEW.id)
+                );
+            END LOOP;
+        END IF;
+
+        -- Case 2: Booking Completed/Documents Ready (Paid -> Completed)
+        IF NEW.status = 'completed' AND OLD.status != 'completed' THEN
+             -- Notify User
+            INSERT INTO notifications (user_id, type, title, message, link, metadata)
+            VALUES (
+                NEW.user_id, 
+                'document', 
+                'Documents Ready', 
+                'Your travel documents for booking #' || NEW.id::text || ' are ready for download.', 
+                '/user/documents', 
+                jsonb_build_object('booking_id', NEW.id)
+            );
+        END IF;
+        
+        -- Case 3: Booking Cancelled
+         IF NEW.status = 'cancelled' AND OLD.status != 'cancelled' THEN
+             -- Notify User
+            INSERT INTO notifications (user_id, type, title, message, link, metadata)
+            VALUES (
+                NEW.user_id, 
+                'booking', 
+                'Order Cancelled', 
+                'Your order #' || NEW.id::text || ' has been cancelled.', 
+                '/user/bookings', 
+                jsonb_build_object('booking_id', NEW.id)
+            );
+        END IF;
     END IF;
 
-    -- Case 2: Booking Completed/Documents Ready (Paid -> Completed)
-    IF NEW.status = 'completed' AND OLD.status != 'completed' THEN
-         -- Notify User
-        INSERT INTO notifications (user_id, type, title, message, link, metadata)
-        VALUES (
-            NEW.user_id, 
-            'document', 
-            'Documents Ready', 
-            'Your travel documents for booking #' || NEW.id::text || ' are ready for download.', 
-            '/user/documents', 
-            jsonb_build_object('booking_id', NEW.id)
-        );
-    END IF;
-    
-    -- Case 3: Booking Cancelled
-     IF NEW.status = 'cancelled' AND OLD.status != 'cancelled' THEN
-         -- Notify User
+    -- 2. Handle Booking Status Changes (booking_status column)
+    IF OLD.booking_status != NEW.booking_status THEN
+        -- Notify User about Booking Status Change
         INSERT INTO notifications (user_id, type, title, message, link, metadata)
         VALUES (
             NEW.user_id, 
             'booking', 
-            'Booking Cancelled', 
-            'Your booking #' || NEW.id::text || ' has been cancelled.', 
+            'Booking ' || INITCAP(NEW.booking_status), 
+            'Your booking #' || NEW.id::text || ' status has been updated to ' || NEW.booking_status || '.', 
             '/user/bookings', 
-            jsonb_build_object('booking_id', NEW.id)
+            jsonb_build_object('booking_id', NEW.id, 'booking_status', NEW.booking_status)
         );
     END IF;
 

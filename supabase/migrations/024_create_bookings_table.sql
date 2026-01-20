@@ -9,6 +9,7 @@ create table bookings (
   payment_intent_id text,
   payment_method text default 'Credit Card',
   passenger_details jsonb, -- Stores the full form data snapshot
+  booking_status text not null default 'confirmed', -- confirmed, pending, processing, cancelled
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
@@ -17,6 +18,7 @@ create table bookings (
 create index idx_bookings_user_id on bookings(user_id);
 create index idx_bookings_stripe_session_id on bookings(stripe_session_id);
 create index idx_bookings_status on bookings(status);
+create index idx_bookings_booking_status on bookings(booking_status);
 create index idx_bookings_created_at on bookings(created_at);
 
 -- Trigger to automatically update updated_at

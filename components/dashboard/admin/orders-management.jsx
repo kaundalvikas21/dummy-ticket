@@ -149,6 +149,7 @@ export function OrdersManagement() {
         amount: amountInUSD, // Now in USD
         currency: 'USD',    // Force display logic to USD
         status: booking.status,
+        booking_status: booking.booking_status || 'confirmed',
         date: new Date(booking.created_at).toLocaleDateString(),
         departure: fromCity,
         arrival: toCity,
@@ -188,7 +189,7 @@ export function OrdersManagement() {
       order.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
       order.email.toLowerCase().includes(searchQuery.toLowerCase())
 
-    const matchesStatus = filterStatus === "all" || order.status === filterStatus
+    const matchesStatus = filterStatus === "all" || order.booking_status.toLowerCase() === filterStatus.toLowerCase()
 
     return matchesSearch && matchesStatus
   })
@@ -219,8 +220,8 @@ export function OrdersManagement() {
       if (error) throw error
 
       toast({
-        title: "Status Updated",
-        description: `Order ${selectedOrder.id} status changed to ${newStatus}`
+        title: "Payment Status Updated",
+        description: `Order ${selectedOrder.id} payment status changed to ${newStatus}`
       })
       fetchOrders() // Refresh list
       setIsEditDialogOpen(false)
@@ -229,8 +230,48 @@ export function OrdersManagement() {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to update order status."
+        description: "Failed to update payment status."
       })
+    }
+  }
+
+  const handleUpdateBookingStatus = async (newBookingStatus) => {
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .update({ booking_status: newBookingStatus })
+        .eq('id', selectedOrder.id)
+
+      if (error) throw error
+
+      toast({
+        title: "Booking Status Updated",
+        description: `Order ${selectedOrder.id} booking status changed to ${newBookingStatus}`
+      })
+      fetchOrders() // Refresh list
+      setIsEditDialogOpen(false)
+    } catch (error) {
+      console.error('Error updating booking status:', error)
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update booking status."
+      })
+    }
+  }
+
+  const getBookingStatusColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case "confirmed":
+        return "bg-emerald-100 text-emerald-700 hover:bg-emerald-100"
+      case "pending":
+        return "bg-yellow-100 text-yellow-700 hover:bg-yellow-100"
+      case "processing":
+        return "bg-blue-100 text-blue-700 hover:bg-blue-100"
+      case "cancelled":
+        return "bg-red-100 text-red-700 hover:bg-red-100"
+      default:
+        return "bg-slate-100 text-slate-700 hover:bg-slate-100"
     }
   }
 
@@ -271,7 +312,7 @@ export function OrdersManagement() {
 
   const handleExport = () => {
     const csv = [
-      ["Order ID", "Transaction ID", "Customer", "Email", "Service", "Amount", "Status", "Date", "Departure", "Arrival"].join(","),
+      ["Order ID", "Transaction ID", "Customer", "Email", "Service", "Amount", "Payment Status", "Booking Status", "Date", "Departure", "Arrival"].join(","),
       ...filteredOrders.map((order) =>
         [
           order.id,
@@ -281,6 +322,7 @@ export function OrdersManagement() {
           order.service,
           `${order.currency} ${order.amount.toFixed(2)}`,
           order.status,
+          order.booking_status,
           order.date,
           order.departure,
           order.arrival,
@@ -351,7 +393,7 @@ export function OrdersManagement() {
                   <Filter className="w-4 h-4" />
                   <span>Filters</span>
                   {filterStatus !== "all" && (
-                    <Badge variant="secondary" className="px-1.5 py-0 h-5 bg-blue-100 text-blue-700 hover:bg-blue-100 border-none text-[10px] font-bold uppercase tracking-wider">
+                    <Badge variant="secondary" className={`px-1.5 py-0 h-5 border-none text-[10px] font-bold uppercase tracking-wider ${getBookingStatusColor(filterStatus)}`}>
                       {filterStatus}
                     </Badge>
                   )}
@@ -369,7 +411,7 @@ export function OrdersManagement() {
                 <DropdownMenuSeparator />
                 <DropdownMenuLabel>Status</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                {['all', 'pending', 'paid', 'processing', 'completed', 'cancelled'].map((status) => (
+                {['all', 'confirmed', 'pending', 'processing', 'cancelled'].map((status) => (
                   <DropdownMenuCheckboxItem
                     key={status}
                     checked={filterStatus === status}
@@ -405,7 +447,8 @@ export function OrdersManagement() {
                     <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Service</th>
                     <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Route</th>
                     <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Amount</th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Status</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Payment Status</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Booking Status</th>
                     <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Date</th>
                     <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Actions</th>
                   </tr>
@@ -459,6 +502,14 @@ export function OrdersManagement() {
                             }
                           >
                             {order.status}
+                          </Badge>
+                        </td>
+                        <td className="py-3 px-4">
+                          <Badge
+                            variant={order.booking_status === "confirmed" ? "default" : "outline"}
+                            className={getBookingStatusColor(order.booking_status)}
+                          >
+                            {order.booking_status}
                           </Badge>
                         </td>
                         <td className="py-3 px-4 text-sm text-gray-600">{order.date}</td>
@@ -604,6 +655,12 @@ export function OrdersManagement() {
                   </Badge>
                 </div>
                 <div>
+                  <Label className="text-gray-600">Booking Status</Label>
+                  <Badge className={getBookingStatusColor(selectedOrder.booking_status)}>
+                    {selectedOrder.booking_status}
+                  </Badge>
+                </div>
+                <div>
                   <Label className="text-gray-600">Date</Label>
                   <p className="font-semibold">{selectedOrder.date}</p>
                 </div>
@@ -624,52 +681,41 @@ export function OrdersManagement() {
             <DialogTitle>Update Order Status</DialogTitle>
             <DialogDescription>Change the status of order <span className="font-mono">{selectedOrder?.id}</span></DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Current Status</Label>
-              <p className="text-sm text-gray-600">
-                Current status: <span className="font-semibold">{selectedOrder?.status}</span>
-              </p>
-            </div>
-            <div className="space-y-2">
-              <Label>Update to:</Label>
-              <div className="flex flex-col gap-2">
-                <Button
-                  variant="outline"
-                  className="justify-start bg-transparent"
-                  onClick={() => handleUpdateStatus("pending")}
-                >
-                  Pending
-                </Button>
-                <Button
-                  variant="outline"
-                  className="justify-start bg-transparent"
-                  onClick={() => handleUpdateStatus("paid")}
-                >
-                  Paid
-                </Button>
-                <Button
-                  variant="outline"
-                  className="justify-start bg-transparent"
-                  onClick={() => handleUpdateStatus("processing")}
-                >
-                  Processing
-                </Button>
-                <Button
-                  variant="outline"
-                  className="justify-start bg-transparent"
-                  onClick={() => handleUpdateStatus("completed")}
-                >
-                  Completed
-                </Button>
-                <Button
-                  variant="outline"
-                  className="justify-start text-red-600 bg-transparent"
-                  onClick={() => handleUpdateStatus("cancelled")}
-                >
-                  Cancelled
-                </Button>
-              </div>
+          <div className="space-y-4">
+            <Label>Booking Status</Label>
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className={`justify-start bg-transparent transition-colors hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 ${selectedOrder?.booking_status === 'confirmed' ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : ''}`}
+                onClick={() => handleUpdateBookingStatus("confirmed")}
+              >
+                Confirmed
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className={`justify-start bg-transparent transition-colors hover:bg-yellow-50 hover:text-yellow-700 hover:border-yellow-200 ${selectedOrder?.booking_status === 'pending' ? 'border-yellow-500 bg-yellow-50 text-yellow-700' : ''}`}
+                onClick={() => handleUpdateBookingStatus("pending")}
+              >
+                Pending
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className={`justify-start bg-transparent transition-colors hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 ${selectedOrder?.booking_status === 'processing' ? 'border-blue-500 bg-blue-50 text-blue-700' : ''}`}
+                onClick={() => handleUpdateBookingStatus("processing")}
+              >
+                Processing
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className={`justify-start transition-colors hover:bg-red-50 hover:text-red-700 hover:border-red-200 bg-transparent ${selectedOrder?.booking_status === 'cancelled' ? 'border-red-500 bg-red-50 text-red-700' : 'text-red-600'}`}
+                onClick={() => handleUpdateBookingStatus("cancelled")}
+              >
+                Cancelled
+              </Button>
             </div>
           </div>
         </DialogContent>
