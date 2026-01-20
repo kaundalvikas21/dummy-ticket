@@ -11,10 +11,13 @@ import { useToast } from "@/hooks/use-toast"
 import { RefreshButton } from "@/components/ui/refresh-button"
 import { CURRENCY_SYMBOLS } from "@/lib/exchange-rate"
 import { useCurrency } from "@/contexts/currency-context"
+import { Pagination } from "@/components/ui/pagination"
 
 export function PaymentHistory({ initialPayments = [] }) {
   const [searchTerm, setSearchTerm] = useState("")
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
   const { toast } = useToast()
   const { rates, formatPrice } = useCurrency()
 
@@ -29,6 +32,17 @@ export function PaymentHistory({ initialPayments = [] }) {
       payment.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
       payment.bookingId.toLowerCase().includes(searchTerm.toLowerCase()) ||
       payment.description.toLowerCase().includes(searchTerm.toLowerCase()),
+  )
+
+  // Reset to first page when search changes
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchTerm])
+
+  const totalPages = Math.ceil(filteredPayments.length / itemsPerPage)
+  const paginatedPayments = filteredPayments.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
   )
 
   // Calculate total spent by converting all amounts to USD first
@@ -69,13 +83,13 @@ export function PaymentHistory({ initialPayments = [] }) {
   }
 
   const getStatusColor = (status) => {
-    switch (status) {
-      case "Completed":
-      case "Paid":
+    switch (status?.toLowerCase()) {
+      case "completed":
+      case "paid":
         return "bg-green-100 text-green-800"
-      case "Pending":
+      case "pending":
         return "bg-yellow-100 text-yellow-800"
-      case "Failed":
+      case "failed":
         return "bg-red-100 text-red-800"
       default:
         return "bg-gray-100 text-gray-800"
@@ -340,7 +354,7 @@ startxref
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredPayments.map((payment) => (
+                {paginatedPayments.map((payment) => (
                   <TableRow key={payment.id}>
                     <TableCell className="font-medium">{payment.id}</TableCell>
                     <TableCell>{payment.bookingId}</TableCell>
@@ -368,7 +382,7 @@ startxref
                     <TableCell>{payment.method}</TableCell>
                     <TableCell className="font-semibold">{CURRENCY_SYMBOLS[payment.currency] || '$'}{payment.amount}</TableCell>
                     <TableCell>
-                      <Badge className={getStatusColor(payment.status)}>{payment.status}</Badge>
+                      <Badge className={getStatusColor("paid")}>Paid</Badge>
                     </TableCell>
                     <TableCell>
                       <Button variant="ghost" size="sm" onClick={() => handleDownloadInvoice(payment.id)}>
@@ -384,6 +398,14 @@ startxref
           )}
         </CardContent>
       </Card>
+
+      {totalPages > 1 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
+      )}
     </div>
   )
 }

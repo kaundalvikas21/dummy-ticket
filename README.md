@@ -13,6 +13,8 @@ Secure, verifiable flight reservations for visa applications. Trusted by travele
 - **Multi-Currency Support**: Automatic currency detection and conversion
 - **Secure Payments**: Stripe integration with multiple payment methods
 - **WhatsApp Notifications**: Real-time booking confirmations via Twilio
+- **Email Delivery**: Automated email confirmations with professional PDF receipts via Resend
+- **Server-Side PDF**: High-quality receipt generation matching frontend aesthetics
 - **User Dashboard**: Track bookings, payment history, and manage profile
 - **Multi-Language**: Support for multiple locales
 - **Admin Panel**: Content management and user management
@@ -27,7 +29,8 @@ Secure, verifiable flight reservations for visa applications. Trusted by travele
 | **Styling** | Tailwind CSS v4 |
 | **Backend** | Supabase (PostgreSQL + Auth + Storage) |
 | **Payment** | Stripe |
-| **Notifications** | Twilio WhatsApp |
+| **Notifications** | Twilio WhatsApp & Resend Email |
+| **PDF Generation** | @react-pdf/renderer (Server-side) |
 | **State** | Zustand |
 | **Forms** | React Hook Form + Zod |
 | **Icons** | Lucide React |
@@ -70,7 +73,13 @@ TWILIO_ACCOUNT_SID=your_account_sid
 TWILIO_AUTH_TOKEN=your_auth_token
 TWILIO_WHATSAPP_NUMBER=whatsapp:+14155238886
 
+# Resend (Email)
+RESEND_API_KEY=re_your_api_key
+EMAIL_FROM=team@comm.getdummytickets.co
+MAIL_FROM_NAME="Dummy Ticket Support"
+
 # Application
+APP_NAME="Dummy Ticket"
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
@@ -142,9 +151,11 @@ See [lib/rate-limit.js](lib/rate-limit.js) for configuration.
 1. User selects flight options
 2. Stripe Checkout session created
 3. Payment processed via Stripe
-4. Webhook confirms payment
-5. WhatsApp notification sent
-6. Booking record created
+4. Webhook validates payment via signature verification
+5. Application generates server-side PDF receipt
+6. WhatsApp notification sent (if selected)
+7. Email confirmation with PDF attachment sent (always)
+8. Booking record and payment record created in Supabase
 
 ### Currency Conversion
 - Auto-detects user location via IP

@@ -15,13 +15,15 @@ import { CURRENCY_SYMBOLS } from "@/lib/exchange-rate";
 
 const getBadgeStyle = (status) => {
   switch (status?.toLowerCase()) {
+    case "active":
+      return "bg-orange-100 text-orange-800 border-orange-200";
     case "confirmed":
     case "paid":
       return "bg-green-100 text-green-800 border-green-200";
     case "processing":
       return "bg-yellow-100 text-yellow-800 border-yellow-200";
     case "completed":
-      return "bg-blue-100 text-blue-800 border-blue-200";
+      return "bg-green-100 text-green-800 border-green-200";
     case "cancelled":
       return "bg-red-100 text-red-800 border-red-200";
     default:

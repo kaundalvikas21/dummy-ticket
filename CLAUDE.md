@@ -11,8 +11,8 @@ Role-based system with User, Vendor, and Admin dashboards.
 - **State Management**: Zustand v5.0.8 (installed, implementation needed)
 - **Forms**: React Hook Form v7.65.0 + Zod v4.1.12
 - **UI Components**: shadcn/ui (Radix UI primitives)
-- **Notifications**: Twilio v5.11.2 (WhatsApp integration)
-- **PDF Generation**: jspdf v4.0.0, html2canvas v1.4.1
+- **Notifications**: Twilio v5.11.2 (WhatsApp), Resend v4.1.2 (Email)
+- **PDF Generation**: @react-pdf/renderer v4.1.6 (Server-side receipts)
 - **Animations**: framer-motion v12.23.24
 - **Charts**: recharts v2.15.4
 - **Build Tool**: Turbopack (enabled)
@@ -96,7 +96,7 @@ store/              # Zustand store
 
 ## Deployment
 - Environment: Vercel (frontend) + Supabase (backend)
-- Required env vars: Supabase URL/keys, Stripe keys
+- Required env vars: Supabase URL/keys, Stripe keys, RESEND_API_KEY, EMAIL_FROM, APP_NAME
 - Build with Turbopack enabled
 - Enable production optimizations
 
@@ -116,10 +116,11 @@ store/              # Zustand store
 ## Production Readiness Status (Updated Jan 2026)
 
 ### ✅ Implemented Features
+- WhatsApp notifications via Twilio (Sandbox configuration)
+- Email notifications with PDF receipt attachments via Resend
+- Server-side PDF generation using @react-pdf/renderer
 - Role-based authentication (User, Vendor, Admin)
 - Stripe payment integration with webhook verification
-- WhatsApp notifications via Twilio
-- PDF ticket generation and download
 - Supabase RLS policies for data security
 - Multi-step booking form with session persistence
 

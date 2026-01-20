@@ -24,6 +24,7 @@ import {
   DropdownMenuItem,
   DropdownMenuCheckboxItem
 } from "@/components/ui/dropdown-menu"
+import { Pagination } from "@/components/ui/pagination"
 
 const Booking = {
   id: "",
@@ -50,12 +51,15 @@ export function MyBookings({ setActiveSection, initialBookings = [] }) {
   const [selectedBooking, setSelectedBooking] = useState(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
 
   const activeFiltersCount = (statusFilter !== "all" ? 1 : 0) + (searchTerm ? 1 : 0)
 
   const clearAllFilters = () => {
     setSearchTerm("")
     setStatusFilter("all")
+    setCurrentPage(1)
   }
 
   const router = useRouter()
@@ -76,21 +80,33 @@ export function MyBookings({ setActiveSection, initialBookings = [] }) {
     return matchesSearch && matchesStatus
   })
 
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchTerm, statusFilter])
+
+  const totalPages = Math.ceil(filteredBookings.length / itemsPerPage)
+  const paginatedBookings = filteredBookings.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  )
+
   const handleViewDetails = (booking) => {
     setSelectedBooking(booking)
     setIsDialogOpen(true)
   }
 
   const getStatusColor = (status) => {
-    switch (status) {
-      case "Confirmed":
-      case "Paid":
+    switch (status?.toLowerCase()) {
+      case "active":
+        return "bg-orange-100 text-orange-800"
+      case "paid":
         return "bg-green-100 text-green-800"
-      case "Processing":
+      case "processing":
         return "bg-yellow-100 text-yellow-800"
-      case "Completed":
-        return "bg-blue-100 text-blue-800"
-      case "Cancelled":
+      case "completed":
+        return "bg-green-100 text-green-800"
+      case "cancelled":
         return "bg-red-100 text-red-800"
       default:
         return "bg-gray-100 text-gray-800"
@@ -319,7 +335,7 @@ startxref
                 >
                   All Status
                 </DropdownMenuCheckboxItem>
-                {["confirmed", "paid", "processing", "completed", "cancelled"].map(status => (
+                {["active", "pending", "processing", "completed", "cancelled"].map(status => (
                   <DropdownMenuCheckboxItem
                     key={status}
                     checked={statusFilter === status}
@@ -366,8 +382,8 @@ startxref
               </div>
             </SkeletonCard>
           ))
-        ) : filteredBookings.length > 0 ? (
-          filteredBookings.map((booking) => (
+        ) : paginatedBookings.length > 0 ? (
+          paginatedBookings.map((booking) => (
             <Card key={booking.id} className="hover:bg-gray-100 hover:border-blue-200 transition-colors duration-200">
               <CardContent className="p-6">
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -463,6 +479,14 @@ startxref
           </Card>
         )}
       </div>
+
+      {totalPages > 1 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
+      )}
 
       {/* Booking Details Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
