@@ -3,12 +3,15 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { Home, Ticket, User, CreditCard, FileText, HelpCircle, Settings, X } from "lucide-react"
+import { Home, Ticket, User, CreditCard, FileText, HelpCircle, Settings, X, LogOut, Loader2 } from "lucide-react"
 import { Logo } from "@/components/ui/logo"
 import { useLogo } from "@/hooks/useLogo"
+import { useAuth } from "@/contexts/auth-context"
+import { useToast } from "@/hooks/use-toast"
+import { useState } from "react"
 
 const menuItems = [
-  { id: "dashboard", href: "/user", label: "Dashboard", icon: Home },
+  { id: "dashboard", href: "/user", label: "My Account", icon: Home },
   { id: "bookings", href: "/user/bookings", label: "My Bookings", icon: Ticket },
   { id: "profile", href: "/user/profile", label: "My Profile", icon: User },
   { id: "payments", href: "/user/payments", label: "Payment History", icon: CreditCard },
@@ -20,6 +23,40 @@ const menuItems = [
 export default function UserSidebar({ mobileMode = false, onClose = () => { } }) {
   const pathname = usePathname()
   const { logo, loading } = useLogo()
+  const { logout } = useAuth()
+  const { toast } = useToast()
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true)
+    try {
+      const result = await logout()
+      if (result.success) {
+        toast({
+          title: "Logged Out Successfully 👋",
+          description: "You have been logged out of your account",
+          variant: "success",
+        })
+        setTimeout(() => {
+          window.location.href = '/login'
+        }, 1000)
+      } else {
+        toast({
+          title: "Logout Failed",
+          description: result.error || "Something went wrong during logout",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      toast({
+        title: "Logout Failed",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoggingOut(false)
+    }
+  }
 
   const handleLinkClick = () => {
     if (mobileMode) {
@@ -29,7 +66,7 @@ export default function UserSidebar({ mobileMode = false, onClose = () => { } })
 
   return (
     <aside className={cn(
-      "h-screen w-64 bg-gradient-to-b from-[#0a1628] to-[#1b263b] text-white",
+      "h-screen w-64 bg-linear-to-b from-[#0a1628] to-[#1b263b] text-white",
       mobileMode ? "h-full overflow-y-auto" : "sticky top-0 left-0"
     )}>
       <div className="flex h-full flex-col">
@@ -92,16 +129,37 @@ export default function UserSidebar({ mobileMode = false, onClose = () => { } })
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-4 py-3 min-h-[44px] transition-colors touch-manipulation",
                   isActive
-                    ? "bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white font-semibold"
+                    ? "bg-linear-to-r from-[#0066FF] to-[#00D4AA] text-white font-semibold"
                     : "text-gray-300 hover:bg-white/10 hover:text-white",
                 )}
               >
-                <Icon className="h-5 w-5 flex-shrink-0" />
+                <Icon className="h-5 w-5 shrink-0" />
                 <span className="font-medium">{item.label}</span>
               </Link>
             )
           })}
         </nav>
+
+        {/* Logout Section */}
+        <div className="mt-auto border-t border-white/10 p-4">
+          <button
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            className={cn(
+              "flex w-full items-center gap-3 rounded-lg px-4 py-3 min-h-[44px] transition-all",
+              "bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-white/10 hover:text-white hover:border-transparent"
+            )}
+          >
+            {isLoggingOut ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <LogOut className="h-5 w-5 shrink-0" />
+            )}
+            <span className="font-medium">
+              {isLoggingOut ? "Logging out..." : "Log Out"}
+            </span>
+          </button>
+        </div>
       </div>
     </aside>
   )

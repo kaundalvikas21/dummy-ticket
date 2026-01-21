@@ -1,14 +1,14 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Home, Plane} from "lucide-react"
+import { Home, Plane } from "lucide-react"
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center px-4 py-32">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center px-4 py-32">
       <div className="max-w-2xl w-full text-center">
         {/* 404 Illustration */}
         <div className="mb-8 relative">
-          <div className="text-[150px] md:text-[200px] font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-green-600 leading-none">
+          <div className="text-[150px] md:text-[200px] font-bold text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-green-600 leading-none">
             404
           </div>
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
@@ -45,8 +45,8 @@ export default function NotFound() {
         <div className="border-t border-gray-200 pt-8">
           <p className="text-sm text-gray-500 mb-4">Quick Links:</p>
           <div className="flex flex-wrap gap-4 justify-center text-sm">
-           <Link href="/user" className="text-blue-600 hover:text-blue-700 hover:underline">
-              My Dashboard
+            <Link href="/user" className="text-blue-600 hover:text-blue-700 hover:underline">
+              My Account
             </Link>
             <Link href="/buy-ticket" className="text-blue-600 hover:text-blue-700 hover:underline">
               Book Tickets

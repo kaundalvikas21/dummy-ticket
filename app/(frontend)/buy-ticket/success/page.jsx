@@ -247,9 +247,9 @@ export default function SuccessPage() {
             <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="bg-white rounded-[2rem] p-8 md:p-10 max-w-xl w-full text-center shadow-2xl border border-gray-100 relative overflow-hidden"
+                className="bg-white rounded-4xl p-8 md:p-10 max-w-xl w-full text-center shadow-2xl border border-gray-100 relative overflow-hidden"
             >
-                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 via-emerald-500 to-blue-500"></div>
+                <div className="absolute top-0 left-0 w-full h-2 bg-linear-to-r from-blue-500 via-emerald-500 to-blue-500"></div>
 
                 <div className="w-20 h-20 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-6 rotate-3 shadow-lg shadow-emerald-50">
                     <div className="w-16 h-16 bg-emerald-500 rounded-xl flex items-center justify-center -rotate-3">
@@ -297,7 +297,7 @@ export default function SuccessPage() {
                     </Button>
 
                     <div className="grid grid-cols-2 gap-3">
-                        <NavButton href="/user" icon={<ArrowRight className="w-4 h-4 mr-2" />} label="Dashboard" />
+                        <NavButton href="/user" icon={<ArrowRight className="w-4 h-4 mr-2" />} label="My Account" />
                         <NavButton href="/" icon={<Home className="w-4 h-4 mr-2" />} label="Home" />
                     </div>
                 </div>

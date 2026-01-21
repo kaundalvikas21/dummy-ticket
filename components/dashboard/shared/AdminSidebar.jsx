@@ -11,7 +11,6 @@ import {
   BarChart3,
   Settings,
   ChevronLeft,
-  ChevronRight,
   ChevronDown,
   UserCircle,
   FileCheck,
@@ -21,16 +20,20 @@ import {
   Phone,
   Info,
   Inbox,
+  LogOut,
+  Loader2,
   Home,
 } from "lucide-react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { useState } from "react"
 import { Logo } from "@/components/ui/logo"
 import { useLogo } from "@/hooks/useLogo"
+import { useAuth } from "@/contexts/auth-context"
+import { useToast } from "@/hooks/use-toast"
 
 const menuItems = [
-  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/admin" },
+  { id: "dashboard", label: "My Account", icon: LayoutDashboard, href: "/admin" },
   { id: "orders", label: "Orders", icon: ShoppingCart, href: "/admin/orders" },
   { id: "documents", label: "Review Documents", icon: FileCheck, href: "/admin/documents" },
   { id: "profile", label: "Profile", icon: UserCircle, href: "/admin/profile" },
@@ -64,10 +67,45 @@ const menuItems = [
   { id: "settings", label: "Settings", icon: Settings, href: "/admin/settings" },
 ]
 
-export function AdminSidebar({ sidebarOpen, setSidebarOpen, mobileMode = false, onClose = () => {} }) {
+export function AdminSidebar({ sidebarOpen, setSidebarOpen, mobileMode = false, onClose = () => { } }) {
   const pathname = usePathname()
+  const router = useRouter()
+  const { toast } = useToast()
+  const { logout } = useAuth()
   const [openSubmenu, setOpenSubmenu] = useState(null)
   const { logo, loading } = useLogo()
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true)
+    try {
+      const result = await logout()
+      if (result.success) {
+        toast({
+          title: "Logged Out Successfully 👋",
+          description: "You have been logged out of your account",
+          variant: "success",
+        })
+        setTimeout(() => {
+          window.location.href = '/login'
+        }, 1000)
+      } else {
+        toast({
+          title: "Logout Failed",
+          description: result.error || "Something went wrong during logout",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      toast({
+        title: "Logout Failed",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoggingOut(false)
+    }
+  }
 
   const handleLinkClick = () => {
     if (mobileMode) {
@@ -79,9 +117,8 @@ export function AdminSidebar({ sidebarOpen, setSidebarOpen, mobileMode = false, 
     <motion.aside
       initial={false}
       animate={{ width: sidebarOpen ? 256 : 80 }}
-      className={`fixed left-0 top-0 h-screen bg-gradient-to-b from-[#0a1628] to-[#1b263b] text-white z-50 shadow-2xl border-r border-white/10 ${
-        mobileMode ? 'w-64' : ''
-      }`}
+      className={`fixed left-0 top-0 h-screen bg-linear-to-b from-[#0a1628] to-[#1b263b] text-white z-50 shadow-2xl border-r border-white/10 ${mobileMode ? 'w-64' : ''
+        }`}
     >
       <div className="flex flex-col h-full">
         {/* Logo */}
@@ -129,11 +166,11 @@ export function AdminSidebar({ sidebarOpen, setSidebarOpen, mobileMode = false, 
                     <button
                       onClick={() => setOpenSubmenu(openSubmenu === item.id ? null : item.id)}
                       className={`w-full flex items-center gap-3 px-3 lg:px-4 py-2.5 lg:py-3 rounded-lg transition-all min-h-[44px] ${isSubmenuActive
-                        ? "bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white shadow-lg"
+                        ? "bg-linear-to-r from-[#0066FF] to-[#00D4AA] text-white shadow-lg"
                         : "text-white/70 hover:bg-white/10 hover:text-white"
                         }`}
                     >
-                      <Icon className="w-4 h-4 lg:w-5 lg:h-5 flex-shrink-0" />
+                      <Icon className="w-4 h-4 lg:w-5 lg:h-5 shrink-0" />
                       <AnimatePresence>
                         {shouldShowText && (
                           <>
@@ -181,7 +218,7 @@ export function AdminSidebar({ sidebarOpen, setSidebarOpen, mobileMode = false, 
                                     : "text-white/60 hover:bg-white/10 hover:text-white"
                                     }`}
                                 >
-                                  <SubIcon className="w-3 h-3 lg:w-4 lg:h-4 flex-shrink-0" />
+                                  <SubIcon className="w-3 h-3 lg:w-4 lg:h-4 shrink-0" />
                                   <AnimatePresence>
                                     <motion.span
                                       initial={{ opacity: 0, width: 0 }}
@@ -209,11 +246,11 @@ export function AdminSidebar({ sidebarOpen, setSidebarOpen, mobileMode = false, 
                     href={item.href}
                     onClick={handleLinkClick}
                     className={`w-full flex items-center gap-3 px-3 lg:px-4 py-2.5 lg:py-3 rounded-lg transition-all min-h-[44px] ${isActive
-                      ? "bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white shadow-lg"
+                      ? "bg-linear-to-r from-[#0066FF] to-[#00D4AA] text-white shadow-lg"
                       : "text-white/70 hover:bg-white/10 hover:text-white"
                       }`}
                   >
-                    <Icon className="w-4 h-4 lg:w-5 lg:h-5 flex-shrink-0" />
+                    <Icon className="w-4 h-4 lg:w-5 lg:h-5 shrink-0" />
                     <AnimatePresence>
                       {shouldShowText && (
                         <motion.span
@@ -233,14 +270,31 @@ export function AdminSidebar({ sidebarOpen, setSidebarOpen, mobileMode = false, 
           </ul>
         </nav>
 
-        {/* Toggle Button - Hide on mobile mode */}
+        {/* Logout Button - replaced toggle button as requested */}
         {!mobileMode && (
           <div className="p-4 border-t border-white/10">
             <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="w-full flex items-center justify-center p-2 rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-all"
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+              className={`w-full flex items-center ${sidebarOpen ? 'justify-start px-4' : 'justify-center'} gap-3 p-2.5 rounded-lg bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-white/10 hover:text-white hover:border-transparent transition-all`}
             >
-              {sidebarOpen ? <ChevronLeft className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
+              {isLoggingOut ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <LogOut className="w-5 h-5 shrink-0" />
+              )}
+              <AnimatePresence>
+                {sidebarOpen && (
+                  <motion.span
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: "auto" }}
+                    exit={{ opacity: 0, width: 0 }}
+                    className="overflow-hidden whitespace-nowrap font-medium"
+                  >
+                    {isLoggingOut ? "Logging out..." : "Log Out"}
+                  </motion.span>
+                )}
+              </AnimatePresence>
             </button>
           </div>
         )}

@@ -298,7 +298,7 @@ export function UserHeader({ onMenuClick, sidebarOpen }) {
           <Menu className="w-5 h-5 text-gray-700" />
         </button>
 
-        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">My Dashboard</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">My Account</h1>
       </div>
 
       <div className="flex items-center gap-2 sm:gap-4">
