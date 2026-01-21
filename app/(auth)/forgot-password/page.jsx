@@ -117,7 +117,7 @@ export default function ForgotPasswordPage() {
                     id="email"
                     label="Email Address"
                     type="email"
-                    placeholder="admin@example.com"
+                    placeholder="you@example.com"
                     icon={Mail}
                     {...register('email')}
                     error={errors.email?.message}

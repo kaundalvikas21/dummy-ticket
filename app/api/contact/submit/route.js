@@ -85,7 +85,7 @@ export async function POST(request) {
     // Send email notification to admin
     try {
       await sendEmail({
-        to: process.env.EMAIL_FROM || 'admin@dummy-ticket.com', // Admin email
+        to: process.env.ADMIN_EMAIL || process.env.EMAIL_FROM, // Admin email
         subject: `New Contact Submission: ${subject}`,
         html: `
           <h3>New Contact Form Submission</h3>

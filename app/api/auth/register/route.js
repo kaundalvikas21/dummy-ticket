@@ -52,6 +52,11 @@ async function handleRegister(request) {
     const supabase = await createClient()
 
 
+    // Automatically assign admin role if email matches ADMIN_EMAIL
+    const adminEmail = (process.env.ADMIN_EMAIL || '').toLowerCase()
+    const effectiveRole = email.toLowerCase() === adminEmail ? 'admin' : (role || 'user')
+
+
     // Format phone number for Supabase auth (E.164 format required)
     let formattedPhone = null
     if (phoneNumber && phoneNumber.trim()) {
@@ -72,7 +77,7 @@ async function handleRegister(request) {
         data: {
           first_name: firstName,
           last_name: lastName,
-          role: role || 'user',
+          role: effectiveRole,
           phone_number: phoneNumber || null,
           country_code: countryCode || null,
           nationality: nationality || null,
@@ -111,6 +116,39 @@ async function handleRegister(request) {
       )
     }
 
+    // 3. Send Account Creation Emails (Non-blocking)
+    try {
+      const { sendEmail } = await import('@/lib/email')
+      const { getWelcomeEmail, getAdminNewUserNotificationEmail } = await import('@/lib/email-templates')
+
+      const userData = {
+        first_name: firstName,
+        last_name: lastName,
+        email: email,
+        role: role || 'user',
+        nationality: nationality
+      }
+
+      // Send Welcome Email to User
+      sendEmail({
+        to: email,
+        subject: `Welcome to ${process.env.APP_NAME || 'Dummy Ticket'}! ✈️`,
+        html: getWelcomeEmail(userData)
+      }).catch(err => console.error('Error sending welcome email:', err))
+
+      // Send Notification Email to Admin
+      const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_FROM
+      if (adminEmail) {
+        sendEmail({
+          to: adminEmail,
+          subject: `🔔 New User Registered: ${firstName} ${lastName}`,
+          html: getAdminNewUserNotificationEmail(userData)
+        }).catch(err => console.error('Error sending admin notification email:', err))
+      }
+    } catch (emailError) {
+      console.error('Failed to initiate email sending:', emailError)
+    }
+
     // 4. Create User Profile manually (backup for trigger)
     if (authData.user?.id) {
       try {
@@ -145,7 +183,7 @@ async function handleRegister(request) {
               phone_number: phoneNumber,
               country_code: countryCode,
               nationality: nationality,
-              role: role || 'user',
+              role: effectiveRole,
               preferred_language: 'en'
             })
 
@@ -199,7 +237,7 @@ async function handleRegister(request) {
       user: {
         id: authData.user.id,
         email: authData.user.email,
-        role: role || 'user',
+        role: effectiveRole,
         created_at: authData.user.created_at,
         updated_at: authData.user.updated_at,
         email_confirmed_at: authData.user.email_confirmed_at

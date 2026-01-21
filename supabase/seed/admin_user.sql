@@ -27,7 +27,7 @@ INSERT INTO user_profiles (
   updated_at
 ) VALUES
 -- Admin user (auth_user_id should match UUID from auth.users after signup)
-('00000000-0000-0000-0000-000000000001', 'Admin', 'User', 'admin@example.com', '+1234567890', 'US', 'en', 'admin', NOW(), NOW()),
+('00000000-0000-0000-0000-000000000001', 'Admin', 'User', 'vikas@fanaticcoders.com', '+1234567890', 'US', 'en', 'admin', NOW(), NOW()),
 
 -- Vendor user
 ('00000000-0000-0000-0000-000000000002', 'Vendor', 'User', 'vendor@example.com', '+1234567891', 'US', 'en', 'vendor', NOW(), NOW()),
