@@ -13,8 +13,9 @@ Secure, verifiable flight reservations for visa applications. Trusted by travele
 - **Multi-Currency Support**: Automatic currency detection and conversion
 - **Secure Payments**: Stripe integration with multiple payment methods
 - **WhatsApp Notifications**: Real-time booking confirmations via Twilio
-- **Email Delivery**: Automated email confirmations with professional PDF receipts via Resend
-- **Server-Side PDF**: High-quality receipt generation matching frontend aesthetics
+- **Automated Delivery**: Email confirmations with professional **High-Resolution (3x) PDF receipts**
+- **Dynamic Service Tracking**: Real-time service type capture (e.g., "Ticket with E-Receipt") across all receipts
+- **Data Normalization**: Intelligent city name capitalization for professional itineraries
 - **User Dashboard**: Track bookings, payment history, and manage profile
 - **Multi-Language**: Support for multiple locales
 - **Admin Panel**: Content management and user management

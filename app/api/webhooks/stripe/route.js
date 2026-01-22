@@ -43,6 +43,28 @@ export async function POST(req) {
                             console.error('PDF generation failed:', pdfError);
                             // Continue without PDF if generation fails
                         }
+
+                        // Send notification to Admin (NO PDF)
+                        try {
+                            const { sendEmail } = await import('@/lib/email');
+                            const { getAdminBookingNotificationEmail } = await import('@/lib/email-templates');
+
+                            const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_FROM;
+                            console.log(`Sending simplified admin notification to: ${adminEmail}`);
+
+                            const adminEmailOptions = {
+                                to: adminEmail,
+                                subject: `🔔 New Booking - ${result.booking.id}`,
+                                html: getAdminBookingNotificationEmail(result.booking)
+                            };
+
+                            const adminEmailResult = await sendEmail(adminEmailOptions);
+                            if (!adminEmailResult.success) {
+                                console.error('Error in sendEmail for admin:', adminEmailResult.error);
+                            }
+                        } catch (adminEmailError) {
+                            console.error('Failed to send admin notification email:', adminEmailError);
+                        }
                     }
 
                     // Send WhatsApp notification if delivery method is 'whatsapp'

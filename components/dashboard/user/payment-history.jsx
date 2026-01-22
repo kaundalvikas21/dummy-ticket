@@ -46,7 +46,8 @@ export function PaymentHistory({ initialPayments = [] }) {
   )
 
   // Calculate total spent by converting all amounts to USD first
-  const completedPayments = payments.filter((p) => ["Completed", "Paid"].includes(p.status))
+  // Calculate total spent by using raw status to include both past (Completed) and future (Active) bookings
+  const completedPayments = payments.filter((p) => p.rawStatus === "paid")
   const uniqueCurrencies = [...new Set(completedPayments.map(p => p.currency || 'USD'))]
   const isSingleCurrency = uniqueCurrencies.length === 1
   const singleCurrency = isSingleCurrency ? uniqueCurrencies[0] : null

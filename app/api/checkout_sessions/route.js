@@ -37,9 +37,18 @@ export async function POST(req) {
             nationality: formData.nationality
         });
 
+        const capitalizeWords = (str) => {
+            if (!str) return "";
+            return str
+                .toLowerCase()
+                .split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+        };
+
         const meta_travel = JSON.stringify({
-            dep_city: formData.departureCity,
-            arr_city: formData.arrivalCity,
+            dep_city: capitalizeWords(formData.departureCity),
+            arr_city: capitalizeWords(formData.arrivalCity),
             dep_date: formData.departureDate,
             ret_date: formData.tripType === "one-way" ? "" : formData.returnDate,
             class: formData.travelClass,
@@ -137,6 +146,7 @@ export async function POST(req) {
                 booking_id: customId,
                 user_id: user?.id || "guest",
                 plan_id: planId,
+                plan_name: plan.name,
                 amount: (unitAmount / 100).toString(),
                 currency: currency,
                 payment_method: formData.paymentMethod === "card" ? "Credit Card" : (formData.paymentMethod === "amazon_pay" ? "Amazon Pay" : (formData.paymentMethod === "apple_pay" ? "Apple Pay" : formData.paymentMethod)),
