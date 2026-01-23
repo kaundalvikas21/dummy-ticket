@@ -96,7 +96,7 @@ store/              # Zustand store
 
 ## Deployment
 - Environment: Vercel (frontend) + Supabase (backend)
-- Required env vars: Supabase URL/keys, Stripe keys, RESEND_API_KEY, EMAIL_FROM, APP_NAME
+- Required env vars: Supabase URL/keys, Stripe keys, RESEND_API_KEY, EMAIL_FROM, APP_NAME, HEXARATE_URL, CRON_SECRET
 - Build with Turbopack enabled
 - Enable production optimizations
 
@@ -131,6 +131,7 @@ store/              # Zustand store
 - ✅ Smart Logging Utility (lib/logger.js)
 - ✅ Dynamic Service Type Flow (Metadata-driven, no more hardcoded fallbacks)
 - ✅ High-Resolution PDF Generation (Backend & Success Page synced)
+- ✅ Hexarate API Migration (Database-backed currency rates + Cron job)
 
 ### ⚠️ Remaining Issues Before Production
 1. **React 19 Features** - Not using useOptimistic, useActionState, useFormStatus

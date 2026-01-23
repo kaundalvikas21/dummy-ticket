@@ -80,8 +80,14 @@ EMAIL_FROM=team@comm.getdummytickets.co
 MAIL_FROM_NAME="Dummy Ticket Support"
 
 # Application
+# Application
 APP_NAME="Dummy Ticket"
 NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# Hexarate API (Currency Conversion)
+NEXT_PUBLIC_HEXARATE_API_URL=https://hexarate.paikama.co/api/rates
+NEXT_PUBLIC_BASE_CURRENCY=USD
+CRON_SECRET=your_cron_secret_key
 ```
 
 ### 3. Database Setup
@@ -265,6 +271,7 @@ For issues and questions:
 - [Twilio](https://twilio.com) - WhatsApp notifications
 - [Vercel](https://vercel.com) - Deployment platform
 - [shadcn/ui](https://ui.shadcn.com) - UI components
+- [Hexarate](https://hexarate.paikama.co) - Currency Exchange API
 
 ---
 
