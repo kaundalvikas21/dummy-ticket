@@ -67,6 +67,8 @@ import { toast } from "@/hooks/use-toast"
 import { compressImage } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
+import { Pagination } from "@/components/ui/pagination"
+
 // Icon mapping for dynamic rendering
 const ICON_MAP = {
   plane: Plane,
@@ -107,6 +109,10 @@ export function ServicePlansManagement() {
   const [loading, setLoading] = useState(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1)
+  const ITEMS_PER_PAGE = 10
+
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false)
   const [planToDelete, setPlanToDelete] = useState(null)
@@ -134,6 +140,11 @@ export function ServicePlansManagement() {
   useEffect(() => {
     fetchServicePlans()
   }, [])
+
+  // Reset page when search changes
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery])
 
   const fetchServicePlans = async (showLoader = true) => {
     if (showLoader) setLoading(true)
@@ -522,6 +533,12 @@ export function ServicePlansManagement() {
     plan.name.toLowerCase().includes(searchQuery.toLowerCase()),
   )
 
+  const totalPages = Math.ceil(filteredPlans.length / ITEMS_PER_PAGE)
+  const paginatedPlans = filteredPlans.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  )
+
   const renderIcon = (iconKey) => {
     const IconComponent = ICON_MAP[iconKey] || Plane
     return <IconComponent className="w-5 h-5 text-gray-500" />
@@ -531,7 +548,7 @@ export function ServicePlansManagement() {
     <div className="space-y-6">
       {/* Page Header */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 rounded-lg shadow-sm">
-        <h1 className="text-2xl font-bold bg-gradient-to-r from-[#0066FF] to-[#00D4AA] bg-clip-text text-transparent">
+        <h1 className="text-2xl font-bold bg-linear-to-r from-[#0066FF] to-[#00D4AA] bg-clip-text text-transparent">
           Service Plans Management
         </h1>
         <div className="flex gap-2 w-full md:w-auto">
@@ -550,7 +567,7 @@ export function ServicePlansManagement() {
             else setIsDialogOpen(true)
           }}>
             <Button
-              className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white cursor-pointer"
+              className="bg-linear-to-r from-[#0066FF] to-[#00D4AA] text-white cursor-pointer"
               onClick={handleAddNew}
             >
               <Plus className="w-4 h-4 mr-2" />
@@ -751,7 +768,7 @@ export function ServicePlansManagement() {
                   disabled={isSaveDisabled}
                   className={`cursor-pointer ${isSaveDisabled
                     ? "opacity-50 cursor-not-allowed"
-                    : "bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white"
+                    : "bg-linear-to-r from-[#0066FF] to-[#00D4AA] text-white"
                     }`}
                   onClick={handleSave}
                 >
@@ -834,10 +851,10 @@ export function ServicePlansManagement() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredPlans.map((plan, index) => (
+                  paginatedPlans.map((plan, index) => (
                     <TableRow key={plan.id}>
                       <TableCell className="font-medium text-gray-500">
-                        {String(index + 1).padStart(2, "0")}
+                        {String((currentPage - 1) * ITEMS_PER_PAGE + index + 1).padStart(2, "0")}
                       </TableCell>
                       <TableCell className="font-medium">{plan.name}</TableCell>
                       <TableCell className="max-w-[200px]">
@@ -940,6 +957,15 @@ export function ServicePlansManagement() {
             </Table>
           </div>
         </CardContent>
+        {filteredPlans.length > 0 && (
+          <div className="border-t border-gray-100 px-6 py-4">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+        )}
       </Card>
 
       {/* Delete Confirmation Alert Dialog */}
