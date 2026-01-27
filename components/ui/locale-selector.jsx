@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from 'react'
-import { Globe, ChevronDown } from 'lucide-react'
+import { ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -21,23 +21,19 @@ export function LocaleSelector() {
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
-          size="sm"
-          className="flex items-center gap-2 px-3 py-2 h-auto"
+          className="flex items-center gap-2 px-3 h-10 md:h-11 rounded-full border-gray-200 bg-white hover:bg-gray-50 hover:text-gray-900 shadow-sm transition-all"
         >
-          <Globe className="w-4 h-4" />
-          <span className="hidden sm:inline-flex items-center gap-2">
-            <FlagIcon
-              src={currentLocale?.flag}
-              alt={currentLocale?.name}
-              countryCode={currentLocale?.countryCode}
-              size={16}
-              className="shrink-0"
-            />
-            <span className="text-xs sm:text-sm font-medium">
-              {currentLocale?.code.toUpperCase()}
-            </span>
+          <FlagIcon
+            src={currentLocale?.flag}
+            alt={currentLocale?.name}
+            countryCode={currentLocale?.countryCode}
+            size={20}
+            className="rounded-sm object-cover shrink-0 shadow-xs"
+          />
+          <span className="text-sm font-semibold text-slate-700">
+            {currentLocale?.code.toUpperCase()}
           </span>
-          <ChevronDown className="w-3 h-3 ml-1" />
+          <ChevronDown className="w-4 h-4 text-slate-400 ml-0.5" strokeWidth={2} />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
@@ -45,9 +41,8 @@ export function LocaleSelector() {
           <DropdownMenuItem
             key={localeInfo.code}
             onClick={() => changeLocale(localeInfo.code)}
-            className={`flex items-center gap-3 cursor-pointer ${
-              localeInfo.code === locale ? 'bg-blue-50 text-blue-700' : ''
-            }`}
+            className={`flex items-center gap-3 cursor-pointer ${localeInfo.code === locale ? 'bg-blue-50 text-blue-700' : ''
+              }`}
           >
             <FlagIcon
               src={localeInfo.flag}
