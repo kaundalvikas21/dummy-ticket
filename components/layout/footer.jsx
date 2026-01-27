@@ -227,7 +227,7 @@ export function Footer() {
         <div className="border-t border-white/10 pt-6 md:pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 md:gap-6">
             <p className="text-gray-400 text-sm">
-              © 2025 <span className="text-[#00D4AA] font-semibold">{logoData?.company_name || "VisaFly"}</span>. All rights reserved.
+              © {new Date().getFullYear()} <span className="text-[#00D4AA] font-semibold">{logoData?.company_name || "VisaFly"}</span>. All rights reserved.
             </p>
             <div className="flex gap-6 md:gap-8">
               <Link href="/terms-of-service" className="text-gray-400 hover:text-[#00D4AA] transition-colors text-sm relative group">
