@@ -40,8 +40,8 @@ export function CurrencySelector() {
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button
-                    variant="outline"
-                    className="flex items-center gap-2 px-3 h-10 md:h-11 rounded-full border-gray-200 bg-white hover:bg-gray-50 hover:text-gray-900 shadow-sm transition-all"
+                    variant="ghost"
+                    className="flex items-center gap-2 px-3 h-10 md:h-11 rounded-full bg-white hover:bg-gray-50 hover:text-gray-900 transition-all"
                 >
                     <span className="text-sm font-semibold text-[#00D4AA]">
                         {CURRENCY_SYMBOLS[currency]}
