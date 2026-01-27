@@ -8,8 +8,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Upload, Trash2, Lock, Eye, EyeOff, Check, X, User, Mail, FileText, Building2, MapPin, Phone, Globe, Languages } from "lucide-react"
-import { Progress } from "@/components/ui/progress"
+import { Upload, Trash2, User, Mail, FileText, Building2, MapPin, Phone, Globe, Languages } from "lucide-react"
+
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/contexts/auth-context"
 import { useCurrency } from "@/contexts/currency-context"
@@ -104,35 +104,7 @@ export function MyProfile({ stats }) {
     }
     return "Member since recently"
   }
-  // Password State
-  const [isChangingPassword, setIsChangingPassword] = useState(false)
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
-  const [showNewPassword, setShowNewPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [passwordStrength, setPasswordStrength] = useState(0)
-  const [passwordSettings, setPasswordSettings] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  })
 
-  // Calculate password strength
-  useEffect(() => {
-    const password = passwordSettings.newPassword
-    if (!password) {
-      setPasswordStrength(0)
-      return
-    }
-
-    let strength = 0
-    if (password.length >= 8) strength += 25
-    if (password.length >= 12) strength += 25
-    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength += 25
-    if (/\d/.test(password)) strength += 15
-    if (/[^a-zA-Z0-9]/.test(password)) strength += 10
-
-    setPasswordStrength(Math.min(strength, 100))
-  }, [passwordSettings.newPassword])
 
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -475,102 +447,7 @@ export function MyProfile({ stats }) {
     }
   }
 
-  const handleChangePassword = async () => {
-    // Basic validation
-    if (!passwordSettings.currentPassword || !passwordSettings.newPassword || !passwordSettings.confirmPassword) {
-      toast({
-        title: "Validation Error",
-        description: "Please fill in all password fields.",
-        variant: "destructive",
-      })
-      return
-    }
 
-    if (passwordSettings.newPassword !== passwordSettings.confirmPassword) {
-      toast({
-        title: "Mismatch Error",
-        description: "New passwords do not match.",
-        variant: "destructive",
-      })
-      return
-    }
-
-    if (passwordSettings.newPassword.length < 8) {
-      toast({
-        title: "Security Warning",
-        description: "Password must be at least 8 characters long.",
-        variant: "destructive",
-      })
-      return
-    }
-
-    setIsChangingPassword(true)
-
-    try {
-      // Verify current password by attempting to sign in
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: user.email,
-        password: passwordSettings.currentPassword,
-      })
-
-      if (signInError) {
-        throw new Error("Current password is incorrect.")
-      }
-
-      const { error } = await supabase.auth.updateUser({
-        password: passwordSettings.newPassword
-      })
-
-      if (error) throw error
-
-      toast({
-        title: "Password Changed",
-        description: "Your password has been updated successfully.",
-      })
-
-      // Reset form
-      setPasswordSettings({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      })
-      // Reset visibility states
-      setShowCurrentPassword(false)
-      setShowNewPassword(false)
-      setShowConfirmPassword(false)
-
-    } catch (error) {
-      toast({
-        title: "Update Failed",
-        description: error.message || "Failed to update password. Please try again.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsChangingPassword(false)
-    }
-  }
-
-  const isPasswordFormValid = () => {
-    return (
-      passwordSettings.currentPassword &&
-      passwordSettings.newPassword &&
-      passwordSettings.confirmPassword &&
-      passwordSettings.newPassword === passwordSettings.confirmPassword &&
-      passwordSettings.newPassword.length >= 8
-    )
-  }
-
-  const getPasswordStrengthColor = () => {
-    if (passwordStrength < 40) return "bg-red-500"
-    if (passwordStrength < 70) return "bg-yellow-500"
-    return "bg-green-500"
-  }
-
-  const getPasswordStrengthText = () => {
-    if (passwordStrength < 40) return "Weak"
-    if (passwordStrength < 70) return "Medium"
-    return "Strong"
-  }
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0]
@@ -970,148 +847,7 @@ export function MyProfile({ stats }) {
       </Card>
 
       {/* Change Password Section */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Lock className="w-5 h-5 text-gray-600" />
-            <CardTitle>Change Password</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid md:grid-cols-1 gap-4 max-w-md">
 
-            <div className="space-y-2">
-              <Label htmlFor="currentPassword">Current Password</Label>
-              <div className="relative">
-                <Input
-                  id="currentPassword"
-                  type={showCurrentPassword ? "text" : "password"}
-                  value={passwordSettings.currentPassword}
-                  onChange={(e) => setPasswordSettings({ ...passwordSettings, currentPassword: e.target.value })}
-                  placeholder="Enter current password"
-                  className="pr-10 pl-10"
-                />
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                >
-                  {showCurrentPassword ? (
-                    <EyeOff className="h-4 w-4 text-gray-500" />
-                  ) : (
-                    <Eye className="h-4 w-4 text-gray-500" />
-                  )}
-                  <span className="sr-only">Toggle password visibility</span>
-                </Button>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="newPassword">New Password</Label>
-              <div className="relative">
-                <Input
-                  id="newPassword"
-                  type={showNewPassword ? "text" : "password"}
-                  value={passwordSettings.newPassword}
-                  onChange={(e) => setPasswordSettings({ ...passwordSettings, newPassword: e.target.value })}
-                  placeholder="Enter new password"
-                  className="pr-10 pl-10"
-                />
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowNewPassword(!showNewPassword)}
-                >
-                  {showNewPassword ? (
-                    <EyeOff className="h-4 w-4 text-gray-500" />
-                  ) : (
-                    <Eye className="h-4 w-4 text-gray-500" />
-                  )}
-                  <span className="sr-only">Toggle password visibility</span>
-                </Button>
-              </div>
-
-              {passwordSettings.newPassword && (
-                <div className="space-y-2 mt-2">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-gray-600">Password Strength:</span>
-                    <span
-                      className={`font-medium ${passwordStrength < 40 ? "text-red-500" : passwordStrength < 70 ? "text-yellow-500" : "text-green-500"}`}
-                    >
-                      {getPasswordStrengthText()}
-                    </span>
-                  </div>
-                  <Progress value={passwordStrength} className={`h-2 ${getPasswordStrengthColor()}`} />
-                  <p className="text-xs text-gray-500">
-                    Use 8+ characters with a mix of uppercase, lowercase, numbers & symbols
-                  </p>
-                </div>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm New Password</Label>
-              <div className="relative">
-                <Input
-                  id="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
-                  value={passwordSettings.confirmPassword}
-                  onChange={(e) => setPasswordSettings({ ...passwordSettings, confirmPassword: e.target.value })}
-                  placeholder="Confirm new password"
-                  className="pr-10 pl-10"
-                />
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff className="h-4 w-4 text-gray-500" />
-                  ) : (
-                    <Eye className="h-4 w-4 text-gray-500" />
-                  )}
-                  <span className="sr-only">Toggle password visibility</span>
-                </Button>
-
-                {passwordSettings.confirmPassword && (
-                  <div className="absolute right-10 top-1/2 -translate-y-1/2 mr-2">
-                    {passwordSettings.newPassword === passwordSettings.confirmPassword ? (
-                      <Check className="w-5 h-5 text-green-500" />
-                    ) : (
-                      <X className="w-5 h-5 text-red-500" />
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-          <Button
-            className="bg-black text-white hover:bg-black/90"
-            onClick={handleChangePassword}
-            disabled={!isPasswordFormValid() || isChangingPassword}
-          >
-            {isChangingPassword ? (
-              <>
-                <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                Updating...
-              </>
-            ) : (
-              <>
-                <Lock className="w-4 h-4 mr-2" />
-                Update Password
-              </>
-            )}
-          </Button>
-        </CardContent>
-      </Card>
 
 
 
