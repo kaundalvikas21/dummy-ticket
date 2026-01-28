@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, Shield, Clock, CheckCircle } from "lucide-react"
+import { ArrowRight, Shield, Clock, CheckCircle, SendHorizonal, Ticket } from "lucide-react"
 import Link from "next/link"
 import { useTranslation } from "@/lib/translations"
 
@@ -79,8 +79,8 @@ export function Hero() {
                   size="lg"
                   className="bg-white text-[#0066FF] text-base md:text-lg px-6 py-5 md:px-10 md:py-7 rounded-2xl hover:bg-white/90 shadow-xl hover:shadow-2xl transition-all group font-semibold cursor-pointer"
                 >
+                  <Ticket className="ml-2 md:w-5 md:size-5 group-hover:translate-x-1 transition-transform" />
                   {t('homepage.hero.cta')}
-                  <ArrowRight className="ml-2 w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
             </motion.div>
