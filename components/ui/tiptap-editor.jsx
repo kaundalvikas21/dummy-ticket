@@ -3,6 +3,8 @@
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
+import { createClient } from '@/lib/supabase/client'
+import { useRef, useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import {
     Bold,
@@ -13,10 +15,16 @@ import {
     Heading2,
     Quote,
     Undo,
-    Redo
+    Redo,
+    Image as ImageIcon,
+    Type
 } from "lucide-react"
 
 export function TiptapEditor({ content, onChange, editable = true }) {
+    const supabase = createClient()
+    const fileInputRef = useRef(null)
+    const [isUploading, setIsUploading] = useState(false)
+
     const editor = useEditor({
         extensions: [
             StarterKit,
@@ -26,7 +34,10 @@ export function TiptapEditor({ content, onChange, editable = true }) {
         editable: editable,
         immediatelyRender: false,
         onUpdate: ({ editor }) => {
-            onChange({ json: editor.getJSON(), html: editor.getHTML() })
+            const json = editor.getJSON()
+            const html = editor.getHTML()
+            lastContentRef.current = JSON.stringify(json)
+            onChange({ json, html })
         },
         editorProps: {
             attributes: {
@@ -34,6 +45,48 @@ export function TiptapEditor({ content, onChange, editable = true }) {
             }
         }
     })
+
+    // Sync content when it changes externally (e.g. after save or tab switch)
+    const lastContentRef = useRef(typeof content === 'string' ? content : JSON.stringify(content))
+
+    useEffect(() => {
+        if (editor && content) {
+            const contentString = typeof content === 'string' ? content : JSON.stringify(content)
+            if (contentString !== lastContentRef.current) {
+                // Only update if it's not the same as current editor content to avoid loops
+                // and flickering. Check both JSON and HTML if needed, but stringified is a good proxy.
+                editor.commands.setContent(content)
+                lastContentRef.current = contentString
+            }
+        }
+    }, [editor, content])
+
+    const handleImageUpload = (event) => {
+        const file = event.target.files?.[0]
+        if (!file) return
+
+        // Create a temporary URL for preview
+        const blobUrl = URL.createObjectURL(file)
+
+        // Add image to editor
+        editor.chain().focus().setImage({ src: blobUrl }).run()
+
+        // Inform parent about the new file associated with this blob URL
+        if (onChange) {
+            onChange({
+                json: editor.getJSON(),
+                html: editor.getHTML(),
+                newImage: {
+                    url: blobUrl,
+                    file: file
+                }
+            })
+        }
+
+        if (fileInputRef.current) {
+            fileInputRef.current.value = ''
+        }
+    }
 
     if (!editor) {
         return null
@@ -81,7 +134,34 @@ export function TiptapEditor({ content, onChange, editable = true }) {
                     >
                         <Heading2 className="w-4 h-4" />
                     </Button>
-                    <p className="text-xs text-muted-foreground mr-2">Paragraph</p>
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => editor.chain().focus().setParagraph().run()}
+                        className={editor.isActive('paragraph') ? 'bg-muted' : ''}
+                        title="Paragraph"
+                    >
+                        <Type className="w-4 h-4" />
+                    </Button>
+                    <div className="w-px h-6 bg-border mx-1" />
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploading}
+                        title="Upload Image"
+                    >
+                        {isUploading ? <ImageIcon className="w-4 h-4 animate-pulse" /> : <ImageIcon className="w-4 h-4" />}
+                    </Button>
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        className="hidden"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                    />
                     <div className="w-px h-6 bg-border mx-1" />
                     <Button
                         type="button"

@@ -25,6 +25,45 @@ const LOCALES = [
     { code: 'ar', label: 'Arabic (AR)' },
 ]
 
+const getWordCount = (text) => {
+    if (!text) return 0
+    return text.trim().split(/\s+/).filter(word => word.length > 0).length
+}
+
+const extractImageUrls = (json) => {
+    const urls = []
+    if (!json) return urls
+
+    const traverse = (node) => {
+        if (node.type === 'image' && node.attrs?.src) {
+            urls.push(node.attrs.src)
+        }
+        if (node.content) {
+            node.content.forEach(traverse)
+        }
+    }
+    traverse(json)
+    return urls
+}
+
+const replaceBlobUrls = (json, urlMap) => {
+    if (!json) return json
+    const newJson = JSON.parse(JSON.stringify(json))
+
+    const traverse = (node) => {
+        if (node.type === 'image' && node.attrs?.src) {
+            if (urlMap[node.attrs.src]) {
+                node.attrs.src = urlMap[node.attrs.src]
+            }
+        }
+        if (node.content) {
+            node.content.forEach(traverse)
+        }
+    }
+    traverse(newJson)
+    return newJson
+}
+
 export default function BlogEditorPage() {
     const { id } = useParams()
     const router = useRouter()
@@ -37,6 +76,7 @@ export default function BlogEditorPage() {
     const [isUploading, setIsUploading] = useState(false)
     const [pendingFile, setPendingFile] = useState(null)
     const fileInputRef = useRef(null)
+    const initialDataRef = useRef(null)
 
     // Blog Meta State
     const [blogData, setBlogData] = useState({
@@ -55,10 +95,34 @@ export default function BlogEditorPage() {
         }), {})
     )
 
+    const [pendingImages, setPendingImages] = useState(new Map()) // blobUrl -> File
+    const initialContentUrlsRef = useRef({}) // locale -> [url1, url2, ...]
+
     const [activeTab, setActiveTab] = useState('en')
+
+    // Change Detection
+    const hasChanges = initialDataRef.current ? (
+        JSON.stringify(initialDataRef.current.blogData) !== JSON.stringify(blogData) ||
+        JSON.stringify(initialDataRef.current.translations) !== JSON.stringify(translations) ||
+        !!pendingFile
+    ) : false
 
     useEffect(() => {
         if (id === 'new') {
+            const initialTranslations = LOCALES.reduce((acc, loc) => ({
+                ...acc,
+                [loc.code]: { title: "", slug: "", description: "", content: {} }
+            }), {})
+            const initialBlog = {
+                is_published: false,
+                is_featured: false,
+                target_countries: [],
+                featured_image: "",
+            }
+            initialDataRef.current = {
+                blogData: initialBlog,
+                translations: initialTranslations
+            }
             setLoading(false)
             return
         }
@@ -98,6 +162,23 @@ export default function BlogEditorPage() {
             })
             setTranslations(loadedTranslations)
 
+            initialDataRef.current = {
+                blogData: {
+                    is_published: blog.is_published,
+                    is_featured: blog.is_featured,
+                    target_countries: blog.target_countries || [],
+                    featured_image: blog.featured_image || "",
+                },
+                translations: loadedTranslations
+            }
+
+            // Track initial content URLs for cleanup
+            const initialUrls = {}
+            LOCALES.forEach(loc => {
+                initialUrls[loc.code] = extractImageUrls(loadedTranslations[loc.code].content?.json || loadedTranslations[loc.code].content)
+            })
+            initialContentUrlsRef.current = initialUrls
+
         } catch (error) {
             console.error("Error fetching blog:", error)
             toast({
@@ -111,11 +192,19 @@ export default function BlogEditorPage() {
     }
 
     const handleTranslationChange = (field, value) => {
+        if (field === 'content' && value.newImage) {
+            setPendingImages(prev => {
+                const next = new Map(prev)
+                next.set(value.newImage.url, value.newImage.file)
+                return next
+            })
+        }
+
         setTranslations(prev => ({
             ...prev,
             [activeTab]: {
                 ...prev[activeTab],
-                [field]: value
+                [field]: value.json ? value : value // Tiptap returns {json, html}
             }
         }))
     }
@@ -150,93 +239,121 @@ export default function BlogEditorPage() {
 
     const handleSave = async () => {
         // Validation
-        const enTitle = translations['en'].title
-        if (!enTitle) {
+        const en = translations['en']
+        if (!en.title || !en.description || !en.content || (typeof en.content === 'object' && Object.keys(en.content).length === 0)) {
             toast({
                 title: "Validation Error",
-                description: "English title is required",
+                description: "English content (Title, Short Description, and Content) is mandatory.",
                 variant: "destructive"
             })
+            setActiveTab('en')
             return
+        }
+
+        // Validate word limit for short descriptions
+        for (const loc of LOCALES) {
+            const desc = translations[loc.code].description
+            if (desc && getWordCount(desc) > 50) {
+                toast({
+                    title: "Validation Error",
+                    description: `Short description (${loc.code.toUpperCase()}) exceeds 50 word limit.`,
+                    variant: "destructive"
+                })
+                setActiveTab(loc.code)
+                return
+            }
         }
 
         setSaving(true)
         try {
             let finalImageUrl = blogData.featured_image
 
-            // 0. Handle Image Deletion (If replaced or removed)
+            // 1. Handle Featured Image Original Logic (kept same but updated with pendingFile)
             if (id !== 'new') {
-                const { data: currentBlog } = await supabase
-                    .from('blogs')
-                    .select('featured_image')
-                    .eq('id', id)
-                    .single()
-
+                const { data: currentBlog } = await supabase.from('blogs').select('featured_image').eq('id', id).single()
                 const oldImage = currentBlog?.featured_image
-
-                // Logic: 
-                // 1. If we have a pending file, we are definitely NOT using the old image -> delete old
-                // 2. If we don't have a pending file, but finalImageUrl is different from oldImage -> delete old
-                // (This covers explicit removal where finalImageUrl becomes "")
-
                 const isReplacing = !!pendingFile
                 const isRemoving = !pendingFile && oldImage && finalImageUrl !== oldImage
-
                 if ((isReplacing || isRemoving) && oldImage) {
                     try {
                         const path = oldImage.split('/assets/').pop()
-                        if (path) {
-                            await supabase.storage.from('assets').remove([path])
-                        }
+                        if (path) await supabase.storage.from('assets').remove([path])
                     } catch (e) {
-                        console.error("Error deleting old image:", e)
+                        console.error("Error deleting old featured image:", e)
                     }
                 }
             }
 
-            // 1. Upload Pending Image if exists
             if (pendingFile) {
                 const file = pendingFile
                 const fileExt = file.name.split('.').pop()
-                const fileNameBase = file.name.lastIndexOf('.') !== -1
-                    ? file.name.slice(0, file.name.lastIndexOf('.'))
-                    : file.name
-
-                // Sanitize
+                const fileNameBase = file.name.lastIndexOf('.') !== -1 ? file.name.slice(0, file.name.lastIndexOf('.')) : file.name
                 const sanitizedBase = fileNameBase.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()
 
-                // Check for duplicates
-                const { data: existingFiles } = await supabase.storage
-                    .from('assets')
-                    .list('blog_image/featured_image', {
-                        limit: 100,
-                        search: sanitizedBase
-                    })
-
+                const { data: existingFiles } = await supabase.storage.from('assets').list('blog_image/featured_image', { limit: 100, search: sanitizedBase })
                 let finalFileName = `${sanitizedBase}.${fileExt}`
                 let counter = 1
-
                 while (existingFiles && existingFiles.find(f => f.name === finalFileName)) {
                     finalFileName = `${sanitizedBase}-${counter}.${fileExt}`
                     counter++
                 }
-
                 const filePath = `blog_image/featured_image/${finalFileName}`
-
-                const { error: uploadError } = await supabase.storage
-                    .from('assets')
-                    .upload(filePath, file)
-
+                const { error: uploadError } = await supabase.storage.from('assets').upload(filePath, file)
                 if (uploadError) throw uploadError
-
-                const { data: { publicUrl } } = supabase.storage
-                    .from('assets')
-                    .getPublicUrl(filePath)
-
+                const { data: { publicUrl } } = supabase.storage.from('assets').getPublicUrl(filePath)
                 finalImageUrl = publicUrl
             }
 
-            // 2. Upsert Blog
+            // --- 2. DEFERRED TIPTAP IMAGE UPLOADS ---
+            const finalTranslations = JSON.parse(JSON.stringify(translations))
+            const blobToPublicMap = {}
+
+            for (const loc of LOCALES) {
+                const content = finalTranslations[loc.code].content
+                if (!content || !content.json) continue
+
+                const usedUrls = extractImageUrls(content.json)
+                const usedBlobUrls = usedUrls.filter(url => url.startsWith('blob:'))
+
+                for (const blobUrl of usedBlobUrls) {
+                    if (blobToPublicMap[blobUrl]) continue
+
+                    const file = pendingImages.get(blobUrl)
+                    if (file) {
+                        const fileExt = file.name.split('.').pop()
+                        const fileNameBase = file.name.lastIndexOf('.') !== -1 ? file.name.slice(0, file.name.lastIndexOf('.')) : file.name
+                        const sanitizedBase = fileNameBase.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()
+
+                        const { data: existingFiles } = await supabase.storage.from('assets').list('blog_image/content_image', { limit: 100, search: sanitizedBase })
+                        let finalFileName = `${sanitizedBase}.${fileExt}`
+                        let counter = 1
+                        while (existingFiles && existingFiles.find(f => f.name === finalFileName)) {
+                            finalFileName = `${sanitizedBase}-${counter}.${fileExt}`
+                            counter++
+                        }
+
+                        const filePath = `blog_image/content_image/${finalFileName}`
+                        const { error: uploadError } = await supabase.storage.from('assets').upload(filePath, file)
+                        if (uploadError) throw uploadError
+
+                        const { data: { publicUrl } } = supabase.storage.from('assets').getPublicUrl(filePath)
+                        blobToPublicMap[blobUrl] = publicUrl
+                    }
+                }
+
+                // Replace blob URLs in JSON and HTML
+                if (Object.keys(blobToPublicMap).length > 0) {
+                    finalTranslations[loc.code].content.json = replaceBlobUrls(content.json, blobToPublicMap)
+                    // Simple replacement for HTML string
+                    let html = content.html
+                    Object.entries(blobToPublicMap).forEach(([blob, pub]) => {
+                        html = html.split(blob).join(pub)
+                    })
+                    finalTranslations[loc.code].content.html = html
+                }
+            }
+
+            // --- 3. UPSERT BLOG & TRANSLATIONS ---
             const blogPayload = {
                 is_published: blogData.is_published,
                 is_featured: blogData.is_featured,
@@ -246,36 +363,24 @@ export default function BlogEditorPage() {
             }
 
             let blogId = id
-
             if (id === 'new') {
-                const { data, error } = await supabase
-                    .from('blogs')
-                    .insert([blogPayload])
-                    .select()
-                    .single()
-
+                const { data, error } = await supabase.from('blogs').insert([blogPayload]).select().single()
                 if (error) throw error
                 blogId = data.id
             } else {
-                const { error } = await supabase
-                    .from('blogs')
-                    .update(blogPayload)
-                    .eq('id', id)
-
+                const { error } = await supabase.from('blogs').update(blogPayload).eq('id', id)
                 if (error) throw error
             }
 
-            // 2. Upsert Translations
             const translationsToUpsert = []
-
             for (const loc of LOCALES) {
-                const t = translations[loc.code]
-                if (t.title) { // Only save if title exists
+                const t = finalTranslations[loc.code]
+                if (t.title) {
                     translationsToUpsert.push({
                         blog_id: blogId,
                         locale: loc.code,
                         title: t.title,
-                        slug: t.slug, // Should check uniqueness? Unique constraint on slug in DB will catch this
+                        slug: t.slug,
                         description: t.description,
                         content: t.content
                     })
@@ -286,15 +391,53 @@ export default function BlogEditorPage() {
                 const { error: transError } = await supabase
                     .from('blog_translations')
                     .upsert(translationsToUpsert, { onConflict: 'blog_id, locale' })
-
                 if (transError) throw transError
             }
 
-            toast({ title: "Success", description: "Blog saved successfully", variant: "success" })
+            // --- 4. STORAGE CLEANUP (Deleted Images) ---
+            const newAllUrls = []
+            LOCALES.forEach(loc => {
+                newAllUrls.push(...extractImageUrls(finalTranslations[loc.code].content?.json || finalTranslations[loc.code].content))
+            })
 
-            if (id === 'new') {
-                router.push(`/admin/blogs/${blogId}`)
+            const oldAllUrls = []
+            Object.values(initialContentUrlsRef.current).forEach(urls => oldAllUrls.push(...urls))
+
+            const urlsToDelete = oldAllUrls.filter(url => !newAllUrls.includes(url) && url.includes('/assets/blog_image/'))
+
+            if (urlsToDelete.length > 0) {
+                const pathsToDelete = urlsToDelete.map(url => url.split('/assets/').pop()).filter(Boolean)
+                if (pathsToDelete.length > 0) {
+                    await supabase.storage.from('assets').remove(pathsToDelete)
+                }
             }
+
+            // --- 5. FINALIZE ---
+            initialDataRef.current = {
+                blogData: { ...blogPayload, featured_image: finalImageUrl },
+                translations: JSON.parse(JSON.stringify(finalTranslations))
+            }
+
+            // Update initialContentUrlsRef for next save
+            const nextInitialUrls = {}
+            LOCALES.forEach(loc => {
+                nextInitialUrls[loc.code] = extractImageUrls(finalTranslations[loc.code].content?.json || finalTranslations[loc.code].content)
+            })
+            initialContentUrlsRef.current = nextInitialUrls
+
+            setTranslations(finalTranslations)
+            setPendingFile(null)
+            setPendingImages(new Map())
+
+            // Delay revocation slightly to allow browser to switch to public URLs
+            if (blobToPublicMap) {
+                setTimeout(() => {
+                    Object.keys(blobToPublicMap).forEach(url => URL.revokeObjectURL(url))
+                }, 1000)
+            }
+
+            toast({ title: "Success", description: "Blog saved successfully", variant: "success" })
+            if (id === 'new') router.push(`/admin/blogs/${blogId}`)
 
         } catch (error) {
             console.error("Save error:", error)
@@ -334,9 +477,9 @@ export default function BlogEditorPage() {
                         {id === 'new' ? 'Create Blog' : 'Edit Blog'}
                     </h1>
                 </div>
-                <Button onClick={handleSave} disabled={saving} className="bg-blue-600 hover:bg-blue-700">
+                <Button onClick={handleSave} disabled={saving || !hasChanges} className="bg-blue-600 hover:bg-blue-700">
                     {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
-                    Save Changes
+                    {hasChanges ? 'Save Changes' : 'No Changes'}
                 </Button>
             </div>
 
@@ -351,18 +494,24 @@ export default function BlogEditorPage() {
                             <Tabs value={activeTab} onValueChange={setActiveTab}>
                                 <TabsList className="grid grid-cols-5 mb-4">
                                     {LOCALES.map(loc => (
-                                        <TabsTrigger key={loc.code} value={loc.code}>{loc.code.toUpperCase()}</TabsTrigger>
+                                        <TabsTrigger key={loc.code} value={loc.code}>
+                                            {loc.code.toUpperCase()}
+                                            {loc.code === 'en' && <span className="ml-1 text-red-500">*</span>}
+                                        </TabsTrigger>
                                     ))}
                                 </TabsList>
 
                                 {LOCALES.map(loc => (
                                     <TabsContent key={loc.code} value={loc.code} className="space-y-4">
                                         <div className="space-y-2">
-                                            <Label>Post Title ({loc.code.toUpperCase()})</Label>
+                                            <Label className="flex items-center gap-1">
+                                                Post Title ({loc.code.toUpperCase()})
+                                                {loc.code === 'en' && <span className="text-red-500">*</span>}
+                                            </Label>
                                             <Input
                                                 value={translations[loc.code].title}
                                                 onChange={(e) => loc.code === 'en' ? handleTitleChange(e.target.value) : handleTranslationChange('title', e.target.value)}
-                                                placeholder="Enter blog title"
+                                                placeholder={loc.code === 'en' ? "Enter blog title (Required)" : "Enter blog title"}
                                             />
                                         </div>
 
@@ -377,17 +526,29 @@ export default function BlogEditorPage() {
                                         </div>
 
                                         <div className="space-y-2">
-                                            <Label>Short Description</Label>
+                                            <div className="flex justify-between items-center">
+                                                <Label className="flex items-center gap-1">
+                                                    Short Description
+                                                    {loc.code === 'en' && <span className="text-red-500">*</span>}
+                                                </Label>
+                                                <span className={`text-xs ${getWordCount(translations[loc.code].description) > 50 ? 'text-red-500 font-medium' : 'text-muted-foreground'}`}>
+                                                    {getWordCount(translations[loc.code].description)}/50 words
+                                                </span>
+                                            </div>
                                             <Textarea
                                                 value={translations[loc.code].description}
                                                 onChange={(e) => handleTranslationChange('description', e.target.value)}
-                                                placeholder="Brief summary for list view and SEO"
+                                                placeholder={loc.code === 'en' ? "Brief summary (Required, Max 50 words)" : "Brief summary (Max 50 words)"}
                                                 rows={3}
+                                                className={getWordCount(translations[loc.code].description) > 50 ? 'border-red-500 focus-visible:ring-red-500' : ''}
                                             />
                                         </div>
 
                                         <div className="space-y-2">
-                                            <Label>Content</Label>
+                                            <Label className="flex items-center gap-1">
+                                                Content
+                                                {loc.code === 'en' && <span className="text-red-500">*</span>}
+                                            </Label>
                                             <div className="min-h-[400px]">
                                                 <TiptapEditor
                                                     content={translations[loc.code].content?.json || translations[loc.code].content}
