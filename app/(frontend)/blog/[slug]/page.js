@@ -111,17 +111,13 @@ export default function SingleBlogPost() {
                 <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-transparent" />
                 <div className="absolute bottom-0 left-0 w-full p-6 md:p-12">
                     <div className="container mx-auto">
-                        <Link href="/" className="inline-flex items-center text-white/80 hover:text-white mb-6 group transition-all">
-                            <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
-                            Back to Blog List
-                        </Link>
+                        <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-white max-w-4xl leading-tight">
+                            {blog.title}
+                        </h1>
                         <div className="flex items-center gap-3 text-white/90 text-sm mb-4">
                             <Calendar className="w-4 h-4 text-blue-400" />
                             <span>{format(new Date(blog.blogs?.created_at), 'MMMM d, yyyy')}</span>
                         </div>
-                        <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-white max-w-4xl leading-tight">
-                            {blog.title}
-                        </h1>
                     </div>
                 </div>
             </div>

@@ -1,8 +1,14 @@
 "use client"
 
 import { useEditor, EditorContent } from '@tiptap/react'
-import StarterKit from '@tiptap/starter-kit'
-import Image from '@tiptap/extension-image'
+import { StarterKit } from '@tiptap/starter-kit'
+import { Image } from '@tiptap/extension-image'
+import { TextAlign } from '@tiptap/extension-text-align'
+import { Highlight } from '@tiptap/extension-highlight'
+import { Table } from '@tiptap/extension-table'
+import { TableRow } from '@tiptap/extension-table-row'
+import { TableCell } from '@tiptap/extension-table-cell'
+import { TableHeader } from '@tiptap/extension-table-header'
 import { createClient } from '@/lib/supabase/client'
 import { useRef, useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
@@ -17,7 +23,15 @@ import {
     Undo,
     Redo,
     Image as ImageIcon,
-    Type
+    Type,
+    AlignCenter,
+    AlignLeft,
+    AlignRight,
+    AlignJustify,
+    Highlighter,
+    Table as TableIcon,
+    Plus,
+    Trash2
 } from "lucide-react"
 
 export function TiptapEditor({ content, onChange, editable = true }) {
@@ -29,6 +43,16 @@ export function TiptapEditor({ content, onChange, editable = true }) {
         extensions: [
             StarterKit,
             Image,
+            TextAlign.configure({
+                types: ['heading', 'paragraph'],
+            }),
+            Highlight.configure({ multicolor: true }),
+            Table.configure({
+                resizable: true,
+            }),
+            TableRow,
+            TableHeader,
+            TableCell,
         ],
         content: content,
         editable: editable,
@@ -41,7 +65,7 @@ export function TiptapEditor({ content, onChange, editable = true }) {
         },
         editorProps: {
             attributes: {
-                class: 'prose prose-slate focus:outline-none min-h-[300px] px-6 py-4 border-none bg-transparent max-w-none'
+                class: 'prose prose-slate focus:outline-none min-h-[300px] px-6 py-4 border-none bg-transparent max-w-none [&_table]:border-collapse [&_table]:w-full [&_table]:my-4 [&_td]:border [&_td]:border-slate-300 [&_td]:p-2 [&_th]:border [&_th]:border-slate-300 [&_th]:p-2 [&_th]:bg-slate-50 [&_th]:font-bold [&_mark]:bg-yellow-200 [&_mark]:px-1'
             }
         }
     })
@@ -162,6 +186,100 @@ export function TiptapEditor({ content, onChange, editable = true }) {
                         accept="image/*"
                         onChange={handleImageUpload}
                     />
+                    <div className="w-px h-6 bg-border mx-1" />
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => editor.chain().focus().setTextAlign('left').run()}
+                        className={editor.isActive({ textAlign: 'left' }) ? 'bg-muted' : ''}
+                        title="Align Left"
+                    >
+                        <AlignLeft className="w-4 h-4" />
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => editor.chain().focus().setTextAlign('center').run()}
+                        className={editor.isActive({ textAlign: 'center' }) ? 'bg-muted' : ''}
+                        title="Align Center"
+                    >
+                        <AlignCenter className="w-4 h-4" />
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => editor.chain().focus().setTextAlign('right').run()}
+                        className={editor.isActive({ textAlign: 'right' }) ? 'bg-muted' : ''}
+                        title="Align Right"
+                    >
+                        <AlignRight className="w-4 h-4" />
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => editor.chain().focus().setTextAlign('justify').run()}
+                        className={editor.isActive({ textAlign: 'justify' }) ? 'bg-muted' : ''}
+                        title="Justify"
+                    >
+                        <AlignJustify className="w-4 h-4" />
+                    </Button>
+                    <div className="w-px h-6 bg-border mx-1" />
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => editor.chain().focus().toggleHighlight().run()}
+                        className={editor.isActive('highlight') ? 'bg-muted' : ''}
+                        title="Highlight"
+                    >
+                        <Highlighter className="w-4 h-4" />
+                    </Button>
+                    <div className="w-px h-6 bg-border mx-1" />
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
+                        title="Insert Table"
+                    >
+                        <TableIcon className="w-4 h-4" />
+                    </Button>
+                    {editor.isActive('table') && (
+                        <>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => editor.chain().focus().addRowAfter().run()}
+                                title="Add Row"
+                            >
+                                <Plus className="w-4 h-4 rotate-90" />
+                            </Button>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => editor.chain().focus().addColumnAfter().run()}
+                                title="Add Column"
+                            >
+                                <Plus className="w-4 h-4" />
+                            </Button>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => editor.chain().focus().deleteTable().run()}
+                                className="text-red-500"
+                                title="Delete Table"
+                            >
+                                <Trash2 className="w-4 h-4" />
+                            </Button>
+                        </>
+                    )}
                     <div className="w-px h-6 bg-border mx-1" />
                     <Button
                         type="button"

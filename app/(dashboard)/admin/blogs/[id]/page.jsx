@@ -15,15 +15,11 @@ import { TiptapEditor } from "@/components/ui/tiptap-editor"
 import { MultiCountrySelector } from "@/components/ui/multi-country-selector"
 import { useToast } from "@/hooks/use-toast"
 import { ArrowLeft, Loader2, Save, Upload, X } from "lucide-react"
+import { LOCALES } from "@/lib/locales"
+import { FlagIcon } from "@/components/ui/flag-icon"
 import countryData from "@/data/country.json"
 
-const LOCALES = [
-    { code: 'en', label: 'English (EN)' },
-    { code: 'fr', label: 'French (FR)' },
-    { code: 'nl', label: 'Dutch (NL)' },
-    { code: 'es', label: 'Spanish (ES)' },
-    { code: 'ar', label: 'Arabic (AR)' },
-]
+const LOCALES_ARRAY = Object.values(LOCALES)
 
 const getWordCount = (text) => {
     if (!text) return 0
@@ -89,7 +85,7 @@ export default function BlogEditorPage() {
     // Translations State
     // Structure: { en: { title: "", slug: "", description: "", content: {} }, fr: ... }
     const [translations, setTranslations] = useState(
-        LOCALES.reduce((acc, loc) => ({
+        LOCALES_ARRAY.reduce((acc, loc) => ({
             ...acc,
             [loc.code]: { title: "", slug: "", description: "", content: {} }
         }), {})
@@ -109,7 +105,7 @@ export default function BlogEditorPage() {
 
     useEffect(() => {
         if (id === 'new') {
-            const initialTranslations = LOCALES.reduce((acc, loc) => ({
+            const initialTranslations = LOCALES_ARRAY.reduce((acc, loc) => ({
                 ...acc,
                 [loc.code]: { title: "", slug: "", description: "", content: {} }
             }), {})
@@ -151,7 +147,7 @@ export default function BlogEditorPage() {
 
             const loadedTranslations = { ...translations }
             blog.blog_translations.forEach(t => {
-                if (LOCALES.some(l => l.code === t.locale)) {
+                if (LOCALES_ARRAY.some(l => l.code === t.locale)) {
                     loadedTranslations[t.locale] = {
                         title: t.title,
                         slug: t.slug,
@@ -174,7 +170,7 @@ export default function BlogEditorPage() {
 
             // Track initial content URLs for cleanup
             const initialUrls = {}
-            LOCALES.forEach(loc => {
+            LOCALES_ARRAY.forEach(loc => {
                 initialUrls[loc.code] = extractImageUrls(loadedTranslations[loc.code].content?.json || loadedTranslations[loc.code].content)
             })
             initialContentUrlsRef.current = initialUrls
@@ -209,17 +205,19 @@ export default function BlogEditorPage() {
         }))
     }
 
-    // Auto-generate slug from title for current tab
-    const handleTitleChange = (value) => {
+    // Auto-generate slug from title for specific locale
+    const handleTitleChange = (value, locCode = activeTab) => {
         const slug = value
             .toLowerCase()
+            .normalize('NFD') // Normalize to decomposed form to handle accented characters
+            .replace(/[\u0300-\u036f]/g, '') // Remove combining diacritical marks
             .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric with hyphens
             .replace(/^-+|-+$/g, '') // Remove leading/trailing hyphens
 
         setTranslations(prev => ({
             ...prev,
-            [activeTab]: {
-                ...prev[activeTab],
+            [locCode]: {
+                ...prev[locCode],
                 title: value,
                 slug: slug
             }
@@ -251,7 +249,7 @@ export default function BlogEditorPage() {
         }
 
         // Validate word limit for short descriptions
-        for (const loc of LOCALES) {
+        for (const loc of LOCALES_ARRAY) {
             const desc = translations[loc.code].description
             if (desc && getWordCount(desc) > 50) {
                 toast({
@@ -308,7 +306,7 @@ export default function BlogEditorPage() {
             const finalTranslations = JSON.parse(JSON.stringify(translations))
             const blobToPublicMap = {}
 
-            for (const loc of LOCALES) {
+            for (const loc of LOCALES_ARRAY) {
                 const content = finalTranslations[loc.code].content
                 if (!content || !content.json) continue
 
@@ -373,7 +371,7 @@ export default function BlogEditorPage() {
             }
 
             const translationsToUpsert = []
-            for (const loc of LOCALES) {
+            for (const loc of LOCALES_ARRAY) {
                 const t = finalTranslations[loc.code]
                 if (t.title) {
                     translationsToUpsert.push({
@@ -396,7 +394,7 @@ export default function BlogEditorPage() {
 
             // --- 4. STORAGE CLEANUP (Deleted Images) ---
             const newAllUrls = []
-            LOCALES.forEach(loc => {
+            LOCALES_ARRAY.forEach(loc => {
                 newAllUrls.push(...extractImageUrls(finalTranslations[loc.code].content?.json || finalTranslations[loc.code].content))
             })
 
@@ -420,7 +418,7 @@ export default function BlogEditorPage() {
 
             // Update initialContentUrlsRef for next save
             const nextInitialUrls = {}
-            LOCALES.forEach(loc => {
+            LOCALES_ARRAY.forEach(loc => {
                 nextInitialUrls[loc.code] = extractImageUrls(finalTranslations[loc.code].content?.json || finalTranslations[loc.code].content)
             })
             initialContentUrlsRef.current = nextInitialUrls
@@ -465,7 +463,7 @@ export default function BlogEditorPage() {
     }
 
     return (
-        <div className="p-6 space-y-6 max-w-7xl mx-auto">
+        <div className="p-6 space-y-6 max-w-[1450px] mx-auto">
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -493,15 +491,21 @@ export default function BlogEditorPage() {
                         <CardContent>
                             <Tabs value={activeTab} onValueChange={setActiveTab}>
                                 <TabsList className="grid grid-cols-5 mb-4">
-                                    {LOCALES.map(loc => (
-                                        <TabsTrigger key={loc.code} value={loc.code}>
+                                    {LOCALES_ARRAY.map(loc => (
+                                        <TabsTrigger key={loc.code} value={loc.code} className="flex items-center gap-2">
+                                            <FlagIcon
+                                                src={loc.flag}
+                                                alt={loc.name}
+                                                countryCode={loc.countryCode}
+                                                size={16}
+                                            />
                                             {loc.code.toUpperCase()}
                                             {loc.code === 'en' && <span className="ml-1 text-red-500">*</span>}
                                         </TabsTrigger>
                                     ))}
                                 </TabsList>
 
-                                {LOCALES.map(loc => (
+                                {LOCALES_ARRAY.map(loc => (
                                     <TabsContent key={loc.code} value={loc.code} className="space-y-4">
                                         <div className="space-y-2">
                                             <Label className="flex items-center gap-1">
@@ -510,7 +514,7 @@ export default function BlogEditorPage() {
                                             </Label>
                                             <Input
                                                 value={translations[loc.code].title}
-                                                onChange={(e) => loc.code === 'en' ? handleTitleChange(e.target.value) : handleTranslationChange('title', e.target.value)}
+                                                onChange={(e) => handleTitleChange(e.target.value, loc.code)}
                                                 placeholder={loc.code === 'en' ? "Enter blog title (Required)" : "Enter blog title"}
                                             />
                                         </div>
