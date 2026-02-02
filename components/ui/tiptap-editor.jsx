@@ -9,6 +9,7 @@ import { Table } from '@tiptap/extension-table'
 import { TableRow } from '@tiptap/extension-table-row'
 import { TableCell } from '@tiptap/extension-table-cell'
 import { TableHeader } from '@tiptap/extension-table-header'
+import Heading from '@tiptap/extension-heading'
 import { createClient } from '@/lib/supabase/client'
 import { useRef, useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
@@ -31,7 +32,8 @@ import {
     Highlighter,
     Table as TableIcon,
     Plus,
-    Trash2
+    Trash2,
+    EyeOff
 } from "lucide-react"
 
 export function TiptapEditor({ content, onChange, editable = true }) {
@@ -41,7 +43,30 @@ export function TiptapEditor({ content, onChange, editable = true }) {
 
     const editor = useEditor({
         extensions: [
-            StarterKit,
+            StarterKit.configure({
+                heading: false,
+            }),
+            Heading.extend({
+                addAttributes() {
+                    return {
+                        ...this.parent?.(),
+                        dataTocIgnore: {
+                            default: null,
+                            parseHTML: element => element.getAttribute('data-toc-ignore'),
+                            renderHTML: attributes => {
+                                if (!attributes.dataTocIgnore) {
+                                    return {}
+                                }
+                                return {
+                                    'data-toc-ignore': attributes.dataTocIgnore,
+                                }
+                            },
+                        },
+                    }
+                }
+            }).configure({
+                levels: [1, 2],
+            }),
             Image,
             TextAlign.configure({
                 types: ['heading', 'paragraph'],
@@ -65,7 +90,7 @@ export function TiptapEditor({ content, onChange, editable = true }) {
         },
         editorProps: {
             attributes: {
-                class: 'prose prose-slate focus:outline-none min-h-[300px] px-6 py-4 border-none bg-transparent max-w-none [&_table]:border-collapse [&_table]:w-full [&_table]:my-4 [&_td]:border [&_td]:border-slate-300 [&_td]:p-2 [&_th]:border [&_th]:border-slate-300 [&_th]:p-2 [&_th]:bg-slate-50 [&_th]:font-bold [&_mark]:bg-yellow-200 [&_mark]:px-1'
+                class: 'prose prose-slate focus:outline-none min-h-[300px] px-6 py-4 border-none bg-transparent max-w-none [&_table]:border-collapse [&_table]:w-full [&_table]:my-4 [&_td]:border [&_td]:border-slate-300 [&_td]:p-2 [&_th]:border [&_th]:border-slate-300 [&_th]:p-2 [&_th]:bg-slate-50 [&_th]:font-bold [&_mark]:bg-yellow-200 [&_mark]:px-1 [&_h1[data-toc-ignore]]:opacity-50 [&_h2[data-toc-ignore]]:opacity-50 [&_h3[data-toc-ignore]]:opacity-50'
             }
         }
     })
@@ -157,6 +182,21 @@ export function TiptapEditor({ content, onChange, editable = true }) {
                         className={editor.isActive('heading', { level: 2 }) ? 'bg-muted' : ''}
                     >
                         <Heading2 className="w-4 h-4" />
+                    </Button>
+                    <div className="w-px h-6 bg-border mx-1" />
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                            const isIgnored = editor.getAttributes('heading').dataTocIgnore
+                            editor.chain().focus().updateAttributes('heading', { dataTocIgnore: isIgnored ? null : 'true' }).run()
+                        }}
+                        disabled={!editor.isActive('heading')}
+                        className={editor.getAttributes('heading').dataTocIgnore ? 'bg-muted text-red-500' : ''}
+                        title="Toggle TOC Visibility"
+                    >
+                        <EyeOff className="w-4 h-4" />
                     </Button>
                     <Button
                         type="button"

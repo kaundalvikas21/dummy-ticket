@@ -91,8 +91,10 @@ export function BlogSection() {
                             Stay updated with travel tips, visa news, and guides for your next trip.
                         </p>
                     </div>
-                    <Link href="/blog" className="hidden md:flex items-center text-blue-600 font-semibold hover:gap-2 transition-all">
-                        View All Blogs <ArrowRight className="ml-1 w-4 h-4" />
+                    <Link href="/blog" className="hidden md:block">
+                        <Button className="rounded-full bg-linear-to-r from-[#0066FF] to-[#00D4AA] hover:opacity-90 transition-opacity text-white px-6 cursor-pointer">
+                            View All Blogs <ArrowRight className="ml-2 w-4 h-4" />
+                        </Button>
                     </Link>
                 </div>
 
@@ -116,14 +118,11 @@ export function BlogSection() {
                                         {format(new Date(mainBlog.created_at), 'MMMM d, yyyy')}
                                     </span>
                                 </div>
-                                <h3 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4 group-hover:text-blue-600 transition-colors">
+                                <h3 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4 transition-colors">
                                     {mainBlog.translation?.title}
                                 </h3>
-                                <p className="text-slate-600 line-clamp-3 mb-6">
-                                    {mainBlog.translation?.description}
-                                </p>
-                                <div className="flex items-center text-blue-600 font-bold group-hover:gap-2 transition-all">
-                                    Read Full Story <ArrowRight className="ml-2 w-5 h-5" />
+                                <div className="flex items-center text-blue-600 font-bold gap-2 transition-all">
+                                    Read More <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                 </div>
                             </div>
                         </Link>
@@ -135,7 +134,7 @@ export function BlogSection() {
                             <Link
                                 key={blog.id}
                                 href={`/blog/${blog.translation?.slug}`}
-                                className="flex gap-4 p-4 rounded-xl bg-white shadow-sm hover:shadow-md transition-all group overflow-hidden"
+                                className="flex gap-4 p-4 rounded-xl bg-white shadow-sm hover:shadow-md transition-all group overflow-hidden items-center"
                             >
                                 <div className="w-24 h-24 sm:w-32 sm:h-32 shrink-0 overflow-hidden rounded-lg">
                                     <img
@@ -148,11 +147,14 @@ export function BlogSection() {
                                     <span className="text-xs text-slate-500 mb-1">
                                         {format(new Date(blog.created_at), 'MMM d, yyyy')}
                                     </span>
-                                    <h4 className="text-lg font-bold text-slate-900 line-clamp-2 leading-tight group-hover:text-blue-600 transition-colors mb-2">
+                                    <h4 className="text-lg font-bold text-slate-900 line-clamp-2 leading-tight transition-colors mb-2">
                                         {blog.translation?.title}
                                     </h4>
-                                    <div className="text-sm font-semibold text-blue-600 flex items-center hover:gap-1 transition-all">
-                                        Read More <ArrowRight className="ml-1 w-3 h-3" />
+                                    <p className="text-sm text-slate-600 line-clamp-2 mb-3">
+                                        {blog.translation?.description}
+                                    </p>
+                                    <div className="text-sm font-semibold text-blue-600 flex items-center gap-1 transition-all">
+                                        Read More <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
                                     </div>
                                 </div>
                             </Link>
