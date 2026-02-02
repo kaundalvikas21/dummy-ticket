@@ -1,0 +1,97 @@
+[
+    {
+        "name": "United States",
+        "code": "US",
+        "currency": "USD"
+    },
+    {
+        "name": "India",
+        "code": "IN",
+        "currency": "INR"
+    },
+    {
+        "name": "United Arab Emirates",
+        "code": "AE",
+        "currency": "AED"
+    },
+    {
+        "name": "Europe",
+        "code": "EU",
+        "currency": "EUR"
+    },
+    {
+        "name": "United Kingdom",
+        "code": "GB",
+        "currency": "GBP"
+    },
+    {
+        "name": "Canada",
+        "code": "CA",
+        "currency": "CAD"
+    },
+    {
+        "name": "Australia",
+        "code": "AU",
+        "currency": "AUD"
+    },
+    {
+        "name": "Japan",
+        "code": "JP",
+        "currency": "JPY"
+    },
+    {
+        "name": "China",
+        "code": "CN",
+        "currency": "CNY"
+    },
+    {
+        "name": "Singapore",
+        "code": "SG",
+        "currency": "SGD"
+    },
+    {
+        "name": "Saudi Arabia",
+        "code": "SA",
+        "currency": "SAR"
+    },
+    {
+        "name": "New Zealand",
+        "code": "NZ",
+        "currency": "NZD"
+    },
+    {
+        "name": "South Korea",
+        "code": "KR",
+        "currency": "KRW"
+    },
+    {
+        "name": "Brazil",
+        "code": "BR",
+        "currency": "BRL"
+    },
+    {
+        "name": "South Africa",
+        "code": "ZA",
+        "currency": "ZAR"
+    },
+    {
+        "name": "Mexico",
+        "code": "MX",
+        "currency": "MXN"
+    },
+    {
+        "name": "Thailand",
+        "code": "TH",
+        "currency": "THB"
+    },
+    {
+        "name": "Russia",
+        "code": "RU",
+        "currency": "RUB"
+    },
+    {
+        "name": "Hong Kong",
+        "code": "HK",
+        "currency": "HKD"
+    }
+]

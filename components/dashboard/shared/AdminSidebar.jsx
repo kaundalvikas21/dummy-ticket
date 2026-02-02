@@ -23,6 +23,7 @@ import {
   LogOut,
   Loader2,
   Home,
+  BookOpen,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
@@ -42,6 +43,7 @@ const menuItems = [
   { id: "vendors", label: "Vendors", icon: Building2, href: "/admin/vendors" },
   { id: "support", label: "Support", icon: MessageSquare, href: "/admin/support" },
   { id: "analytics", label: "Analytics", icon: BarChart3, href: "/admin/analytics" },
+  { id: "blogs", label: "Blogs", icon: BookOpen, href: "/admin/blogs" },
   {
     id: "pages", label: "Pages", icon: FileText, href: "/admin/pages", hasSubmenu: true,
     submenu: [
