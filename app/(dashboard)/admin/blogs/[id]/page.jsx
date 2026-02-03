@@ -489,7 +489,7 @@ export default function BlogEditorPage() {
     return (
         <div className="p-6 space-y-6 max-w-[1450px] mx-auto">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between bg-white p-4 rounded-lg">
                 <div className="flex items-center gap-4">
                     <Button variant="ghost" onClick={() => router.back()}>
                         <ArrowLeft className="h-4 w-4 mr-2" />
