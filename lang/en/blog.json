@@ -1,0 +1,23 @@
+{
+    "hero": {
+        "title": "Blogs",
+        "subtitle": "Explore our latest insights, travel tips, and updates for your next adventure."
+    },
+    "sidebar": {
+        "recentPosts": "Recent Posts",
+        "noPosts": "No recent posts found.",
+        "ctaTitle": "Need a Dummy Ticket?",
+        "ctaSubtitle": "Get confirmed flight reservations and hotel bookings for your visa application in minutes.",
+        "ctaButton": "Create Ticket Now"
+    },
+    "list": {
+        "latestPublication": "Latest Publication",
+        "showing": "Showing",
+        "stories": "stories",
+        "loading": "Loading amazing stories...",
+        "noPostsFound": "No Posts Found",
+        "noPostsDesc": "We're still working on our first few stories. Stay tuned!",
+        "readMore": "Read More",
+        "readFullArticle": "Read Full Article"
+    }
+}

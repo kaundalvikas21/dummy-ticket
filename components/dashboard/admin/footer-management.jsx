@@ -59,6 +59,14 @@ import {
   SkeletonCardContent,
 } from "@/components/ui/skeleton-card";
 
+// Safe ID generator that works in non-secure contexts (http)
+const generateId = () => {
+  if (typeof window !== 'undefined' && window.crypto && window.crypto.randomUUID) {
+    return window.crypto.randomUUID();
+  }
+  return Math.random().toString(36).substring(2, 11) + Date.now().toString(36);
+};
+
 export function FooterManagement() {
   const { toast } = useToast();
   const [footerData, setFooterData] = useState({});
@@ -749,7 +757,7 @@ export function FooterManagement() {
           operation: "add_to_array",
           section: "contact",
           data: {
-            id: crypto.randomUUID(),
+            id: generateId(),
             title,
             content,
             icon_type,
@@ -845,7 +853,7 @@ export function FooterManagement() {
           operation: "add_to_array",
           section: "social",
           data: {
-            id: crypto.randomUUID(),
+            id: generateId(),
             name,
             url,
             icon_name,
@@ -1015,7 +1023,7 @@ export function FooterManagement() {
   // Helper functions for section-specific updates
   const addLinkOptimistically = (linkData, linkType) => {
     const newLink = {
-      id: crypto.randomUUID(), // Temporary ID
+      id: generateId(), // Temporary ID
       title: linkData.title,
       href: linkData.url,
       visible: true,
@@ -1042,7 +1050,7 @@ export function FooterManagement() {
 
   const addContactOptimistically = (contactData) => {
     const newContact = {
-      id: crypto.randomUUID(), // Temporary ID
+      id: generateId(), // Temporary ID
       text: contactData.title,
       href: contactData.link_type === 'tel' ? `tel:${contactData.content}` : `mailto:${contactData.content}`,
       icon: contactData.icon_type,
@@ -1070,7 +1078,7 @@ export function FooterManagement() {
 
   const addSocialOptimistically = (socialData) => {
     const newSocial = {
-      id: crypto.randomUUID(), // Temporary ID
+      id: generateId(), // Temporary ID
       name: socialData.name,
       href: socialData.url,
       icon_name: socialData.icon_name,
@@ -1181,453 +1189,276 @@ export function FooterManagement() {
               {/* Left Column: Logo & Company */}
               <div className="space-y-6">
                 <Card className="h-full border border-gray-200 shadow-md hover:shadow-lg transition-shadow duration-200">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Upload className="w-5 h-5" />
-                  Logo & Company
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Logo Display Information */}
-                <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                  <div className="flex items-start gap-2">
-                    <div className="w-5 h-5 text-blue-500 mt-0.5">
-                      <Info className="w-full h-full" />
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Upload className="w-5 h-5" />
+                      Logo & Company
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Logo Display Information */}
+                    <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                      <div className="flex items-start gap-2">
+                        <div className="w-5 h-5 text-blue-500 mt-0.5">
+                          <Info className="w-full h-full" />
+                        </div>
+                        <div className="text-sm">
+                          <p className="text-blue-800 dark:text-blue-200 font-medium mb-1">
+                            Logo Display Information
+                          </p>
+                          <p className="text-blue-700 dark:text-blue-300 text-xs leading-relaxed">
+                            The logo uploaded here will appear in both the <span className="font-semibold">header</span> and <span className="font-semibold">footer</span> of your website.
+                            Recommended size: 200x60px. Supports PNG, JPG, SVG, and WebP formats (max 5MB).
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-sm">
-                      <p className="text-blue-800 dark:text-blue-200 font-medium mb-1">
-                        Logo Display Information
-                      </p>
-                      <p className="text-blue-700 dark:text-blue-300 text-xs leading-relaxed">
-                        The logo uploaded here will appear in both the <span className="font-semibold">header</span> and <span className="font-semibold">footer</span> of your website.
-                        Recommended size: 200x60px. Supports PNG, JPG, SVG, and WebP formats (max 5MB).
-                      </p>
+                    <div>
+                      <Label>Company Name *</Label>
+                      <Input
+                        value={logoData.company_name}
+                        onChange={(e) =>
+                          setLogoData((prev) => ({
+                            ...prev,
+                            company_name: e.target.value,
+                          }))
+                        }
+                        placeholder="Enter company name (required)"
+                      />
                     </div>
-                  </div>
-                </div>
-                <div>
-                  <Label>Company Name *</Label>
-                  <Input
-                    value={logoData.company_name}
-                    onChange={(e) =>
-                      setLogoData((prev) => ({
-                        ...prev,
-                        company_name: e.target.value,
-                      }))
-                    }
-                    placeholder="Enter company name (required)"
-                  />
-                </div>
 
-                {/* Logo Upload */}
-                <div>
-                  <Label>Upload Logo (Optional)</Label>
-                  <div className="mt-2">
-                    {logoData.url || pendingLogoRemoval ? (
-                      <div
-                        className={`flex items-center justify-between p-3 border rounded-lg ${
-                          pendingLogoRemoval
-                            ? "bg-yellow-50 border-yellow-300"
-                            : "bg-gray-50"
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          {logoData.url ? (
-                            <img
-                              src={logoData.url}
-                              alt="Current logo"
-                              className="w-16 h-16 object-contain border rounded"
-                            />
-                          ) : (
-                            <div className="w-16 h-16 border rounded bg-gray-200 flex items-center justify-center">
-                              <ImageIcon className="w-8 h-8 text-gray-400" />
+                    {/* Logo Upload */}
+                    <div>
+                      <Label>Upload Logo (Optional)</Label>
+                      <div className="mt-2">
+                        {logoData.url || pendingLogoRemoval ? (
+                          <div
+                            className={`flex items-center justify-between p-3 border rounded-lg ${pendingLogoRemoval
+                              ? "bg-yellow-50 border-yellow-300"
+                              : "bg-gray-50"
+                              }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              {logoData.url ? (
+                                <img
+                                  src={logoData.url}
+                                  alt="Current logo"
+                                  className="w-16 h-16 object-contain border rounded"
+                                />
+                              ) : (
+                                <div className="w-16 h-16 border rounded bg-gray-200 flex items-center justify-center">
+                                  <ImageIcon className="w-8 h-8 text-gray-400" />
+                                </div>
+                              )}
+                              <div>
+                                <p className="text-sm font-medium text-gray-700">
+                                  {pendingLogoRemoval
+                                    ? "Logo marked for removal"
+                                    : logoData.originalFileName || "Logo uploaded"}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {pendingLogoRemoval
+                                    ? "Click save to permanently remove from storage and database"
+                                    : "Click save to persist changes"}
+                                </p>
+                              </div>
                             </div>
-                          )}
-                          <div>
-                            <p className="text-sm font-medium text-gray-700">
-                              {pendingLogoRemoval
-                                ? "Logo marked for removal"
-                                : logoData.originalFileName || "Logo uploaded"}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              {pendingLogoRemoval
-                                ? "Click save to permanently remove from storage and database"
-                                : "Click save to persist changes"}
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                // Handle logo removal (UI-only - mark for removal)
+                                if (pendingLogoRemoval) {
+                                  // Cancel removal - restore the logo
+                                  setLogoData((prev) => ({
+                                    ...prev,
+                                    url: logoToRemove,
+                                  }));
+                                  setLogoToRemove(null);
+                                  setPendingLogoRemoval(false);
+                                  toast({
+                                    title: "Logo Removal Cancelled",
+                                    description: "Logo removal has been cancelled.",
+                                  });
+                                } else {
+                                  // Mark logo for removal
+                                  setLogoToRemove(logoData.url);
+
+                                  // Clear logo from UI only (not from database yet)
+                                  setLogoData((prev) => ({ ...prev, url: "" }));
+
+                                  // Mark as pending removal to enable save button
+                                  setPendingLogoRemoval(true);
+
+                                  toast({
+                                    title: "Logo Marked for Removal",
+                                    description:
+                                      "Logo will be permanently removed when you click 'Save All Footer Information'.",
+                                  });
+                                }
+                              }}
+                            >
+                              {pendingLogoRemoval ? "Cancel Removal" : "Remove"}
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                            <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                            <label className="cursor-pointer">
+                              <span className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                                Click to upload logo
+                              </span>
+                              <input
+                                type="file"
+                                className="hidden"
+                                accept="image/png, image/jpeg, image/jpg, image/svg+xml, image/webp"
+                                onChange={(e) => {
+                                  const file = e.target.files[0];
+                                  if (file) handleLogoUpload(file);
+                                }}
+                                disabled={uploadingLogo}
+                              />
+                            </label>
+                            <p className="text-xs text-gray-500 mt-2">
+                              PNG, JPG, SVG, or WebP (max 5MB)
                             </p>
                           </div>
-                        </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            // Handle logo removal (UI-only - mark for removal)
-                            if (pendingLogoRemoval) {
-                              // Cancel removal - restore the logo
-                              setLogoData((prev) => ({
-                                ...prev,
-                                url: logoToRemove,
-                              }));
-                              setLogoToRemove(null);
-                              setPendingLogoRemoval(false);
-                              toast({
-                                title: "Logo Removal Cancelled",
-                                description: "Logo removal has been cancelled.",
-                              });
-                            } else {
-                              // Mark logo for removal
-                              setLogoToRemove(logoData.url);
-
-                              // Clear logo from UI only (not from database yet)
-                              setLogoData((prev) => ({ ...prev, url: "" }));
-
-                              // Mark as pending removal to enable save button
-                              setPendingLogoRemoval(true);
-
-                              toast({
-                                title: "Logo Marked for Removal",
-                                description:
-                                  "Logo will be permanently removed when you click 'Save All Footer Information'.",
-                              });
-                            }
-                          }}
-                        >
-                          {pendingLogoRemoval ? "Cancel Removal" : "Remove"}
-                        </Button>
+                        )}
                       </div>
-                    ) : (
-                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                        <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                        <label className="cursor-pointer">
-                          <span className="text-blue-600 hover:text-blue-700 text-sm font-medium">
-                            Click to upload logo
-                          </span>
-                          <input
-                            type="file"
-                            className="hidden"
-                            accept="image/png, image/jpeg, image/jpg, image/svg+xml, image/webp"
-                            onChange={(e) => {
-                              const file = e.target.files[0];
-                              if (file) handleLogoUpload(file);
-                            }}
-                            disabled={uploadingLogo}
-                          />
-                        </label>
-                        <p className="text-xs text-gray-500 mt-2">
-                          PNG, JPG, SVG, or WebP (max 5MB)
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                    </div>
 
-                <div>
-                  <Label>Alt Text</Label>
-                  <Input
-                    value={logoData.alt_text}
-                    onChange={(e) =>
-                      setLogoData((prev) => ({
-                        ...prev,
-                        alt_text: e.target.value,
-                      }))
-                    }
-                    placeholder="Enter logo alt text for SEO"
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                    <div>
+                      <Label>Alt Text</Label>
+                      <Input
+                        value={logoData.alt_text}
+                        onChange={(e) =>
+                          setLogoData((prev) => ({
+                            ...prev,
+                            alt_text: e.target.value,
+                          }))
+                        }
+                        placeholder="Enter logo alt text for SEO"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
 
               {/* Right Column: Footer Description + Business Address stacked */}
               <div className="space-y-6">
                 {/* Footer Description */}
                 <Card className="border border-gray-200 shadow-md hover:shadow-lg transition-shadow duration-200">
                   <CardHeader>
-                <CardTitle>Footer Description</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Enter footer description"
-                  rows={6}
-                  className="min-h-[120px]"
-                />
-              </CardContent>
-            </Card>
+                    <CardTitle>Footer Description</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <Textarea
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder="Enter footer description"
+                      rows={6}
+                      className="min-h-[120px]"
+                    />
+                  </CardContent>
+                </Card>
 
                 {/* Business Address */}
                 <Card className="border border-gray-200 shadow-md hover:shadow-lg transition-shadow duration-200">
                   <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MapPin className="w-5 h-5" />
-                  Business Address
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Textarea
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  placeholder="Enter business address"
-                  rows={6}
-                  className="min-h-[120px]"
-                />
-              </CardContent>
-            </Card>
-               
+                    <CardTitle className="flex items-center gap-2">
+                      <MapPin className="w-5 h-5" />
+                      Business Address
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <Textarea
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      placeholder="Enter business address"
+                      rows={6}
+                      className="min-h-[120px]"
+                    />
+                  </CardContent>
+                </Card>
+
               </div>
 
               {/* Integrated Save Button - Spans both columns on desktop */}
               <div className="lg:col-span-2 flex justify-center pt-4">
-            <Button
-              onClick={saveRow1Data}
-              disabled={
-                savingRow1 ||
-                uploadingLogo ||
-                !hasRow1Changes() ||
-                !logoData.company_name?.trim()
-              }
-              className="px-8 py-2 text-base font-medium w-full lg:w-auto lg:px-12"
-              size="lg"
-            >
-              {savingRow1
-                ? "Saving..."
-                : uploadingLogo
-                ? "Uploading..."
-                : "Save All Footer Information"}
-            </Button>
+                <Button
+                  onClick={saveRow1Data}
+                  disabled={
+                    savingRow1 ||
+                    uploadingLogo ||
+                    !hasRow1Changes() ||
+                    !logoData.company_name?.trim()
+                  }
+                  className="px-8 py-2 text-base font-medium w-full lg:w-auto lg:px-12"
+                  size="lg"
+                >
+                  {savingRow1
+                    ? "Saving..."
+                    : uploadingLogo
+                      ? "Uploading..."
+                      : "Save All Footer Information"}
+                </Button>
+              </div>
+            </div>
           </div>
-        </div>
-        </div>
         </div>
 
         {/* Secondary Footer Management - Links & Contact */}
         <div className="border-t border-gray-100 pt-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Left Column: Company Links + Support Links */}
-          <div className="space-y-6">
-            {/* Company Links */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex justify-between items-center">
-                  <span>Company Links</span>
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      setLinkFormData({
-                        title: "",
-                        url: "",
-                        section: "company",
-                        id: null,
-                      });
-                      setOriginalLinkData({
-                        title: "",
-                        url: "",
-                        section: "company",
-                        id: null,
-                      });
-                      setShowLinkDialog(true);
-                    }}
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Link
-                  </Button>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {footerData.company_links?.map((link) => (
-                    <div
-                      key={link.id}
-                      className="flex items-center justify-between p-2 border rounded"
+            {/* Left Column: Company Links + Support Links */}
+            <div className="space-y-6">
+              {/* Company Links */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex justify-between items-center">
+                    <span>Company Links</span>
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        setLinkFormData({
+                          title: "",
+                          url: "",
+                          section: "company",
+                          id: null,
+                        });
+                        setOriginalLinkData({
+                          title: "",
+                          url: "",
+                          section: "company",
+                          id: null,
+                        });
+                        setShowLinkDialog(true);
+                      }}
                     >
-                      <div>
-                        <div className="font-medium">{link.title}</div>
-                        <div className="text-sm text-gray-500">{link.href}</div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => toggleItemVisibility("links", link.id, link.visible !== false, "company")}
-                          className={link.visible === false ? "opacity-50" : ""}
-                        >
-                          {link.visible === false ? (
-                            <EyeOff className="w-4 h-4 text-gray-500" />
-                          ) : (
-                            <Eye className="w-4 h-4 text-green-600" />
-                          )}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            // Edit company link
-                            const editData = {
-                              title: link.title || "",
-                              url: link.href || "",
-                              section: "company",
-                              id: link.id,
-                            };
-                            setLinkFormData(editData);
-                            setOriginalLinkData(editData);
-                            setShowLinkDialog(true);
-                          }}
-                        >
-                          <Edit className="w-4 h-4 text-blue-600" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setSelectedItem(link);
-                            setShowDeleteDialog(true);
-                          }}
-                        >
-                          <Trash2 className="w-4 h-4 text-red-600" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Support Links */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex justify-between items-center">
-                  <span>Support Links</span>
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      setLinkFormData({
-                        title: "",
-                        url: "",
-                        section: "support",
-                        id: null,
-                      });
-                      setOriginalLinkData({
-                        title: "",
-                        url: "",
-                        section: "support",
-                        id: null,
-                      });
-                      setShowLinkDialog(true);
-                    }}
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Link
-                  </Button>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {footerData.support_links?.map((link) => (
-                    <div
-                      key={link.id}
-                      className="flex items-center justify-between p-2 border rounded"
-                    >
-                      <div>
-                        <div className="font-medium">{link.title}</div>
-                        <div className="text-sm text-gray-500">{link.href}</div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => toggleItemVisibility("links", link.id, link.visible !== false, "support")}
-                          className={link.visible === false ? "opacity-50" : ""}
-                        >
-                          {link.visible === false ? (
-                            <EyeOff className="w-4 h-4 text-gray-500" />
-                          ) : (
-                            <Eye className="w-4 h-4 text-green-600" />
-                          )}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            // Edit support link
-                            const editData = {
-                              title: link.title || "",
-                              url: link.href || "",
-                              section: "support",
-                              id: link.id,
-                            };
-                            setLinkFormData(editData);
-                            setOriginalLinkData(editData);
-                            setShowLinkDialog(true);
-                          }}
-                        >
-                          <Edit className="w-4 h-4 text-blue-600" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setSelectedItem(link);
-                            setShowDeleteDialog(true);
-                          }}
-                        >
-                          <Trash2 className="w-4 h-4 text-red-600" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Right Column: Contact Information + Social Media */}
-          <div className="space-y-6">
-            {/* Contact Items */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex justify-between items-center">
-                  <span className="flex items-center gap-2">
-                    <Phone className="w-5 h-5" />
-                    Contact Information
-                  </span>
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      resetContactForm();
-                      setShowContactDialog(true);
-                    }}
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Contact
-                  </Button>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {footerData.contact_items?.map((item) => {
-                    const Icon = item.icon === "Mail" ? Mail : Phone;
-                    return (
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Link
+                    </Button>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {footerData.company_links?.map((link) => (
                       <div
-                        key={item.id}
+                        key={link.id}
                         className="flex items-center justify-between p-2 border rounded"
                       >
-                        <div className="flex items-center gap-2">
-                          <Icon className="w-4 h-4" />
-                          <div>
-                            <div className="font-medium">{item.text}</div>
-                            <div className="text-sm text-gray-500">
-                              {item.href}
-                            </div>
-                          </div>
+                        <div>
+                          <div className="font-medium">{link.title}</div>
+                          <div className="text-sm text-gray-500">{link.href}</div>
                         </div>
                         <div className="flex gap-2">
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => toggleItemVisibility("contact", item.id, item.visible !== false)}
-                            className={item.visible === false ? "opacity-50" : ""}
+                            onClick={() => toggleItemVisibility("links", link.id, link.visible !== false, "company")}
+                            className={link.visible === false ? "opacity-50" : ""}
                           >
-                            {item.visible === false ? (
+                            {link.visible === false ? (
                               <EyeOff className="w-4 h-4 text-gray-500" />
                             ) : (
                               <Eye className="w-4 h-4 text-green-600" />
@@ -1637,22 +1468,16 @@ export function FooterManagement() {
                             size="sm"
                             variant="outline"
                             onClick={() => {
-                              // Extract the raw phone/email from href
-                              const rawContent = item.href.replace(
-                                /^(tel:|mailto:)/,
-                                ""
-                              );
+                              // Edit company link
                               const editData = {
-                                title: item.text || "",
-                                content: rawContent || "",
-                                icon_type: item.icon || "Phone",
-                                country: item.country || "",
-                                link_type: item.link_type || "tel",
-                                id: item.id, // Include record ID for editing
+                                title: link.title || "",
+                                url: link.href || "",
+                                section: "company",
+                                id: link.id,
                               };
-                              setContactFormData(editData);
-                              setOriginalContactData(editData);
-                              setShowContactDialog(true);
+                              setLinkFormData(editData);
+                              setOriginalLinkData(editData);
+                              setShowLinkDialog(true);
                             }}
                           >
                             <Edit className="w-4 h-4 text-blue-600" />
@@ -1661,7 +1486,7 @@ export function FooterManagement() {
                             size="sm"
                             variant="outline"
                             onClick={() => {
-                              setSelectedItem(item);
+                              setSelectedItem(link);
                               setShowDeleteDialog(true);
                             }}
                           >
@@ -1669,65 +1494,58 @@ export function FooterManagement() {
                           </Button>
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
 
-            {/* Social Links */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex justify-between items-center">
-                  <span className="flex items-center gap-2">
-                    <Globe className="w-5 h-5" />
-                    Social Media
-                  </span>
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      const initialSocialData = {
-                        name: "",
-                        url: "",
-                        icon_name: "facebook",
-                        id: null,
-                      };
-                      setSocialFormData(initialSocialData);
-                      setOriginalSocialData(initialSocialData);
-                      setShowSocialDialog(true);
-                    }}
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Social
-                  </Button>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {footerData.social_links?.map((social) => {
-                    const Icon = getSocialIcon(social.icon_name);
-                    return (
+              {/* Support Links */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex justify-between items-center">
+                    <span>Support Links</span>
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        setLinkFormData({
+                          title: "",
+                          url: "",
+                          section: "support",
+                          id: null,
+                        });
+                        setOriginalLinkData({
+                          title: "",
+                          url: "",
+                          section: "support",
+                          id: null,
+                        });
+                        setShowLinkDialog(true);
+                      }}
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Link
+                    </Button>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {footerData.support_links?.map((link) => (
                       <div
-                        key={social.id}
+                        key={link.id}
                         className="flex items-center justify-between p-2 border rounded"
                       >
-                        <div className="flex items-center gap-2">
-                          <Icon className="w-4 h-4" />
-                          <div>
-                            <div className="font-medium">{social.name}</div>
-                            <div className="text-sm text-gray-500">
-                              {social.href}
-                            </div>
-                          </div>
+                        <div>
+                          <div className="font-medium">{link.title}</div>
+                          <div className="text-sm text-gray-500">{link.href}</div>
                         </div>
                         <div className="flex gap-2">
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => toggleItemVisibility("social", social.id, social.visible !== false)}
-                            className={social.visible === false ? "opacity-50" : ""}
+                            onClick={() => toggleItemVisibility("links", link.id, link.visible !== false, "support")}
+                            className={link.visible === false ? "opacity-50" : ""}
                           >
-                            {social.visible === false ? (
+                            {link.visible === false ? (
                               <EyeOff className="w-4 h-4 text-gray-500" />
                             ) : (
                               <Eye className="w-4 h-4 text-green-600" />
@@ -1737,15 +1555,16 @@ export function FooterManagement() {
                             size="sm"
                             variant="outline"
                             onClick={() => {
+                              // Edit support link
                               const editData = {
-                                name: social.name || "",
-                                url: social.href || "",
-                                icon_name: social.icon_name || "facebook",
-                                id: social.id, // Include record ID for editing
+                                title: link.title || "",
+                                url: link.href || "",
+                                section: "support",
+                                id: link.id,
                               };
-                              setSocialFormData(editData);
-                              setOriginalSocialData(editData);
-                              setShowSocialDialog(true);
+                              setLinkFormData(editData);
+                              setOriginalLinkData(editData);
+                              setShowLinkDialog(true);
                             }}
                           >
                             <Edit className="w-4 h-4 text-blue-600" />
@@ -1754,7 +1573,7 @@ export function FooterManagement() {
                             size="sm"
                             variant="outline"
                             onClick={() => {
-                              setSelectedItem(social);
+                              setSelectedItem(link);
                               setShowDeleteDialog(true);
                             }}
                           >
@@ -1762,13 +1581,201 @@ export function FooterManagement() {
                           </Button>
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Right Column: Contact Information + Social Media */}
+            <div className="space-y-6">
+              {/* Contact Items */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex justify-between items-center">
+                    <span className="flex items-center gap-2">
+                      <Phone className="w-5 h-5" />
+                      Contact Information
+                    </span>
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        resetContactForm();
+                        setShowContactDialog(true);
+                      }}
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Contact
+                    </Button>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {footerData.contact_items?.map((item) => {
+                      const Icon = item.icon === "Mail" ? Mail : Phone;
+                      return (
+                        <div
+                          key={item.id}
+                          className="flex items-center justify-between p-2 border rounded"
+                        >
+                          <div className="flex items-center gap-2">
+                            <Icon className="w-4 h-4" />
+                            <div>
+                              <div className="font-medium">{item.text}</div>
+                              <div className="text-sm text-gray-500">
+                                {item.href}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => toggleItemVisibility("contact", item.id, item.visible !== false)}
+                              className={item.visible === false ? "opacity-50" : ""}
+                            >
+                              {item.visible === false ? (
+                                <EyeOff className="w-4 h-4 text-gray-500" />
+                              ) : (
+                                <Eye className="w-4 h-4 text-green-600" />
+                              )}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                // Extract the raw phone/email from href
+                                const rawContent = item.href.replace(
+                                  /^(tel:|mailto:)/,
+                                  ""
+                                );
+                                const editData = {
+                                  title: item.text || "",
+                                  content: rawContent || "",
+                                  icon_type: item.icon || "Phone",
+                                  country: item.country || "",
+                                  link_type: item.link_type || "tel",
+                                  id: item.id, // Include record ID for editing
+                                };
+                                setContactFormData(editData);
+                                setOriginalContactData(editData);
+                                setShowContactDialog(true);
+                              }}
+                            >
+                              <Edit className="w-4 h-4 text-blue-600" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setSelectedItem(item);
+                                setShowDeleteDialog(true);
+                              }}
+                            >
+                              <Trash2 className="w-4 h-4 text-red-600" />
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Social Links */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex justify-between items-center">
+                    <span className="flex items-center gap-2">
+                      <Globe className="w-5 h-5" />
+                      Social Media
+                    </span>
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        const initialSocialData = {
+                          name: "",
+                          url: "",
+                          icon_name: "facebook",
+                          id: null,
+                        };
+                        setSocialFormData(initialSocialData);
+                        setOriginalSocialData(initialSocialData);
+                        setShowSocialDialog(true);
+                      }}
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Social
+                    </Button>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {footerData.social_links?.map((social) => {
+                      const Icon = getSocialIcon(social.icon_name);
+                      return (
+                        <div
+                          key={social.id}
+                          className="flex items-center justify-between p-2 border rounded"
+                        >
+                          <div className="flex items-center gap-2">
+                            <Icon className="w-4 h-4" />
+                            <div>
+                              <div className="font-medium">{social.name}</div>
+                              <div className="text-sm text-gray-500">
+                                {social.href}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => toggleItemVisibility("social", social.id, social.visible !== false)}
+                              className={social.visible === false ? "opacity-50" : ""}
+                            >
+                              {social.visible === false ? (
+                                <EyeOff className="w-4 h-4 text-gray-500" />
+                              ) : (
+                                <Eye className="w-4 h-4 text-green-600" />
+                              )}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                const editData = {
+                                  name: social.name || "",
+                                  url: social.href || "",
+                                  icon_name: social.icon_name || "facebook",
+                                  id: social.id, // Include record ID for editing
+                                };
+                                setSocialFormData(editData);
+                                setOriginalSocialData(editData);
+                                setShowSocialDialog(true);
+                              }}
+                            >
+                              <Edit className="w-4 h-4 text-blue-600" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setSelectedItem(social);
+                                setShowDeleteDialog(true);
+                              }}
+                            >
+                              <Trash2 className="w-4 h-4 text-red-600" />
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
-        </div>
         </div>
       </div>
 

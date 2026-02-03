@@ -23,7 +23,7 @@ export async function GET(request) {
       .select('*')
       .eq('status', 'active')
 
-  
+
     if (error) {
       console.error('Footer fetch error:', error)
       return createAuthError(`Failed to fetch footer data: ${error.message}`, 500)
@@ -65,7 +65,7 @@ export async function GET(request) {
           // Extract company and support links
           organizedData.company_links = content.company_links || []
           organizedData.support_links = content.support_links || []
-                break
+          break
 
         case 'contact':
           // Extract contact items and format for frontend compatibility
@@ -73,14 +73,14 @@ export async function GET(request) {
             id: contact.id,
             text: contact.title,
             href: contact.link_type === 'tel' ? `tel:${contact.content}` :
-                 contact.link_type === 'mailto' ? `mailto:${contact.content}` :
-                 contact.content,
+              contact.link_type === 'mailto' ? `mailto:${contact.content}` :
+                contact.content,
             icon: contact.icon_type || contact.icon || 'Phone',
             country: contact.country || '',
             link_type: contact.link_type || 'tel',
             visible: contact.visible !== undefined ? contact.visible : true
           }))
-                    break
+          break
 
         case 'social':
           // Extract social links and map url to href for frontend compatibility
@@ -88,19 +88,19 @@ export async function GET(request) {
             ...social,
             href: social.url || ''
           }))
-                    break
+          break
       }
     })
 
     // Return the organized data
 
     return NextResponse.json(organizedData, {
-  headers: {
-    'Cache-Control': 'no-cache, no-store, must-revalidate',
-    'Pragma': 'no-cache',
-    'Expires': '0'
-  }
-})
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
+    })
   } catch (error) {
     console.error('Footer API error:', error)
     return createAuthError('Internal server error', 500)
@@ -116,7 +116,7 @@ export async function POST(request) {
     const body = await request.json()
     const { operation, section, data } = body
 
-    
+
     if (operation === 'add_to_array') {
       // Server-side validation for new items
       if (section === 'links') {
@@ -188,7 +188,7 @@ export async function POST(request) {
 
       // Add new item with generated ID
       const newItem = {
-        id: crypto.randomUUID(),
+        id: (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : require('crypto').randomBytes(16).toString('hex'),
         ...data
       }
 
@@ -284,7 +284,7 @@ export async function PUT(request) {
     const body = await request.json()
     const { operation, section, itemId, data } = body
 
-    
+
     if (operation === 'update_array_item') {
       // Update existing item in array
       let { data: existingRecord } = await supabaseAdmin
@@ -385,7 +385,7 @@ export async function DELETE(request) {
     const section = searchParams.get('section')
     const itemId = searchParams.get('itemId')
 
-    
+
     if (!section || !itemId) {
       return createAuthError('Section and itemId are required', 400)
     }

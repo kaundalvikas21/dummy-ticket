@@ -117,7 +117,7 @@ export default function SingleBlogPost() {
             {/* Hero Header */}
             <div className="relative h-[400px] md:h-[500px] w-full overflow-hidden">
                 {/* Blue Overlay Background */}
-                <div className="absolute inset-0 bg-gradient-to-br from-[#0066FF] to-[#0052CC] opacity-90" />
+                <div className="absolute inset-0 bg-linear-to-br from-[#0066FF] to-[#0052CC] opacity-90" />
 
                 {/* Background Image (Subtle) */}
                 <img
@@ -141,7 +141,7 @@ export default function SingleBlogPost() {
             </div>
 
             <div className="container mx-auto px-4 lg:px-6 mt-12">
-                <div className="flex flex-col lg:flex-row gap-12">
+                <div className="flex flex-col-reverse lg:flex-row gap-8 lg:gap-12">
                     {/* Main Content */}
                     <article className="lg:col-span-8 flex-1">
                         <div className="prose prose-slate lg:prose-lg max-w-none prose-headings:font-bold prose-a:text-blue-600 prose-img:rounded-2xl prose-headings:scroll-mt-24">
@@ -265,7 +265,7 @@ export default function SingleBlogPost() {
                         <div className="sticky top-24 space-y-10">
                             {/* Table of Contents */}
                             {toc.length > 0 && (
-                                <div>
+                                <div className="bg-slate-50/50 lg:bg-transparent p-6 lg:p-0 rounded-3xl lg:rounded-none border border-slate-100 lg:border-none">
                                     <h5 className="font-bold text-slate-900 mb-4 uppercase tracking-wider text-sm border-b pb-2">Table of Contents</h5>
                                     <nav>
                                         <ul className="list-disc pl-4 space-y-2">

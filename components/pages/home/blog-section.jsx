@@ -80,7 +80,7 @@ export function BlogSection() {
     const sideBlogs = blogs.slice(1, 4)
 
     return (
-        <section className="py-20 bg-gray-50/50">
+        <section className="py-12 md:py-24 bg-[#F0F3F9]">
             <div className="container mx-auto px-4 lg:px-6">
                 <div className="flex justify-between items-end mb-10">
                     <div>
@@ -121,7 +121,7 @@ export function BlogSection() {
                                 <h3 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4 transition-colors">
                                     {mainBlog.translation?.title}
                                 </h3>
-                                <div className="flex items-center text-blue-600 font-bold gap-2 transition-all">
+                                <div className="flex items-center text-[#00C2C0] font-bold gap-2 transition-all">
                                     Read More <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                 </div>
                             </div>
@@ -153,7 +153,7 @@ export function BlogSection() {
                                     <p className="text-sm text-slate-600 line-clamp-2 mb-3">
                                         {blog.translation?.description}
                                     </p>
-                                    <div className="text-sm font-semibold text-blue-600 flex items-center gap-1 transition-all">
+                                    <div className="text-sm font-semibold text-[#00C2C0] flex items-center gap-1 transition-all">
                                         Read More <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
                                     </div>
                                 </div>
@@ -166,6 +166,15 @@ export function BlogSection() {
                             </div>
                         )}
                     </div>
+                </div>
+
+                {/* Mobile View All Button */}
+                <div className="mt-12 flex justify-center md:hidden">
+                    <Link href="/blog" className="w-full">
+                        <Button className="w-full rounded-2xl bg-linear-to-r from-[#0066FF] to-[#00D4AA] text-white py-6 text-lg font-bold shadow-lg hover:shadow-xl transition-all cursor-pointer">
+                            View All Blogs <ArrowRight className="ml-2 w-5 h-5" />
+                        </Button>
+                    </Link>
                 </div>
             </div>
         </section>
