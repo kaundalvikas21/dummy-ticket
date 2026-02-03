@@ -6,6 +6,8 @@ import { useLocale } from "@/contexts/locale-context";
 import { BlogHero } from "@/components/pages/blog/blog-hero";
 import { BlogList } from "@/components/pages/blog/blog-list";
 import { BlogSidebar } from "@/components/pages/blog/blog-sidebar";
+import { Pagination } from "@/components/ui/pagination";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { useTranslation } from "@/lib/translations";
 
 export default function BlogPage() {
@@ -14,6 +16,8 @@ export default function BlogPage() {
     const [blogs, setBlogs] = useState([]);
     const [recentPosts, setRecentPosts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const blogsPerPage = 8;
 
     useEffect(() => {
         fetchBlogData();
@@ -42,6 +46,7 @@ export default function BlogPage() {
 
             // Recent posts for sidebar (top 3)
             setRecentPosts(validBlogs.slice(0, 3));
+            setCurrentPage(1); // Reset to first page when locale changes
 
         } catch (error) {
             console.error("Error fetching blog data:", error.message || error);
@@ -54,7 +59,13 @@ export default function BlogPage() {
         <main className="min-h-screen bg-slate-50/50">
             <BlogHero />
 
-            <div className="container mx-auto px-4 py-16 md:py-24">
+            <div className="container mx-auto px-4 pt-8 md:pt-12 pb-16">
+                <Breadcrumbs
+                    items={[
+                        { label: 'Blog' }
+                    ]}
+                />
+
                 <div className="flex flex-col lg:flex-row gap-12 xl:gap-16">
                     {/* Blog Listing */}
                     <div className="flex-1">
@@ -68,11 +79,27 @@ export default function BlogPage() {
                             </p>
                         </div>
 
-                        <BlogList blogs={blogs} loading={loading} />
+                        <BlogList
+                            blogs={blogs.slice((currentPage - 1) * blogsPerPage, currentPage * blogsPerPage)}
+                            loading={loading}
+                        />
+
+                        {blogs.length > blogsPerPage && (
+                            <div className="mt-12">
+                                <Pagination
+                                    currentPage={currentPage}
+                                    totalPages={Math.ceil(blogs.length / blogsPerPage)}
+                                    onPageChange={(page) => {
+                                        setCurrentPage(page);
+                                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                                    }}
+                                />
+                            </div>
+                        )}
                     </div>
 
                     {/* Sidebar */}
-                    <div className="lg:w-80 xl:w-96 shrink-0">
+                    <div className="lg:w-80 xl:w-96 shrink-0 lg:sticky lg:top-24 self-start">
                         <BlogSidebar recentPosts={recentPosts} />
                     </div>
                 </div>

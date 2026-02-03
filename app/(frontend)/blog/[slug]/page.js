@@ -9,6 +9,7 @@ import { Loader2, Calendar, Link2, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 import Link from "next/link"
+import { Breadcrumbs } from "@/components/ui/breadcrumbs"
 import { useToast } from "@/hooks/use-toast"
 
 export default function SingleBlogPost() {
@@ -140,7 +141,14 @@ export default function SingleBlogPost() {
                 </div>
             </div>
 
-            <div className="container mx-auto px-4 lg:px-6 mt-12">
+            <div className="container mx-auto px-4 lg:px-6 pt-10">
+                <Breadcrumbs
+                    items={[
+                        { label: 'Blog', href: '/blog' },
+                        { label: blog.title }
+                    ]}
+                />
+
                 <div className="flex flex-col-reverse lg:flex-row gap-8 lg:gap-12">
                     {/* Main Content */}
                     <article className="lg:col-span-8 flex-1">

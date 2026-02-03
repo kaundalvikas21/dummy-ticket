@@ -24,18 +24,17 @@ export function BlogSection() {
             // Get country from localStorage as requested
             const detectedCountry = localStorage.getItem('last-detected-country') || 'IN'
 
-            // Fetch blogs that are published and match country criteria
-            // target_countries is an array. Filter: empty array OR contains detectedCountry
+            // Fetch blogs that are published
             const { data, error } = await supabase
                 .from('blogs')
                 .select(`
-          *,
-          blog_translations!inner (*)
-        `)
+                  *,
+                  blog_translations!inner (*)
+                `)
                 .eq('is_published', true)
                 .order('is_featured', { ascending: false })
                 .order('created_at', { ascending: false })
-                .limit(10) // Fetch a few more to filter in JS if needed, though we try to filter in query
+                .limit(20) // Fetch enough to filter by country in JS
 
             if (error) throw error
 
@@ -98,7 +97,7 @@ export function BlogSection() {
                     </Link>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                     {/* Main Featured Blog (Left) */}
                     <div className="lg:col-span-7 group">
                         <Link href={`/blog/${mainBlog.translation?.slug}`} className="block overflow-hidden rounded-2xl bg-white shadow-sm hover:shadow-xl transition-all duration-300">
@@ -118,7 +117,7 @@ export function BlogSection() {
                                         {format(new Date(mainBlog.created_at), 'MMMM d, yyyy')}
                                     </span>
                                 </div>
-                                <h3 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4 transition-colors">
+                                <h3 className="text-2xl md:text-2xl font-bold text-slate-900 mb-4 transition-colors">
                                     {mainBlog.translation?.title}
                                 </h3>
                                 <div className="flex items-center text-[#00C2C0] font-bold gap-2 transition-all">

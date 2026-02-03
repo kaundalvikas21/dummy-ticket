@@ -76,7 +76,7 @@ export default function BlogEditorPage() {
 
     // Blog Meta State
     const [blogData, setBlogData] = useState({
-        is_published: false,
+        is_published: true,
         is_featured: false,
         target_countries: [], // Empty means global
         featured_image: "",
@@ -110,7 +110,7 @@ export default function BlogEditorPage() {
                 [loc.code]: { title: "", slug: "", description: "", content: {} }
             }), {})
             const initialBlog = {
-                is_published: false,
+                is_published: true,
                 is_featured: false,
                 target_countries: [],
                 featured_image: "",
@@ -259,6 +259,30 @@ export default function BlogEditorPage() {
                 })
                 setActiveTab(loc.code)
                 return
+            }
+        }
+
+        // Validate Featured Blog Limit (Max 4)
+        if (blogData.is_featured) {
+            try {
+                let query = supabase.from('blogs').select('id').eq('is_featured', true).eq('is_published', true)
+                if (id !== 'new') {
+                    query = query.neq('id', id)
+                }
+                const { data: featuredBlogs, error: countError } = await query
+
+                if (countError) throw countError
+
+                if (featuredBlogs && featuredBlogs.length >= 4) {
+                    toast({
+                        title: "Limit Exceeded",
+                        description: "You can only have a maximum of 4 featured blogs. Please unfeature another blog first.",
+                        variant: "destructive"
+                    })
+                    return
+                }
+            } catch (err) {
+                console.error("Error checking featured stories count:", err)
             }
         }
 
