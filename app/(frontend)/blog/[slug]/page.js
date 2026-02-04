@@ -116,27 +116,22 @@ export default function SingleBlogPost() {
     return (
         <div className="pb-20 bg-white">
             {/* Hero Header */}
-            <div className="relative h-[400px] md:h-[500px] w-full overflow-hidden">
-                {/* Blue Overlay Background */}
-                <div className="absolute inset-0 bg-linear-to-br from-[#0066FF] to-[#0052CC] opacity-90" />
-
-                {/* Background Image (Subtle) */}
-                <img
-                    src={blog.blogs?.featured_image || "/api/placeholder/1200/600"}
-                    className="absolute inset-0 w-full h-full object-cover opacity-30"
-                    alt={blog.title}
-                />
-
-                {/* Content */}
-                <div className="absolute bottom-0 left-0 w-full p-6 md:p-12 z-10">
-                    <div className="container mx-auto">
-                        <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-white max-w-7xl leading-tight mb-4">
-                            {blog.title}
-                        </h1>
-                        <div className="flex items-center gap-3 text-white/90 text-sm mb-4">
-                            <Calendar className="w-4 h-4 text-blue-200" />
-                            <span>{format(new Date(blog.blogs?.created_at), 'MMMM d, yyyy')}</span>
-                        </div>
+            <div
+                className="w-full flex items-center justify-center text-center pt-32 pb-16 md:pt-40 md:pb-24"
+                style={{
+                    backgroundImage: `linear-gradient(rgba(0, 102, 255, 0.7), rgba(0, 82, 204, 0.7)), url(${blog.blogs?.featured_image || "/api/placeholder/1200/600"})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat'
+                }}
+            >
+                <div className="container mx-auto">
+                    <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-white max-w-7xl mx-auto leading-tight mb-4">
+                        {blog.title}
+                    </h1>
+                    <div className="flex items-center justify-center gap-3 text-white/90 text-sm">
+                        <Calendar className="w-4 h-4 text-blue-200" />
+                        <span>{format(new Date(blog.blogs?.created_at), 'MMMM d, yyyy')}</span>
                     </div>
                 </div>
             </div>

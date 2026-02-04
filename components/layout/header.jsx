@@ -160,15 +160,21 @@ export function Header() {
       </AnimatePresence>
 
       <motion.header
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
         className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/95 backdrop-blur-lg shadow-lg"
       >
         <nav className="container mx-auto px-6 lg:px-8 py-5">
           <div className="flex items-center justify-between">
             {/* Logo */}
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Link href="/" className="flex items-center transition-colors">
+              <Link
+                href="/"
+                className="flex items-center transition-colors"
+                onClick={() => {
+                  if (pathname === '/') {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }
+                }}
+              >
                 <Logo
                   size="md"
                   logo={logoData}

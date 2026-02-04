@@ -7,20 +7,19 @@ export function BlogHero() {
     const { t } = useTranslation('blog');
 
     return (
-        <section className="relative min-h-[50vh] flex items-center justify-center overflow-hidden">
-            {/* Background Image with Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-br from-[#0066FF] to-[#0052CC] opacity-90" />
-            <img
-                src="/blog_hero.jpg"
-                alt="Blogs Background"
-                className="absolute inset-0 w-full h-full object-cover opacity-20"
-            />
-
-            {/* Content */}
-            <div className="container mx-auto px-4 pt-24 pb-16 md:py-32 relative z-10">
+        <section
+            className="w-full flex items-center justify-center text-center pt-32 pb-16 md:pt-40 md:pb-24"
+            style={{
+                backgroundImage: `linear-gradient(rgba(0, 102, 255, 0.7), rgba(0, 82, 204, 0.7)), url(/blog_hero.jpg)`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat'
+            }}
+        >
+            <div className="container mx-auto relative z-10">
                 <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
                     transition={{ duration: 0.6 }}
                     className="max-w-4xl mx-auto text-center text-white"
                 >

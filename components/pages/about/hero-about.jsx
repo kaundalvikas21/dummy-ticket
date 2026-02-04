@@ -7,16 +7,17 @@ import { useTranslation } from "@/lib/translations"
 export default function HeroSection() {
   const { t } = useTranslation()
   return (
-    <section className="relative min-h-[60vh] flex items-center justify-center overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0066FF] to-[#0052CC] opacity-90" />
-      <img
-        src="/about-og-image.png"
-        alt="About Us Hero"
-        className="absolute inset-0 w-full h-full object-cover opacity-20"
-      />
-
-      <div className="relative container mx-auto px-4 pt-24 pb-16 md:py-32 text-center text-white z-10">
-        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
+    <section
+      className="w-full flex items-center justify-center text-center pt-32 pb-16 md:pt-40 md:pb-24"
+      style={{
+        backgroundImage: `linear-gradient(rgba(0, 102, 255, 0.7), rgba(0, 82, 204, 0.7)), url(/about-og-image.png)`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
+      <div className="relative container mx-auto text-center text-white z-10">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8 }}>
           <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 md:px-6 md:py-3 rounded-full mb-6 md:mb-8 border border-white/20">
             <Plane className="w-4 h-4 md:w-5 md:h-5" />
             <span className="text-xs md:text-sm font-semibold">{t('about.hero.trustedSince')}</span>

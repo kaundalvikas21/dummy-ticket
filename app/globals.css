@@ -446,7 +446,8 @@ select:focus-visible {
 }
 
 .tiptap-content mark {
-  background-color: #fef08a; /* yellow-200 equivalent */
+  background-color: #fef08a;
+  /* yellow-200 equivalent */
   padding: 0.1rem 0.25rem;
   border-radius: 0.125rem;
 }

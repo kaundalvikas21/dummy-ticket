@@ -56,7 +56,7 @@ export default function BlogPage() {
     };
 
     return (
-        <main className="min-h-screen bg-slate-50/50">
+        <div className="min-h-screen bg-slate-50/50">
             <BlogHero />
 
             <div className="container mx-auto px-4 pt-8 md:pt-12 pb-16">
@@ -104,6 +104,6 @@ export default function BlogPage() {
                     </div>
                 </div>
             </div>
-        </main>
+        </div>
     );
 }

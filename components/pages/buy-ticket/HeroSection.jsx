@@ -15,22 +15,19 @@ export function HeroSection() {
   ]
 
   return (
-    <div className="relative bg-gradient-to-br from-[#0066FF] to-[#0052CC] pt-24 md:pt-32 pb-12 md:pb-20 overflow-hidden">
-      {/* Background Image with Overlay */}
-      <div className="absolute inset-0 z-0">
-        <img
-          src="/airplane-flying-clouds-professional.jpg"
-          alt="Booking Background"
-          className="w-full h-full object-cover opacity-50"
-        />
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0066FF]/50 to-[#0052CC]/50" />
-      </div>
-
-      {/* Hero Content */}
-      <div className="container mx-auto px-4 relative z-10">
+    <section
+      className="w-full flex items-center justify-center text-center pt-32 pb-16 md:pt-40 md:pb-24"
+      style={{
+        backgroundImage: `linear-gradient(rgba(0, 102, 255, 0.7), rgba(0, 82, 204, 0.7)), url(/airplane-flying-clouds-professional.jpg)`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
+      <div className="container mx-auto relative z-10">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
           className="text-center"
         >
           <motion.div
@@ -60,6 +57,6 @@ export function HeroSection() {
           </div>
         </motion.div>
       </div>
-    </div>
+    </section>
   )
 }

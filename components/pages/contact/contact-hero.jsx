@@ -17,20 +17,19 @@ export function ContactHero({ settings }) {
   const address = settings.address?.value || "123 Business St, Suite 100, New York, NY 10001";
 
   return (
-    <section className="relative pt-24 pb-12 md:pt-32 md:pb-20 overflow-hidden">
-      {/* Background Image with Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0066FF] to-[#0052CC] opacity-90" />
-      <img
-        src="/customer-support-team-professional.jpg"
-        alt="Customer Support"
-        className="absolute inset-0 w-full h-full object-cover opacity-20"
-      />
-
-      {/* Content */}
-      <div className="container mx-auto px-4 relative z-10">
+    <section
+      className="w-full flex items-center justify-center text-center pt-32 pb-16 md:pt-40 md:pb-24"
+      style={{
+        backgroundImage: `linear-gradient(rgba(0, 102, 255, 0.7), rgba(0, 82, 204, 0.7)), url(/customer-support-team-professional.jpg)`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
+      <div className="container mx-auto relative z-10">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
           transition={{ duration: 0.6 }}
           className="max-w-4xl mx-auto text-center text-white"
         >
@@ -47,15 +46,15 @@ export function ContactHero({ settings }) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="bg-white/10 backdrop-blur-md rounded-2xl p-4 md:p-6 border border-white/20"
+              className="bg-white/10 backdrop-blur-md rounded-2xl p-4 md:p-6 border border-white/20 flex flex-col items-center justify-center text-center"
             >
-              <Phone className="w-6 h-6 md:w-8 md:h-8 mx-auto mb-2 md:mb-3" />
-              <h3 className="font-semibold mb-1 md:mb-2 text-sm md:text-base">
+              <Phone className="w-6 h-6 md:w-8 md:h-8 mb-3" />
+              <h3 className="font-semibold mb-2 text-sm md:text-base">
                 {t('contact.contactInfo.methods.1.title')}
               </h3>
               <a
                 href={`tel:${phone.replace(/[^+\d]/g, "")}`}
-                className="text-white/80 text-xs md:text-sm hover:text-white hover:underline transition-colors"
+                className="text-white/80 text-xs md:text-sm hover:text-white hover:underline transition-colors block w-full truncate"
               >
                 {phone}
               </a>
@@ -65,15 +64,15 @@ export function ContactHero({ settings }) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="bg-white/10 backdrop-blur-md rounded-2xl p-4 md:p-6 border border-white/20"
+              className="bg-white/10 backdrop-blur-md rounded-2xl p-4 md:p-6 border border-white/20 flex flex-col items-center justify-center text-center"
             >
-              <Mail className="w-6 h-6 md:w-8 md:h-8 mx-auto mb-2 md:mb-3" />
-              <h3 className="font-semibold mb-1 md:mb-2 text-sm md:text-base">
+              <Mail className="w-6 h-6 md:w-8 md:h-8 mb-3" />
+              <h3 className="font-semibold mb-2 text-sm md:text-base">
                 {t('contact.contactInfo.methods.0.title')}
               </h3>
               <a
                 href={`mailto:${email}`}
-                className="text-white/80 text-xs md:text-sm hover:text-white hover:underline transition-colors"
+                className="text-white/80 text-xs md:text-sm hover:text-white hover:underline transition-colors block w-full truncate"
               >
                 {email}
               </a>
@@ -83,13 +82,13 @@ export function ContactHero({ settings }) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
-              className="col-span-2 md:col-span-1 bg-white/10 backdrop-blur-md rounded-2xl p-4 md:p-6 border border-white/20"
+              className="col-span-2 md:col-span-1 bg-white/10 backdrop-blur-md rounded-2xl p-4 md:p-6 border border-white/20 flex flex-col items-center justify-center text-center"
             >
-              <MapPin className="w-6 h-6 md:w-8 md:h-8 mx-auto mb-2 md:mb-3" />
-              <h3 className="font-semibold mb-1 md:mb-2 text-sm md:text-base">
+              <MapPin className="w-6 h-6 md:w-8 md:h-8 mb-3" />
+              <h3 className="font-semibold mb-2 text-sm md:text-base">
                 {t('contact.contactInfo.methods.2.title')}
               </h3>
-              <p className="text-white/80 text-xs md:text-sm leading-relaxed">
+              <p className="text-white/80 text-xs md:text-sm leading-relaxed max-w-[200px] md:max-w-none">
                 {address}
               </p>
             </motion.div>

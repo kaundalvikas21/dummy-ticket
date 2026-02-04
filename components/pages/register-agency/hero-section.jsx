@@ -5,13 +5,19 @@ import { Building2 } from "lucide-react"
 
 export function Hero() {
   return (
-    <section className="pt-24 pb-16 md:py-32 bg-gradient-to-br from-[#0066FF] to-[#00D4AA] relative overflow-hidden">
-      <div className="absolute inset-0 bg-[url('/abstract-geometric-flow.png')] opacity-10" />
-
-      <div className="container mx-auto px-4 relative z-10">
+    <section
+      className="w-full flex items-center justify-center text-center pt-32 pb-16 md:pt-40 md:pb-24 relative overflow-hidden"
+      style={{
+        backgroundImage: `linear-gradient(to bottom right, rgba(0, 102, 255, 0.85), rgba(0, 212, 170, 0.85)), url('/abstract-geometric-flow.png')`,
+        backgroundSize: 'cover',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center'
+      }}
+    >
+      <div className="container mx-auto relative z-10">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
           transition={{ duration: 0.6 }}
           className="max-w-4xl mx-auto text-center"
         >

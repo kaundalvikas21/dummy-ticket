@@ -2,12 +2,14 @@
 
 import { Mail, Phone, MapPin } from "lucide-react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { useState, useEffect } from "react"
 import { FooterSkeleton } from "@/components/ui/footer-skeleton"
 import { Logo } from "@/components/ui/logo"
 import { useLogo } from "@/hooks/useLogo"
 
 export function Footer() {
+  const pathname = usePathname()
   const [footerData, setFooterData] = useState({})
   const [loading, setLoading] = useState(true)
   const { logo: logoData, loading: logoLoading } = useLogo()
@@ -91,7 +93,7 @@ export function Footer() {
 
 
   return (
-    <footer className="relative bg-gradient-to-br from-[#0a1628] via-[#0d1b2a] to-[#1b263b] text-white overflow-hidden">
+    <footer className="relative bg-linear-to-br from-[#0a1628] via-[#0d1b2a] to-[#1b263b] text-white overflow-hidden">
       <div className="absolute inset-0 opacity-5">
         <div className="absolute top-0 right-0 w-96 h-96 bg-[#0066FF] rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#00D4AA] rounded-full blur-3xl" />
@@ -99,7 +101,15 @@ export function Footer() {
 
       <div className="relative container mx-auto px-4 py-8 md:py-16">
         <div className="mb-8 md:mb-12">
-          <Link href="/" className="flex w-fit items-center mb-4 md:mb-6">
+          <Link
+            href="/"
+            className="flex w-fit items-center mb-4 md:mb-6"
+            onClick={() => {
+              if (pathname === '/') {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }
+            }}
+          >
             <Logo
               size="lg"
               logo={logoData}
@@ -114,7 +124,7 @@ export function Footer() {
           )}
           {data.address && (
             <div className="flex items-start gap-3 text-gray-300 bg-white/5 backdrop-blur-sm rounded-xl p-3 md:p-4 max-w-md border border-white/10">
-              <MapPin className="w-5 h-5 md:w-6 md:h-6 flex-shrink-0 mt-1 text-[#00D4AA]" />
+              <MapPin className="w-5 h-5 md:w-6 md:h-6 shrink-0 mt-1 text-[#00D4AA]" />
               <span className="text-xs md:text-sm leading-relaxed whitespace-pre-line">
                 {data.address}
               </span>
@@ -128,7 +138,7 @@ export function Footer() {
             <div>
               <h3 className="font-bold text-base md:text-lg lg:text-xl mb-3 md:mb-4 lg:mb-6 text-white relative inline-block">
                 Company
-                <span className="absolute -bottom-2 left-0 w-12 h-1 bg-gradient-to-r from-[#0066FF] to-[#00D4AA] rounded-full" />
+                <span className="absolute -bottom-2 left-0 w-12 h-1 bg-linear-to-r from-[#0066FF] to-[#00D4AA] rounded-full" />
               </h3>
               <ul className="space-y-2 md:space-y-3 lg:space-y-4 mt-4 md:mt-6 lg:mt-8">
                 {data.company_links.map((link, index) => (
@@ -151,7 +161,7 @@ export function Footer() {
             <div>
               <h3 className="font-bold text-base md:text-lg lg:text-xl mb-3 md:mb-4 lg:mb-6 text-white relative inline-block">
                 Support
-                <span className="absolute -bottom-2 left-0 w-12 h-1 bg-gradient-to-r from-[#0066FF] to-[#00D4AA] rounded-full" />
+                <span className="absolute -bottom-2 left-0 w-12 h-1 bg-linear-to-r from-[#0066FF] to-[#00D4AA] rounded-full" />
               </h3>
               <ul className="space-y-2 md:space-y-3 lg:space-y-4 mt-4 md:mt-6 lg:mt-8">
                 {data.support_links.map((link, index) => (
@@ -174,15 +184,15 @@ export function Footer() {
             <div>
               <h3 className="font-bold text-base md:text-lg lg:text-xl mb-3 md:mb-4 lg:mb-6 text-white relative inline-block">
                 Contact
-                <span className="absolute -bottom-2 left-0 w-12 h-1 bg-gradient-to-r from-[#0066FF] to-[#00D4AA] rounded-full" />
+                <span className="absolute -bottom-2 left-0 w-12 h-1 bg-linear-to-r from-[#0066FF] to-[#00D4AA] rounded-full" />
               </h3>
               <ul className="space-y-2.5 md:space-y-3 lg:space-y-4 mt-4 md:mt-6 lg:mt-8">
                 {data.contact_items.map((item, index) => {
                   const Icon = item.icon === "Mail" ? Mail : Phone
                   return (
                     <li key={`contact-${item.id || `item-${index}`}`} className="flex items-start gap-2 text-gray-300 group">
-                      <Icon className="w-3.5 h-3.5 md:w-5 md:h-5 flex-shrink-0 mt-0.5 text-[#00D4AA] group-hover:scale-110 transition-transform" />
-                      <a href={item.href} className="text-[10px] md:text-sm leading-tight group-hover:text-white transition-colors break-all !min-h-0 !min-w-0">
+                      <Icon className="w-3.5 h-3.5 md:w-5 md:h-5 shrink-0 mt-0.5 text-[#00D4AA] group-hover:scale-110 transition-transform" />
+                      <a href={item.href} className="text-[10px] md:text-sm leading-tight group-hover:text-white transition-colors break-all min-h-0! min-w-0!">
                         {item.text}
                       </a>
                     </li>
@@ -197,7 +207,7 @@ export function Footer() {
             <div>
               <h3 className="font-bold text-base md:text-lg lg:text-xl mb-3 md:mb-4 lg:mb-6 text-white relative inline-block">
                 Follow Us
-                <span className="absolute -bottom-2 left-0 w-12 h-1 bg-gradient-to-r from-[#0066FF] to-[#00D4AA] rounded-full" />
+                <span className="absolute -bottom-2 left-0 w-12 h-1 bg-linear-to-r from-[#0066FF] to-[#00D4AA] rounded-full" />
               </h3>
               <div className="flex flex-wrap gap-2 md:gap-3 lg:gap-4 mt-4 md:mt-6 lg:mt-8">
                 {data.social_links.map((social, index) => (
@@ -206,7 +216,7 @@ export function Footer() {
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 rounded-lg md:rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-gradient-to-br hover:from-[#0066FF] hover:to-[#00D4AA] hover:border-transparent flex items-center justify-center transition-all duration-300 group hover:scale-110 hover:shadow-lg hover:shadow-[#0066FF]/30 !min-h-0 !min-w-0"
+                    className="w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 rounded-lg md:rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-linear-to-br hover:from-[#0066FF] hover:to-[#00D4AA] hover:border-transparent flex items-center justify-center transition-all duration-300 group hover:scale-110 hover:shadow-lg hover:shadow-[#0066FF]/30 min-h-0! min-w-0!"
                     aria-label={social.name}
                   >
                     {typeof social.icon === "function" ? (
