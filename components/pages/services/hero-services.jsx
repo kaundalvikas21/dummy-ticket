@@ -10,7 +10,7 @@ export default function HeroSection() {
   const heroRef = useRef(null)
 
   const heroStyle = {
-    backgroundImage: `linear-gradient(rgba(0, 102, 255, 0.7), rgba(0, 82, 204, 0.7)), url(/travel-world-map-abstract.jpg)`,
+    backgroundImage: `linear-gradient(rgba(0, 102, 255, 0.7), rgba(0, 82, 204, 0.7)), url(/world_map.jpg)`,
     backgroundSize: 'cover',
     backgroundPosition: 'center',
     backgroundRepeat: 'no-repeat'

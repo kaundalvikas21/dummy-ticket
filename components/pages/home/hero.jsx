@@ -29,7 +29,7 @@ export function Hero() {
     <section
       className="w-full flex items-center justify-center text-center pt-32 pb-16 md:pt-40 md:pb-24 relative overflow-hidden"
       style={{
-        backgroundImage: `linear-gradient(to bottom right, rgba(0, 102, 255, 0.85), rgba(0, 102, 255, 0.75), rgba(0, 212, 170, 0.7)), url(/modern-airport-terminal-with-planes-and-travelers-.jpg)`,
+        backgroundImage: `linear-gradient(to bottom right, rgba(0, 102, 255, 0.85), rgba(0, 102, 255, 0.75), rgba(0, 212, 170, 0.7)), url(/modern_terminal_with_travellers.jpg)`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat'
