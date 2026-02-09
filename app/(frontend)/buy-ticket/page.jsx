@@ -491,15 +491,15 @@ export default function BuyTicketPage() {
                     }`}>
                     {plan.popular_label && (
                       <div className="absolute top-0 right-0 z-10">
-                        <span className="bg-gradient-to-l from-[#0066FF] to-[#00D4AA] text-white px-3 py-1 rounded-bl-xl text-[10px] font-bold uppercase shadow-sm">
+                        <span className="bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white px-3 py-1 rounded-bl-xl text-[10px] font-bold uppercase shadow-sm">
                           {plan.popular_label}
                         </span>
                       </div>
                     )}
 
                     <div className="flex justify-between items-start mb-4">
-                      <h4 className="font-bold text-xl text-gray-900 group-hover:text-[#0066FF] transition-colors line-clamp-2 pr-8">{plan.name}</h4>
-                      <span className="font-bold text-xl text-[#0066FF] flex-shrink-0 ml-4"><Price amount={plan.price} /></span>
+                      <h4 className="font-bold text-xl text-gray-900 group-hover:text-[#00c2c0] transition-colors line-clamp-2">{plan.name}</h4>
+                      <span className="font-bold text-xl text-[#00c2c0] flex-shrink-0 ml-4"><Price amount={plan.price} /></span>
                     </div>
 
                     <p className="text-sm text-gray-600 mb-6 leading-relaxed line-clamp-3">{plan.description}</p>
@@ -524,8 +524,8 @@ export default function BuyTicketPage() {
                         onClick={() => router.push(`/buy-ticket?planId=${plan.id}`)}
                         variant="outline"
                         className={`w-full h-12 rounded-xl font-semibold transition-all ${plan.popular_label
-                          ? "border-[#0066FF] text-[#0066FF] hover:bg-[#0066FF] hover:text-white"
-                          : "border-gray-200 text-gray-900 hover:text-[#0066FF] hover:border-[#0066FF] hover:bg-blue-50"
+                          ? "border-[#00c2c0] text-[#00c2c0] hover:bg-[#00c2c0] hover:text-white"
+                          : "border-gray-200 text-gray-900 hover:text-[#00c2c0] hover:border-[#00c2c0] hover:bg-blue-50"
                           }`}
                       >
                         Select Plan

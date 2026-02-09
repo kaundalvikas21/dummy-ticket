@@ -133,7 +133,7 @@ export default function MainServices({ servicePlans }) {
 
                   <div className="p-5 md:p-8 flex-1 flex flex-col">
                     <h3
-                      className={`text-xl md:text-2xl font-bold mb-2 ${service.popular_label ? "text-gray-900" : "text-gray-900 group-hover:text-[#0066FF]"
+                      className={`text-xl md:text-2xl font-bold mb-2 ${service.popular_label ? "text-gray-900" : "text-gray-900 group-hover:text-[#00c2c0]"
                         }`}
                     >
                       {service.name}
@@ -178,7 +178,7 @@ export default function MainServices({ servicePlans }) {
                         <Button
                           className={`w-full py-5 md:py-6 rounded-xl font-semibold text-sm md:text-base transition-all duration-300 cursor-pointer ${service.popular_label
                             ? "bg-gradient-to-r from-[#0066FF] to-[#00D4AA] text-white hover:shadow-lg hover:-translate-y-0.5 border-0"
-                            : "bg-white border-2 border-gray-200 text-gray-900 hover:border-[#0066FF] hover:text-[#0066FF] hover:bg-gray-50"
+                            : "bg-white border-2 border-gray-200 text-gray-900 hover:border-[#00c2c0] hover:text-[#00c2c0] hover:bg-gray-50"
                             }`}
                         >
                           Book Now

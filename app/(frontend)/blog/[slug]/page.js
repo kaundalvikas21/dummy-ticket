@@ -129,8 +129,8 @@ export default function SingleBlogPost() {
                     <h1 className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-white max-w-7xl mx-auto leading-tight mb-4">
                         {blog.title}
                     </h1>
-                    <div className="flex items-center justify-center gap-3 text-white/90 text-sm">
-                        <Calendar className="w-4 h-4 text-blue-200" />
+                    <div className="flex items-center justify-center gap-3 text-white text-base font-semibold">
+                        <Calendar className="w-5 h-5 text-white" />
                         <span>{format(new Date(blog.blogs?.created_at), 'MMMM d, yyyy')}</span>
                     </div>
                 </div>
@@ -172,7 +172,7 @@ export default function SingleBlogPost() {
                                         variant="outline"
                                         size="icon"
                                         className="rounded-full hover:bg-blue-50 hover:text-blue-600 group"
-                                        onClick={() => window.open('https://www.facebook.com/', '_blank')}
+                                        onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank')}
                                         title="Facebook"
                                     >
                                         <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -198,7 +198,7 @@ export default function SingleBlogPost() {
                                         variant="outline"
                                         size="icon"
                                         className="rounded-full hover:bg-gray-200 hover:text-black group transition-colors"
-                                        onClick={() => window.open('https://twitter.com/', '_blank')}
+                                        onClick={() => window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(blog.title)}`, '_blank')}
                                         title="X"
                                     >
                                         <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
