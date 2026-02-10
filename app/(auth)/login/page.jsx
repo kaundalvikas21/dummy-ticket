@@ -12,6 +12,7 @@ import { useAuth } from '@/contexts/auth-context'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 import { Mail, Lock } from 'lucide-react'
+import { GoogleAuthButton } from '@/components/auth/GoogleAuthButton'
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -110,6 +111,10 @@ export default function LoginPage() {
     }
   }
 
+  const isSocialError = (error) => {
+    return error && (error.toLowerCase().includes('password') || error.toLowerCase().includes('credential'))
+  }
+
   return (
     <AuthLayout
       title="Welcome to VisaFly"
@@ -117,6 +122,7 @@ export default function LoginPage() {
       isLoading={isLoading}
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+
 
         <FormField
           id="email"
@@ -158,6 +164,21 @@ export default function LoginPage() {
           </AuthButton>
         </div>
       </form>
+
+      <div className="mt-6">
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t border-gray-300" />
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="bg-white px-2 text-gray-500">Or continue with</span>
+          </div>
+        </div>
+
+        <div className="mt-6">
+          <GoogleAuthButton text="Sign in with Google" />
+        </div>
+      </div>
 
       {/* Register Link */}
       <div className="text-center mt-6">

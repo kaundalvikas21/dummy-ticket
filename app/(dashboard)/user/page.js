@@ -16,9 +16,23 @@ const UserDashboardPage = async () => {
   // Fetch user profile for name
   const { data: profile } = await supabase
     .from('user_profiles')
-    .select('first_name')
-    .eq('id', user.id)
+    .select('first_name, last_name')
+    .eq('auth_user_id', user.id)
     .single();
+
+  const getDisplayName = () => {
+    const fName = profile?.first_name || '';
+    const lName = profile?.last_name || '';
+
+    if (fName && fName !== 'Unknown') {
+      if (!lName || lName === fName) return fName;
+      return `${fName} ${lName}`.trim();
+    }
+    // Fallback to Google metadata
+    if (user.user_metadata?.full_name) return user.user_metadata.full_name;
+    if (user.user_metadata?.given_name) return user.user_metadata.given_name;
+    return user.email?.split('@')[0] || 'User';
+  };
 
   // Fetch all bookings
   const { data: bookings, error: dbError } = await supabase
@@ -110,7 +124,7 @@ const UserDashboardPage = async () => {
       statsData={stats}
       upcomingBookingsData={upcomingList}
       recentActivityData={recentActivity}
-      userName={profile?.first_name || user?.user_metadata?.first_name || user?.email?.split('@')[0]}
+      userName={getDisplayName()}
     />
   );
 };

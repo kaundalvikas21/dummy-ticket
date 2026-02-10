@@ -13,7 +13,7 @@ export function AuthButton({
   return (
     <Button
       type={type}
-      className="w-full bg-gradient-to-r from-blue-600 to-teal-400 text-white hover:shadow-xl hover:shadow-blue-600/40 transition-all duration-300 transform hover:scale-[1.02] font-semibold py-3 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+      className="w-full bg-linear-to-r from-blue-600 to-teal-400 text-white hover:shadow-xl hover:shadow-blue-600/40 transition-all duration-300 transform hover:scale-[1.02] font-semibold py-3 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none cursor-pointer"
       disabled={disabled || isLoading}
       {...props}
     >

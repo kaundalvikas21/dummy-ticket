@@ -34,6 +34,9 @@ const getBadgeStyle = (status) => {
 export function UserDashboard({ statsData, upcomingBookingsData, recentActivityData, userName }) {
   const router = useRouter();
 
+  // Use a cleaner fallback if userName is still questionable
+  const displayUserName = userName === 'Unknown' || !userName ? 'User' : userName;
+
   const handleBookTicket = () => {
     router.push("/buy-ticket");
   };
@@ -93,7 +96,7 @@ export function UserDashboard({ statsData, upcomingBookingsData, recentActivityD
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="text-center sm:text-left">
               <h2 className="text-xl sm:text-2xl font-bold mb-2">
-                Welcome back, {userName || 'User'}!
+                Welcome back, {displayUserName}!
               </h2>
               <p className="text-blue-100 text-sm sm:text-base">
                 You have {statsData?.upcoming || 0} upcoming trip{(statsData?.upcoming || 0) !== 1 ? 's' : ''}. Ready for your next adventure?

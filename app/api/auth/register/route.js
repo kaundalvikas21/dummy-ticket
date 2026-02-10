@@ -149,52 +149,20 @@ async function handleRegister(request) {
       console.error('Failed to initiate email sending:', emailError)
     }
 
-    // 4. Create User Profile manually (backup for trigger)
+    // 4. Create User Profile using central utility
     if (authData.user?.id) {
       try {
-        const { createClient: createAdminClient } = await import('@supabase/supabase-js')
-        const supabaseAdmin = createAdminClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL,
-          process.env.SUPABASE_SERVICE_ROLE_KEY,
-          {
-            auth: {
-              autoRefreshToken: false,
-              persistSession: false
-            }
-          }
-        )
-
-        // Check if profile already exists (to avoid duplicate errors if trigger worked)
-        const { data: existingProfile } = await supabaseAdmin
-          .from('user_profiles')
-          .select('id')
-          .eq('auth_user_id', authData.user.id)
-          .single()
-
-        if (!existingProfile) {
-          console.log('Profile not found for new user, creating manually...')
-          const { error: profileError } = await supabaseAdmin
-            .from('user_profiles')
-            .insert({
-              auth_user_id: authData.user.id,
-              first_name: firstName,
-              last_name: lastName,
-              email: email,
-              phone_number: phoneNumber,
-              country_code: countryCode,
-              nationality: nationality,
-              role: effectiveRole,
-              preferred_language: 'en'
-            })
-
-          if (profileError) {
-            console.error('Manual profile creation failed:', profileError.message)
-          } else {
-            console.log('Manual profile creation successful')
-          }
-        }
+        const { syncUserProfile } = await import('@/lib/auth-utils')
+        await syncUserProfile(authData.user, {
+          firstName,
+          lastName,
+          phoneNumber,
+          countryCode,
+          nationality,
+          forceUpdate: true
+        })
       } catch (profileCatchError) {
-        console.warn('Error in manual profile creation flow:', profileCatchError.message)
+        console.warn('Error in profile creation flow:', profileCatchError.message)
       }
     }
 

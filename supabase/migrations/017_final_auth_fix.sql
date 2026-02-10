@@ -2,6 +2,7 @@
 -- This migration consolidates all previous fixes and resolves the user creation issue
 
 -- STEP 1: Remove ALL conflicting constraints and triggers
+DROP TRIGGER IF EXISTS create_user_profile_on_signup_trigger ON auth.users;
 DROP TRIGGER IF EXISTS create_user_profile_on_signup_trigger_final ON auth.users;
 DROP TRIGGER IF EXISTS update_user_profile_on_auth_update_safe ON auth.users;
 DROP FUNCTION IF EXISTS create_user_profile_on_signup_final() CASCADE;
@@ -16,14 +17,30 @@ DROP POLICY IF EXISTS "Admins can update all profiles" ON user_profiles;
 DROP POLICY IF EXISTS "Admins can manage all profiles" ON user_profiles;
 DROP POLICY IF EXISTS "Service role bypass for profile creation" ON user_profiles;
 DROP POLICY IF EXISTS "Allow all operations on user_profiles" ON user_profiles;
+DROP POLICY IF EXISTS "Service role full access" ON user_profiles;
 
 -- STEP 2: Fix user_profiles table structure
--- Make user_id nullable for Supabase Auth users
-ALTER TABLE user_profiles ALTER COLUMN user_id DROP NOT NULL;
+DO $$ 
+BEGIN
+    -- 1. Handle user_id (the original column)
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'user_profiles' AND column_name = 'user_id') THEN
+        -- Make it nullable if it exists
+        ALTER TABLE public.user_profiles ALTER COLUMN user_id DROP NOT NULL;
+        -- Remove its constraint if it exists
+        ALTER TABLE public.user_profiles DROP CONSTRAINT IF EXISTS user_profiles_user_id_fkey;
+        RAISE NOTICE 'Defensively handled user_id column';
+    END IF;
 
--- Remove any foreign key constraints that reference auth.users
-ALTER TABLE user_profiles DROP CONSTRAINT IF EXISTS user_profiles_auth_user_id_fkey;
-ALTER TABLE user_profiles DROP CONSTRAINT IF EXISTS user_profiles_user_id_fkey;
+    -- 2. Handle auth_user_id (the new column)
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'user_profiles' AND column_name = 'auth_user_id') THEN
+        ALTER TABLE public.user_profiles ADD COLUMN auth_user_id UUID REFERENCES auth.users(id);
+        RAISE NOTICE 'Added missing auth_user_id column';
+    ELSE
+        -- Remove its constraint if it exists to prevent conflicts
+        ALTER TABLE public.user_profiles DROP CONSTRAINT IF EXISTS user_profiles_auth_user_id_fkey;
+        RAISE NOTICE 'auth_user_id column already exists, cleaned up constraint';
+    END IF;
+END $$;
 
 -- STEP 3: Disable RLS temporarily to test basic functionality
 ALTER TABLE user_profiles DISABLE ROW LEVEL SECURITY;
@@ -37,6 +54,7 @@ BEGIN
     auth_user_id,
     first_name,
     last_name,
+    avatar_url,
     phone_number,
     nationality,
     preferred_language,
@@ -46,8 +64,25 @@ BEGIN
   )
   SELECT
     NEW.id,
-    COALESCE(NEW.raw_user_meta_data->>'first_name', 'Unknown'),
-    COALESCE(NEW.raw_user_meta_data->>'last_name', 'User'),
+    COALESCE(
+      NEW.raw_user_meta_data->>'first_name', 
+      NEW.raw_user_meta_data->>'given_name',
+      split_part(NEW.raw_user_meta_data->>'full_name', ' ', 1),
+      'Unknown'
+    ),
+    COALESCE(
+      NEW.raw_user_meta_data->>'last_name', 
+      NEW.raw_user_meta_data->>'family_name',
+      CASE 
+        WHEN position(' ' in NEW.raw_user_meta_data->>'full_name') > 0 
+        THEN substring(NEW.raw_user_meta_data->>'full_name' from position(' ' in NEW.raw_user_meta_data->>'full_name') + 1)
+        ELSE '' 
+      END
+    ),
+    COALESCE(
+      NEW.raw_user_meta_data->>'avatar_url',
+      NEW.raw_user_meta_data->>'picture'
+    ),
     NEW.raw_user_meta_data->>'phone_number',
     NEW.raw_user_meta_data->>'nationality',
     COALESCE(NEW.raw_user_meta_data->>'preferred_language', 'en'),
@@ -66,7 +101,7 @@ EXCEPTION
     RAISE NOTICE 'Profile creation failed for user %: %', NEW.id, SQLERRM;
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, auth;
 
 -- Create trigger for automatic profile creation
 CREATE TRIGGER create_user_profile_on_signup_trigger
@@ -80,20 +115,26 @@ ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
 -- Policy: Users can view their own profile
 CREATE POLICY "Users can view own profile"
   ON user_profiles FOR SELECT
-  USING (auth.uid() = auth_user_id OR auth.uid() IS NULL);
+  USING (auth.uid() = auth_user_id);
 
 -- Policy: Users can update their own profile
 CREATE POLICY "Users can update own profile"
   ON user_profiles FOR UPDATE
   USING (auth.uid() = auth_user_id);
 
+-- Policy: Admins can manage all profiles (using secure JWT claims)
+CREATE POLICY "Admins can manage all profiles"
+  ON user_profiles FOR ALL
+  USING (
+    auth.jwt() ->> 'role' = 'admin' OR
+    auth.jwt() -> 'app_metadata' ->> 'role' = 'admin'
+  );
+
 -- Policy: Service role can bypass RLS for all operations
 CREATE POLICY "Service role full access"
   ON user_profiles FOR ALL
   USING (
     current_setting('request.jwt.claims', true)::jsonb->>'role' = 'service_role'
-    OR auth.uid() = auth_user_id
-    OR auth.uid() IS NULL
   );
 
 -- STEP 6: Grant necessary permissions

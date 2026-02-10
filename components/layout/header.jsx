@@ -109,12 +109,24 @@ export function Header() {
     }
   }
 
-  // Get user display name (prefer profile name over email, but don't use email fallback)
+  // Get user display name
   const getUserDisplayName = () => {
-    if (syncedProfile?.first_name) {
-      return `${syncedProfile.first_name} ${syncedProfile.last_name || ''}`.trim()
+    const fName = syncedProfile?.first_name || ''
+    const lName = syncedProfile?.last_name || ''
+
+    if (fName && fName !== 'Unknown') {
+      // If last name is identical to first name (due to old trigger bug), only show one
+      if (!lName || lName === fName) return fName
+      return `${fName} ${lName}`.trim()
     }
-    return 'User' // Don't use email fallback - return 'User' instead
+    // Deep fallback - check user user_metadata directly if profile is stale/defaulted
+    if (user?.user_metadata?.full_name) {
+      return user.user_metadata.full_name;
+    }
+    if (user?.user_metadata?.given_name) {
+      return `${user.user_metadata.given_name} ${user.user_metadata.family_name || ''}`.trim();
+    }
+    return 'User'
   }
 
   // Get user initials for avatar (only name-based, never email)

@@ -8,8 +8,7 @@ FOR SELECT
 TO authenticated 
 USING (
   auth.jwt() ->> 'role' = 'admin' OR
-  auth.jwt() -> 'app_metadata' ->> 'role' = 'admin' OR
-  auth.jwt() -> 'user_metadata' ->> 'role' = 'admin'
+  auth.jwt() -> 'app_metadata' ->> 'role' = 'admin'
 );
 
 -- Add policy for Admins to DELETE all profiles
@@ -19,8 +18,7 @@ FOR DELETE
 TO authenticated 
 USING (
   auth.jwt() ->> 'role' = 'admin' OR
-  auth.jwt() -> 'app_metadata' ->> 'role' = 'admin' OR
-  auth.jwt() -> 'user_metadata' ->> 'role' = 'admin'
+  auth.jwt() -> 'app_metadata' ->> 'role' = 'admin'
 );
 
 -- Add policy for Admins to UPDATE all profiles
@@ -30,11 +28,9 @@ FOR UPDATE
 TO authenticated 
 USING (
   auth.jwt() ->> 'role' = 'admin' OR
-  auth.jwt() -> 'app_metadata' ->> 'role' = 'admin' OR
-  auth.jwt() -> 'user_metadata' ->> 'role' = 'admin'
+  auth.jwt() -> 'app_metadata' ->> 'role' = 'admin'
 )
 WITH CHECK (
   auth.jwt() ->> 'role' = 'admin' OR
-  auth.jwt() -> 'app_metadata' ->> 'role' = 'admin' OR
-  auth.jwt() -> 'user_metadata' ->> 'role' = 'admin'
+  auth.jwt() -> 'app_metadata' ->> 'role' = 'admin'
 );

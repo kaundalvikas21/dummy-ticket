@@ -10,6 +10,7 @@ import { FormField } from '@/components/auth/FormField'
 import { AuthButton } from '@/components/auth/AuthButton'
 import { PhoneInputSingle } from '@/components/ui/input/PhoneInputSingle'
 import { User, Mail, Lock, Phone } from 'lucide-react'
+import { GoogleAuthButton } from '@/components/auth/GoogleAuthButton'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/auth-context'
 import { useRouter } from 'next/navigation'
@@ -301,6 +302,21 @@ export default function RegisterPage() {
           Create Account
         </AuthButton>
       </form>
+
+      <div className="mt-6">
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t border-gray-300" />
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="bg-white px-2 text-gray-500">Or sign up with</span>
+          </div>
+        </div>
+
+        <div className="mt-6">
+          <GoogleAuthButton text="Sign up with Google" />
+        </div>
+      </div>
 
       {/* Login Link */}
       <div className="text-center mt-4">

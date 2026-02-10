@@ -131,61 +131,64 @@ export default function BuyTicketPage() {
             .single()
 
           if (profile) {
-            setFormData(prev => ({
-              ...prev,
-              firstName: isReturningFromCheckout ? (prev.firstName || profile.first_name || "") : (profile.first_name || prev.firstName || ""),
-              lastName: isReturningFromCheckout ? (prev.lastName || profile.last_name || "") : (profile.last_name || prev.lastName || ""),
-              email: isReturningFromCheckout ? (prev.email || user.email || "") : (user.email || prev.email || ""),
-              phone: isReturningFromCheckout ? (prev.phone || profile.phone_number || "") : (profile.phone_number || prev.phone || ""),
-              passportNumber: isReturningFromCheckout ? (prev.passportNumber || profile.passport_number || "") : (profile.passport_number || prev.passportNumber || ""),
-              dateOfBirth: isReturningFromCheckout ? (prev.dateOfBirth || profile.date_of_birth || "") : (profile.date_of_birth || prev.dateOfBirth || ""),
-              nationality: (() => {
-                const val = (prev.nationality || profile.nationality || "").trim();
-                if (!val) return "";
-                // If it's already matching a country name exactly (or close enough), use the official name from our list
-                // This helps map "Indian" -> "India" to match the PassengerDetailsForm dropdown
-                const matched = countries.find(c => {
-                  const name = c.name.toLowerCase();
-                  const target = val.toLowerCase();
-                  return target.includes(name) || name.includes(target);
-                });
-                return matched ? matched.name : val;
-              })(),
-              // Delivery Options prefill
-              deliveryEmail: isReturningFromCheckout ? (prev.deliveryEmail || user.email || "") : (user.email || prev.deliveryEmail || ""),
-              whatsappNumber: isReturningFromCheckout ? (prev.whatsappNumber || profile.phone_number || "") : (profile.phone_number || prev.whatsappNumber || ""),
-              // Map address fields to Billing if available
-              billingName: isReturningFromCheckout
-                ? (prev.billingName || `${profile.first_name || ""} ${profile.last_name || ""}`.trim() || "")
-                : (`${profile.first_name || ""} ${profile.last_name || ""}`.trim() || prev.billingName || ""),
-              billingAddress: isReturningFromCheckout ? (prev.billingAddress || profile.address || "") : (profile.address || prev.billingAddress || ""),
-              billingCity: isReturningFromCheckout ? (prev.billingCity || profile.city || "") : (profile.city || prev.billingCity || ""),
-              billingZip: isReturningFromCheckout ? (prev.billingZip || profile.postal_code || "") : (profile.postal_code || prev.billingZip || ""),
-              billingCountry: (() => {
-                const getCode = (v) => {
-                  if (!v || typeof v !== 'string') return null;
-                  const clean = v.trim();
-                  if (!clean) return null;
-                  // Exact code match
-                  const codeMatch = countries.find(c => c.code.toUpperCase() === clean.toUpperCase());
-                  if (codeMatch) return codeMatch.code;
-                  // Name match
-                  const nameMatch = countries.find(c => {
+            const { normalizeNames } = await import('@/lib/auth-utils');
+            const { firstName: normFirstName, lastName: normLastName } = normalizeNames(profile.first_name, profile.last_name);
+            const profileFullName = [profile.first_name, profile.last_name].filter(Boolean).join(' ');
+
+            setFormData(prev => {
+              return {
+                ...prev,
+                firstName: (() => {
+                  const val = isReturningFromCheckout ? (prev.firstName || normFirstName) : (normFirstName || prev.firstName || "");
+                  return val || "";
+                })(),
+                lastName: (() => {
+                  return isReturningFromCheckout ? (prev.lastName || normLastName) : (normLastName || prev.lastName || "");
+                })(),
+                email: isReturningFromCheckout ? (prev.email || user.email || "") : (user.email || prev.email || ""),
+                phone: isReturningFromCheckout ? (prev.phone || profile.phone_number || "") : (profile.phone_number || prev.phone || ""),
+                passportNumber: isReturningFromCheckout ? (prev.passportNumber || profile.passport_number || "") : (profile.passport_number || prev.passportNumber || ""),
+                dateOfBirth: isReturningFromCheckout ? (prev.dateOfBirth || profile.date_of_birth || "") : (profile.date_of_birth || prev.dateOfBirth || ""),
+                nationality: (() => {
+                  const val = (prev.nationality || profile.nationality || "").trim();
+                  if (!val) return "";
+                  const matched = countries.find(c => {
                     const name = c.name.toLowerCase();
-                    const target = clean.toLowerCase();
+                    const target = val.toLowerCase();
                     return target.includes(name) || name.includes(target);
                   });
-                  return nameMatch ? nameMatch.code : null;
-                };
+                  return matched ? matched.name : val;
+                })(),
+                deliveryEmail: isReturningFromCheckout ? (prev.deliveryEmail || user.email || "") : (user.email || prev.deliveryEmail || ""),
+                whatsappNumber: isReturningFromCheckout ? (prev.whatsappNumber || profile.phone_number || "") : (profile.phone_number || prev.whatsappNumber || ""),
+                billingName: isReturningFromCheckout
+                  ? (prev.billingName || profileFullName || "")
+                  : (profileFullName || prev.billingName || ""),
+                billingAddress: isReturningFromCheckout ? (prev.billingAddress || profile.address || "") : (profile.address || prev.billingAddress || ""),
+                billingCity: isReturningFromCheckout ? (prev.billingCity || profile.city || "") : (profile.city || prev.billingCity || ""),
+                billingZip: isReturningFromCheckout ? (prev.billingZip || profile.postal_code || "") : (profile.postal_code || prev.billingZip || ""),
+                billingCountry: (() => {
+                  const getCode = (v) => {
+                    if (!v || typeof v !== 'string') return null;
+                    const clean = v.trim();
+                    if (!clean) return null;
+                    const codeMatch = countries.find(c => c.code.toUpperCase() === clean.toUpperCase());
+                    if (codeMatch) return codeMatch.code;
+                    const nameMatch = countries.find(c => {
+                      const name = c.name.toLowerCase();
+                      const target = clean.toLowerCase();
+                      return target.includes(name) || name.includes(target);
+                    });
+                    return nameMatch ? nameMatch.code : null;
+                  };
 
-                // Use priority: profile country_code > profile nationality > existing form data
-                // We prefer profile data over potentially old/incorrect session storage for these specific fields
-                return getCode(profile.country_code) ||
-                  getCode(profile.nationality) ||
-                  getCode(prev.billingCountry) ||
-                  "";
-              })()
-            }))
+                  return getCode(profile.country_code) ||
+                    getCode(profile.nationality) ||
+                    getCode(prev.billingCountry) ||
+                    "";
+                })()
+              };
+            });
           }
         }
 

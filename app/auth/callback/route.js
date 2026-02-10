@@ -19,10 +19,11 @@ export async function GET(request) {
         const { data: { user } } = await supabase.auth.getUser()
 
         if (user) {
-          // Get user role for proper redirect
+          const { syncUserProfile } = await import('@/lib/auth-utils')
+          await syncUserProfile(user)
+
           const userRole = user?.app_metadata?.role || 'user'
           const dashboardUrl = next === '/' ? `/${userRole}` : next
-
           return NextResponse.redirect(`${origin}${dashboardUrl}`)
         }
 

@@ -100,10 +100,15 @@ export default function ContactContent({ settings }) {
         if (response.ok) {
           const userData = await response.json()
 
+          const p = userData.profile;
+          const fullName = (p.first_name && p.last_name && p.first_name !== p.last_name)
+            ? `${p.first_name} ${p.last_name}`.trim()
+            : (p.first_name || "");
+
           // Only pre-fill if the fields are empty
           setFormData(prev => ({
             ...prev,
-            name: prev.name || userData.profile.first_name || "",
+            name: prev.name || fullName || "",
             email: prev.email || userData.profile.email || "",
             phone: prev.phone || userData.profile.phone_number || ""
           }))

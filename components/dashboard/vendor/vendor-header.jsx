@@ -88,8 +88,12 @@ export function VendorHeader() {
 
   // Get user display name from profile
   const getUserDisplayName = () => {
-    if (profile?.first_name) {
-      return `${profile.first_name} ${profile.last_name || ''}`.trim()
+    const fName = profile?.first_name || ''
+    const lName = profile?.last_name || ''
+
+    if (fName && fName !== 'Unknown') {
+      if (!lName || lName === fName) return fName
+      return `${fName} ${lName}`.trim()
     }
     return "" // Return empty string - skeleton will handle loading state
   }

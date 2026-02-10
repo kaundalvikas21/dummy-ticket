@@ -78,34 +78,10 @@ async function handleLogin(request) {
     let profile = profileResult.data
     const profileError = profileResult.error
 
-    if (profileError) {
-      console.error('Profile fetch error:', profileError)
-
-      // If no profile exists, create a basic one
-      if (profileError.code === 'PGRST116') {
-        const newProfile = {
-          auth_user_id: authData.user.id,
-          first_name: authData.user.user_metadata?.first_name || '',
-          last_name: authData.user.user_metadata?.last_name || '',
-          preferred_language: 'en'
-        }
-
-        const createdProfileResult = await supabaseAdmin
-          .from('user_profiles')
-          .insert(newProfile)
-          .select()
-          .single()
-
-        const createdProfile = createdProfileResult.data
-        const createError = createdProfileResult.error
-
-        if (createError) {
-          console.error('Profile creation error:', createError)
-        } else {
-          profile = createdProfile
-        }
-      }
-    }
+    // Sync user profile using central utility
+    const { syncUserProfile } = await import('@/lib/auth-utils')
+    const { profile: syncedProfile } = await syncUserProfile(authData.user)
+    profile = syncedProfile || profile
 
     // Return success response with user and profile data
     return NextResponse.json({

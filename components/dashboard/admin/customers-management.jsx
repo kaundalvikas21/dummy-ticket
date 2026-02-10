@@ -89,21 +89,30 @@ export function CustomersManagement() {
 
       // 1. Initialize from Profiles
       profiles?.forEach(profile => {
-        // Core fix: use auth_user_id (from Supabase Auth) as primary, fallback to old user_id or PK id
         const id = profile.auth_user_id || profile.user_id || profile.id
+        const firstName = profile.first_name || '';
+        const lastName = profile.last_name || '';
+        let displayName = (firstName === lastName || !lastName)
+          ? firstName
+          : `${firstName} ${lastName}`.trim();
+
+        if (displayName === 'Unknown User' || !firstName || firstName === 'Unknown') {
+          displayName = 'Customer';
+        }
 
         customerMap.set(id, {
           id: id.toString(),
           auth_user_id: profile.auth_user_id,
           user_id: profile.user_id,
           profile_id: profile.id,
-          name: profile.first_name ? `${profile.first_name} ${profile.last_name || ''}`.trim() : 'Guest User',
+          name: displayName,
           email: profile.email || 'N/A',
           phone: profile.phone_number || 'N/A',
           location: `${profile.city || ''}, ${profile.country || ''}`.replace(/^, $/, 'N/A'),
           orders: 0,
           spent: 0,
           status: "active",
+          avatar_url: profile.avatar_url,
           joinDate: new Date(profile.created_at || Date.now()).toLocaleDateString(),
           rawJoinDate: new Date(profile.created_at || Date.now())
         })
@@ -458,12 +467,16 @@ export function CustomersManagement() {
                         <td className="py-3 px-4">
                           <div className="flex items-center gap-3">
                             <Avatar>
-                              <AvatarFallback className="bg-linear-to-br from-[#0066FF] to-[#00D4AA] text-white">
-                                {customer.name
-                                  .split(" ")
-                                  .map((n) => n[0])
-                                  .join("")}
-                              </AvatarFallback>
+                              {customer.avatar_url ? (
+                                <img src={customer.avatar_url} alt={customer.name} className="h-full w-full object-cover" />
+                              ) : (
+                                <AvatarFallback className="bg-linear-to-br from-[#0066FF] to-[#00D4AA] text-white">
+                                  {customer.name
+                                    .split(" ")
+                                    .map((n) => n[0])
+                                    .join("")}
+                                </AvatarFallback>
+                              )}
                             </Avatar>
                             <div className="flex flex-col">
                               <span className="text-sm font-medium text-gray-900">{customer.name}</span>
@@ -543,12 +556,16 @@ export function CustomersManagement() {
             <div className="space-y-6 py-4">
               <div className="flex items-center gap-4">
                 <Avatar className="w-16 h-16">
-                  <AvatarFallback className="bg-linear-to-br from-[#0066FF] to-[#00D4AA] text-white text-xl">
-                    {selectedCustomer.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
-                  </AvatarFallback>
+                  {selectedCustomer.avatar_url ? (
+                    <img src={selectedCustomer.avatar_url} alt={selectedCustomer.name} className="h-full w-full object-cover" />
+                  ) : (
+                    <AvatarFallback className="bg-linear-to-br from-[#0066FF] to-[#00D4AA] text-white text-xl">
+                      {selectedCustomer.name
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")}
+                    </AvatarFallback>
+                  )}
                 </Avatar>
                 <div>
                   <h3 className="text-xl font-bold">{selectedCustomer.name}</h3>

@@ -40,9 +40,11 @@ export function AuthProvider({ children }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN') {
-        setUser(session.user)
-        // Note: Profile is fetched by checkAuth(), avoiding race condition
+      if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+        if (session?.user) {
+          setUser(session.user)
+          await fetchProfile(session)
+        }
       } else if (event === 'SIGNED_OUT') {
         setUser(null)
         setProfile(null)
@@ -57,6 +59,26 @@ export function AuthProvider({ children }) {
     return () => subscription.unsubscribe()
   }, [])
 
+  const fetchProfile = async (session) => {
+    if (!session?.user || !session?.access_token) return
+
+    try {
+      const response = await fetch('/api/auth/profile', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      })
+      if (response.ok) {
+        const result = await response.json()
+        if (result.success) {
+          setProfile(result.profile)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch profile:', error)
+    }
+  }
+
   const checkAuth = async () => {
     try {
       // Get initial session
@@ -64,23 +86,7 @@ export function AuthProvider({ children }) {
 
       if (session?.user) {
         setUser(session.user)
-
-        // Fetch user profile
-        try {
-          const response = await fetch('/api/auth/profile', {
-            headers: {
-              'Authorization': `Bearer ${session.access_token}`
-            }
-          })
-          if (response.ok) {
-            const result = await response.json()
-            if (result.success) {
-              setProfile(result.profile)
-            }
-          }
-        } catch (error) {
-          console.error('Failed to fetch profile:', error)
-        }
+        await fetchProfile(session)
       }
     } catch (error) {
       console.error('Auth check error:', error)
@@ -115,6 +121,26 @@ export function AuthProvider({ children }) {
       return { success: true, data: result }
     } catch (error) {
       console.error('Sign in error:', error)
+      return { success: false, error: error.message }
+    }
+  }
+
+  const signInWithGoogle = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+        },
+      })
+      if (error) throw error
+      return { success: true }
+    } catch (error) {
+      console.error('Google sign in error:', error)
       return { success: false, error: error.message }
     }
   }
@@ -329,8 +355,7 @@ export function AuthProvider({ children }) {
     profileVersion,
     // Supabase Auth methods
     signIn,
-    signUp,
-    signOut,
+    signInWithGoogle,
     signUp,
     signOut,
     resetPassword,

@@ -42,11 +42,10 @@ BEGIN
   -- Check if user has admin role from JWT claims or app_metadata
   RETURN (
     auth.jwt() ->> 'role' = 'admin' OR
-    auth.jwt() -> 'app_metadata' ->> 'role' = 'admin' OR
-    auth.jwt() -> 'user_metadata' ->> 'role' = 'admin'
+    auth.jwt() -> 'app_metadata' ->> 'role' = 'admin'
   );
 END;
-$$ LANGUAGE plpgsql IMMUTABLE SECURITY DEFINER;
+$$ LANGUAGE plpgsql IMMUTABLE SECURITY DEFINER SET search_path = public, auth;
 
 -- Admins can manage all bookings
 create policy "Admins can manage all bookings"
