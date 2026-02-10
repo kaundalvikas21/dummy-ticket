@@ -50,7 +50,6 @@ export async function POST(req) {
                             const { getAdminBookingNotificationEmail } = await import('@/lib/email-templates');
 
                             const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_FROM;
-                            console.log(`Sending simplified admin notification to: ${adminEmail}`);
 
                             const adminEmailOptions = {
                                 to: adminEmail,

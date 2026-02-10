@@ -45,6 +45,11 @@ const MyBookingsProps = {
   setActiveSection: null,
 }
 
+const formatLocation = (loc) => {
+  if (!loc) return loc;
+  return loc.replace(/ - ([a-zA-Z]+)$/, (match, code) => ` - ${code.toUpperCase()}`);
+};
+
 export function MyBookings({ setActiveSection, initialBookings = [] }) {
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
@@ -181,11 +186,11 @@ BT
 (FLIGHT INFORMATION) Tj
 0 -20 Td
 /F2 10 Tf
-(Route: ${booking.route}) Tj
+(Route: ${formatLocation(booking.route)}) Tj
 0 -15 Td
-(Departure Airport: ${booking.departure}) Tj
+(Departure Airport: ${formatLocation(booking.departure)}) Tj
 0 -15 Td
-(Arrival Airport: ${booking.arrival}) Tj
+(Arrival Airport: ${formatLocation(booking.arrival)}) Tj
 0 -15 Td
 (Travel Date: ${booking.date}) Tj
 0 -15 Td
@@ -404,7 +409,7 @@ startxref
                       <div className="flex items-center gap-3">
                         <div className="flex flex-col bg-blue-50/50 px-2 py-1 rounded border border-blue-100/50 min-w-[70px]">
                           <span className="text-[8px] font-bold text-blue-400 uppercase leading-none mb-1">From</span>
-                          <span className="text-xs font-bold text-blue-700 truncate" title={booking.departure}>{booking.departure}</span>
+                          <span className="text-xs font-bold text-blue-700 truncate" title={booking.departure}>{formatLocation(booking.departure)}</span>
                         </div>
 
                         {booking.isRoundTrip ? (
@@ -415,7 +420,7 @@ startxref
 
                         <div className="flex flex-col bg-emerald-50/50 px-2 py-1 rounded border border-emerald-100/50 min-w-[70px]">
                           <span className="text-[8px] font-bold text-emerald-400 uppercase leading-none mb-1">To</span>
-                          <span className="text-xs font-bold text-emerald-700 truncate" title={booking.arrival}>{booking.arrival}</span>
+                          <span className="text-xs font-bold text-emerald-700 truncate" title={booking.arrival}>{formatLocation(booking.arrival)}</span>
                         </div>
                       </div>
 
@@ -510,15 +515,15 @@ startxref
                   <div className="space-y-3">
                     <div>
                       <p className="text-sm text-gray-600">Route</p>
-                      <p className="font-medium">{selectedBooking.route}</p>
+                      <p className="font-medium">{formatLocation(selectedBooking.route)}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-600">Departure</p>
-                      <p className="font-medium">{selectedBooking.departure}</p>
+                      <p className="font-medium">{formatLocation(selectedBooking.departure)}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-600">Arrival</p>
-                      <p className="font-medium">{selectedBooking.arrival}</p>
+                      <p className="font-medium">{formatLocation(selectedBooking.arrival)}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-600">Travel Date</p>

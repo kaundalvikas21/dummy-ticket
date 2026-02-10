@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion"
 import { Plane } from "lucide-react"
-import { TextInput } from "@/components/ui/input/TextInput"
+import { AirportSelect } from "@/components/ui/input/AirportSelect"
 import { SelectInput } from "@/components/ui/input/SelectInput"
 import { DatePicker } from "@/components/ui/input/DatePicker"
 import { useTranslation } from "@/lib/translations"
@@ -58,7 +58,7 @@ export function TravelDetailsForm({ formData, updateFormData }) {
 
         {/* City and Date Inputs */}
         <div className="grid md:grid-cols-2 gap-4 md:gap-6">
-          <TextInput
+          <AirportSelect
             label={t('buyTicket.travelDetails.fields.departureCity')}
             icon={Plane}
             value={formData.departureCity}
@@ -68,7 +68,7 @@ export function TravelDetailsForm({ formData, updateFormData }) {
           />
 
           <div>
-            <TextInput
+            <AirportSelect
               label={t('buyTicket.travelDetails.fields.arrivalCity')}
               icon={Plane}
               iconClassName="rotate-90"

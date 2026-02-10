@@ -364,8 +364,8 @@ startxref
                       <div className="flex flex-col gap-1">
                         <span className="text-xs font-medium text-gray-500">{payment.type}</span>
                         <div className="flex items-center gap-2">
-                          <div className="flex items-center bg-blue-50/50 px-1.5 py-0.5 rounded border border-blue-100/30">
-                            <span className="text-[12px] font-bold text-blue-700">{payment.departure}</span>
+                          <div className="flex items-center bg-blue-50/50 px-1.5 py-0.5 rounded border border-blue-100/30 max-w-[120px]" title={payment.departure}>
+                            <span className="text-[12px] font-bold text-blue-700 truncate">{payment.departure}</span>
                           </div>
 
                           {payment.isRoundTrip ? (
@@ -374,8 +374,8 @@ startxref
                             <MoveRight className="h-3 w-3 text-slate-400" />
                           )}
 
-                          <div className="flex items-center bg-emerald-50/50 px-1.5 py-0.5 rounded border border-emerald-100/30">
-                            <span className="text-[12px] font-bold text-emerald-700">{payment.arrival}</span>
+                          <div className="flex items-center bg-emerald-50/50 px-1.5 py-0.5 rounded border border-emerald-100/30 max-w-[120px]" title={payment.arrival}>
+                            <span className="text-[12px] font-bold text-emerald-700 truncate">{payment.arrival}</span>
                           </div>
                         </div>
                       </div>

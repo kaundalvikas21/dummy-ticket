@@ -141,6 +141,11 @@ export function OrdersManagement() {
       const rate = (rates && rates[currencyCode]) ? rates[currencyCode] : 1
       const amountInUSD = currencyCode === 'USD' ? nativeAmount : (rate ? nativeAmount / rate : nativeAmount)
 
+      const formatLocation = (loc) => {
+        if (!loc || loc === "N/A") return loc
+        return loc.replace(/ - ([a-zA-Z]+)$/, (match, code) => ` - ${code.toUpperCase()}`)
+      }
+
       return {
         id: booking.id,
         customer: passengerName || 'Guest',
@@ -151,8 +156,8 @@ export function OrdersManagement() {
         status: booking.status,
         booking_status: booking.booking_status || 'confirmed',
         date: new Date(booking.created_at).toLocaleDateString(),
-        departure: fromCity,
-        arrival: toCity,
+        departure: formatLocation(fromCity),
+        arrival: formatLocation(toCity),
         phone: passengerPhone,
         pnr: booking.pnr || 'N/A',
         payment_intent_id: booking.payment_intent_id || 'N/A',
@@ -468,7 +473,7 @@ export function OrdersManagement() {
                         <td className="py-3 px-4 text-sm text-gray-700">{order.service}</td>
                         <td className="py-3 px-4">
                           <div className="flex items-center gap-3">
-                            <div className="flex flex-col bg-blue-50/50 px-2 py-1 rounded border border-blue-100/50 min-w-[70px]">
+                            <div className="flex flex-col bg-blue-50/50 px-2 py-1 rounded border border-blue-100/50 min-w-[70px] max-w-[150px]">
                               <span className="text-[8px] font-bold text-blue-400 uppercase leading-none mb-1">From</span>
                               <span className="text-xs font-bold text-blue-700 truncate" title={order.departure}>{order.departure}</span>
                             </div>
@@ -477,7 +482,7 @@ export function OrdersManagement() {
                             ) : (
                               <MoveRight className="h-4 w-4 text-slate-400" />
                             )}
-                            <div className="flex flex-col bg-emerald-50/50 px-2 py-1 rounded border border-emerald-100/50 min-w-[70px]">
+                            <div className="flex flex-col bg-emerald-50/50 px-2 py-1 rounded border border-emerald-100/50 min-w-[70px] max-w-[150px]">
                               <span className="text-[8px] font-bold text-emerald-400 uppercase leading-none mb-1">To</span>
                               <span className="text-xs font-bold text-emerald-700 truncate" title={order.arrival}>{order.arrival}</span>
                             </div>

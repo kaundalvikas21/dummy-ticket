@@ -26,6 +26,11 @@ const PDF_STYLES = {
     importantNotes: { backgroundColor: '#f8fafc', padding: '20px', borderRadius: '10px', border: '1px solid #f1f5f9' }
 }
 
+const formatLocation = (loc) => {
+    if (!loc) return loc;
+    return loc.replace(/ - ([a-zA-Z]+)$/, (match, code) => ` - ${code.toUpperCase()}`);
+};
+
 const RecipientTemplate = ({ booking, acknowledgmentRef }) => {
     if (!booking) return null;
     const p = booking.passenger_details;
@@ -107,7 +112,7 @@ const RecipientTemplate = ({ booking, acknowledgmentRef }) => {
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                             <div style={{ flex: '1' }}>
                                 <p style={PDF_STYLES.fieldLabel}>From</p>
-                                <p style={{ fontSize: '18px', fontWeight: '800', margin: '2px 0 0 0' }}>{p?.departureCity}</p>
+                                <p style={{ fontSize: '18px', fontWeight: '800', margin: '2px 0 0 0' }}>{formatLocation(p?.departureCity)}</p>
                                 <p style={{ fontSize: '12px', fontWeight: '700', color: '#2563eb', margin: '6px 0 0 0' }}>{p?.departureDate}</p>
                             </div>
                             <div style={{ flex: '0 0 120px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -116,7 +121,7 @@ const RecipientTemplate = ({ booking, acknowledgmentRef }) => {
                             </div>
                             <div style={{ flex: '1', textAlign: 'right' }}>
                                 <p style={PDF_STYLES.fieldLabel}>To</p>
-                                <p style={{ fontSize: '18px', fontWeight: '800', margin: '2px 0 0 0' }}>{p?.arrivalCity}</p>
+                                <p style={{ fontSize: '18px', fontWeight: '800', margin: '2px 0 0 0' }}>{formatLocation(p?.arrivalCity)}</p>
                                 {p?.returnDate && (
                                     <p style={{ fontSize: '12px', fontWeight: '700', color: '#059669', margin: '6px 0 0 0' }}>Return: {p?.returnDate}</p>
                                 )}
