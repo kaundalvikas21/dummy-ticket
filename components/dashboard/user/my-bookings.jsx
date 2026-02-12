@@ -26,6 +26,9 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Pagination } from "@/components/ui/pagination"
 
+import { RecipientPDF } from "@/components/pdf/RecipientPDF"
+import { useTicketDownload } from "@/hooks/use-ticket-download"
+
 const Booking = {
   id: "",
   route: "",
@@ -58,6 +61,11 @@ export function MyBookings({ setActiveSection, initialBookings = [] }) {
   const [loading, setLoading] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
+
+  const { download, isDownloading, templateRef } = useTicketDownload()
+
+  // Keep track of which booking is being downloaded for the UI feedback
+  const [downloadingBookingId, setDownloadingBookingId] = useState(null)
 
   const activeFiltersCount = (statusFilter !== "all" ? 1 : 0) + (searchTerm ? 1 : 0)
 
@@ -118,161 +126,32 @@ export function MyBookings({ setActiveSection, initialBookings = [] }) {
     }
   }
 
-  const handleDownloadTicket = (bookingId) => {
+  const handleDownloadTicket = async (bookingId) => {
     const booking = bookings.find((b) => b.id === bookingId)
     if (!booking) return
 
+    setDownloadingBookingId(bookingId)
     toast({
-      title: "Download Started",
-      description: `Downloading ticket for booking ${bookingId}`,
+      title: "Generating Ticket",
+      description: `Preparing your download for booking ${bookingId}...`,
     })
 
-    const pdfContent = `%PDF-1.4
-1 0 obj
-<<
-/Type /Catalog
-/Pages 2 0 R
->>
-endobj
-2 0 obj
-<<
-/Type /Pages
-/Kids [3 0 R]
-/Count 1
->>
-endobj
-3 0 obj
-<<
-/Type /Page
-/Parent 2 0 R
-/Resources <<
-/Font <<
-/F1 <<
-/Type /Font
-/Subtype /Type1
-/BaseFont /Helvetica-Bold
->>
-/F2 <<
-/Type /Font
-/Subtype /Type1
-/BaseFont /Helvetica
->>
->>
->>
-/MediaBox [0 0 612 792]
-/Contents 4 0 R
->>
-endobj
-4 0 obj
-<<
-/Length 2000
->>
-stream
-BT
-/F1 20 Tf
-50 750 Td
-(VISAFLY - TRAVEL BOOKING CONFIRMATION) Tj
-0 -40 Td
-/F1 14 Tf
-(Booking ID: ${booking.id}) Tj
-0 -20 Td
-/F2 10 Tf
-(Booking Date: ${booking.bookingDate}) Tj
-0 -15 Td
-(Status: ${booking.status}) Tj
+    const success = await download(booking)
 
-0 -40 Td
-/F1 12 Tf
-(FLIGHT INFORMATION) Tj
-0 -20 Td
-/F2 10 Tf
-(Route: ${formatLocation(booking.route)}) Tj
-0 -15 Td
-(Departure Airport: ${formatLocation(booking.departure)}) Tj
-0 -15 Td
-(Arrival Airport: ${formatLocation(booking.arrival)}) Tj
-0 -15 Td
-(Travel Date: ${booking.date}) Tj
-0 -15 Td
-(Service Type: ${booking.type}) Tj
+    if (success) {
+      toast({
+        title: "Download Complete",
+        description: `Ticket for booking ${bookingId} has been downloaded.`,
+      })
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Download Failed",
+        description: "There was an error generating your ticket. Please try again.",
+      })
+    }
 
-0 -40 Td
-/F1 12 Tf
-(PASSENGER INFORMATION) Tj
-0 -20 Td
-/F2 10 Tf
-(Name: ${booking.passenger}) Tj
-0 -15 Td
-(Email: ${booking.email}) Tj
-0 -15 Td
-(Phone: ${booking.phone}) Tj
-
-0 -40 Td
-/F1 12 Tf
-(PAYMENT INFORMATION) Tj
-0 -20 Td
-/F2 10 Tf
-(Total Amount Paid: ${booking.amount} ${booking.currency || 'USD'}) Tj
-0 -15 Td
-(Payment Status: Completed) Tj
-
-0 -40 Td
-/F1 12 Tf
-(IMPORTANT INFORMATION) Tj
-0 -20 Td
-/F2 9 Tf
-(- This is a valid dummy ticket for visa application purposes.) Tj
-0 -12 Td
-(- This ticket is valid for 14 days from the date of issue.) Tj
-0 -12 Td
-(- Please carry a printed copy of this ticket for your visa application.) Tj
-0 -12 Td
-(- This booking confirmation serves as proof of travel intent.) Tj
-
-0 -40 Td
-/F1 10 Tf
-(CONTACT SUPPORT) Tj
-0 -15 Td
-/F2 9 Tf
-(Email: support@visafly.com) Tj
-0 -12 Td
-(Phone: +1 (800) 123-4567) Tj
-0 -12 Td
-(Website: www.visafly.com) Tj
-
-0 -40 Td
-/F2 8 Tf
-(Generated on: ${new Date().toLocaleString()}) Tj
-0 -12 Td
-(This is an electronically generated document and does not require a signature.) Tj
-ET
-endstream
-endobj
-xref
-0 5
-0000000000 65535 f
-0000000009 00000 n
-0000000058 00000 n
-0000000115 00000 n
-0000000317 00000 n
-trailer
-<<
-/Size 5
-/Root 1 0 R
->>
-startxref
-2367
-%%EOF`
-
-    const blob = new Blob([pdfContent], { type: "application/pdf" })
-    const url = window.URL.createObjectURL(blob)
-    const link = document.createElement("a")
-    link.href = url
-    link.download = `VisaFly-Ticket-${bookingId}.pdf`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    window.URL.revokeObjectURL(url)
+    setDownloadingBookingId(null)
   }
 
   const handleContactSupport = () => {
@@ -438,8 +317,12 @@ startxref
                       <Eye className="mr-2 h-4 w-4" />
                       View Details
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleDownloadTicket(booking.id)}>
-                      <Download className="mr-2 h-4 w-4" />
+                    <Button variant="outline" size="sm" onClick={() => handleDownloadTicket(booking.id)} disabled={downloadingBookingId === booking.id}>
+                      {downloadingBookingId === booking.id ? (
+                        <span className="w-4 h-4 border-2 border-blue-600/30 border-t-blue-600 rounded-full animate-spin mr-2"></span>
+                      ) : (
+                        <Download className="mr-2 h-4 w-4" />
+                      )}
                       Download
                     </Button>
                   </div>
@@ -571,8 +454,12 @@ startxref
               </div>
 
               <div className="flex gap-2">
-                <Button className="flex-1" onClick={() => handleDownloadTicket(selectedBooking.id)}>
-                  <Download className="mr-2 h-4 w-4" />
+                <Button className="flex-1" onClick={() => handleDownloadTicket(selectedBooking.id)} disabled={downloadingBookingId === selectedBooking.id}>
+                  {downloadingBookingId === selectedBooking.id ? (
+                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></span>
+                  ) : (
+                    <Download className="mr-2 h-4 w-4" />
+                  )}
                   Download Ticket
                 </Button>
                 <Button variant="outline" className="flex-1 bg-transparent" onClick={handleContactSupport}>
@@ -583,6 +470,9 @@ startxref
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Hidden PDF template for generation */}
+      <RecipientPDF booking={bookings.find(b => b.id === downloadingBookingId) || selectedBooking} ref={templateRef} />
     </div>
   )
 }

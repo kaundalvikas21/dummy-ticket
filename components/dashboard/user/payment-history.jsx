@@ -281,7 +281,7 @@ export function PaymentHistory({ initialPayments = [] }) {
                 <TableRow>
                   <TableHead>Transaction ID</TableHead>
                   <TableHead>Booking ID</TableHead>
-                  <TableHead>Date</TableHead>
+                  <TableHead>Travel Date</TableHead>
                   <TableHead>Description</TableHead>
                   <TableHead>Method</TableHead>
                   <TableHead>Amount</TableHead>
