@@ -269,26 +269,30 @@ export function MyBookings({ setActiveSection, initialBookings = [] }) {
         ) : paginatedBookings.length > 0 ? (
           paginatedBookings.map((booking) => (
             <Card key={booking.id} className="hover:bg-gray-100 hover:border-blue-200 transition-colors duration-200">
-              <CardContent className="p-6">
-                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-blue-50 border border-blue-100/50">
+              <CardContent className="p-4 md:p-6">
+                <div className="flex flex-row items-start justify-between gap-3 md:items-center">
+                  <div className="flex items-center gap-3 md:gap-4">
+                    <div className="flex h-10 w-10 md:h-16 md:w-16 items-center justify-center rounded-lg bg-blue-50 border border-blue-100/50 shrink-0">
                       {booking.isRoundTrip ? (
-                        <ArrowLeftRight className="h-8 w-8 text-blue-600" />
+                        <ArrowLeftRight className="h-5 w-5 md:h-8 md:w-8 text-blue-600" />
                       ) : (
-                        <Plane className="h-8 w-8 text-blue-600" />
+                        <Plane className="h-5 w-5 md:h-8 md:w-8 text-blue-600" />
                       )}
                     </div>
                     <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <Badge className={getStatusColor(booking.status)}>{booking.status}</Badge>
-                        <p className="text-sm text-gray-400">ID: {booking.id}</p>
+                      <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2 mb-2">
+                        <Badge className={`${getStatusColor(booking.status)} w-fit`}>{booking.status}</Badge>
+                        <div className="flex flex-wrap items-center gap-2 text-[10px] md:text-xs text-gray-400">
+                          <span>ID: {booking.id}</span>
+                          <span className="hidden md:inline">•</span>
+                          <span>Booked: {booking.bookingDate}</span>
+                        </div>
                       </div>
 
-                      <div className="flex items-center gap-3">
-                        <div className="flex flex-col bg-blue-50/50 px-2 py-1 rounded border border-blue-100/50 min-w-[70px]">
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <div className="flex flex-col bg-blue-50/50 px-2 py-1 rounded border border-blue-100/50 min-w-[60px] max-w-[100px] sm:max-w-none">
                           <span className="text-[8px] font-bold text-blue-400 uppercase leading-none mb-1">From</span>
-                          <span className="text-xs font-bold text-blue-700 truncate" title={booking.departure}>{formatLocation(booking.departure)}</span>
+                          <span className="text-[10px] sm:text-xs font-bold text-blue-700 truncate" title={booking.departure}>{formatLocation(booking.departure)}</span>
                         </div>
 
                         {booking.isRoundTrip ? (
@@ -297,13 +301,13 @@ export function MyBookings({ setActiveSection, initialBookings = [] }) {
                           <MoveRight className="h-4 w-4 text-slate-400" />
                         )}
 
-                        <div className="flex flex-col bg-emerald-50/50 px-2 py-1 rounded border border-emerald-100/50 min-w-[70px]">
+                        <div className="flex flex-col bg-emerald-50/50 px-2 py-1 rounded border border-emerald-100/50 min-w-[60px] max-w-[100px] sm:max-w-none">
                           <span className="text-[8px] font-bold text-emerald-400 uppercase leading-none mb-1">To</span>
-                          <span className="text-xs font-bold text-emerald-700 truncate" title={booking.arrival}>{formatLocation(booking.arrival)}</span>
+                          <span className="text-[10px] sm:text-xs font-bold text-emerald-700 truncate" title={booking.arrival}>{formatLocation(booking.arrival)}</span>
                         </div>
                       </div>
 
-                      <div className="mt-2 flex items-center gap-4 text-xs text-gray-500">
+                      <div className="mt-2 flex items-center flex-wrap gap-4 text-xs text-gray-500">
                         <span className="flex items-center gap-1">
                           <Calendar className="h-4 w-4" />
                           {booking.date}
@@ -312,18 +316,29 @@ export function MyBookings({ setActiveSection, initialBookings = [] }) {
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={() => handleViewDetails(booking)}>
+                  <div className="flex flex-col md:flex-row items-end md:items-center gap-2 shrink-0">
+                    <Button variant="outline" size="sm" className="hidden md:flex" onClick={() => handleViewDetails(booking)}>
                       <Eye className="mr-2 h-4 w-4" />
                       View Details
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleDownloadTicket(booking.id)} disabled={downloadingBookingId === booking.id}>
+                    <Button variant="outline" size="icon" className="md:hidden h-8 w-8" onClick={() => handleViewDetails(booking)}>
+                      <Eye className="h-4 w-4" />
+                    </Button>
+
+                    <Button variant="outline" size="sm" className="hidden md:flex" onClick={() => handleDownloadTicket(booking.id)} disabled={downloadingBookingId === booking.id}>
                       {downloadingBookingId === booking.id ? (
                         <span className="w-4 h-4 border-2 border-blue-600/30 border-t-blue-600 rounded-full animate-spin mr-2"></span>
                       ) : (
                         <Download className="mr-2 h-4 w-4" />
                       )}
                       Download
+                    </Button>
+                    <Button variant="outline" size="icon" className="md:hidden h-8 w-8" onClick={() => handleDownloadTicket(booking.id)} disabled={downloadingBookingId === booking.id}>
+                      {downloadingBookingId === booking.id ? (
+                        <span className="w-4 h-4 border-2 border-blue-600/30 border-t-blue-600 rounded-full animate-spin"></span>
+                      ) : (
+                        <Download className="h-4 w-4" />
+                      )}
                     </Button>
                   </div>
                 </div>
@@ -378,92 +393,123 @@ export function MyBookings({ setActiveSection, initialBookings = [] }) {
 
       {/* Booking Details Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="w-[95vw] max-w-2xl max-h-[85vh] overflow-y-auto rounded-lg">
           <DialogHeader>
             <DialogTitle>Booking Details</DialogTitle>
           </DialogHeader>
           {selectedBooking && (
             <div className="space-y-6">
-              <div className="flex items-center justify-between rounded-lg bg-blue-50 p-4">
-                <div>
-                  <p className="text-sm text-gray-600">Booking ID</p>
-                  <p className="text-lg font-semibold">{selectedBooking.id}</p>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between rounded-lg bg-blue-50 p-4 gap-4">
+                <div className="flex flex-wrap gap-6 md:gap-12">
+                  <div>
+                    <p className="text-[10px] uppercase font-bold text-blue-400 mb-1 leading-none tracking-wider">Booking ID</p>
+                    <p className="text-lg font-semibold leading-none">{selectedBooking.id}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase font-bold text-blue-400 mb-1 leading-none tracking-wider">Booking Date</p>
+                    <p className="text-lg font-semibold leading-none">{selectedBooking.bookingDate}</p>
+                  </div>
                 </div>
                 <Badge className={getStatusColor(selectedBooking.status)}>{selectedBooking.status}</Badge>
               </div>
 
               <div className="grid gap-6 md:grid-cols-2">
                 <div>
-                  <h4 className="mb-4 font-semibold">Flight Information</h4>
+                  <h4 className="mb-3 text-sm font-semibold bg-blue-100 rounded-lg w-fit px-3 py-1.5">Flight Information</h4>
                   <div className="space-y-3">
                     <div>
-                      <p className="text-sm text-gray-600">Route</p>
-                      <p className="font-medium">{formatLocation(selectedBooking.route)}</p>
+                      <p className="text-xs text-gray-600 uppercase">Route</p>
+                      <div className="font-medium text-sm flex items-center gap-2">
+                        {(() => {
+                          const getCode = (loc) => {
+                            if (!loc) return "";
+                            const match = loc.match(/ - ([a-zA-Z]+)$/);
+                            return match ? match[1].toUpperCase() : "";
+                          };
+                          const depCode = getCode(selectedBooking.departure);
+                          const arrCode = getCode(selectedBooking.arrival);
+
+                          if (depCode && arrCode) {
+                            return (
+                              <>
+                                <span className="text-blue-600">{depCode}</span>
+                                {selectedBooking.isRoundTrip ? (
+                                  <ArrowLeftRight className="h-4 w-4 text-gray-500" />
+                                ) : (
+                                  <MoveRight className="h-4 w-4 text-gray-500" />
+                                )}
+                                <span className="text-green-600">{arrCode}</span>
+                              </>
+                            );
+                          }
+                          return formatLocation(selectedBooking.route);
+                        })()}
+                      </div>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600">Departure</p>
-                      <p className="font-medium">{formatLocation(selectedBooking.departure)}</p>
+                      <p className="text-xs text-gray-600 uppercase">Departure</p>
+                      <p className="font-medium text-sm">{formatLocation(selectedBooking.departure)}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600">Arrival</p>
-                      <p className="font-medium">{formatLocation(selectedBooking.arrival)}</p>
+                      <p className="text-xs text-gray-600 uppercase">Arrival</p>
+                      <p className="font-medium text-sm">{formatLocation(selectedBooking.arrival)}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600">Travel Date</p>
-                      <p className="font-medium">{selectedBooking.date}</p>
+                      <p className="text-xs uppercase text-blue-600">Travel Date</p>
+                      <p className="font-medium text-sm">{selectedBooking.date}</p>
                     </div>
                     {selectedBooking.isRoundTrip && selectedBooking.returnDate && (
                       <div>
-                        <p className="text-sm text-gray-600">Return Date</p>
-                        <p className="font-medium">{selectedBooking.returnDate}</p>
+                        <p className="text-xs uppercase text-green-600">Return Date</p>
+                        <p className="font-medium text-sm">{selectedBooking.returnDate}</p>
                       </div>
                     )}
                   </div>
                 </div>
 
                 <div>
-                  <h4 className="mb-4 font-semibold">Passenger Information</h4>
+                  <h4 className="mb-3 text-sm font-semibold bg-green-100 rounded-lg w-fit px-3 py-1.5">Passenger Information</h4>
                   <div className="space-y-3">
                     <div>
-                      <p className="text-sm text-gray-600">Name</p>
-                      <p className="font-medium">{selectedBooking.passenger}</p>
+                      <p className="text-xs text-gray-600 uppercase">Name</p>
+                      <p className="font-medium text-sm">{selectedBooking.passenger}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600">Email</p>
-                      <p className="font-medium">{selectedBooking.email}</p>
+                      <p className="text-xs text-gray-600 uppercase">Email</p>
+                      <p className="font-medium text-sm">{selectedBooking.email}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600">Phone</p>
-                      <p className="font-medium">{selectedBooking.phone}</p>
+                      <p className="text-xs text-gray-600 uppercase">Phone</p>
+                      <p className="font-medium text-sm">{selectedBooking.phone}</p>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="rounded-lg border p-4">
+              <div className="rounded-lg border p-3 md:p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-600">Service Type</p>
-                    <p className="font-semibold">{selectedBooking.type}</p>
+                    <p className="text-xs text-gray-600">Service Type</p>
+                    <p className="font-semibold text-sm">{selectedBooking.type}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-gray-600">Total Amount</p>
-                    <p className="text-2xl font-bold text-blue-600">{`${CURRENCY_SYMBOLS[selectedBooking.currency || 'USD'] || '$'}${selectedBooking.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</p>
+                    <p className="text-xs text-gray-600">Total Amount</p>
+                    <p className="text-xl md:text-2xl font-bold text-blue-600">{`${CURRENCY_SYMBOLS[selectedBooking.currency || 'USD'] || '$'}${selectedBooking.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}</p>
                   </div>
                 </div>
               </div>
 
-              <div className="flex gap-2">
-                <Button className="flex-1" onClick={() => handleDownloadTicket(selectedBooking.id)} disabled={downloadingBookingId === selectedBooking.id}>
+              <div className="flex flex-row gap-3">
+                <Button size="sm" className="flex-1 bg-blue-600 hover:bg-blue-700 text-white" onClick={() => handleDownloadTicket(selectedBooking.id)} disabled={downloadingBookingId === selectedBooking.id}>
                   {downloadingBookingId === selectedBooking.id ? (
                     <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></span>
                   ) : (
                     <Download className="mr-2 h-4 w-4" />
                   )}
-                  Download Ticket
+                  Download
                 </Button>
-                <Button variant="outline" className="flex-1 bg-transparent" onClick={handleContactSupport}>
-                  Contact Support
+                <Button size="sm" variant="outline" className="flex-1 bg-transparent" onClick={handleContactSupport}>
+                  Support
                 </Button>
               </div>
             </div>

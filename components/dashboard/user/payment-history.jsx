@@ -99,8 +99,8 @@ export function PaymentHistory({ initialPayments = [] }) {
 
   const handleExportAll = () => {
     const csvContent = [
-      ["Payment ID", "Booking ID", "Date", "Description", "Method", "Amount", "Currency", "Status"],
-      ...payments.map((p) => [p.id, p.bookingId, p.date, p.description, p.method, p.amount, p.currency || 'USD', p.status]),
+      ["Payment ID", "Booking ID", "Booking Date", "Travel Date", "Description", "Method", "Amount", "Currency", "Status"],
+      ...payments.map((p) => [p.id, p.bookingId, p.bookingDate, p.date, p.description, p.method, p.amount, p.currency || 'USD', p.status]),
     ]
       .map((row) => row.join(","))
       .join("\n")
@@ -276,59 +276,63 @@ export function PaymentHistory({ initialPayments = [] }) {
               ))}
             </div>
           ) : filteredPayments.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Transaction ID</TableHead>
-                  <TableHead>Booking ID</TableHead>
-                  <TableHead>Travel Date</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead>Method</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedPayments.map((payment) => (
-                  <TableRow key={payment.id}>
-                    <TableCell className="font-medium">{payment.id}</TableCell>
-                    <TableCell>{payment.bookingId}</TableCell>
-                    <TableCell>{payment.date}</TableCell>
-                    <TableCell className="max-w-xs">
-                      <div className="flex flex-col gap-1">
-                        <span className="text-xs font-medium text-gray-500">{payment.type}</span>
-                        <div className="flex items-center gap-2">
-                          <div className="flex items-center bg-blue-50/50 px-1.5 py-0.5 rounded border border-blue-100/30 max-w-[120px]" title={payment.departure}>
-                            <span className="text-[12px] font-bold text-blue-700 truncate">{payment.departure}</span>
-                          </div>
+            <div className="overflow-x-auto pb-4">
+              <Table className="min-w-[1000px]">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Transaction ID</TableHead>
+                    <TableHead>Booking ID</TableHead>
+                    <TableHead>Booking Date</TableHead>
+                    <TableHead>Travel Date</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead>Method</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedPayments.map((payment) => (
+                    <TableRow key={payment.id}>
+                      <TableCell className="font-medium">{payment.id}</TableCell>
+                      <TableCell>{payment.bookingId}</TableCell>
+                      <TableCell className="text-xs text-gray-500">{payment.bookingDate}</TableCell>
+                      <TableCell>{payment.date}</TableCell>
+                      <TableCell className="max-w-xs">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-xs font-medium text-gray-500">{payment.type}</span>
+                          <div className="flex items-center gap-2">
+                            <div className="flex items-center bg-blue-50/50 px-1.5 py-0.5 rounded border border-blue-100/30 max-w-[120px]" title={payment.departure}>
+                              <span className="text-[12px] font-bold text-blue-700 truncate">{payment.departure}</span>
+                            </div>
 
-                          {payment.isRoundTrip ? (
-                            <ArrowLeftRight className="h-3 w-3 text-slate-400" />
-                          ) : (
-                            <MoveRight className="h-3 w-3 text-slate-400" />
-                          )}
+                            {payment.isRoundTrip ? (
+                              <ArrowLeftRight className="h-3 w-3 text-slate-400" />
+                            ) : (
+                              <MoveRight className="h-3 w-3 text-slate-400" />
+                            )}
 
-                          <div className="flex items-center bg-emerald-50/50 px-1.5 py-0.5 rounded border border-emerald-100/30 max-w-[120px]" title={payment.arrival}>
-                            <span className="text-[12px] font-bold text-emerald-700 truncate">{payment.arrival}</span>
+                            <div className="flex items-center bg-emerald-50/50 px-1.5 py-0.5 rounded border border-emerald-100/30 max-w-[120px]" title={payment.arrival}>
+                              <span className="text-[12px] font-bold text-emerald-700 truncate">{payment.arrival}</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>{payment.method}</TableCell>
-                    <TableCell className="font-semibold">{CURRENCY_SYMBOLS[payment.currency] || '$'}{payment.amount}</TableCell>
-                    <TableCell>
-                      <Badge className={getStatusColor("paid")}>Paid</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Button variant="ghost" size="sm" onClick={() => handleDownloadInvoice(payment.id)}>
-                        <Download className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                      </TableCell>
+                      <TableCell>{payment.method}</TableCell>
+                      <TableCell className="font-semibold">{CURRENCY_SYMBOLS[payment.currency] || '$'}{payment.amount}</TableCell>
+                      <TableCell>
+                        <Badge className={getStatusColor("paid")}>Paid</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Button variant="ghost" size="sm" onClick={() => handleDownloadInvoice(payment.id)}>
+                          <Download className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           ) : (
             <EmptyState hasSearch={searchTerm.length > 0} />
           )}

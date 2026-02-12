@@ -95,6 +95,7 @@ export function OrdersManagement() {
       let passengerPhone = "N/A"
       let fromCity = "N/A"
       let toCity = "N/A"
+      let travelDate = "N/A"
 
       try {
         if (booking.passenger_details) {
@@ -109,6 +110,7 @@ export function OrdersManagement() {
             passengerPhone = p.phone || p.contactPhone || "N/A"
             fromCity = p.fromCity || p.departureCity || "N/A"
             toCity = p.toCity || p.arrivalCity || "N/A"
+            travelDate = p.departureDate || "N/A"
           } else {
             if (details.firstName) {
               passengerName = `${details.firstName} ${details.lastName}`.trim()
@@ -117,6 +119,7 @@ export function OrdersManagement() {
             passengerPhone = details.contactPhone || details.phone || "N/A"
             fromCity = details.departureCity || details.fromCity || "N/A"
             toCity = details.arrivalCity || details.toCity || "N/A"
+            travelDate = details.departureDate || "N/A"
           }
         }
       } catch (e) { console.error("Error parsing details", e) }
@@ -162,6 +165,7 @@ export function OrdersManagement() {
         pnr: booking.pnr || 'N/A',
         payment_intent_id: booking.payment_intent_id || 'N/A',
         isRoundTrip: isRoundTrip,
+        travelDate: travelDate || 'N/A',
         details: { ...booking }
       }
     })
@@ -317,7 +321,7 @@ export function OrdersManagement() {
 
   const handleExport = () => {
     const csv = [
-      ["Order ID", "Transaction ID", "Customer", "Email", "Service", "Amount", "Payment Status", "Booking Status", "Date", "Departure", "Arrival"].join(","),
+      ["Order ID", "Transaction ID", "Customer", "Email", "Service", "Amount", "Payment Status", "Booking Status", "Booking Date", "Travel Date", "Departure", "Arrival"].join(","),
       ...filteredOrders.map((order) =>
         [
           order.id,
@@ -329,6 +333,7 @@ export function OrdersManagement() {
           order.status,
           order.booking_status,
           order.date,
+          order.travelDate,
           order.departure,
           order.arrival,
         ].join(","),
@@ -442,35 +447,35 @@ export function OrdersManagement() {
           {loading ? (
             <SkeletonTable rows={5} columns={8} />
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
+            <div className="overflow-x-auto pb-4">
+              <table className="w-full min-w-[1200px]">
                 <thead>
                   <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Order ID</th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Transaction ID</th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Customer</th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Service</th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Route</th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Amount</th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Payment Status</th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Booking Status</th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Date</th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Actions</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700 whitespace-nowrap">Order ID</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700 whitespace-nowrap">Transaction ID</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700 whitespace-nowrap">Customer</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700 whitespace-nowrap">Service</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700 whitespace-nowrap">Route</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700 whitespace-nowrap">Amount</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700 whitespace-nowrap">Payment Status</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700 whitespace-nowrap">Booking Status</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700 whitespace-nowrap md:min-w-[140px]">Booking Date</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700 whitespace-nowrap">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {paginatedOrders.length > 0 ? (
                     paginatedOrders.map((order) => (
                       <tr key={order.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                        <td className="py-3 px-4 text-sm font-medium text-gray-900 break-all" title={order.id}>{order.id}</td>
-                        <td className="py-3 px-4 text-sm font-medium text-gray-900 break-all" title={order.payment_intent_id}>{order.payment_intent_id}</td>
+                        <td className="py-3 px-4 text-sm font-medium text-gray-900 whitespace-nowrap" title={order.id}>{order.id}</td>
+                        <td className="py-3 px-4 text-sm font-medium text-gray-900 whitespace-nowrap" title={order.payment_intent_id}>{order.payment_intent_id}</td>
                         <td className="py-3 px-4">
-                          <div className="flex flex-col">
+                          <div className="flex flex-col whitespace-nowrap">
                             <span className="text-sm font-medium text-gray-900">{order.customer}</span>
                             <span className="text-xs text-gray-500">{order.email}</span>
                           </div>
                         </td>
-                        <td className="py-3 px-4 text-sm text-gray-700">{order.service}</td>
+                        <td className="py-3 px-4 text-sm text-gray-700 whitespace-nowrap">{order.service}</td>
                         <td className="py-3 px-4">
                           <div className="flex items-center gap-3">
                             <div className="flex flex-col bg-blue-50/50 px-2 py-1 rounded border border-blue-100/50 min-w-[70px] max-w-[150px]">
@@ -666,8 +671,12 @@ export function OrdersManagement() {
                   </Badge>
                 </div>
                 <div>
-                  <Label className="text-gray-600">Date</Label>
+                  <Label className="text-gray-600">Booking Date</Label>
                   <p className="font-semibold">{selectedOrder.date}</p>
+                </div>
+                <div>
+                  <Label className="text-gray-600">Travel Date</Label>
+                  <p className="font-semibold">{selectedOrder.travelDate}</p>
                 </div>
                 <div className="col-span-2">
                   <Label className="text-gray-600">Transaction ID</Label>
