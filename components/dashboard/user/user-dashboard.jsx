@@ -9,6 +9,7 @@ import {
   CheckCircle,
   Calendar,
   Plane,
+  ArrowLeftRight,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { CURRENCY_SYMBOLS } from "@/lib/exchange-rate";
@@ -161,14 +162,18 @@ export function UserDashboard({ statsData, upcomingBookingsData, recentActivityD
                   >
                     <div className="flex items-center gap-3">
                       <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-lg bg-blue-100 flex-shrink-0">
-                        <Plane className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
+                        {booking.isRoundTrip ? (
+                          <ArrowLeftRight className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
+                        ) : (
+                          <Plane className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 border-none" />
+                        )}
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
                           <div className="flex items-center bg-blue-50/50 px-1.5 py-0.5 rounded border border-blue-100/30">
                             <span className="text-[12px] font-bold text-blue-700">{booking.departure}</span>
                           </div>
-                          <span className="text-gray-400 text-xs">→</span>
+                          <span className="text-gray-400 text-xs">{booking.isRoundTrip ? '⇄' : '→'}</span>
                           <div className="flex items-center bg-emerald-50/50 px-1.5 py-0.5 rounded border border-emerald-100/30">
                             <span className="text-[12px] font-bold text-emerald-700">{booking.arrival}</span>
                           </div>
@@ -183,7 +188,7 @@ export function UserDashboard({ statsData, upcomingBookingsData, recentActivityD
                       >
                         {booking.status}
                       </Badge>
-                      <p className="text-xs text-gray-500">{booking.type}</p>
+                      <p className="text-xs text-gray-500 text-right whitespace-nowrap">{booking.type}</p>
                     </div>
                   </div>
                 ))

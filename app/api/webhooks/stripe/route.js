@@ -53,7 +53,7 @@ export async function POST(req) {
 
                             const adminEmailOptions = {
                                 to: adminEmail,
-                                subject: `🔔 New Booking - ${result.booking.id}`,
+                                subject: `New Booking - ${result.booking.id}`,
                                 html: getAdminBookingNotificationEmail(result.booking)
                             };
 

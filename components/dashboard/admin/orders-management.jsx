@@ -96,6 +96,7 @@ export function OrdersManagement() {
       let fromCity = "N/A"
       let toCity = "N/A"
       let travelDate = "N/A"
+      let returnDate = "N/A"
 
       try {
         if (booking.passenger_details) {
@@ -111,6 +112,7 @@ export function OrdersManagement() {
             fromCity = p.fromCity || p.departureCity || "N/A"
             toCity = p.toCity || p.arrivalCity || "N/A"
             travelDate = p.departureDate || "N/A"
+            returnDate = p.returnDate || "N/A"
           } else {
             if (details.firstName) {
               passengerName = `${details.firstName} ${details.lastName}`.trim()
@@ -120,6 +122,7 @@ export function OrdersManagement() {
             fromCity = details.departureCity || details.fromCity || "N/A"
             toCity = details.arrivalCity || details.toCity || "N/A"
             travelDate = details.departureDate || "N/A"
+            returnDate = details.returnDate || "N/A"
           }
         }
       } catch (e) { console.error("Error parsing details", e) }
@@ -166,6 +169,7 @@ export function OrdersManagement() {
         payment_intent_id: booking.payment_intent_id || 'N/A',
         isRoundTrip: isRoundTrip,
         travelDate: travelDate || 'N/A',
+        returnDate: returnDate || 'N/A',
         details: { ...booking }
       }
     })
@@ -613,6 +617,9 @@ export function OrdersManagement() {
             <DialogTitle>Order Details</DialogTitle>
             <DialogDescription>
               Full details for order <span className="font-mono text-xs">{selectedOrder?.id}</span>
+              {selectedOrder && (
+                <span className="ml-2 text-gray-500">• Booked on {selectedOrder.date}</span>
+              )}
             </DialogDescription>
           </DialogHeader>
           {selectedOrder && (
@@ -620,35 +627,35 @@ export function OrdersManagement() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label className="text-gray-600">Customer Name</Label>
-                  <p className="font-semibold">{selectedOrder.customer}</p>
+                  <p className="font-medium">{selectedOrder.customer}</p>
                 </div>
                 <div>
                   <Label className="text-gray-600">Email</Label>
-                  <p className="font-semibold">{selectedOrder.email}</p>
+                  <p className="font-medium">{selectedOrder.email}</p>
                 </div>
                 <div>
                   <Label className="text-gray-600">Phone</Label>
-                  <p className="font-semibold">{selectedOrder.phone}</p>
+                  <p className="font-medium">{selectedOrder.phone}</p>
                 </div>
                 <div>
                   <Label className="text-gray-600">Service</Label>
-                  <p className="font-semibold">{selectedOrder.service}</p>
+                  <p className="font-medium">{selectedOrder.service}</p>
                 </div>
                 <div>
                   <Label className="text-gray-600">Departure</Label>
-                  <p className="font-semibold">{selectedOrder.departure}</p>
+                  <p className="font-medium">{selectedOrder.departure}</p>
                 </div>
                 <div>
                   <Label className="text-gray-600">Arrival</Label>
-                  <p className="font-semibold">{selectedOrder.arrival}</p>
+                  <p className="font-medium">{selectedOrder.arrival}</p>
                 </div>
                 <div>
                   <Label className="text-gray-600">PNR Code</Label>
-                  <p className="font-semibold">{selectedOrder.pnr}</p>
+                  <p className="font-medium">{selectedOrder.pnr}</p>
                 </div>
                 <div>
                   <Label className="text-gray-600">Amount</Label>
-                  <p className="font-semibold">${selectedOrder.amount.toFixed(2)}</p>
+                  <p className="font-medium">${selectedOrder.amount.toFixed(2)}</p>
                 </div>
                 <div>
                   <Label className="text-gray-600">Status</Label>
@@ -671,13 +678,16 @@ export function OrdersManagement() {
                   </Badge>
                 </div>
                 <div>
-                  <Label className="text-gray-600">Booking Date</Label>
-                  <p className="font-semibold">{selectedOrder.date}</p>
-                </div>
-                <div>
                   <Label className="text-gray-600">Travel Date</Label>
-                  <p className="font-semibold">{selectedOrder.travelDate}</p>
+                  <p className="font-medium">{selectedOrder.travelDate}</p>
                 </div>
+                {selectedOrder.returnDate !== "N/A" && (
+                  <div>
+                    <Label className="text-gray-600">Return Date</Label>
+                    <p className="font-medium">{selectedOrder.returnDate}</p>
+                  </div>
+                )}
+
                 <div className="col-span-2">
                   <Label className="text-gray-600">Transaction ID</Label>
                   <p className="font-mono text-xs text-gray-700 break-all">{selectedOrder.payment_intent_id}</p>
