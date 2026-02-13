@@ -1,24 +1,55 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { ChevronRight, Shield, Scale, FileText, Lock, Globe, RefreshCcw } from "lucide-react"
+import { ChevronRight, Shield, Scale, FileText, Lock, Globe, RefreshCcw, Info, HelpCircle, Bell, Settings, User, CreditCard, Mail, MessageSquare, AlertTriangle, Cloud, Zap } from "lucide-react"
 import { useTranslation } from "@/lib/translations"
 import Link from "next/link"
 import { useEffect, useState } from "react"
+import { getTermsSections } from "@/actions/terms-service"
 
 export default function TermsContent() {
-    const { t } = useTranslation('terms')
+    const { t, locale } = useTranslation('terms')
     const [activeSection, setActiveSection] = useState("")
+    const [dbSections, setDbSections] = useState([])
+    const [loading, setLoading] = useState(true)
 
-    const sections = t('sections', { returnObjects: true })
-    const sectionsArray = Array.isArray(sections) ? sections : []
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const result = await getTermsSections()
+                if (result.success) {
+                    setDbSections(result.data)
+                    // If we have sections, set the first one as active initially? 
+                    // Or let the scroll handler do it.
+                }
+            } catch (error) {
+                console.error("Failed to fetch terms", error)
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchData()
+    }, [])
+
+    // Process sections for current locale
+    const currentSections = dbSections.filter(s => s.is_active).map(section => {
+        const currentLocale = locale || 'en'
+        const trans = section.translations?.find(t => t.locale === currentLocale) ||
+            section.translations?.find(t => t.locale === 'en')
+        return {
+            id: section.key || `section-${section.id}`,
+            key: section.key,
+            title: trans?.title || "Untitled",
+            content: trans?.content || ""
+        }
+    })
 
     useEffect(() => {
         const handleScroll = () => {
             const threshold = 160 // Focused detection line from top
             let currentActive = ""
 
-            for (const section of sectionsArray) {
+            for (const section of currentSections) {
                 const element = document.getElementById(section.id)
                 if (element) {
                     const rect = element.getBoundingClientRect()
@@ -36,18 +67,31 @@ export default function TermsContent() {
 
         window.addEventListener("scroll", handleScroll)
         return () => window.removeEventListener("scroll", handleScroll)
-    }, [sections])
+    }, [currentSections, activeSection])
 
-    const getIcon = (id) => {
+    const getIcon = (key) => {
         const icons = {
             acceptance: Scale,
             services: Globe,
             "user-obligations": Shield,
             "refund-policy": RefreshCcw,
             limitation: Lock,
-            "governing-law": FileText
+            "governing-law": FileText,
+            info: Info,
+            faq: HelpCircle,
+            notification: Bell,
+            settings: Settings,
+            privacy: Lock,
+            security: Shield,
+            payment: CreditCard,
+            email: Mail,
+            chat: MessageSquare,
+            warning: AlertTriangle,
+            cloud: Cloud,
+            speed: Zap,
+            other: FileText
         }
-        return icons[id] || FileText
+        return icons[key] || FileText
     }
 
     return (
@@ -82,27 +126,35 @@ export default function TermsContent() {
                         <div className="sticky top-24 space-y-8">
                             <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                                 <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-                                    <div className="w-1.5 h-6 bg-[#0066FF] rounded-full" />
+                                    <div className="w-1.5 h-6 bg-[#00D4AA] rounded-full" />
                                     {t('sidebar.title')}
                                 </h3>
                                 <nav className="space-y-2">
-                                    {sectionsArray.map((section) => (
-                                        <button
-                                            key={section.id}
-                                            onClick={() => {
-                                                const element = document.getElementById(section.id)
-                                                element?.scrollIntoView({ behavior: "smooth", block: "start" })
-                                            }}
-                                            className={`w-full text-left px-4 py-3 rounded-xl transition-all duration-300 flex items-center justify-between group ${activeSection === section.id
-                                                ? "bg-[#0066FF]/10 text-[#0066FF] font-semibold border border-[#0066FF]/20"
-                                                : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
-                                                }`}
-                                        >
-                                            <span className="text-sm truncate">{section.title}</span>
-                                            <ChevronRight className={`w-4 h-4 transition-transform duration-300 ${activeSection === section.id ? "translate-x-1" : "opacity-0 group-hover:opacity-100"
-                                                }`} />
-                                        </button>
-                                    ))}
+                                    {loading ? (
+                                        <div className="space-y-2 animate-pulse">
+                                            {[1, 2, 3, 4].map(i => (
+                                                <div key={i} className="h-10 bg-gray-100 rounded-xl w-full"></div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        currentSections.map((section) => (
+                                            <button
+                                                key={section.id}
+                                                onClick={() => {
+                                                    const element = document.getElementById(section.id)
+                                                    element?.scrollIntoView({ behavior: "smooth", block: "start" })
+                                                }}
+                                                className={`w-full text-left px-4 py-3 rounded-xl transition-all duration-300 flex items-center justify-between group ${activeSection === section.id
+                                                    ? "bg-[#00D4AA]/10 text-[#00D4AA] font-semibold border border-[#00D4AA]/20"
+                                                    : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
+                                                    }`}
+                                            >
+                                                <span className="text-sm truncate">{section.title}</span>
+                                                <ChevronRight className={`w-4 h-4 transition-transform duration-300 ${activeSection === section.id ? "translate-x-1" : "opacity-0 group-hover:opacity-100"
+                                                    }`} />
+                                            </button>
+                                        ))
+                                    )}
                                 </nav>
                             </div>
 
@@ -125,34 +177,49 @@ export default function TermsContent() {
 
                     {/* Main Content */}
                     <main className="lg:w-2/3 xl:w-3/4 space-y-12">
-                        {sectionsArray.map((section, index) => {
-                            const Icon = getIcon(section.id)
-                            return (
-                                <motion.section
-                                    key={section.id}
-                                    id={section.id}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
-                                    viewport={{ once: true }}
-                                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                                    className="bg-white rounded-2xl p-6 md:p-8 border border-gray-100/80 hover:border-gray-200 transition-all duration-300 group scroll-mt-28"
-                                >
-                                    <div className="flex flex-col md:flex-row gap-6 md:gap-8">
-                                        <div className="shrink-0">
-                                            <Icon className="w-6 h-6 text-[#0066FF] mt-1" />
-                                        </div>
-                                        <div>
-                                            <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-4 group-hover:text-[#0066FF] transition-colors">
-                                                {section.title}
-                                            </h2>
-                                            <div className="prose prose-slate max-w-none text-gray-600 leading-relaxed space-y-4">
-                                                <p>{section.content}</p>
-                                            </div>
+                        {loading ? (
+                            <div className="space-y-12">
+                                {[1, 2, 3].map(i => (
+                                    <div key={i} className="bg-white rounded-2xl p-6 md:p-8 border border-gray-100/80 animate-pulse">
+                                        <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
+                                        <div className="space-y-3">
+                                            <div className="h-4 bg-gray-100 rounded w-full"></div>
+                                            <div className="h-4 bg-gray-100 rounded w-5/6"></div>
+                                            <div className="h-4 bg-gray-100 rounded w-4/6"></div>
                                         </div>
                                     </div>
-                                </motion.section>
-                            )
-                        })}
+                                ))}
+                            </div>
+                        ) : (
+                            currentSections.map((section, index) => {
+                                const Icon = getIcon(section.key)
+                                return (
+                                    <motion.section
+                                        key={section.id}
+                                        id={section.id}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{ duration: 0.5, delay: index * 0.1 }}
+                                        className="bg-white rounded-2xl p-6 md:p-8 border border-gray-100/80 hover:border-gray-200 transition-all duration-300 group scroll-mt-28"
+                                    >
+                                        <div className="flex flex-col md:flex-row gap-6 md:gap-8">
+                                            <div className="shrink-0">
+                                                <Icon className="w-6 h-6 text-[#00D4AA] mt-1" />
+                                            </div>
+                                            <div>
+                                                <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-4 group-hover:text-[#00D4AA] transition-colors">
+                                                    {section.title}
+                                                </h2>
+                                                <div className="prose prose-slate max-w-none text-gray-600 leading-relaxed space-y-4 whitespace-pre-line">
+                                                    <p>{section.content}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </motion.section>
+                                )
+                            })
+                        )}
                     </main>
                 </div>
             </div>

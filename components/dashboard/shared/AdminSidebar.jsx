@@ -24,6 +24,7 @@ import {
   Loader2,
   Home,
   BookOpen,
+  FileTextIcon,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
@@ -51,7 +52,8 @@ const menuItems = [
       { id: "contact", label: "Contact Us", icon: Phone, href: "/admin/pages/contact" },
       { id: "faq", label: "FAQ", icon: HelpCircle, href: "/admin/pages/faq" },
       { id: "about", label: "About Us", icon: Info, href: "/admin/pages/about" },
-      { id: "footer", label: "Footer", icon: FileText, href: "/admin/pages/footer" }
+      { id: "terms", label: "Terms of Service", icon: FileCheck, href: "/admin/pages/terms" },
+      { id: "footer", label: "Footer", icon: FileTextIcon, href: "/admin/pages/footer" }
     ]
   },
   {

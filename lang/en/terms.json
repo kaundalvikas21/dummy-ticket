@@ -11,37 +11,5 @@
             "description": "If you have any questions about our Terms of Service, please contact our legal team.",
             "button": "Contact Support"
         }
-    },
-    "sections": [
-        {
-            "id": "acceptance",
-            "title": "1. Acceptance of Terms",
-            "content": "By accessing or using the VisaFly platform, you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree with any of these terms, you are prohibited from using or accessing this site."
-        },
-        {
-            "id": "services",
-            "title": "2. Description of Service",
-            "content": "VisaFly provides flight reservations and hotel bookings primarily intended for visa application purposes. These are verifiable reservations but are not intended for actual travel unless specified. Users are responsible for understanding the requirements of the embassy or consulate they are applying to."
-        },
-        {
-            "id": "user-obligations",
-            "title": "3. User Obligations",
-            "content": "You agree to provide accurate and complete information when using our services. You are responsible for maintaining the confidentiality of any account information and for all activities that occur under your account. Any fraudulent use of the service will result in immediate termination."
-        },
-        {
-            "id": "refund-policy",
-            "title": "4. Refund Policy",
-            "content": "Our refund policy is designed to be fair. Refunds for flight reservations or hotel bookings are only possible if the service has not yet been processed. Once a reservation is confirmed and sent to the user, it is generally non-refundable due to the nature of the service."
-        },
-        {
-            "id": "limitation",
-            "title": "5. Limitation of Liability",
-            "content": "VisaFly shall not be liable for any damages arising out of the use or inability to use the materials on our platform, even if VisaFly or an authorized representative has been notified orally or in writing of the possibility of such damage."
-        },
-        {
-            "id": "governing-law",
-            "title": "6. Governing Law",
-            "content": "These terms and conditions are governed by and construed in accordance with the laws, and you irrevocably submit to the exclusive jurisdiction of the courts in that State or location."
-        }
-    ]
+    }
 }
