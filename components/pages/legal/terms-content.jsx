@@ -53,7 +53,7 @@ export default function TermsContent() {
     return (
         <div className="bg-gray-50/50 min-h-screen">
             {/* Hero Section */}
-            <section className="relative pt-32 pb-20 lg:py-32 overflow-hidden bg-[#0a1628]">
+            <section className="relative pt-32 pb-16 md:pt-40 md:pb-24 overflow-hidden bg-[#0a1628]">
                 <div className="absolute inset-0 opacity-10">
                     <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#0066FF] rounded-full blur-[120px]" />
                     <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#00D4AA] rounded-full blur-[120px]" />
