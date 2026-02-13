@@ -1,0 +1,15 @@
+{
+    "hero": {
+        "title": "Términos de",
+        "highlight": "Servicio",
+        "description": "Última actualización: 30 de diciembre de 2024. Lea estos términos detenidamente antes de utilizar nuestros servicios."
+    },
+    "sidebar": {
+        "title": "En esta página",
+        "contact": {
+            "title": "¿Necesita ayuda?",
+            "description": "Si tiene alguna pregunta sobre nuestros Términos de servicio, póngase en contacto con nuestro equipo legal.",
+            "button": "Contactar con soporte"
+        }
+    }
+}

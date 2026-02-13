@@ -1,0 +1,15 @@
+{
+    "hero": {
+        "title": "Conditions d'",
+        "highlight": "utilisation",
+        "description": "Dernière mise à jour : 30 décembre 2024. Veuillez lire attentivement ces conditions avant d'utiliser nos services."
+    },
+    "sidebar": {
+        "title": "Sur cette page",
+        "contact": {
+            "title": "Besoin d'aide ?",
+            "description": "Si vous avez des questions sur nos conditions d'utilisation, veuillez contacter notre équipe juridique.",
+            "button": "Contacter le support"
+        }
+    }
+}
