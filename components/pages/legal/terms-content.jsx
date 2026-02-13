@@ -70,6 +70,7 @@ export default function TermsContent() {
     }, [currentSections, activeSection])
 
     const getIcon = (key) => {
+        if (key === 'none') return null
         const icons = {
             acceptance: Scale,
             services: Globe,
@@ -201,19 +202,22 @@ export default function TermsContent() {
                                         whileInView={{ opacity: 1, y: 0 }}
                                         viewport={{ once: true }}
                                         transition={{ duration: 0.5, delay: index * 0.1 }}
-                                        className="bg-white rounded-2xl p-6 md:p-8 border border-gray-100/80 hover:border-gray-200 transition-all duration-300 group scroll-mt-28"
+                                        className="bg-white transition-all duration-300 group scroll-mt-28"
                                     >
                                         <div className="flex flex-col md:flex-row gap-6 md:gap-8">
-                                            <div className="shrink-0">
-                                                <Icon className="w-6 h-6 text-[#00D4AA] mt-1" />
-                                            </div>
+                                            {Icon && (
+                                                <div className="shrink-0">
+                                                    <Icon className="w-6 h-6 text-[#00D4AA] mt-1" />
+                                                </div>
+                                            )}
                                             <div>
                                                 <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-4 group-hover:text-[#00D4AA] transition-colors">
                                                     {section.title}
                                                 </h2>
-                                                <div className="prose prose-slate max-w-none text-gray-600 leading-relaxed space-y-4 whitespace-pre-line">
-                                                    <p>{section.content}</p>
-                                                </div>
+                                                <div
+                                                    className="prose prose-slate max-w-none text-gray-600 leading-relaxed"
+                                                    dangerouslySetInnerHTML={{ __html: section.content }}
+                                                />
                                             </div>
                                         </div>
                                     </motion.section>

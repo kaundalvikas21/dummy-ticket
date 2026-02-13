@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
+import { TiptapEditor } from "@/components/ui/tiptap-editor"
 import {
     Dialog,
     DialogContent,
@@ -29,6 +30,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 const AVAILABLE_ICONS = [
+    { value: "none", label: "None", icon: null },
     { value: "acceptance", label: "Acceptance", icon: Scale },
     { value: "services", label: "Services", icon: Globe },
     { value: "user-obligations", label: "Obligations", icon: Shield },
@@ -67,7 +69,7 @@ export default function TermsServicePage() {
     const [editingSection, setEditingSection] = useState(null)
     const [sectionToDelete, setSectionToDelete] = useState(null)
     const [formData, setFormData] = useState({
-        key: "other",
+        key: "none",
         is_active: true,
         translations: {} // { en: { title: '', content: '' }, fr: ... }
     })
@@ -129,7 +131,7 @@ export default function TermsServicePage() {
         })
 
         setFormData({
-            key: section.key || "other",
+            key: section.key || "none",
             is_active: section.is_active,
             translations: translationsMap
         })
@@ -143,7 +145,7 @@ export default function TermsServicePage() {
             translationsMap[lang.code] = { title: "", content: "" }
         })
         setFormData({
-            key: "other",
+            key: "none",
             is_active: true,
             translations: translationsMap
         })
@@ -243,6 +245,7 @@ export default function TermsServicePage() {
     }
 
     const getIcon = (key) => {
+        if (key === 'none') return null
         const iconData = AVAILABLE_ICONS.find(icon => icon.value === key)
         return iconData?.icon || FileText
     }
@@ -278,6 +281,10 @@ export default function TermsServicePage() {
         }
     }
 
+    const stripHtml = (html) => {
+        if (!html) return ""
+        return html.replace(/<[^>]*>?/gm, '')
+    }
 
     return (
         <div className="space-y-6">
@@ -341,7 +348,7 @@ export default function TermsServicePage() {
                                                 <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center shrink-0 border border-gray-100">
                                                     {(() => {
                                                         const Icon = getIcon(section.key)
-                                                        return <Icon className="w-4 h-4 text-[#0066FF]" />
+                                                        return Icon ? <Icon className="w-4 h-4 text-[#0066FF]" /> : null
                                                     })()}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
@@ -385,7 +392,7 @@ export default function TermsServicePage() {
                                                         </div>
                                                     </div>
                                                     <p className="text-sm text-gray-500 truncate mt-0.5">
-                                                        {enTranslation?.content || "No content"}
+                                                        {stripHtml(enTranslation?.content) || "No content"}
                                                     </p>
                                                 </div>
                                             </div>
@@ -445,7 +452,7 @@ export default function TermsServicePage() {
                                                 const Icon = selected.icon
                                                 return (
                                                     <div className="flex items-center gap-2">
-                                                        <Icon className="w-4 h-4 text-[#0066FF]" />
+                                                        {Icon && <Icon className="w-4 h-4 text-[#0066FF]" />}
                                                         <span>{selected.label}</span>
                                                     </div>
                                                 )
@@ -458,7 +465,7 @@ export default function TermsServicePage() {
                                             return (
                                                 <SelectItem key={icon.value} value={icon.value}>
                                                     <div className="flex items-center gap-2">
-                                                        <Icon className="w-4 h-4 text-gray-500" />
+                                                        {Icon && <Icon className="w-4 h-4 text-gray-500" />}
                                                         <span>{icon.label}</span>
                                                     </div>
                                                 </SelectItem>
@@ -514,12 +521,10 @@ export default function TermsServicePage() {
                                         </div>
                                         <div className="space-y-2">
                                             <Label className="text-gray-700">Content <span className="text-gray-400 font-normal">({lang.name})</span> {lang.code === 'en' && <span className="text-red-500">*</span>}</Label>
-                                            <Textarea
-                                                placeholder={`Enter the full content for this section in ${lang.name}...`}
-                                                className="min-h-[300px] border-gray-200 focus:border-[#0066FF] focus:ring-[#0066FF]/20 transition-all leading-relaxed p-4"
-                                                value={formData.translations[lang.code]?.content || ""}
-                                                onChange={(e) => updateTranslation('content', e.target.value)}
-                                                dir={lang.code === 'ar' ? 'rtl' : 'ltr'}
+                                            <TiptapEditor
+                                                content={formData.translations[lang.code]?.content || ""}
+                                                onChange={({ html }) => updateTranslation('content', html)}
+                                                editable={true}
                                             />
                                         </div>
                                     </TabsContent>
