@@ -49,7 +49,12 @@ export async function POST(request) {
       })
 
     if (error) {
-      console.error('Supabase storage upload error:', error)
+      console.error('Supabase storage upload error details:', {
+        message: error.message,
+        error: error,
+        filePath,
+        contentType: file.type
+      })
       return createAuthError(`Failed to upload file: ${error.message}`, 500)
     }
 

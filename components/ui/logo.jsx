@@ -11,9 +11,9 @@ export function Logo({
 }) {
   const sizeClasses = {
     sm: 'h-8 w-auto',
-    md: 'h-10 w-auto md:h-14 lg:h-16',
-    lg: 'h-12 w-auto md:h-16 lg:h-20',
-    xl: 'h-16 w-auto md:h-20 lg:h-24'
+    md: 'w-[120px] md:w-[160px] lg:w-[180px] h-auto',
+    lg: 'w-[120px] md:w-[170px] lg:w-[180px] h-auto',
+    xl: 'w-[120px] md:w-[220px] lg:w-[260px] h-auto'
   }
 
   const iconSizes = {
@@ -52,7 +52,7 @@ export function Logo({
         // When no logo, show only company name from backend (no icon)
         showText && (
           <span className={cn(
-            "bg-gradient-to-r from-[#0066FF] to-[#00D4AA] bg-clip-text text-transparent font-bold",
+            "bg-linear-to-r from-[#0066FF] to-[#00D4AA] bg-clip-text text-transparent font-bold",
             textSizes[size]
           )}>
             {logo?.company_name || 'VisaFly'}

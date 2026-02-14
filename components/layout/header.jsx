@@ -177,7 +177,7 @@ export function Header() {
         <nav className="container mx-auto px-6 lg:px-8 py-5">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <div>
               <Link
                 href="/"
                 className="flex items-center transition-colors"
@@ -193,7 +193,7 @@ export function Header() {
                   loading={logoLoading}
                 />
               </Link>
-            </motion.div>
+            </div>
 
             {/* Mobile Navigation Menu */}
             <AnimatePresence>
