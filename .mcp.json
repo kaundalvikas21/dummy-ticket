@@ -39,6 +39,19 @@
         "mcp-remote",
         "https://mcp.linear.app/sse"
       ]
+    },
+    "Ref": {
+      "command": "npx",
+      "args": [
+        "ref-tools-mcp@latest"
+      ],
+      "env": {
+        "REF_API_KEY": "ref-1660a5b336ed22e1ea2e"
+      }
+    },
+    "exa": {
+      "type": "http",
+      "url": "https://mcp.exa.ai/mcp"
     }
   }
 }
