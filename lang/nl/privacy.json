@@ -3,37 +3,5 @@
         "title": "Privacy",
         "highlight": "Beleid",
         "description": "Bij VisaFly hechten we veel waarde aan uw privacy. Dit beleid legt uit hoe we uw persoonlijke gegevens verzamelen, gebruiken en beschermen."
-    },
-    "sections": [
-        {
-            "id": "collection",
-            "title": "1. Gegevensverzameling",
-            "content": "We verzamelen informatie die u rechtstreeks aan ons verstrekt wanneer u een vluchtreservering of hotelboeking maakt, inclusief uw naam, e-mailadres, paspoortgegevens en reisdata. We verzamelen ook geautomatiseerde gegevens zoals IP-adressen en apparaatinformatie voor beveiligings- en prestatiedoeleinden."
-        },
-        {
-            "id": "usage",
-            "title": "2. Hoe we gegevens gebruiken",
-            "content": "Uw gegevens worden uitsluitend gebruikt om onze diensten te verlenen en te verbeteren. Dit omvat het verwerken van uw boekingen, het verzenden van bevestigingsmails en het bieden van klantenservice. We verkopen uw persoonlijke gegevens niet aan derden voor marketingdoeleinden."
-        },
-        {
-            "id": "sharing",
-            "title": "3. Gegevens delen",
-            "content": "We delen uw informatie alleen met vertrouwde partners en serviceproviders die nodig zijn om uw boekingen te vervullen (bijv. reserveringssystemen van luchtvaartmaatschappijen). We kunnen ook informatie vrijgeven indien wettelijk vereist of om onze wettelijke rechten te beschermen."
-        },
-        {
-            "id": "security",
-            "title": "4. Gegevensbeveiliging",
-            "content": "We implementeren beveiligingsmaatregelen die de industriestandaard volgen, waaronder SSL-encryptie en beveiligde servers, om uw persoonlijke informatie te beschermen tegen ongeoorloofde toegang, openbaarmaking of wijziging."
-        },
-        {
-            "id": "cookies",
-            "title": "5. Cookiebeleid",
-            "content": "We gebruiken cookies om uw browse-ervaring te verbeteren, uw voorkeuren te onthouden en siteverkeer te analyseren. U kunt uw cookievoorkeuren op elk gewenst moment beheren via uw browserinstellingen."
-        },
-        {
-            "id": "rights",
-            "title": "6. Uw rechten",
-            "content": "U heeft het recht op toegang tot, correctie of verwijdering van uw persoonlijke informatie die bij ons is opgeslagen. Om deze rechten uit te oefenen of als u privacygerelateerde vragen heeft, kunt u contact opnemen met ons ondersteuningsteam."
-        }
-    ]
+    }
 }

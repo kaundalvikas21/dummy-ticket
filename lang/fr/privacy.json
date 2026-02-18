@@ -3,37 +3,5 @@
         "title": "Politique de",
         "highlight": "confidentialité",
         "description": "Chez VisaFly, nous accordons une grande importance à votre vie privée. Cette politique explique comment nous collectons, utilisons et protégeons vos informations personnelles."
-    },
-    "sections": [
-        {
-            "id": "collection",
-            "title": "1. Collecte de données",
-            "content": "Nous collectons les informations que vous nous fournissez directement lorsque vous réservez un vol ou un hôtel, notamment votre nom, votre adresse e-mail, les détails de votre passeport et vos dates de voyage. Nous collectons également des données automatisées telles que les adresses IP et les informations sur les appareils à des fins de sécurité et de performance."
-        },
-        {
-            "id": "usage",
-            "title": "2. Comment nous utilisons les données",
-            "content": "Vos données sont utilisées uniquement pour fournir et améliorer nos services. Cela inclut le traitement de vos réservations, l'envoi d'e-mails de Californie et la fourniture d'un support client. Nous ne vendons pas vos données personnelles à des tiers à des fins de marketing."
-        },
-        {
-            "id": "sharing",
-            "title": "3. Partage de données",
-            "content": "Nous partageons vos informations uniquement avec des partenaires de confiance et des prestataires de services nécessaires à la réalisation de vos réservations (par exemple, les systèmes de réservation des compagnies aériennes). Nous pouvons également divulguer des informations si la loi l'exige ou pour protéger nos droits légaux."
-        },
-        {
-            "id": "security",
-            "title": "4. Sécurité des données",
-            "content": "Nous mettons en œuvre des mesures de sécurité conformes aux normes de l'industrie, notamment le cryptage SSL et des serveurs sécurisés, pour protéger vos informations personnelles contre tout accès, divulgation ou altération non autorisés."
-        },
-        {
-            "id": "cookies",
-            "title": "5. Politique relative aux cookies",
-            "content": "Nous utilisons des cookies pour améliorer votre expérience de navigation, mémoriser vos préférences et analyser le trafic du site. Vous pouvez gérer vos préférences en matière de cookies via les paramètres de votre navigateur à tout moment."
-        },
-        {
-            "id": "rights",
-            "title": "6. Vos droits",
-            "content": "Vous avez le droit d'accéder, de corriger ou de supprimer vos informations personnelles stockées chez nous. Pour exercer ces droits ou si vous avez des questions relatives à la confidentialité, veuillez contacter notre équipe d'assistance."
-        }
-    ]
+    }
 }

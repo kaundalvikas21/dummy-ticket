@@ -2,38 +2,6 @@
     "hero": {
         "title": "Política de",
         "highlight": "Privacidad",
-        "description": "En VisaFly, valoramos su privacidad. Esta política explica cómo recopilamos, usamos y protegemos su información personal."
-    },
-    "sections": [
-        {
-            "id": "collection",
-            "title": "1. Recopilación de datos",
-            "content": "Recopilamos la información que usted nos proporciona directamente cuando realiza una reserva de vuelo o de hotel, incluidos su nombre, dirección de correo electrónico, detalles del pasaporte y fechas de viaje. También recopilamos datos automatizados, como direcciones IP e información del dispositivo, por motivos de seguridad y rendimiento."
-        },
-        {
-            "id": "usage",
-            "title": "2. Cómo utilizamos los datos",
-            "content": "Sus datos se utilizan únicamente para proporcionar y mejorar nuestros servicios. Esto incluye el procesamiento de sus reservas, el envío de correos electrónicos de confirmación y la prestación de atención al cliente. No vendemos sus datos personales a terceros con fines de marketing."
-        },
-        {
-            "id": "sharing",
-            "title": "3. Intercambio de datos",
-            "content": "Solo compartimos su información con socios de confianza y proveedores de servicios necesarios para completar sus reservas (por ejemplo, sistemas de reserva de aerolíneas). También podemos divulgar información si así lo exige la ley o para proteger nuestros derechos legales."
-        },
-        {
-            "id": "security",
-            "title": "4. Seguridad de los datos",
-            "content": "Implementamos medidas de seguridad estándar de la industria, incluido el cifrado SSL y servidores seguros, para proteger su información personal contra el acceso, la divulgación o la alteración no autorizados."
-        },
-        {
-            "id": "cookies",
-            "title": "5. Política de cookies",
-            "content": "Utilizamos cookies para mejorar su experiencia de navegación, recordar sus preferencias y analizar el tráfico del sitio. Puede gestionar sus preferencias de cookies a través de la configuración de su navegador en cualquier momento."
-        },
-        {
-            "id": "rights",
-            "title": "6. Sus derechos",
-            "content": "Tiene derecho a acceder, corregir o eliminar su información personal almacenada con nosotros. Para ejercer estos derechos o si tiene alguna pregunta relacionada con la privacidad, póngase en contacto con nuestro equipo de soporte."
-        }
-    ]
+        "description": "En VisaFly, valoramos su privacy. Esta política explica cómo recopilamos, usamos y protegemos su información personal."
+    }
 }
