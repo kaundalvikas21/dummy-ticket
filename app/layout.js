@@ -28,6 +28,12 @@ export const metadata = {
   },
   authors: [{ name: "VisaFly" }],
   publisher: "VisaFly",
+
+  icons: {
+    icon: "/logo.svg", // standard favicon
+    shortcut: "/logo.svg",
+    apple: "/logo.svg", // for iOS devices
+  },
 };
 
 export const viewport = {
