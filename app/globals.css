@@ -463,3 +463,47 @@ select:focus-visible {
 .tiptap-content [style*="text-align: justify"] {
   text-align: justify;
 }
+
+/* Fix for Tiptap Lists */
+.tiptap.ProseMirror ul,
+.tiptap.ProseMirror ol,
+.tiptap-content ul,
+.tiptap-content ol {
+  margin: 1rem 0 1rem 1.5rem !important;
+  list-style-position: outside !important;
+}
+
+.tiptap.ProseMirror ul {
+  list-style-type: disc !important;
+}
+
+.tiptap.ProseMirror ol {
+  list-style-type: decimal !important;
+}
+
+.tiptap.ProseMirror li>p,
+.tiptap-content li>p {
+  margin: 0 !important;
+  display: inline-block !important;
+  /* Forces text to stay next to marker */
+  width: auto !important;
+}
+
+/* Ensure list items themselves don't break weirdly */
+.tiptap.ProseMirror li,
+.tiptap-content li {
+  margin-bottom: 0.5rem !important;
+  display: list-item !important;
+  white-space: normal !important;
+  word-break: normal !important;
+}
+
+/* Adjust for Arabic RTL lists */
+[dir="rtl"] .tiptap.ProseMirror ul,
+[dir="rtl"] .tiptap.ProseMirror ol,
+.rtl-content ul,
+.rtl-content ol {
+  margin: 1rem 1.5rem 1rem 0 !important;
+  padding-right: 1.5rem !important;
+  padding-left: 0 !important;
+}

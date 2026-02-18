@@ -85,7 +85,8 @@ export function TiptapEditor({ content, onChange, editable = true }) {
         onUpdate: ({ editor }) => {
             const json = editor.getJSON()
             const html = editor.getHTML()
-            lastContentRef.current = JSON.stringify(json)
+            // Store HTML for comparison in useEffect
+            lastContentRef.current = html
             onChange({ json, html })
         },
         editorProps: {
@@ -95,17 +96,26 @@ export function TiptapEditor({ content, onChange, editable = true }) {
         }
     })
 
-    // Sync content when it changes externally (e.g. after save or tab switch)
-    const lastContentRef = useRef(typeof content === 'string' ? content : JSON.stringify(content))
+    // Sync content when it changes externally
+    const lastContentRef = useRef(content)
 
     useEffect(() => {
-        if (editor && content) {
-            const contentString = typeof content === 'string' ? content : JSON.stringify(content)
-            if (contentString !== lastContentRef.current) {
-                // Only update if it's not the same as current editor content to avoid loops
-                // and flickering. Check both JSON and HTML if needed, but stringified is a good proxy.
-                editor.commands.setContent(content)
-                lastContentRef.current = contentString
+        if (editor && content !== undefined) {
+            // Robust check for both HTML string and JSON object
+            const isJson = typeof content === 'object' && content !== null
+            const contentString = isJson ? JSON.stringify(content) : content
+            const lastContentString = typeof lastContentRef.current === 'object' && lastContentRef.current !== null
+                ? JSON.stringify(lastContentRef.current)
+                : lastContentRef.current
+
+            if (contentString !== lastContentString) {
+                // If it's JSON, compare it properly
+                const currentContent = isJson ? JSON.stringify(editor.getJSON()) : editor.getHTML()
+
+                if (contentString !== currentContent) {
+                    editor.commands.setContent(content, false)
+                    lastContentRef.current = content
+                }
             }
         }
     }, [editor, content])
