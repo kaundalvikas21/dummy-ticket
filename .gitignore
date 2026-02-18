@@ -43,11 +43,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-#claude code
-.claude
+# Claude and Agents
+.claude/
+.agents/
 .mcp.json
-.serena
-.agents
+.serena/
 
 # Development scripts and logs
 *.mjs
