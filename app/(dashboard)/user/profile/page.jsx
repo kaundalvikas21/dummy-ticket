@@ -7,7 +7,8 @@ import { getExchangeRates } from "@/lib/exchange-rate";
 export default async function ProfilePage() {
   const supabase = await createClient();
 
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  const { data, error: authError } = await supabase.auth.getUser();
+  const user = data?.user;
   if (authError || !user) {
     redirect("/login");
   }

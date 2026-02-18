@@ -30,9 +30,11 @@ export const metadata = {
   publisher: "VisaFly",
 
   icons: {
-    icon: "/logo.svg", // standard favicon
-    shortcut: "/logo.svg",
-    apple: "/logo.svg", // for iOS devices
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
   },
 };
 

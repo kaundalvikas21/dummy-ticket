@@ -7,7 +7,8 @@ import { formatBookingData } from '@/lib/formatters';
 const UserDashboardPage = async () => {
   const supabase = await createClient();
 
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  const { data, error: authError } = await supabase.auth.getUser();
+  const user = data?.user;
 
   if (authError || !user) {
     redirect('/login');

@@ -7,8 +7,16 @@ export async function proxy(request) {
     // Create Supabase client for middleware
     const supabase = await createClient()
 
-    // Refresh session if expired - required for Server Components
-    const { data: { user } } = await supabase.auth.getUser()
+    let user = null;
+    try {
+        // Refresh session if expired - required for Server Components
+        const { data, error } = await supabase.auth.getUser()
+        if (!error && data?.user) {
+            user = data.user;
+        }
+    } catch (error) {
+        console.error('Middleware auth error:', error.message)
+    }
 
     // OPTIMIZED: Use role from app_metadata (already in JWT, no DB query needed)
     // Default to 'user' if no role is set

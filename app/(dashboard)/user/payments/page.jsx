@@ -6,7 +6,8 @@ import { formatBookingData } from "@/lib/formatters"
 export default async function PaymentsPage() {
   const supabase = await createClient()
 
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  const { data, error: authError } = await supabase.auth.getUser()
+  const user = data?.user
   if (authError || !user) {
     redirect("/login")
   }

@@ -1,0 +1,19 @@
+<svg viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Professional rounded background -->
+  <rect width="128" height="128" rx="32" fill="#00c2c0"/>
+  
+  <!-- Centered container for Lucide Ticket Icon -->
+  <!-- Scaled up to occupy more space (approx 104x104) -->
+  <g transform="translate(12, 12) scale(4.33)">
+      <path
+        d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"
+        stroke="white"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+      <path d="M13 5v2" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      <path d="M13 17v2" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      <path d="M13 11v2" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
+</svg>

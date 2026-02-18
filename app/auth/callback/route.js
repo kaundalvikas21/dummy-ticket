@@ -16,7 +16,8 @@ export async function GET(request) {
         // Successfully exchanged code for session
         // Redirect to the intended page or default dashboard
         const supabase = await createClient()
-        const { data: { user } } = await supabase.auth.getUser()
+        const { data, error: userError } = await supabase.auth.getUser()
+        const user = data?.user
 
         if (user) {
           const { syncUserProfile } = await import('@/lib/auth-utils')
